@@ -1,9 +1,9 @@
 FastCS
 ===========================
 
-|logo| |code_ci| |docs_ci| |coverage| |pypi_version| |license|
+|code_ci| |docs_ci| |coverage| |pypi_version| |license|
 
-FastCS is a control system agnostic framework for building Device support in
+|logo| FastCS is a control system agnostic framework for building Device support in
 Python that will work for both EPICS and Tango without depending on either.
 
 .. note::
