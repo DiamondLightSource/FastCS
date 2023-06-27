@@ -46,4 +46,4 @@ See https://DiamondLightSource.github.io/FastCS for more detailed documentation.
 .. |logo| image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
     :width: 100px
     :height: 100px
-    :align: left 
+    :align: left
