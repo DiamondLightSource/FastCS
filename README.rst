@@ -48,3 +48,4 @@ See https://DiamondLightSource.github.io/FastCS for more detailed documentation.
 .. |logo| image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
     :width: 150px
     :height: 150px
+    :align: left
