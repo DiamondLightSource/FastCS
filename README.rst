@@ -1,4 +1,4 @@
-FastCS
+|logo| FastCS
 ===========================
 
 |code_ci| |docs_ci| |coverage| |pypi_version| |license|
@@ -42,3 +42,5 @@ Releases       https://github.com/DiamondLightSource/FastCS/releases
     when included in index.rst
 
 See https://DiamondLightSource.github.io/FastCS for more detailed documentation.
+
+.. |logo| image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
