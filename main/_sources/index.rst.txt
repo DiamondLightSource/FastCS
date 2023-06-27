@@ -3,6 +3,8 @@
 .. include:: ../README.rst
     :end-before: when included in index.rst
 
+.. |logo| replace:: \
+
 How the documentation is structured
 -----------------------------------
 
