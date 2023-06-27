@@ -1,7 +1,7 @@
-|code_ci| |docs_ci| |coverage| |pypi_version| |license|
-
 FastCS
 ===========================
+
+|code_ci| |docs_ci| |coverage| |pypi_version| |license|
 
 .. image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
     :width: 150px
