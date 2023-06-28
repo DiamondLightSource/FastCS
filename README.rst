@@ -1,14 +1,14 @@
-|code_ci| |docs_ci| |coverage| |pypi_version| |license|
-
 FastCS
 ===========================
+
+|code_ci| |docs_ci| |coverage| |pypi_version| |license|
 
 .. image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
     :width: 150px
     :height: 150px
     :align: left
     :class: not-in-sphinx
-    :target: https://github.com/DiamondLightSource/FastCS
+    :target: https://DiamondLightSource.github.io/FastCS
 
 ============== ==============================================================
 PyPI           ``pip install FastCS``
