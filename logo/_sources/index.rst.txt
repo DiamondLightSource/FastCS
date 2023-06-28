@@ -3,7 +3,14 @@
 .. include:: ../README.rst
     :end-before: when included in index.rst
 
-.. |logo| replace:: \
+.. raw:: html
+
+    <style>
+    /* Don't display logo when renderd in sphinx rather than GitHub/PyPI */
+    .not-in-sphinx {
+        display: none;
+    }
+    </style>
 
 How the documentation is structured
 -----------------------------------
