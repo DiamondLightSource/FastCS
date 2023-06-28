@@ -4,9 +4,10 @@ FastCS
 |code_ci| |docs_ci| |coverage| |pypi_version| |license|
 
 .. image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
-    :width: 105px
-    :height: 105px
+    :width: 150px
+    :height: 150px
     :align: left
+    :name: logo
     :target: https://DiamondLightSource.github.io/FastCS
 
 :PyPI:           ``pip install FastCS``
