@@ -4,18 +4,15 @@ FastCS
 |code_ci| |docs_ci| |coverage| |pypi_version| |license|
 
 .. image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
-    :width: 150px
-    :height: 150px
+    :width: 105px
+    :height: 105px
     :align: left
-    :class: not-in-sphinx
     :target: https://DiamondLightSource.github.io/FastCS
 
-============== ==============================================================
-PyPI           ``pip install FastCS``
-Source code    https://github.com/DiamondLightSource/FastCS
-Documentation  https://DiamondLightSource.github.io/FastCS
-Releases       https://github.com/DiamondLightSource/FastCS/releases
-============== ==============================================================
+:PyPI:           ``pip install FastCS``
+:Source code:    https://github.com/DiamondLightSource/FastCS
+:Documentation:  https://DiamondLightSource.github.io/FastCS
+:Releases:       https://github.com/DiamondLightSource/FastCS/releases
 
 FastCS is a control system agnostic framework for building Device support in
 Python that will work for both EPICS and Tango without depending on either.
