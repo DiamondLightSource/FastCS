@@ -3,7 +3,12 @@ FastCS
 
 |code_ci| |docs_ci| |coverage| |pypi_version| |license|
 
-|logo|
+.. image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
+    :width: 150px
+    :height: 150px
+    :align: left
+    :class: not-in-sphinx
+    :target: https://github.com/DiamondLightSource/FastCS
 
 ============== ==============================================================
 PyPI           ``pip install FastCS``
@@ -44,9 +49,3 @@ Python that will work for both EPICS and Tango without depending on either.
     when included in index.rst
 
 See https://DiamondLightSource.github.io/FastCS for more detailed documentation.
-
-.. |logo| image:: https://raw.githubusercontent.com/DiamondLightSource/FastCS/main/docs/images/fastcs.svg
-    :width: 150px
-    :height: 150px
-    :class: logo
-    :target: https://github.com/DiamondLightSource/FastCS
