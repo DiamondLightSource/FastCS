@@ -1,7 +1,7 @@
 from softioc import asyncio_dispatcher, softioc
 
-from .backend import Backend
-from .mapping import Mapping
+from fastcs.backend import Backend
+from fastcs.mapping import Mapping
 
 
 class AsyncioBackend:
