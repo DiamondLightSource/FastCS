@@ -25,7 +25,7 @@ from pvi.device import (
 
 from fastcs.attributes import Attribute, AttrMode
 from fastcs.cs_methods import MethodType
-from fastcs.datatypes import DataType
+from fastcs.datatypes import Bool, DataType, Float, Int
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
@@ -59,17 +59,23 @@ class EpicsGUI:
 
     @staticmethod
     def _get_read_widget(datatype: DataType) -> ReadWidget:
-        if datatype.dtype is bool:
-            return LED()
-        else:
-            return TextRead()
+        match datatype:
+            case Bool():
+                return LED()
+            case Int() | Float():
+                return TextRead()
+            case _:
+                raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     @staticmethod
     def _get_write_widget(datatype: DataType) -> WriteWidget:
-        if datatype.dtype is bool:
-            return CheckBox()
-        else:
-            return TextWrite()
+        match datatype:
+            case Bool():
+                return CheckBox()
+            case Int() | Float():
+                return TextWrite()
+            case _:
+                raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     @classmethod
     def _get_attribute_component(cls, attr_path: str, name: str, attribute: Attribute):

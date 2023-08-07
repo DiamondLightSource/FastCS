@@ -2,11 +2,13 @@ from dataclasses import dataclass
 from typing import Any, Callable, cast
 
 from softioc import asyncio_dispatcher, builder, softioc
+from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrMode, AttrR, AttrRW, AttrW
 from fastcs.backend import Backend
 from fastcs.cs_methods import MethodType
 from fastcs.datatypes import Bool, DataType, Float, Int
+from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
 
@@ -15,13 +17,16 @@ class EpicsIOCOptions:
     terminal: bool = True
 
 
-def _get_input_record(pv_name: str, datatype: DataType) -> Any:
-    if isinstance(datatype, Bool):
-        return builder.boolIn(pv_name, ZNAM=datatype.znam, ONAM=datatype.onam)
-    elif isinstance(datatype, Int):
-        return builder.longIn(pv_name)
-    elif isinstance(datatype, Float):
-        return builder.aIn(pv_name, PREC=datatype.prec)
+def _get_input_record(pv_name: str, datatype: DataType) -> RecordWrapper:
+    match datatype:
+        case Bool(znam, onam):
+            return builder.boolIn(pv_name, ZNAM=znam, ONAM=onam)
+        case Int():
+            return builder.longIn(pv_name)
+        case Float(prec):
+            return builder.aIn(pv_name, PREC=prec)
+        case _:
+            raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
 
 def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
@@ -34,18 +39,23 @@ def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
 
 
 def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) -> Any:
-    if isinstance(datatype, Bool):
-        return builder.boolOut(
-            pv_name,
-            ZNAM=datatype.znam,
-            ONAM=datatype.onam,
-            always_update=True,
-            on_update=on_update,
-        )
-    elif isinstance(datatype, Int):
-        return builder.longOut(pv_name, always_update=True, on_update=on_update)
-    elif isinstance(datatype, Float):
-        return builder.aOut(pv_name, always_update=True, on_update=on_update, PREC=2)
+    match datatype:
+        case Bool(znam, onam):
+            return builder.boolOut(
+                pv_name,
+                ZNAM=znam,
+                ONAM=onam,
+                always_update=True,
+                on_update=on_update,
+            )
+        case Int():
+            return builder.longOut(pv_name, always_update=True, on_update=on_update)
+        case Float(prec):
+            return builder.aOut(
+                pv_name, always_update=True, on_update=on_update, PREC=prec
+            )
+        case _:
+            raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
 
 def _create_and_link_write_pv(pv_name: str, attribute: AttrW) -> None:
