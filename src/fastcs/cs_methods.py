@@ -23,7 +23,6 @@ class MethodInfo:
         self.kwargs = kwargs
 
     def _validate_method(self, type: MethodType, fn: Callable) -> None:
-
         if self.return_type not in (None, Signature.empty):
             raise FastCSException("Method return type must be None or empty")
 
