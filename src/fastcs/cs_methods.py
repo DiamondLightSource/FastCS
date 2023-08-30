@@ -17,7 +17,12 @@ class MethodType(Enum):
 class MethodInfo:
     def __init__(self, method_type: MethodType, fn: Callable, **kwargs) -> None:
         self._method_type = method_type
-        self._store_method_details(fn)
+
+        self._docstring = getdoc(fn)
+
+        sig = signature(fn, eval_str=True)
+        self._parameters = sig.parameters
+        self._return_type = sig.return_annotation
         self._validate_method(method_type, fn)
 
         self.kwargs = kwargs
@@ -48,13 +53,6 @@ class MethodInfo:
     def _validate_command_method(self, fn: Callable) -> None:
         if not len(self.parameters) == 1:
             raise FastCSException("Command method cannot have arguments")
-
-    def _store_method_details(self, fn):
-        self._docstring = getdoc(fn)
-
-        sig = signature(fn, eval_str=True)
-        self._parameters = sig.parameters
-        self._return_type = sig.return_annotation
 
     @property
     def method_type(self):

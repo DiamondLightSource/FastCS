@@ -20,7 +20,13 @@ class SingleMapping:
 class Mapping:
     def __init__(self, controller: Controller) -> None:
         self.controller = controller
+
+        self._controller_mappings: list[SingleMapping] = []
         self._generate_mapping(controller)
+        self._controller_mappings.append(self._get_single_mapping(controller))
+
+        for sub_controller in controller.get_sub_controllers():
+            self._controller_mappings.append(self._get_single_mapping(sub_controller))
 
     @staticmethod
     def _get_single_mapping(controller: BaseController) -> SingleMapping:
@@ -34,12 +40,6 @@ class Mapping:
                 attributes[attr_name] = attr
 
         return SingleMapping(controller, methods, attributes)
-
-    def _generate_mapping(self, controller: Controller) -> None:
-        self._controller_mappings: list[SingleMapping] = []
-        self._controller_mappings.append(self._get_single_mapping(controller))
-        for sub_controller in controller.get_sub_controllers():
-            self._controller_mappings.append(self._get_single_mapping(sub_controller))
 
     def __str__(self) -> str:
         result = "Controller mappings:\n"
