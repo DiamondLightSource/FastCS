@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from .attributes import Attribute
 from .controller import BaseController, Controller
 from .cs_methods import Command, Put, Scan
+from .wrappers import WrappedMethod
 
 
 @dataclass
@@ -33,7 +34,7 @@ class Mapping:
         for attr_name in dir(controller):
             attr = getattr(controller, attr_name)
             match attr:
-                case object(fastcs_method=fastcs_method):
+                case WrappedMethod(fastcs_method=fastcs_method):
                     match fastcs_method:
                         case Put():
                             put_methods[attr_name] = fastcs_method

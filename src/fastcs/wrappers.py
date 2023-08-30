@@ -1,7 +1,11 @@
-from typing import Any
+from typing import Any, Protocol
 
-from .cs_methods import Command, Put, Scan
+from .cs_methods import Command, Method, Put, Scan
 from .exceptions import FastCSException
+
+
+class WrappedMethod(Protocol):
+    fastcs_method: Method
 
 
 # TODO: Consider type hints with the use of typing.Protocol
