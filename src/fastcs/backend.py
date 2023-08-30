@@ -95,7 +95,7 @@ def _link_attribute_sender_class(single_mapping: SingleMapping) -> None:
             case AttrW(sender=Sender()):
                 assert (
                     not attribute.has_process_callback()
-                ), f"Cannot assign both put method and Sender to {attr_name}"
+                ), f"Cannot assign both put method and Sender object to {attr_name}"
 
                 callback = _create_sender_callback(attribute, single_mapping.controller)
                 attribute.set_process_callback(callback)
