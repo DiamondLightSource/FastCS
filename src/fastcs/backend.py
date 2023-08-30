@@ -51,7 +51,7 @@ def _add_updater_scan_tasks(
     scan_dict: dict[float, list[Callable]], single_mapping: SingleMapping
 ):
     for attribute in single_mapping.attributes.values():
-        if attribute.mode in (AttrMode.READ, AttrMode.READ_WRITE):
+        if attribute.access_mode in (AttrMode.READ, AttrMode.READ_WRITE):
             attribute = cast(AttrR, attribute)
 
             if attribute.updater is None:
@@ -84,10 +84,10 @@ def _link_single_controller_put_tasks(single_mapping: SingleMapping):
         name = method_data.name.removeprefix("put_")
 
         attribute = single_mapping.attributes[name]
-        assert attribute.mode in [
+        assert attribute.access_mode in [
             AttrMode.WRITE,
             AttrMode.READ_WRITE,
-        ], f"Mode {attribute.mode} does not support put operations for {name}"
+        ], f"Mode {attribute.access_mode} does not support put operations for {name}"
         attribute = cast(AttrW, attribute)
 
         attribute.set_process_callback(method)
@@ -102,7 +102,7 @@ def _create_sender_callback(attribute, controller):
 
 def _link_attribute_sender_class(single_mapping: SingleMapping) -> None:
     for attr_name, attribute in single_mapping.attributes.items():
-        if attribute.mode in (AttrMode.WRITE, AttrMode.READ_WRITE):
+        if attribute.access_mode in (AttrMode.WRITE, AttrMode.READ_WRITE):
             attribute = cast(AttrW, attribute)
 
             if attribute.sender is None:

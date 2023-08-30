@@ -30,13 +30,13 @@ class Handler(Sender, Updater, Protocol):
 
 class Attribute(Generic[T]):
     def __init__(
-        self, datatype: DataType[T], mode: AttrMode, handler: Any = None
+        self, datatype: DataType[T], access_mode: AttrMode, handler: Any = None
     ) -> None:
         assert (
             datatype.dtype in ATTRIBUTE_TYPES
         ), f"Attr type must be one of {ATTRIBUTE_TYPES}, received type {datatype.dtype}"
         self._datatype: DataType[T] = datatype
-        self._mode: AttrMode = mode
+        self._access_mode: AttrMode = access_mode
 
     @property
     def datatype(self) -> DataType[T]:
@@ -47,18 +47,18 @@ class Attribute(Generic[T]):
         return self._datatype.dtype
 
     @property
-    def mode(self) -> AttrMode:
-        return self._mode
+    def access_mode(self) -> AttrMode:
+        return self._access_mode
 
 
 class AttrR(Attribute[T]):
     def __init__(
         self,
         datatype: DataType[T],
-        mode=AttrMode.READ,
+        access_mode=AttrMode.READ,
         handler: Updater | None = None,
     ) -> None:
-        super().__init__(datatype, mode=mode, handler=handler)  # type: ignore
+        super().__init__(datatype, access_mode=access_mode, handler=handler)  # type: ignore
         self._value: T = datatype.dtype()
         self._update_callback: AttrCallback[T] | None = None
         self._updater = handler
@@ -82,9 +82,9 @@ class AttrR(Attribute[T]):
 
 class AttrW(Attribute[T]):
     def __init__(
-        self, datatype: DataType[T], mode=AttrMode.WRITE, handler: Sender | None = None
+        self, datatype: DataType[T], access_mode=AttrMode.WRITE, handler: Sender | None = None
     ) -> None:
-        super().__init__(datatype, mode=mode, handler=handler)  # type: ignore
+        super().__init__(datatype, access_mode=access_mode, handler=handler)  # type: ignore
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
         self._sender = handler
@@ -117,10 +117,10 @@ class AttrRW(AttrW[T], AttrR[T]):
     def __init__(
         self,
         datatype: DataType[T],
-        mode=AttrMode.READ_WRITE,
+        access_mode=AttrMode.READ_WRITE,
         handler: Handler | None = None,
     ) -> None:
-        super().__init__(datatype, mode=mode, handler=handler)  # type: ignore
+        super().__init__(datatype, access_mode=access_mode, handler=handler)  # type: ignore
 
     async def process(self, value: T) -> None:
         await self.set(value)

@@ -82,7 +82,7 @@ class EpicsGUI:
         pv = cls._get_pv(attr_path, name)
         name = name.title().replace("_", " ")
 
-        match attribute.mode:
+        match attribute.access_mode:
             case AttrMode.READ:
                 read_widget = cls._get_read_widget(attribute.datatype)
                 return SignalR(name, pv, read_widget)
