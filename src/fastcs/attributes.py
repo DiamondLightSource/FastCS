@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Generic, Protocol
+from typing import Any, Generic, Protocol, runtime_checkable
 
 from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
 
@@ -12,11 +12,13 @@ class AttrMode(Enum):
     READ_WRITE = 3
 
 
+@runtime_checkable
 class Sender(Protocol):
     async def put(self, controller: Any, attr: AttrW, value: Any) -> None:
         pass
 
 
+@runtime_checkable
 class Updater(Protocol):
     update_period: float
 
@@ -24,6 +26,7 @@ class Updater(Protocol):
         pass
 
 
+@runtime_checkable
 class Handler(Sender, Updater, Protocol):
     pass
 

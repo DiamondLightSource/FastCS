@@ -1,9 +1,10 @@
-from typing import Any, Protocol
+from typing import Any, Protocol, runtime_checkable
 
 from .cs_methods import Command, Method, Put, Scan
 from .exceptions import FastCSException
 
 
+@runtime_checkable
 class WrappedMethod(Protocol):
     fastcs_method: Method
 
