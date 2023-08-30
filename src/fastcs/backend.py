@@ -31,7 +31,7 @@ def _get_periodic_scan_tasks(scan_dict: dict[float, list[Callable]]) -> list[Cal
     return periodic_scan_tasks
 
 
-def _add_wrapped_scan_tasks(
+def _add_scan_method_tasks(
     scan_dict: dict[float, list[Callable]], single_mapping: SingleMapping
 ):
     for method_data in single_mapping.methods:
@@ -48,7 +48,7 @@ def _create_updater_callback(attribute, controller):
     return callback
 
 
-def _add_updater_scan_tasks(
+def _add_attribute_updater_tasks(
     scan_dict: dict[float, list[Callable]], single_mapping: SingleMapping
 ):
     for attribute in single_mapping.attributes.values():
@@ -64,8 +64,8 @@ def _get_scan_tasks(mapping: Mapping) -> list[Callable]:
     scan_dict: dict[float, list[Callable]] = defaultdict(list)
 
     for single_mapping in mapping.get_controller_mappings():
-        _add_wrapped_scan_tasks(scan_dict, single_mapping)
-        _add_updater_scan_tasks(scan_dict, single_mapping)
+        _add_scan_method_tasks(scan_dict, single_mapping)
+        _add_attribute_updater_tasks(scan_dict, single_mapping)
 
     scan_tasks = _get_periodic_scan_tasks(scan_dict)
     return scan_tasks
