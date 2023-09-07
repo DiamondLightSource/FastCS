@@ -83,16 +83,13 @@ def _create_and_link_attribute_pvs(mapping: Mapping) -> None:
             attr_name = attr_name.title().replace("_", "")
             pv_name = path.upper() + ":" + attr_name if path else attr_name
 
-            match attribute.access_mode:
-                case AttrMode.READ:
-                    attribute = cast(AttrR, attribute)
-                    _create_and_link_read_pv(pv_name, attribute)
-                case AttrMode.WRITE:
-                    attribute = cast(AttrW, attribute)
-                    _create_and_link_write_pv(pv_name, attribute)
-                case AttrMode.READ_WRITE:
-                    attribute = cast(AttrRW, attribute)
+            match attribute:
+                case AttrRW():
                     _create_and_link_read_pv(pv_name + "_RBV", attribute)
+                    _create_and_link_write_pv(pv_name, attribute)
+                case AttrR():
+                    _create_and_link_read_pv(pv_name, attribute)
+                case AttrW():
                     _create_and_link_write_pv(pv_name, attribute)
 
 

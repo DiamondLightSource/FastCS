@@ -23,7 +23,7 @@ from pvi.device import (
     WriteWidget,
 )
 
-from fastcs.attributes import Attribute, AttrMode
+from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.cs_methods import MethodType
 from fastcs.datatypes import Bool, DataType, Float, Int
 from fastcs.exceptions import FastCSException
@@ -82,17 +82,17 @@ class EpicsGUI:
         pv = cls._get_pv(attr_path, name)
         name = name.title().replace("_", " ")
 
-        match attribute.access_mode:
-            case AttrMode.READ:
-                read_widget = cls._get_read_widget(attribute.datatype)
-                return SignalR(name, pv, read_widget)
-            case AttrMode.WRITE:
-                write_widget = cls._get_write_widget(attribute.datatype)
-                return SignalW(name, pv, TextWrite())
-            case AttrMode.READ_WRITE:
+        match attribute:
+            case AttrRW():
                 read_widget = cls._get_read_widget(attribute.datatype)
                 write_widget = cls._get_write_widget(attribute.datatype)
                 return SignalRW(name, pv, write_widget, pv + "_RBV", read_widget)
+            case AttrR():
+                read_widget = cls._get_read_widget(attribute.datatype)
+                return SignalR(name, pv, read_widget)
+            case AttrW():
+                write_widget = cls._get_write_widget(attribute.datatype)
+                return SignalW(name, pv, TextWrite())
 
     @classmethod
     def _get_command_component(cls, attr_path: str, name: str):

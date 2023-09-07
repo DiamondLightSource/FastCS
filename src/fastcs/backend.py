@@ -2,8 +2,9 @@ import asyncio
 from collections import defaultdict
 from typing import Callable, cast
 
-from .attributes import AttrCallback, AttrMode, AttrR, AttrW
+from .attributes import AttrCallback, AttrR, AttrW, Sender, Updater
 from .cs_methods import MethodType
+from .exceptions import FastCSException
 from .mapping import Mapping, SingleMapping
 
 
@@ -51,14 +52,12 @@ def _add_updater_scan_tasks(
     scan_dict: dict[float, list[Callable]], single_mapping: SingleMapping
 ):
     for attribute in single_mapping.attributes.values():
-        if attribute.access_mode in (AttrMode.READ, AttrMode.READ_WRITE):
-            attribute = cast(AttrR, attribute)
-
-            if attribute.updater is None:
-                continue
-
-            callback = _create_updater_callback(attribute, single_mapping.controller)
-            scan_dict[attribute.updater.update_period].append(callback)
+        match attribute:
+            case AttrR(updater=Updater(update_period)) as attribute:
+                callback = _create_updater_callback(
+                    attribute, single_mapping.controller
+                )
+                scan_dict[update_period].append(callback)
 
 
 def _get_scan_tasks(mapping: Mapping) -> list[Callable]:
@@ -84,13 +83,14 @@ def _link_single_controller_put_tasks(single_mapping: SingleMapping):
         name = method_data.name.removeprefix("put_")
 
         attribute = single_mapping.attributes[name]
-        assert attribute.access_mode in [
-            AttrMode.WRITE,
-            AttrMode.READ_WRITE,
-        ], f"Mode {attribute.access_mode} does not support put operations for {name}"
-        attribute = cast(AttrW, attribute)
-
-        attribute.set_process_callback(method)
+        match attribute:
+            case AttrW():
+                attribute.set_process_callback(method)
+            case _:
+                raise FastCSException(
+                    f"Mode {attribute.access_mode} does not "
+                    f"support put operations for {name}"
+                )
 
 
 def _create_sender_callback(attribute, controller):
@@ -102,18 +102,14 @@ def _create_sender_callback(attribute, controller):
 
 def _link_attribute_sender_class(single_mapping: SingleMapping) -> None:
     for attr_name, attribute in single_mapping.attributes.items():
-        if attribute.access_mode in (AttrMode.WRITE, AttrMode.READ_WRITE):
-            attribute = cast(AttrW, attribute)
+        match attribute:
+            case AttrW(sender=Sender()):
+                assert (
+                    not attribute.has_process_callback()
+                ), f"Cannot assign both put method and Sender to {attr_name}"
 
-            if attribute.sender is None:
-                continue
-
-            assert (
-                not attribute.has_process_callback()
-            ), f"Cannot assign put method and Sender to {attr_name}"
-
-            callback = _create_sender_callback(attribute, single_mapping.controller)
-            attribute.set_process_callback(callback)
+                callback = _create_sender_callback(attribute, single_mapping.controller)
+                attribute.set_process_callback(callback)
 
 
 class Backend:
