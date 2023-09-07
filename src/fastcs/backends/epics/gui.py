@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from pvi._format import Formatter
 from pvi._format.base import Formatter
 from pvi._yaml_utils import deserialize_yaml
 from pvi.device import (

@@ -1,5 +1,6 @@
 import asyncio
 from collections import defaultdict
+from types import MethodType
 from typing import Callable
 
 from .attributes import AttrR, AttrW, Sender, Updater
@@ -34,7 +35,9 @@ def _add_scan_method_tasks(
     scan_dict: dict[float, list[Callable]], single_mapping: SingleMapping
 ):
     for method in single_mapping.scan_methods.values():
-        scan_dict[method.period].append(method.fn)
+        scan_dict[method.period].append(
+            MethodType(method.fn, single_mapping.controller)
+        )
 
 
 def _create_updater_callback(attribute, controller):
@@ -74,7 +77,9 @@ def _link_single_controller_put_tasks(single_mapping: SingleMapping) -> None:
         attribute = single_mapping.attributes[name]
         match attribute:
             case AttrW():
-                attribute.set_process_callback(method.fn)
+                attribute.set_process_callback(
+                    MethodType(method.fn, single_mapping.controller)
+                )
             case _:
                 raise FastCSException(
                     f"Mode {attribute.access_mode} does not "

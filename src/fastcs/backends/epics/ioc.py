@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from types import MethodType
 from typing import Any, Callable
 
 from softioc import asyncio_dispatcher, builder, softioc
@@ -99,7 +100,9 @@ def _create_and_link_command_pvs(mapping: Mapping) -> None:
             name = name.title().replace("_", "")
             pv_name = path.upper() + ":" + name if path else name
 
-            _create_and_link_command_pv(pv_name, method.fn)
+            _create_and_link_command_pv(
+                pv_name, MethodType(method.fn, single_mapping.controller)
+            )
 
 
 class EpicsIOC:
