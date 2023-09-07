@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import Any, Callable, cast
+from typing import Any, Callable
 
 from softioc import asyncio_dispatcher, builder, softioc
 from softioc.pythonSoftIoc import RecordWrapper
 
-from fastcs.attributes import AttrMode, AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backend import Backend
 from fastcs.cs_methods import MethodType
 from fastcs.datatypes import Bool, DataType, Float, Int

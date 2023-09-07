@@ -58,7 +58,7 @@ class AttrR(Attribute[T]):
         access_mode=AttrMode.READ,
         handler: Updater | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode=access_mode, handler=handler)  # type: ignore
+        super().__init__(datatype, access_mode, handler)  # type: ignore
         self._value: T = datatype.dtype()
         self._update_callback: AttrCallback[T] | None = None
         self._updater = handler
@@ -82,9 +82,12 @@ class AttrR(Attribute[T]):
 
 class AttrW(Attribute[T]):
     def __init__(
-        self, datatype: DataType[T], access_mode=AttrMode.WRITE, handler: Sender | None = None
+        self,
+        datatype: DataType[T],
+        access_mode=AttrMode.WRITE,
+        handler: Sender | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode=access_mode, handler=handler)  # type: ignore
+        super().__init__(datatype, access_mode, handler)  # type: ignore
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
         self._sender = handler
@@ -120,7 +123,7 @@ class AttrRW(AttrW[T], AttrR[T]):
         access_mode=AttrMode.READ_WRITE,
         handler: Handler | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode=access_mode, handler=handler)  # type: ignore
+        super().__init__(datatype, access_mode, handler)  # type: ignore
 
     async def process(self, value: T) -> None:
         await self.set(value)
