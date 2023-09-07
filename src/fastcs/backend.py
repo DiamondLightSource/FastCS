@@ -1,9 +1,8 @@
 import asyncio
 from collections import defaultdict
-from typing import Callable, cast
+from typing import Callable
 
-from .attributes import AttrCallback, AttrR, AttrW, Sender, Updater
-from .cs_methods import MethodType
+from .attributes import AttrR, AttrW, Sender, Updater
 from .exceptions import FastCSException
 from .mapping import Mapping, SingleMapping
 
@@ -34,11 +33,8 @@ def _get_periodic_scan_tasks(scan_dict: dict[float, list[Callable]]) -> list[Cal
 def _add_scan_method_tasks(
     scan_dict: dict[float, list[Callable]], single_mapping: SingleMapping
 ):
-    for method_data in single_mapping.methods:
-        if method_data.info.method_type == MethodType.scan:
-            period = method_data.info.kwargs["period"]
-            method = method_data.method
-            scan_dict[period].append(method)
+    for method in single_mapping.scan_methods.values():
+        scan_dict[method.period].append(method.fn)
 
 
 def _create_updater_callback(attribute, controller):
@@ -53,7 +49,7 @@ def _add_attribute_updater_tasks(
 ):
     for attribute in single_mapping.attributes.values():
         match attribute:
-            case AttrR(updater=Updater(update_period)) as attribute:
+            case AttrR(updater=Updater(update_period=update_period)) as attribute:
                 callback = _create_updater_callback(
                     attribute, single_mapping.controller
                 )
@@ -71,21 +67,14 @@ def _get_scan_tasks(mapping: Mapping) -> list[Callable]:
     return scan_tasks
 
 
-def _link_single_controller_put_tasks(single_mapping: SingleMapping):
-    put_methods = [
-        method_data
-        for method_data in single_mapping.methods
-        if method_data.info.method_type == MethodType.put
-    ]
-
-    for method_data in put_methods:
-        method = cast(AttrCallback, method_data.method)
-        name = method_data.name.removeprefix("put_")
+def _link_single_controller_put_tasks(single_mapping: SingleMapping) -> None:
+    for name, method in single_mapping.put_methods.items():
+        name = name.removeprefix("put_")
 
         attribute = single_mapping.attributes[name]
         match attribute:
             case AttrW():
-                attribute.set_process_callback(method)
+                attribute.set_process_callback(method.fn)
             case _:
                 raise FastCSException(
                     f"Mode {attribute.access_mode} does not "

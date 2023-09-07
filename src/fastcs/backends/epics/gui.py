@@ -24,7 +24,6 @@ from pvi.device import (
 )
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.cs_methods import MethodType
 from fastcs.datatypes import Bool, DataType, Float, Int
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
@@ -128,11 +127,8 @@ class EpicsGUI:
                     )
                 )
 
-            for method_data in single_mapping.methods:
-                if method_data.info.method_type == MethodType.command:
-                    group_children.append(
-                        self._get_command_component(attr_path, method_data.name)
-                    )
+            for name in single_mapping.command_methods:
+                group_children.append(self._get_command_component(attr_path, name))
 
             components.append(Group(group_name, Grid(), group_children))
 

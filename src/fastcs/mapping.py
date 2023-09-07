@@ -1,19 +1,16 @@
 from dataclasses import dataclass
-from typing import Callable, NamedTuple
 
 from .attributes import Attribute
 from .controller import BaseController, Controller
-from .cs_methods import MethodInfo
-
-MethodData = NamedTuple(
-    "MethodData", (("name", str), ("info", MethodInfo), ("method", Callable))
-)
+from .cs_methods import Command, Put, Scan
 
 
 @dataclass
 class SingleMapping:
     controller: BaseController
-    methods: list[MethodData]
+    scan_methods: dict[str, Scan]
+    put_methods: dict[str, Put]
+    command_methods: dict[str, Command]
     attributes: dict[str, Attribute]
 
 
@@ -22,7 +19,6 @@ class Mapping:
         self.controller = controller
 
         self._controller_mappings: list[SingleMapping] = []
-        self._generate_mapping(controller)
         self._controller_mappings.append(self._get_single_mapping(controller))
 
         for sub_controller in controller.get_sub_controllers():
@@ -30,16 +26,27 @@ class Mapping:
 
     @staticmethod
     def _get_single_mapping(controller: BaseController) -> SingleMapping:
-        methods = []
+        scan_methods = {}
+        put_methods = {}
+        command_methods = {}
         attributes = {}
         for attr_name in dir(controller):
             attr = getattr(controller, attr_name)
-            if hasattr(attr, "fastcs_method_info"):
-                methods.append(MethodData(attr_name, attr.fastcs_method_info, attr))
-            elif isinstance(attr, Attribute):
-                attributes[attr_name] = attr
+            match attr:
+                case object(fastcs_method=fastcs_method):
+                    match fastcs_method:
+                        case Put():
+                            put_methods[attr_name] = fastcs_method
+                        case Scan():
+                            scan_methods[attr_name] = fastcs_method
+                        case Command():
+                            command_methods[attr_name] = fastcs_method
+                case Attribute():
+                    attributes[attr_name] = attr
 
-        return SingleMapping(controller, methods, attributes)
+        return SingleMapping(
+            controller, scan_methods, put_methods, command_methods, attributes
+        )
 
     def __str__(self) -> str:
         result = "Controller mappings:\n"

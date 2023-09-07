@@ -1,6 +1,6 @@
 from typing import Any
 
-from .cs_methods import MethodInfo, MethodType
+from .cs_methods import Command, Put, Scan
 from .exceptions import FastCSException
 
 
@@ -10,17 +10,17 @@ def scan(period: float) -> Any:
         raise FastCSException("Scan method must have a positive scan period")
 
     def wrapper(fn):
-        fn.fastcs_method_info = MethodInfo(MethodType.scan, fn, period=period)
+        fn.fastcs_method = Scan(fn, period)
         return fn
 
     return wrapper
 
 
 def put(fn) -> Any:
-    fn.fastcs_method_info = MethodInfo(MethodType.put, fn)
+    fn.fastcs_method = Put(fn)
     return fn
 
 
 def command(fn) -> Any:
-    fn.fastcs_method_info = MethodInfo(MethodType.command, fn)
+    fn.fastcs_method = Command(fn)
     return fn

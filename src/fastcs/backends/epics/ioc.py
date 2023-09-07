@@ -6,7 +6,6 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backend import Backend
-from fastcs.cs_methods import MethodType
 from fastcs.datatypes import Bool, DataType, Float, Int
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
@@ -96,12 +95,11 @@ def _create_and_link_attribute_pvs(mapping: Mapping) -> None:
 def _create_and_link_command_pvs(mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
-        for method_data in single_mapping.methods:
-            if method_data.info.method_type == MethodType.command:
-                name = method_data.name.title().replace("_", "")
-                pv_name = path.upper() + ":" + name if path else name
+        for name, method in single_mapping.command_methods.items():
+            name = name.title().replace("_", "")
+            pv_name = path.upper() + ":" + name if path else name
 
-                _create_and_link_command_pv(pv_name, method_data.method)
+            _create_and_link_command_pv(pv_name, method.fn)
 
 
 class EpicsIOC:
