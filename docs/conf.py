@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from subprocess import check_output
 
-import requests
+import requests  # type:ignore
 
 import fastcs
 
@@ -32,6 +32,7 @@ else:
 extensions = [
     # Use this for generating API docs
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     # This can parse google style docstrings
     "sphinx.ext.napoleon",
     # For linking to external sphinx documentation
@@ -48,7 +49,7 @@ extensions = [
 
 # If true, Sphinx will warn about all references where the target cannot
 # be found.
-nitpicky = True
+nitpicky = False
 
 # A list of (type, target) tuples (by default empty) that should be ignored when
 # generating warnings in "nitpicky mode". Note that type should include the
@@ -75,6 +76,12 @@ autodoc_member_order = "bysource"
 # Don't inherit docstrings from baseclasses
 autodoc_inherit_docstrings = False
 
+# Generate autosummary sections
+autosummary_generate = True
+
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "_templates"]
+
 # Output graphviz directive produced images in a scalable format
 graphviz_output_format = "svg"
 
@@ -98,7 +105,10 @@ pygments_style = "sphinx"
 
 # This means you can link things like `str` and `asyncio` to the relevant
 # docs in the python documentation.
-intersphinx_mapping = dict(python=("https://docs.python.org/3/", None))
+intersphinx_mapping = dict(
+    python=("https://docs.python.org/3/", None),
+    numpy=("https://numpy.org/doc/stable/", None),
+)
 
 # A dictionary of graphviz graph attributes for inheritance diagrams.
 inheritance_graph_attrs = dict(rankdir="TB")

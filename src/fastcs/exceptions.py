@@ -1,0 +1,2 @@
+class FastCSException(Exception):
+    pass

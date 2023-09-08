@@ -7,20 +7,20 @@ name = "fastcs"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
 description = "Control system agnostic framework for building Device support in Python that will work for both EPICS and Tango"
 dependencies = [
-    "typing-extensions;python_version<'3.8'",
+    "numpy",
+    "pydantic",
+    "pvi",
+    "softioc",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.rst"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 
 [project.optional-dependencies]
 dev = [
@@ -99,8 +99,8 @@ skipsdist=True
 # Don't create a virtualenv for the command, requires tox-direct plugin
 direct = True
 passenv = *
-allowlist_externals = 
-    pytest 
+allowlist_externals =
+    pytest
     pre-commit
     mypy
     sphinx-build
