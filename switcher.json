@@ -22,5 +22,9 @@
   {
     "version": "HTTP",
     "url": "https://DiamondLightSource.github.io/FastCS/HTTP/"
+  },
+  {
+    "version": "string-datatype",
+    "url": "https://DiamondLightSource.github.io/FastCS/string-datatype/"
   }
 ]
