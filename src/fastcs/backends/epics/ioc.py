@@ -7,7 +7,7 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backend import Backend
-from fastcs.datatypes import Bool, DataType, Float, Int
+from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
@@ -25,6 +25,8 @@ def _get_input_record(pv_name: str, datatype: DataType) -> RecordWrapper:
             return builder.longIn(pv_name)
         case Float(prec):
             return builder.aIn(pv_name, PREC=prec)
+        case String():
+            return builder.longStringIn(pv_name)
         case _:
             raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
@@ -53,6 +55,10 @@ def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) ->
         case Float(prec):
             return builder.aOut(
                 pv_name, always_update=True, on_update=on_update, PREC=prec
+            )
+        case String():
+            return builder.longStringOut(
+                pv_name, always_update=True, on_update=on_update
             )
         case _:
             raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
