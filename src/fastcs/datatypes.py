@@ -4,7 +4,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Awaitable, Callable, Generic, TypeVar
 
-T = TypeVar("T", int, float, bool)
+T = TypeVar("T", int, float, bool, str)
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
 
@@ -42,3 +42,10 @@ class Bool(DataType[bool]):
     @property
     def dtype(self) -> type[bool]:
         return bool
+
+
+@dataclass(frozen=True)
+class String(DataType[str]):
+    @property
+    def dtype(self) -> type[str]:
+        return str
