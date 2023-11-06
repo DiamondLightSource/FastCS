@@ -16,6 +16,7 @@ from pvi.device import (
     SignalRW,
     SignalW,
     SignalX,
+    TextFormat,
     TextRead,
     TextWrite,
     Tree,
@@ -23,7 +24,7 @@ from pvi.device import (
 )
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.datatypes import Bool, DataType, Float, Int
+from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
@@ -62,6 +63,8 @@ class EpicsGUI:
                 return LED()
             case Int() | Float():
                 return TextRead()
+            case String():
+                return TextRead(format=TextFormat.string)
             case _:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
@@ -72,6 +75,8 @@ class EpicsGUI:
                 return CheckBox()
             case Int() | Float():
                 return TextWrite()
+            case String():
+                return TextWrite(format=TextFormat.string)
             case _:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
