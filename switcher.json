@@ -24,6 +24,10 @@
     "url": "https://DiamondLightSource.github.io/FastCS/HTTP/"
   },
   {
+    "version": "skeleton-update",
+    "url": "https://DiamondLightSource.github.io/FastCS/skeleton-update/"
+  },
+  {
     "version": "string-datatype",
     "url": "https://DiamondLightSource.github.io/FastCS/string-datatype/"
   }
