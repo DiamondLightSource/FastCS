@@ -1,5 +1,8 @@
 import asyncio
 from dataclasses import dataclass
+from typing import Dict
+
+import aiohttp
 
 
 class DisconnectedError(Exception):
@@ -52,3 +55,28 @@ class IPConnection:
     async def _receive_response(self) -> str:
         data = await self._reader.readline()
         return data.decode("utf-8")
+
+
+class HTTPConnection:
+    def __init__(self, settings: IPConnectionSettings, headers: Dict[str, str]):
+        self._session = aiohttp.ClientSession()
+        self._ip = settings.ip
+        self._port = settings.port
+        self._headers = headers
+
+    async def get(self, uri) -> str:
+        async with self._session.get(
+            f"http://{self._ip}:{self._port}/{uri}"
+        ) as response:
+            return await response.json()
+
+    async def put(self, uri, value):
+        async with self._session.put(
+            f"http://{self._ip}:{self._port}/{uri}",
+            json={"value": value},
+            headers=self._headers,
+        ) as response:
+            return await response.json()
+
+    async def close(self):
+        await self._session.close()
