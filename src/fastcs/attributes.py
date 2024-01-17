@@ -46,13 +46,18 @@ class Attribute(Generic[T]):
     """
 
     def __init__(
-        self, datatype: DataType[T], access_mode: AttrMode, handler: Any = None
+        self,
+        datatype: DataType[T],
+        access_mode: AttrMode,
+        group: str | None = None,
+        handler: Any = None,
     ) -> None:
         assert (
             datatype.dtype in ATTRIBUTE_TYPES
         ), f"Attr type must be one of {ATTRIBUTE_TYPES}, received type {datatype.dtype}"
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
+        self._group = group
 
     @property
     def datatype(self) -> DataType[T]:
@@ -66,6 +71,10 @@ class Attribute(Generic[T]):
     def access_mode(self) -> AttrMode:
         return self._access_mode
 
+    @property
+    def group(self) -> str | None:
+        return self._group
+
 
 class AttrR(Attribute[T]):
     """A read-only `Attribute`."""
@@ -74,9 +83,10 @@ class AttrR(Attribute[T]):
         self,
         datatype: DataType[T],
         access_mode=AttrMode.READ,
+        group: str | None = None,
         handler: Updater | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode, handler)  # type: ignore
+        super().__init__(datatype, access_mode, group, handler)  # type: ignore
         self._value: T = datatype.dtype()
         self._update_callback: AttrCallback[T] | None = None
         self._updater = handler
@@ -105,9 +115,10 @@ class AttrW(Attribute[T]):
         self,
         datatype: DataType[T],
         access_mode=AttrMode.WRITE,
+        group: str | None = None,
         handler: Sender | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode, handler)  # type: ignore
+        super().__init__(datatype, access_mode, group, handler)  # type: ignore
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
         self._sender = handler
@@ -143,9 +154,10 @@ class AttrRW(AttrW[T], AttrR[T]):
         self,
         datatype: DataType[T],
         access_mode=AttrMode.READ_WRITE,
+        group: str | None = None,
         handler: Handler | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode, handler)  # type: ignore
+        super().__init__(datatype, access_mode, group, handler)  # type: ignore
 
     async def process(self, value: T) -> None:
         await self.set(value)

@@ -26,6 +26,16 @@ def put(fn) -> Any:
     return fn
 
 
-def command(fn) -> Any:
-    fn.fastcs_method = Command(fn)
-    return fn
+def command(*, group: str | None = None) -> Any:
+    """Decorator to map a `Controller` method into a `Command`.
+
+    Args:
+        group: Group to display the widget for this command in on the UI
+
+    """
+
+    def wrapper(fn):
+        fn.fastcs_method = Command(fn, group=group)
+        return fn
+
+    return wrapper

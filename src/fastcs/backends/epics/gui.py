@@ -2,8 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from pvi._format.base import Formatter
-from pvi._yaml_utils import deserialize_yaml
+from pvi._format.dls import DLSFormatter
 from pvi.device import (
     LED,
     CheckBox,
@@ -16,6 +15,7 @@ from pvi.device import (
     SignalRW,
     SignalW,
     SignalX,
+    SubScreen,
     TextFormat,
     TextRead,
     TextWrite,
@@ -24,11 +24,10 @@ from pvi.device import (
 )
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.exceptions import FastCSException
-from fastcs.mapping import Mapping
-
-FORMATTER_YAML = Path.cwd() / ".." / "pvi" / "formatters" / "dls.bob.pvi.formatter.yaml"
+from fastcs.mapping import Mapping, SingleMapping
 
 
 class EpicsGUIFormat(Enum):
@@ -113,29 +112,60 @@ class EpicsGUI:
 
         assert options.output_path.suffix == options.file_format.value
 
-        formatter = deserialize_yaml(Formatter, FORMATTER_YAML)
+        formatter = DLSFormatter()
 
-        components: Tree[Component] = []
-        for single_mapping in self._mapping.get_controller_mappings():
-            attr_path = single_mapping.controller.path
+        controller_mapping = self._mapping.get_controller_mappings()[0]
+        sub_controller_mappings = self._mapping.get_controller_mappings()[1:]
 
-            group_name = type(single_mapping.controller).__name__ + " " + attr_path
-            group_children: list[Component] = []
+        components = self.extract_mapping_components(controller_mapping)
 
-            for attr_name, attribute in single_mapping.attributes.items():
-                group_children.append(
-                    self._get_attribute_component(
-                        attr_path,
-                        attr_name,
-                        attribute,
-                    )
+        for sub_controller_mapping in sub_controller_mappings:
+            components.append(
+                Group(
+                    sub_controller_mapping.controller.path,
+                    SubScreen(),
+                    self.extract_mapping_components(sub_controller_mapping),
                 )
-
-            for name in single_mapping.command_methods:
-                group_children.append(self._get_command_component(attr_path, name))
-
-            components.append(Group(group_name, Grid(), group_children))
+            )
 
         device = Device("Simple Device", children=components)
 
         formatter.format(device, "MY-DEVICE-PREFIX", options.output_path)
+
+    def extract_mapping_components(self, mapping: SingleMapping) -> list[Component]:
+        components: Tree[Component] = []
+        attr_path = mapping.controller.path
+
+        groups: dict[str, list[Component]] = {}
+        for attr_name, attribute in mapping.attributes.items():
+            signal = self._get_attribute_component(
+                attr_path,
+                attr_name,
+                attribute,
+            )
+
+            match attribute:
+                case Attribute(group=group) if group is not None:
+                    if group not in groups:
+                        groups[group] = []
+
+                    groups[group].append(signal)
+                case _:
+                    components.append(signal)
+
+        for name, command in mapping.command_methods.items():
+            signal = self._get_command_component(attr_path, name)
+
+            match command:
+                case Command(group=group) if group is not None:
+                    if group not in groups:
+                        groups[group] = []
+
+                    groups[group].append(signal)
+                case _:
+                    components.append(signal)
+
+        for name, children in groups.items():
+            components.append(Group(name, Grid(), children))
+
+        return components
