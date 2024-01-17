@@ -7,6 +7,8 @@ from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
 
 
 class AttrMode(Enum):
+    """Access mode of an `Attribute`."""
+
     READ = 1
     WRITE = 2
     READ_WRITE = 3
@@ -14,12 +16,16 @@ class AttrMode(Enum):
 
 @runtime_checkable
 class Sender(Protocol):
+    """Protocol for setting the value of an `Attribute`."""
+
     async def put(self, controller: Any, attr: AttrW, value: Any) -> None:
         pass
 
 
 @runtime_checkable
 class Updater(Protocol):
+    """Protocol for updating the cached readback value of an `Attribute`."""
+
     update_period: float
 
     async def update(self, controller: Any, attr: AttrR) -> None:
@@ -28,10 +34,17 @@ class Updater(Protocol):
 
 @runtime_checkable
 class Handler(Sender, Updater, Protocol):
+    """Protocol encapsulating both `Sender` and `Updater`."""
+
     pass
 
 
 class Attribute(Generic[T]):
+    """Base FastCS attribute.
+
+    Instances of this class added to a `Controller` will be used by the backend.
+    """
+
     def __init__(
         self, datatype: DataType[T], access_mode: AttrMode, handler: Any = None
     ) -> None:
@@ -55,6 +68,8 @@ class Attribute(Generic[T]):
 
 
 class AttrR(Attribute[T]):
+    """A read-only `Attribute`."""
+
     def __init__(
         self,
         datatype: DataType[T],
@@ -84,6 +99,8 @@ class AttrR(Attribute[T]):
 
 
 class AttrW(Attribute[T]):
+    """A write-only `Attribute`."""
+
     def __init__(
         self,
         datatype: DataType[T],
@@ -120,6 +137,8 @@ class AttrW(Attribute[T]):
 
 
 class AttrRW(AttrW[T], AttrR[T]):
+    """A read-write `Attribute`."""
+
     def __init__(
         self,
         datatype: DataType[T],
