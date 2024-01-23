@@ -12,6 +12,8 @@ AttrCallback = Callable[[T], Awaitable[None]]
 
 
 class DataType(Generic[T]):
+    """Generic datatype mapping to a python type, with additional metadata."""
+
     @property
     @abstractmethod
     def dtype(self) -> type[T]:  # Using property due to lack of Generic ClassVars
@@ -20,6 +22,8 @@ class DataType(Generic[T]):
 
 @dataclass(frozen=True)
 class Int(DataType[int]):
+    """`DataType` mapping to builtin `int`."""
+
     @property
     def dtype(self) -> type[int]:
         return int
@@ -27,6 +31,8 @@ class Int(DataType[int]):
 
 @dataclass(frozen=True)
 class Float(DataType[float]):
+    """`DataType` mapping to builtin `float`."""
+
     prec: int = 2
 
     @property
@@ -36,6 +42,8 @@ class Float(DataType[float]):
 
 @dataclass(frozen=True)
 class Bool(DataType[bool]):
+    """`DataType` mapping to builtin `bool`."""
+
     znam: str = "OFF"
     onam: str = "ON"
 
@@ -46,6 +54,8 @@ class Bool(DataType[bool]):
 
 @dataclass(frozen=True)
 class String(DataType[str]):
+    """`DataType` mapping to builtin `str`."""
+
     @property
     def dtype(self) -> type[str]:
         return str

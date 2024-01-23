@@ -14,7 +14,7 @@ description = "Control system agnostic framework for building Device support in 
 dependencies = [
     "numpy",
     "pydantic",
-    "pvi",
+    "pvi~=0.7.1",
     "softioc",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]

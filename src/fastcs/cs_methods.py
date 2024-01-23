@@ -8,7 +8,7 @@ ScanCallback = Callable[..., Awaitable[None]]
 
 
 class Method:
-    def __init__(self, fn: Callable) -> None:
+    def __init__(self, fn: Callable, *, group: str | None = None) -> None:
         self._docstring = getdoc(fn)
 
         sig = signature(fn, eval_str=True)
@@ -17,6 +17,7 @@ class Method:
         self._validate(fn)
 
         self._fn = fn
+        self._group = group
 
     def _validate(self, fn: Callable) -> None:
         if self.return_type not in (None, Signature.empty):
@@ -40,6 +41,10 @@ class Method:
     @property
     def fn(self):
         return self._fn
+
+    @property
+    def group(self):
+        return self._group
 
 
 class Scan(Method):
@@ -71,8 +76,8 @@ class Put(Method):
 
 
 class Command(Method):
-    def __init__(self, fn: Callable) -> None:
-        super().__init__(fn)
+    def __init__(self, fn: Callable, *, group: str | None = None) -> None:
+        super().__init__(fn, group=group)
 
     def _validate(self, fn: Callable) -> None:
         super()._validate(fn)

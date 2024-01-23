@@ -23,6 +23,14 @@ class BaseController:
 
 
 class Controller(BaseController):
+    """Top-level controller for a device.
+
+    This is the primary class for implementing device support in FastCS. Instances of
+    this class can be loaded into a backend to access its `Attribute`s. The backend can
+    then perform a specific function with the set of `Attributes`, such as generating a
+    UI or creating parameters for a control system.
+    """
+
     def __init__(self) -> None:
         super().__init__()
         self.__sub_controllers: list[SubController] = []
@@ -38,5 +46,11 @@ class Controller(BaseController):
 
 
 class SubController(BaseController):
+    """A subordinate to a `Controller` for managing a subset of a device.
+
+    An instance of this class can be registered with a parent `Controller` to include it
+    as part of a larger device.
+    """
+
     def __init__(self, path: str) -> None:
         super().__init__(path)
