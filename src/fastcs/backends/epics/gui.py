@@ -82,26 +82,32 @@ class EpicsGUI:
     @classmethod
     def _get_attribute_component(cls, attr_path: str, name: str, attribute: Attribute):
         pv = cls._get_pv(attr_path, name)
-        name = name.title().replace("_", " ")
+        name = name.title().replace("_", "")
 
         match attribute:
             case AttrRW():
                 read_widget = cls._get_read_widget(attribute.datatype)
                 write_widget = cls._get_write_widget(attribute.datatype)
-                return SignalRW(name, pv, write_widget, pv + "_RBV", read_widget)
+                return SignalRW(
+                    name=name,
+                    pv=pv,
+                    widget=write_widget,
+                    read_pv=pv + "_RBV",
+                    read_widget=read_widget,
+                )
             case AttrR():
                 read_widget = cls._get_read_widget(attribute.datatype)
-                return SignalR(name, pv, read_widget)
+                return SignalR(name=name, pv=pv, widget=read_widget)
             case AttrW():
                 write_widget = cls._get_write_widget(attribute.datatype)
-                return SignalW(name, pv, TextWrite())
+                return SignalW(name=name, pv=pv, widget=TextWrite())
 
     @classmethod
     def _get_command_component(cls, attr_path: str, name: str):
         pv = cls._get_pv(attr_path, name)
-        name = name.title().replace("_", " ")
+        name = name.title().replace("_", "")
 
-        return SignalX(name, pv, value=1)
+        return SignalX(name=name, pv=pv, value="1")
 
     def create_gui(self, options: EpicsGUIOptions | None = None) -> None:
         if options is None:
@@ -122,13 +128,13 @@ class EpicsGUI:
         for sub_controller_mapping in sub_controller_mappings:
             components.append(
                 Group(
-                    sub_controller_mapping.controller.path,
-                    SubScreen(),
-                    self.extract_mapping_components(sub_controller_mapping),
+                    name=sub_controller_mapping.controller.path,
+                    layout=SubScreen(),
+                    children=self.extract_mapping_components(sub_controller_mapping),
                 )
             )
 
-        device = Device("Simple Device", children=components)
+        device = Device(label="Simple Device", children=components)
 
         formatter.format(device, "MY-DEVICE-PREFIX", options.output_path)
 
@@ -166,6 +172,6 @@ class EpicsGUI:
                     components.append(signal)
 
         for name, children in groups.items():
-            components.append(Group(name, Grid(), children))
+            components.append(Group(name=name, layout=Grid(), children=children))
 
         return components
