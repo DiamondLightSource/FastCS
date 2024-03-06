@@ -7,15 +7,20 @@ from typing import Iterable, List, Optional
 import aiozmq
 import zmq
 
-
 @dataclass
+class ZMQConnectionSettings:
+    _host: str = "127.0.0.1"
+    _port: int = 5555
+    _type: int = zmq.DEALER
+
+
 class ZMQConnection:
     """An adapter for a ZeroMQ data stream."""
 
-    zmq_host: str = "127.0.0.1"
-    zmq_port: int = 5555
-    zmq_type: int = zmq.DEALER
-    running: bool = False
+    def __init__(self, settings: ZMQConnectionSettings) -> None:
+        self._host, self._port, self._type = (settings._host, settings._port, settings._type)
+        self.running: bool = False
+        self._lock = asyncio.Lock()
 
     def get_setup(self) -> None:
         """Print out the current configuration."""
@@ -33,9 +38,9 @@ Running: {self.running}
         print("starting stream...")
 
         self._socket = await aiozmq.create_zmq_stream(
-            self.zmq_type, connect=f"tcp://{self.zmq_host}:{self.zmq_port}"
+            self._type, connect=f"tcp://{self._host}:{self._port}"
         )  # type: ignore
-        if self.zmq_type == zmq.SUB:
+        if self._type == zmq.SUB:
             self._socket.transport.setsockopt(zmq.SUBSCRIBE, b"")
         self._socket.transport.setsockopt(zmq.LINGER, 0)
 
@@ -66,7 +71,7 @@ Running: {self.running}
         Returns:
             Optional[bytes]: If received, a response is returned, else None
         """
-        if self.zmq_type is not zmq.DEALER:
+        if self._type is not zmq.DEALER:
             try:
                 resp = await asyncio.wait_for(self._socket.read(), timeout=20)
                 return resp[0]
@@ -109,14 +114,14 @@ Running: {self.running}
 
         self.running = True
 
-        if self.zmq_type == zmq.DEALER:
+        if self._type == zmq.DEALER:
             await asyncio.gather(
                 *[
                     self._process_message_queue(),
                     self._process_response_queue(),
                 ]
             )
-        elif self.zmq_type == zmq.SUB:
+        elif self._type == zmq.SUB:
             await asyncio.gather(
                 *[
                     self._process_response_queue(),
@@ -145,7 +150,7 @@ Running: {self.running}
         if message is not None:
             if not self._socket._closing:
                 try:
-                    if self.zmq_type is not zmq.DEALER:
+                    if self._type is not zmq.DEALER:
                         self._socket.write(message)
                     else:
                         self._socket._transport._zmq_sock.send(b"", flags=zmq.SNDMORE)
