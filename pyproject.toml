@@ -12,10 +12,12 @@ classifiers = [
 ]
 description = "Control system agnostic framework for building Device support in Python that will work for both EPICS and Tango"
 dependencies = [
+    "aiozmq",
     "numpy",
     "pydantic",
     "pvi~=0.7.1",
     "softioc",
+    "zmq",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
