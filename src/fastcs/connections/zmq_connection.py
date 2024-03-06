@@ -22,20 +22,9 @@ class ZMQConnection:
         self.running: bool = False
         self._lock = asyncio.Lock()
 
-    def get_setup(self) -> None:
-        """Print out the current configuration."""
-        print(
-            f"""
-Host: {self.zmq_host}
-Port: {self.zmq_port}
-Type: {self.zmq_type.name}
-Running: {self.running}
-"""
-        )
 
     async def start_stream(self) -> None:
         """Start the ZeroMQ stream."""
-        print("starting stream...")
 
         self._socket = await aiozmq.create_zmq_stream(
             self._type, connect=f"tcp://{self._host}:{self._port}"
@@ -43,8 +32,6 @@ Running: {self.running}
         if self._type == zmq.SUB:
             self._socket.transport.setsockopt(zmq.SUBSCRIBE, b"")
         self._socket.transport.setsockopt(zmq.LINGER, 0)
-
-        print(f"Stream started. {self._socket}")
 
     async def close_stream(self) -> None:
         """Close the ZeroMQ stream."""
@@ -110,7 +97,7 @@ Running: {self.running}
             if getattr(self, "_socket", None) is None:
                 await self.start_stream()
         except Exception as e:
-            print("Exception when starting stream:", e)
+            raise Exception("Exception when starting stream:", e)
 
         self.running = True
 
@@ -134,7 +121,6 @@ Running: {self.running}
 
     async def _process_message_queue(self) -> None:
         """Process message queue for sending messages over the ZeroMQ stream."""
-        print("Processing message queue...")
         running = True
         while running:
             message = await self._send_message_queue.get()
@@ -163,14 +149,13 @@ Running: {self.running}
                     print("Unable to write to ZMQ stream, trying again...")
                     await asyncio.sleep(1)
             else:
-                print("Socket closed...")
                 await asyncio.sleep(5)
         else:
-            print("No message")
+            # No message was received
+            pass
 
     async def _process_response_queue(self) -> None:
         """Process response message queue from the ZeroMQ stream."""
-        print("Processing response queue...")
         running = True
         while running:
             resp = await self._read_response()
