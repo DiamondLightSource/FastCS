@@ -1,4 +1,4 @@
 from .ip_connection import IPConnection
-from .zmq_connection import ZMQConnection
+from .zmq_connection import ZMQDealerConnection, ZMQSubConnection
 
-__all__ = ["IPConnection", "ZMQConnection"]
+__all__ = ["IPConnection", "ZMQSubConnection", "ZMQDealerConnection"]
