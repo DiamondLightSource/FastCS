@@ -32,6 +32,10 @@
     "url": "https://DiamondLightSource.github.io/FastCS/HTTP/"
   },
   {
+    "version": "create-connections-dir",
+    "url": "https://DiamondLightSource.github.io/FastCS/create-connections-dir/"
+  },
+  {
     "version": "string-datatype",
     "url": "https://DiamondLightSource.github.io/FastCS/string-datatype/"
   },
