@@ -28,6 +28,10 @@
     "url": "https://DiamondLightSource.github.io/FastCS/0.1/"
   },
   {
+    "version": "Add-serial-connection-support",
+    "url": "https://DiamondLightSource.github.io/FastCS/Add-serial-connection-support/"
+  },
+  {
     "version": "Add-zmq-connection-support",
     "url": "https://DiamondLightSource.github.io/FastCS/Add-zmq-connection-support/"
   },
