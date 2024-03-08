@@ -43,22 +43,18 @@ class ModbusConnection:
         try:
             # address_hex = hex(address)
             rr = await self._client.read_holding_registers(address, count=count, slave=self.slave)  # type: ignore
-            print(f"Response: {rr}")
+
+            if rr.isError() or isinstance(rr, ExceptionResponse): # pragma no cover
+                # Received Modbus library error or exception
+                # THIS EXCEPTION IS NOT A PYTHON EXCEPTION, but a valid modbus message
+                self.disconnect()
+                return None
+            return rr
+
         except ModbusException:  # pragma no cover
             # Received ModbusException from library
             self.disconnect()
-            return
-        if rr.isError():  # pragma no cover
-            # Received Modbus library error
-            self.disconnect()
-            return
-        if isinstance(rr, ExceptionResponse):  # pragma no cover
-            # Received Modbus library exception
-            # THIS IS NOT A PYTHON EXCEPTION, but a valid modbus message
-            self.disconnect()
-        else:
-            return rr
-        return None
+            return None
 
     async def send(self, address: int, value: int) -> ModbusResponse | None:
         """Send a request.
