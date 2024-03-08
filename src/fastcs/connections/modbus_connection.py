@@ -1,19 +1,16 @@
-import asyncio
-
 from dataclasses import dataclass
 from typing import Optional
 
-from pymodbus.client.base import ModbusBaseClient
 from pymodbus.client import (
     AsyncModbusSerialClient,
     AsyncModbusTcpClient,
     AsyncModbusUdpClient,
+    ModbusBaseClient,
 )
+
 from pymodbus.exceptions import ModbusException
-
 from pymodbus.framer import Framer
-from pymodbus.pdu import ExceptionResponse
-
+from pymodbus.pdu import ExceptionResponse, ModbusResponse
 
 # Constants
 CR = "\r"
@@ -27,29 +24,27 @@ class ModbusConnectionSettings:
     port: int = 7001
     slave: int = 0
 
+
 class ModbusConnection:
-
     def __init__(self, settings: ModbusConnectionSettings) -> None:
-
         self.host, self.port, self.slave = settings.host, settings.port, settings.slave
         self.running: bool = False
 
         self._client: ModbusBaseClient
 
-    async def connect(self, framer=Framer.SOCKET):
+    async def connect(self) -> None:
         raise NotImplementedError
-
 
     def disconnect(self):
         self._client.close()
 
-    async def _read(self, address: int, count: int = 2) -> Optional[str]:
+    async def _read(self, address: int, count: int = 2) -> Optional[ModbusResponse]:
         # address -= 1  # modbus spec starts from 0 not 1
         try:
             # address_hex = hex(address)
             rr = await self._client.read_holding_registers(address, count=count, slave=self.slave)  # type: ignore
             print(f"Response: {rr}")
-        except ModbusException as exc:  # pragma no cover
+        except ModbusException:  # pragma no cover
             # Received ModbusException from library
             self.disconnect()
             return
@@ -61,8 +56,11 @@ class ModbusConnection:
             # Received Modbus library exception
             # THIS IS NOT A PYTHON EXCEPTION, but a valid modbus message
             self.disconnect()
+        else:
+            return rr
+        return None
 
-    async def send(self, address: int, value: int) -> None:
+    async def send(self, address: int, value: int) -> ModbusResponse | None:
         """Send a request.
 
         Args:
@@ -71,14 +69,15 @@ class ModbusConnection:
         """
         await self._client.write_registers(address, value, slave=self.slave)
         resp = await self._read(address, 2)
+        return resp
+
 
 class ModbusSerialConnection(ModbusConnection):
-
     def __init__(self, settings: ModbusConnectionSettings) -> None:
         super().__init__(settings)
 
-    async def connect(self, framer=Framer.SOCKET):
-        self._client: AsyncModbusSerialClient = AsyncModbusSerialClient(
+    async def connect(self, framer: Framer=Framer.SOCKET):
+        self._client = AsyncModbusSerialClient(
             str(self.port),
             framer=framer,
             timeout=10,
@@ -95,13 +94,13 @@ class ModbusSerialConnection(ModbusConnection):
         await self._client.connect()
         assert self._client.connected
 
-class ModbusTcpConnection(ModbusConnection):
 
+class ModbusTcpConnection(ModbusConnection):
     def __init__(self, settings: ModbusConnectionSettings) -> None:
         super().__init__(settings)
 
-    async def connect(self, framer=Framer.SOCKET):
-        self._client: AsyncModbusTcpClient = AsyncModbusTcpClient(
+    async def connect(self, framer: Framer=Framer.SOCKET):
+        self._client = AsyncModbusTcpClient(
             self.host,
             self.port,
             framer=framer,
@@ -116,13 +115,13 @@ class ModbusTcpConnection(ModbusConnection):
         await self._client.connect()
         assert self._client.connected
 
-class ModbusUdpConnection(ModbusConnection):
 
+class ModbusUdpConnection(ModbusConnection):
     def __init__(self, settings: ModbusConnectionSettings) -> None:
         super().__init__(settings)
 
-    async def connect(self, framer=Framer.SOCKET):
-        self._client: AsyncModbusUdpClient = AsyncModbusUdpClient(
+    async def connect(self, framer: Framer=Framer.SOCKET):
+        self._client = AsyncModbusUdpClient(
             self.host,
             self.port,
             framer=framer,
