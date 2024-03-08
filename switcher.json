@@ -44,6 +44,10 @@
     "url": "https://DiamondLightSource.github.io/FastCS/HTTP/"
   },
   {
+    "version": "Modbus-support",
+    "url": "https://DiamondLightSource.github.io/FastCS/Modbus-support/"
+  },
+  {
     "version": "Upgrade-to-Python-3.11",
     "url": "https://DiamondLightSource.github.io/FastCS/Upgrade-to-Python-3.11/"
   },
