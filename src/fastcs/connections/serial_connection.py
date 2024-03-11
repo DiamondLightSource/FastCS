@@ -49,10 +49,10 @@ class SerialConnection:
         """Format message for printing by appending a newline char.
 
         Args:
-            message (bytes): The message to format.
+            message: The message to format.
 
         Returns:
-            bytes: The formatted message.
+            The formatted message.
         """
         return message + b"\n"
 
@@ -60,7 +60,7 @@ class SerialConnection:
         """Send a request.
 
         Args:
-            request (str): The request string to send.
+            request: The request string to send.
         """
         self._socket.send(self._format_message(request))
 
@@ -71,10 +71,10 @@ class SerialConnection:
         from the device.
 
         Args:
-            request (str): The request string to send.
+            request: The request string to send.
 
         Returns:
-            Optional[bytes]: If the response could be decoded,
+            If the response could be decoded,
             then it is returned. Otherwise None is returned.
         """
         async with self._lock:
@@ -95,10 +95,10 @@ class SerialConnection:
         """Sends a request and attempts to decode the response.
 
         Args:
-            request (str): The request string to send.
+            request: The request string to send.
 
         Returns:
-            Optional[str]: The decoded response string if the
+            The decoded response string if the
             request was successful, otherwise None is returned.
         """
 
