@@ -56,6 +56,10 @@
     "url": "https://DiamondLightSource.github.io/FastCS/create-connections-dir/"
   },
   {
+    "version": "improve_ip_connection",
+    "url": "https://DiamondLightSource.github.io/FastCS/improve_ip_connection/"
+  },
+  {
     "version": "string-datatype",
     "url": "https://DiamondLightSource.github.io/FastCS/string-datatype/"
   },
