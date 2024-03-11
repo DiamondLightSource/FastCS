@@ -7,7 +7,6 @@ from pymodbus.client import (
     AsyncModbusUdpClient,
     ModbusBaseClient,
 )
-
 from pymodbus.exceptions import ModbusException
 from pymodbus.framer import Framer
 from pymodbus.pdu import ExceptionResponse, ModbusResponse
@@ -42,9 +41,11 @@ class ModbusConnection:
         # address -= 1  # modbus spec starts from 0 not 1
         try:
             # address_hex = hex(address)
-            rr = await self._client.read_holding_registers(address, count=count, slave=self.slave)  # type: ignore
+            rr = await self._client.read_holding_registers(
+                address, count=count, slave=self.slave
+            )  # type: ignore
 
-            if rr.isError() or isinstance(rr, ExceptionResponse): # pragma no cover
+            if rr.isError() or isinstance(rr, ExceptionResponse):  # pragma no cover
                 # Received Modbus library error or exception
                 # THIS EXCEPTION IS NOT A PYTHON EXCEPTION, but a valid modbus message
                 self.disconnect()
@@ -72,7 +73,7 @@ class ModbusSerialConnection(ModbusConnection):
     def __init__(self, settings: ModbusConnectionSettings) -> None:
         super().__init__(settings)
 
-    async def connect(self, framer: Framer=Framer.SOCKET):
+    async def connect(self, framer: Framer = Framer.SOCKET):
         self._client = AsyncModbusSerialClient(
             str(self.port),
             framer=framer,
@@ -95,7 +96,7 @@ class ModbusTcpConnection(ModbusConnection):
     def __init__(self, settings: ModbusConnectionSettings) -> None:
         super().__init__(settings)
 
-    async def connect(self, framer: Framer=Framer.SOCKET):
+    async def connect(self, framer: Framer = Framer.SOCKET):
         self._client = AsyncModbusTcpClient(
             self.host,
             self.port,
@@ -116,7 +117,7 @@ class ModbusUdpConnection(ModbusConnection):
     def __init__(self, settings: ModbusConnectionSettings) -> None:
         super().__init__(settings)
 
-    async def connect(self, framer: Framer=Framer.SOCKET):
+    async def connect(self, framer: Framer = Framer.SOCKET):
         self._client = AsyncModbusUdpClient(
             self.host,
             self.port,
