@@ -1,12 +1,7 @@
 API
 ===
 
-.. toctree::
-
-.. autosummary::
-    :toctree: _autosummary
-    :template: custom-module-template.rst
-    :recursive:
+.. automodule:: fastcs
 
     ``fastcs``
     -----------------------------------

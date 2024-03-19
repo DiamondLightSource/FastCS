@@ -3,15 +3,6 @@
 .. include:: ../README.rst
     :end-before: when included in index.rst
 
-.. raw:: html
-
-    <style>
-    #logo {
-        width: 105px;
-        height: 105px;
-    }
-    </style>
-
 How the documentation is structured
 -----------------------------------
 
