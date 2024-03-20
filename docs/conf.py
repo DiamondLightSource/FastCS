@@ -69,6 +69,9 @@ nitpick_ignore = [
     ("py:class", "'id'"),
     ("py:class", "typing_extensions.Literal"),
 ]
+nitpick_ignore_regex = [
+    ("py:class", "fastcs.*.T"),
+]
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
 # inserted into the main body of the autoclass directive
