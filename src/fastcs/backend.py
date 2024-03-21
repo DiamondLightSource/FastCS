@@ -1,7 +1,7 @@
 import asyncio
 from collections import defaultdict
+from collections.abc import Callable
 from types import MethodType
-from typing import Callable
 
 from .attributes import AttrR, AttrW, Sender, Updater
 from .exceptions import FastCSException

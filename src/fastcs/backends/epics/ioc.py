@@ -1,6 +1,7 @@
+from collections.abc import Callable
 from dataclasses import dataclass
 from types import MethodType
-from typing import Any, Callable
+from typing import Any
 
 from softioc import asyncio_dispatcher, builder, softioc
 from softioc.pythonSoftIoc import RecordWrapper

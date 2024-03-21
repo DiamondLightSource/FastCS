@@ -8,7 +8,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-.venv
 build/
 develop-eggs/
 dist/
@@ -56,7 +55,6 @@ cov.xml
 
 # Sphinx documentation
 docs/_build/
-docs/**/_autosummary
 
 # PyBuilder
 target/
