@@ -71,7 +71,7 @@ def _create_and_link_write_pv(pv_name: str, attribute: AttrW) -> None:
     )
 
     async def async_wrapper(v):
-        record.set(v)
+        record.set(v, process=False)
 
     attribute.set_write_display_callback(async_wrapper)
 
