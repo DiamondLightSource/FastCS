@@ -71,7 +71,7 @@ def _create_and_link_write_pv(pv_name: str, attribute: AttrW) -> None:
     )
 
     async def async_wrapper(v):
-        record.set(v)
+        record.set(v, process=False)
 
     attribute.set_write_display_callback(async_wrapper)
 
@@ -80,7 +80,7 @@ def _create_and_link_command_pv(pv_name: str, method: Callable) -> None:
     async def wrapped_method(_: Any):
         await method()
 
-    builder.aOut(pv_name, always_update=True, on_update=wrapped_method)
+    builder.aOut(pv_name, initial_value=0, always_update=True, on_update=wrapped_method)
 
 
 def _create_and_link_attribute_pvs(mapping: Mapping) -> None:
