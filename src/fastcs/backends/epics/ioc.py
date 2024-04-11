@@ -113,8 +113,9 @@ def _create_and_link_command_pvs(mapping: Mapping) -> None:
 
 
 class EpicsIOC:
-    def __init__(self, mapping: Mapping):
+    def __init__(self, mapping: Mapping, pv_prefix: str):
         self._mapping = mapping
+        self._pv_prefix = pv_prefix
 
     def run(self, options: EpicsIOCOptions | None = None) -> None:
         if options is None:
@@ -125,7 +126,7 @@ class EpicsIOC:
         backend = Backend(self._mapping, dispatcher.loop)
 
         # Set the record prefix
-        builder.SetDeviceName("MY-DEVICE-PREFIX")
+        builder.SetDeviceName(self._pv_prefix)
 
         _create_and_link_attribute_pvs(self._mapping)
 

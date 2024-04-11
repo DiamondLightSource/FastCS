@@ -5,7 +5,7 @@ from pathlib import Path
 from pvi._format.dls import DLSFormatter
 from pvi.device import (
     LED,
-    CheckBox,
+    ButtonPanel,
     Component,
     Device,
     Grid,
@@ -19,6 +19,7 @@ from pvi.device import (
     TextFormat,
     TextRead,
     TextWrite,
+    ToggleButton,
     Tree,
     WriteWidget,
 )
@@ -42,18 +43,16 @@ class EpicsGUIOptions:
 
 
 class EpicsGUI:
-    def __init__(self, mapping: Mapping) -> None:
+    def __init__(self, mapping: Mapping, pv_prefix: str) -> None:
         self._mapping = mapping
+        self._pv_prefix = pv_prefix
 
-    @staticmethod
-    def _get_pv(attr_path: str, name: str):
+    def _get_pv(self, attr_path: str, name: str):
         if attr_path:
             attr_path = ":" + attr_path
         attr_path += ":"
 
-        pv = attr_path.upper() + name.title().replace("_", "")
-
-        return pv
+        return f"{self._pv_prefix}{attr_path.upper()}{name.title().replace('_', '')}"
 
     @staticmethod
     def _get_read_widget(datatype: DataType) -> ReadWidget:
@@ -71,7 +70,7 @@ class EpicsGUI:
     def _get_write_widget(datatype: DataType) -> WriteWidget:
         match datatype:
             case Bool():
-                return CheckBox()
+                return ToggleButton()
             case Int() | Float():
                 return TextWrite()
             case String():
@@ -79,35 +78,38 @@ class EpicsGUI:
             case _:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
-    @classmethod
-    def _get_attribute_component(cls, attr_path: str, name: str, attribute: Attribute):
-        pv = cls._get_pv(attr_path, name)
+    def _get_attribute_component(self, attr_path: str, name: str, attribute: Attribute):
+        pv = self._get_pv(attr_path, name)
         name = name.title().replace("_", "")
 
         match attribute:
             case AttrRW():
-                read_widget = cls._get_read_widget(attribute.datatype)
-                write_widget = cls._get_write_widget(attribute.datatype)
+                read_widget = self._get_read_widget(attribute.datatype)
+                write_widget = self._get_write_widget(attribute.datatype)
                 return SignalRW(
                     name=name,
-                    pv=pv,
-                    widget=write_widget,
+                    write_pv=pv,
+                    write_widget=write_widget,
                     read_pv=pv + "_RBV",
                     read_widget=read_widget,
                 )
             case AttrR():
-                read_widget = cls._get_read_widget(attribute.datatype)
-                return SignalR(name=name, pv=pv, widget=read_widget)
+                read_widget = self._get_read_widget(attribute.datatype)
+                return SignalR(name=name, read_pv=pv, read_widget=read_widget)
             case AttrW():
-                write_widget = cls._get_write_widget(attribute.datatype)
-                return SignalW(name=name, pv=pv, widget=TextWrite())
+                write_widget = self._get_write_widget(attribute.datatype)
+                return SignalW(name=name, write_pv=pv, write_widget=TextWrite())
 
-    @classmethod
-    def _get_command_component(cls, attr_path: str, name: str):
-        pv = cls._get_pv(attr_path, name)
+    def _get_command_component(self, attr_path: str, name: str):
+        pv = self._get_pv(attr_path, name)
         name = name.title().replace("_", "")
 
-        return SignalX(name=name, pv=pv, value="1")
+        return SignalX(
+            name=name,
+            write_pv=pv,
+            value="1",
+            write_widget=ButtonPanel(actions={name: "1"}),
+        )
 
     def create_gui(self, options: EpicsGUIOptions | None = None) -> None:
         if options is None:
@@ -136,7 +138,7 @@ class EpicsGUI:
 
         device = Device(label="Simple Device", children=components)
 
-        formatter.format(device, "MY-DEVICE-PREFIX", options.output_path)
+        formatter.format(device, options.output_path)
 
     def extract_mapping_components(self, mapping: SingleMapping) -> list[Component]:
         components: Tree[Component] = []

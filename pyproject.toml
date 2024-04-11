@@ -13,7 +13,7 @@ description = "Control system agnostic framework for building Device support in 
 dependencies = [
     "numpy",
     "pydantic",
-    "pvi~=0.7.1",
+    "pvi~=0.8.1",
     "softioc",
 ]
 dynamic = ["version"]
