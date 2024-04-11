@@ -1,0 +1,17 @@
+# Changes here will be overwritten by Copier
+_commit: 2.0.2-10-g0eb87d2
+_src_path: gh:DiamondLightSource/python-copier-template
+author_email: gary.yendell@diamond.ac.uk
+author_name: Gary Yendell
+component_owner: user:mef65357
+description: Control system agnostic framework for building Device support in Python
+    that will work for both EPICS and Tango
+distribution_name: fastcs
+docker: false
+docs_type: sphinx
+git_platform: github.com
+github_org: DiamondLightSource
+package_name: fastcs
+pypi: true
+repo_name: FastCS
+type_checker: mypy

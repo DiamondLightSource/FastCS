@@ -1,6 +1,6 @@
 from asyncio import iscoroutinefunction
+from collections.abc import Awaitable, Callable
 from inspect import Signature, getdoc, signature
-from typing import Awaitable, Callable
 
 from .exceptions import FastCSException
 

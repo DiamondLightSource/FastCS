@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Awaitable, Callable, Generic, TypeVar
+from typing import Generic, TypeVar
 
 T = TypeVar("T", int, float, bool, str)
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
@@ -22,7 +23,7 @@ class DataType(Generic[T]):
 
 @dataclass(frozen=True)
 class Int(DataType[int]):
-    """`DataType` mapping to builtin `int`."""
+    """`DataType` mapping to builtin ``int``."""
 
     @property
     def dtype(self) -> type[int]:
@@ -31,7 +32,7 @@ class Int(DataType[int]):
 
 @dataclass(frozen=True)
 class Float(DataType[float]):
-    """`DataType` mapping to builtin `float`."""
+    """`DataType` mapping to builtin ``float``."""
 
     prec: int = 2
 
@@ -42,7 +43,7 @@ class Float(DataType[float]):
 
 @dataclass(frozen=True)
 class Bool(DataType[bool]):
-    """`DataType` mapping to builtin `bool`."""
+    """`DataType` mapping to builtin ``bool``."""
 
     znam: str = "OFF"
     onam: str = "ON"
@@ -54,7 +55,7 @@ class Bool(DataType[bool]):
 
 @dataclass(frozen=True)
 class String(DataType[str]):
-    """`DataType` mapping to builtin `str`."""
+    """`DataType` mapping to builtin ``str``."""
 
     @property
     def dtype(self) -> type[str]:
