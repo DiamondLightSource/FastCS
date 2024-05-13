@@ -98,7 +98,7 @@ class EpicsGUI:
                 return SignalR(name=name, read_pv=pv, read_widget=read_widget)
             case AttrW():
                 write_widget = self._get_write_widget(attribute.datatype)
-                return SignalW(name=name, write_pv=pv, write_widget=TextWrite())
+                return SignalW(name=name, write_pv=pv, write_widget=write_widget)
 
     def _get_command_component(self, attr_path: str, name: str):
         pv = self._get_pv(attr_path, name)
