@@ -29,6 +29,7 @@ from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping, SingleMapping
+from fastcs.util import snake_to_pascal
 
 
 class EpicsGUIFormat(Enum):
@@ -130,7 +131,7 @@ class EpicsGUI:
         for sub_controller_mapping in sub_controller_mappings:
             components.append(
                 Group(
-                    name=sub_controller_mapping.controller.path,
+                    name=snake_to_pascal(sub_controller_mapping.controller.path),
                     layout=SubScreen(),
                     children=self.extract_mapping_components(sub_controller_mapping),
                 )
