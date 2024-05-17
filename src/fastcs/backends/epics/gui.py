@@ -41,6 +41,7 @@ class EpicsGUIFormat(Enum):
 class EpicsGUIOptions:
     output_path: Path = Path.cwd() / "output.bob"
     file_format: EpicsGUIFormat = EpicsGUIFormat.bob
+    title: str = "Simple Device"
 
 
 class EpicsGUI:
@@ -137,7 +138,7 @@ class EpicsGUI:
                 )
             )
 
-        device = Device(label="Simple Device", children=components)
+        device = Device(label=options.title, children=components)
 
         formatter.format(device, options.output_path)
 
