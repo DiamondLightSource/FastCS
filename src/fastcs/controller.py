@@ -6,12 +6,15 @@ from .attributes import Attribute
 
 
 class BaseController:
-    def __init__(self, path="") -> None:
-        self._path: str = path
+    def __init__(self, path: list[str] | None = None) -> None:
+        self._path: list[str] = path or []
+        self.__sub_controllers: list[SubController] = []
+
         self._bind_attrs()
 
     @property
-    def path(self):
+    def path(self) -> list[str]:
+        """Path prefix of attributes, recursively including parent ``Controller``s."""
         return self._path
 
     def _bind_attrs(self) -> None:
@@ -20,6 +23,12 @@ class BaseController:
             if isinstance(attr, Attribute):
                 new_attribute = copy(attr)
                 setattr(self, attr_name, new_attribute)
+
+    def register_sub_controller(self, controller: SubController):
+        self.__sub_controllers.append(controller)
+
+    def get_sub_controllers(self) -> list[SubController]:
+        return self.__sub_controllers
 
 
 class Controller(BaseController):
@@ -33,16 +42,9 @@ class Controller(BaseController):
 
     def __init__(self) -> None:
         super().__init__()
-        self.__sub_controllers: list[SubController] = []
 
     async def connect(self) -> None:
         pass
-
-    def register_sub_controller(self, controller: SubController):
-        self.__sub_controllers.append(controller)
-
-    def get_sub_controllers(self) -> list[SubController]:
-        return self.__sub_controllers
 
 
 class SubController(BaseController):
@@ -52,5 +54,5 @@ class SubController(BaseController):
     it as part of a larger device.
     """
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: list[str]) -> None:
         super().__init__(path)
