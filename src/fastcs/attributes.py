@@ -60,7 +60,7 @@ class Attribute(Generic[T]):
         self._access_mode: AttrMode = access_mode
         self._group = group
         self.enabled = True
-        self._allowed_values = allowed_values
+        self._allowed_values: list[T] | None = allowed_values
 
     @property
     def datatype(self) -> DataType[T]:

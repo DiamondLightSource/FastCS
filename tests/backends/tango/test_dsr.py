@@ -10,6 +10,7 @@ def test_collect_attributes(mapping):
 
     # Check that attributes are created and of expected type
     assert list(attributes.keys()) == [
+        "BigEnum",
         "ReadBool",
         "ReadInt",
         "ReadWriteFloat",

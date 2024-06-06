@@ -50,6 +50,10 @@ class TestController(Controller):
     read_bool: AttrR = AttrR(Bool())
     write_bool: AttrW = AttrW(Bool(), handler=TestSender())
     string_enum: AttrRW = AttrRW(String(), allowed_values=["red", "green", "blue"])
+    big_enum: AttrR = AttrR(
+        Int(),
+        allowed_values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+    )
 
     initialised = False
     connected = False

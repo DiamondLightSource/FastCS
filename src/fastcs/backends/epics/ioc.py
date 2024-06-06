@@ -8,8 +8,13 @@ from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.backends.epics.util import (
+    MBB_MAX_CHOICES,
+    MBB_STATE_FIELDS,
+    convert_if_enum,
+)
 from fastcs.controller import BaseController
-from fastcs.datatypes import Bool, DataType, Float, Int, String
+from fastcs.datatypes import Bool, Float, Int, String, T
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
@@ -148,20 +153,28 @@ def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
 
 
 def _create_and_link_read_pv(
-    pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR
+    pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
 ) -> None:
-    record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute.datatype)
+    record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute)
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
-    async def async_wrapper(v):
-        record.set(v)
+    async def async_record_set(value: T):
+        record.set(convert_if_enum(attribute, value))
 
-    attribute.set_update_callback(async_wrapper)
+    attribute.set_update_callback(async_record_set)
 
 
-def _get_input_record(pv: str, datatype: DataType) -> RecordWrapper:
-    match datatype:
+def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
+    if (
+        isinstance(attribute.datatype, String)
+        and attribute.allowed_values is not None
+        and len(attribute.allowed_values) <= MBB_MAX_CHOICES
+    ):
+        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
+        return builder.mbbIn(pv, **state_keys)
+
+    match attribute.datatype:
         case Bool(znam, onam):
             return builder.boolIn(pv, ZNAM=znam, ONAM=onam)
         case Int():
@@ -171,28 +184,51 @@ def _get_input_record(pv: str, datatype: DataType) -> RecordWrapper:
         case String():
             return builder.longStringIn(pv)
         case _:
-            raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
+            raise FastCSException(
+                f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
+            )
 
 
 def _create_and_link_write_pv(
-    pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW
+    pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW[T]
 ) -> None:
+    async def on_update(value):
+        if (
+            isinstance(attribute.datatype, String)
+            and isinstance(value, int)
+            and attribute.allowed_values is not None
+        ):
+            try:
+                value = attribute.allowed_values[value]
+            except IndexError:
+                raise IndexError(
+                    f"Invalid index {value}, allowed values: {attribute.allowed_values}"
+                ) from None
+
+        await attribute.process_without_display_update(value)
+
     record = _get_output_record(
-        f"{pv_prefix}:{pv_name}",
-        attribute.datatype,
-        on_update=attribute.process_without_display_update,
+        f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
     )
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
-    async def async_wrapper(v):
-        record.set(v, process=False)
+    async def async_record_set(value: T):
+        record.set(convert_if_enum(attribute, value), process=False)
 
-    attribute.set_write_display_callback(async_wrapper)
+    attribute.set_write_display_callback(async_record_set)
 
 
-def _get_output_record(pv: str, datatype: DataType, on_update: Callable) -> Any:
-    match datatype:
+def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
+    if (
+        isinstance(attribute.datatype, String)
+        and attribute.allowed_values is not None
+        and len(attribute.allowed_values) <= MBB_MAX_CHOICES
+    ):
+        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
+        return builder.mbbOut(pv, always_update=True, on_update=on_update, **state_keys)
+
+    match attribute.datatype:
         case Bool(znam, onam):
             return builder.boolOut(
                 pv,
@@ -208,7 +244,9 @@ def _get_output_record(pv: str, datatype: DataType, on_update: Callable) -> Any:
         case String():
             return builder.longStringOut(pv, always_update=True, on_update=on_update)
         case _:
-            raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
+            raise FastCSException(
+                f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
+            )
 
 
 def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:

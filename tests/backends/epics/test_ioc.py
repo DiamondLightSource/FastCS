@@ -33,13 +33,21 @@ def test_ioc(mocker: MockerFixture, mapping: Mapping):
     builder.aOut.assert_any_call(
         f"{DEVICE}:ReadWriteFloat", always_update=True, on_update=mocker.ANY, PREC=2
     )
+    builder.longIn.assert_any_call(f"{DEVICE}:BigEnum")
     builder.longIn.assert_any_call(f"{DEVICE}:ReadWriteInt_RBV")
     builder.longOut.assert_called_with(
         f"{DEVICE}:ReadWriteInt", always_update=True, on_update=mocker.ANY
     )
-    builder.longStringIn.assert_called_once_with(f"{DEVICE}:StringEnum_RBV")
-    builder.longStringOut.assert_called_once_with(
-        f"{DEVICE}:StringEnum", always_update=True, on_update=mocker.ANY
+    builder.mbbIn.assert_called_once_with(
+        f"{DEVICE}:StringEnum_RBV", ZRST="red", ONST="green", TWST="blue"
+    )
+    builder.mbbOut.assert_called_once_with(
+        f"{DEVICE}:StringEnum",
+        ZRST="red",
+        ONST="green",
+        TWST="blue",
+        always_update=True,
+        on_update=mocker.ANY,
     )
     builder.boolOut.assert_called_once_with(
         f"{DEVICE}:WriteBool",
