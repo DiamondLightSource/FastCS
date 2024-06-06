@@ -8,9 +8,28 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backend import Backend
-from fastcs.datatypes import Bool, DataType, Float, Int, String
+from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
+
+ENUM_ST_MAPPING = {
+    0: "ZRST",
+    1: "ONST",
+    2: "TWST",
+    3: "THST",
+    4: "FRST",
+    5: "FVST",
+    6: "SXST",
+    7: "SVST",
+    8: "EIST",
+    9: "NIST",
+    10: "TEST",
+    11: "ELST",
+    12: "TVST",
+    13: "TTST",
+    14: "FTST",
+    15: "FFST",
+}
 
 
 @dataclass
@@ -18,12 +37,19 @@ class EpicsIOCOptions:
     terminal: bool = True
 
 
-def _get_input_record(pv_name: str, datatype: DataType) -> RecordWrapper:
+def _get_input_record(pv_name: str, attribute: AttrR) -> RecordWrapper:
+    datatype = attribute.datatype
     match datatype:
         case Bool(znam, onam):
             return builder.boolIn(pv_name, ZNAM=znam, ONAM=onam)
         case Int():
-            return builder.longIn(pv_name)
+            if attribute.dropdown_mapping is None:
+                return builder.longIn(pv_name)
+            kwargs = {
+                ENUM_ST_MAPPING[enum_val]: enum_name
+                for enum_name, enum_val in attribute.dropdown_mapping.items()
+            }
+            return builder.mbbIn(pv_name, **kwargs)
         case Float(prec):
             return builder.aIn(pv_name, PREC=prec)
         case String():
@@ -33,7 +59,7 @@ def _get_input_record(pv_name: str, datatype: DataType) -> RecordWrapper:
 
 
 def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
-    record = _get_input_record(pv_name, attribute._datatype)
+    record = _get_input_record(pv_name, attribute)
 
     async def async_wrapper(v):
         record.set(v)
@@ -41,7 +67,8 @@ def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
     attribute.set_update_callback(async_wrapper)
 
 
-def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) -> Any:
+def _get_output_record(pv_name: str, attribute: AttrW, on_update: Callable) -> Any:
+    datatype = attribute.datatype
     match datatype:
         case Bool(znam, onam):
             return builder.boolOut(
@@ -52,7 +79,15 @@ def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) ->
                 on_update=on_update,
             )
         case Int():
-            return builder.longOut(pv_name, always_update=True, on_update=on_update)
+            if attribute.dropdown_mapping is None:
+                return builder.longOut(pv_name, always_update=True, on_update=on_update)
+            kwargs = {
+                ENUM_ST_MAPPING[enum_val]: enum_name
+                for enum_name, enum_val in attribute.dropdown_mapping.items()
+            }
+            return builder.mbbOut(
+                pv_name, always_update=True, on_update=on_update, **kwargs
+            )
         case Float(prec):
             return builder.aOut(
                 pv_name, always_update=True, on_update=on_update, PREC=prec
@@ -67,7 +102,7 @@ def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) ->
 
 def _create_and_link_write_pv(pv_name: str, attribute: AttrW) -> None:
     record = _get_output_record(
-        pv_name, attribute.datatype, on_update=attribute.process_without_display_update
+        pv_name, attribute, on_update=attribute.process_without_display_update
     )
 
     async def async_wrapper(v):

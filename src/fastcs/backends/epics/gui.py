@@ -6,6 +6,7 @@ from pvi._format.dls import DLSFormatter
 from pvi.device import (
     LED,
     ButtonPanel,
+    ComboBox,
     Component,
     Device,
     Grid,
@@ -26,7 +27,7 @@ from pvi.device import (
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Bool, DataType, Float, Int, String
+from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping, SingleMapping
 from fastcs.util import snake_to_pascal
@@ -56,7 +57,8 @@ class EpicsGUI:
         return f"{self._pv_prefix}{attr_path.upper()}{name.title().replace('_', '')}"
 
     @staticmethod
-    def _get_read_widget(datatype: DataType) -> ReadWidget:
+    def _get_read_widget(attribute: Attribute) -> ReadWidget:
+        datatype = attribute.datatype
         match datatype:
             case Bool():
                 return LED()
@@ -68,14 +70,21 @@ class EpicsGUI:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     @staticmethod
-    def _get_write_widget(datatype: DataType) -> WriteWidget:
+    def _get_write_widget(attribute: Attribute) -> WriteWidget:
+        datatype = attribute.datatype
         match datatype:
             case Bool():
                 return ToggleButton()
-            case Int() | Float():
+            case Float():
                 return TextWrite()
+            case Int():
+                if attribute.dropdown_mapping is None:
+                    return TextWrite()
+                return ComboBox(choices=list(attribute.dropdown_mapping.keys()))
             case String():
-                return TextWrite(format=TextFormat.string)
+                if attribute.dropdown_mapping is None:
+                    return TextWrite(format=TextFormat.string)
+                return ComboBox(choices=list(attribute.dropdown_mapping.values()))
             case _:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
@@ -85,8 +94,8 @@ class EpicsGUI:
 
         match attribute:
             case AttrRW():
-                read_widget = self._get_read_widget(attribute.datatype)
-                write_widget = self._get_write_widget(attribute.datatype)
+                read_widget = self._get_read_widget(attribute)
+                write_widget = self._get_write_widget(attribute)
                 return SignalRW(
                     name=name,
                     write_pv=pv,
@@ -95,10 +104,10 @@ class EpicsGUI:
                     read_widget=read_widget,
                 )
             case AttrR():
-                read_widget = self._get_read_widget(attribute.datatype)
+                read_widget = self._get_read_widget(attribute)
                 return SignalR(name=name, read_pv=pv, read_widget=read_widget)
             case AttrW():
-                write_widget = self._get_write_widget(attribute.datatype)
+                write_widget = self._get_write_widget(attribute)
                 return SignalW(name=name, write_pv=pv, write_widget=write_widget)
 
     def _get_command_component(self, attr_path: str, name: str):
