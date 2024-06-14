@@ -28,7 +28,7 @@ from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.exceptions import FastCSException
-from fastcs.mapping import Mapping, SingleMapping
+from fastcs.mapping import Mapping, SingleMapping, _get_single_mapping
 from fastcs.util import snake_to_pascal
 
 
@@ -49,12 +49,10 @@ class EpicsGUI:
         self._mapping = mapping
         self._pv_prefix = pv_prefix
 
-    def _get_pv(self, attr_path: str, name: str):
-        if attr_path:
-            attr_path = ":" + attr_path
-        attr_path += ":"
-
-        return f"{self._pv_prefix}{attr_path.upper()}{name.title().replace('_', '')}"
+    def _get_pv(self, attr_path: list[str], name: str):
+        attr_prefix = ":".join(attr_path)
+        pv_prefix = ":".join((self._pv_prefix, attr_prefix))
+        return f"{pv_prefix}:{name.title().replace('_', '')}"
 
     @staticmethod
     def _get_read_widget(datatype: DataType) -> ReadWidget:
@@ -80,7 +78,9 @@ class EpicsGUI:
             case _:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
-    def _get_attribute_component(self, attr_path: str, name: str, attribute: Attribute):
+    def _get_attribute_component(
+        self, attr_path: list[str], name: str, attribute: Attribute
+    ):
         pv = self._get_pv(attr_path, name)
         name = name.title().replace("_", "")
 
@@ -102,7 +102,7 @@ class EpicsGUI:
                 write_widget = self._get_write_widget(attribute.datatype)
                 return SignalW(name=name, write_pv=pv, write_widget=write_widget)
 
-    def _get_command_component(self, attr_path: str, name: str):
+    def _get_command_component(self, attr_path: list[str], name: str):
         pv = self._get_pv(attr_path, name)
         name = name.title().replace("_", "")
 
@@ -122,29 +122,29 @@ class EpicsGUI:
 
         assert options.output_path.suffix == options.file_format.value
 
-        formatter = DLSFormatter()
-
         controller_mapping = self._mapping.get_controller_mappings()[0]
-        sub_controller_mappings = self._mapping.get_controller_mappings()[1:]
-
         components = self.extract_mapping_components(controller_mapping)
-
-        for sub_controller_mapping in sub_controller_mappings:
-            components.append(
-                Group(
-                    name=snake_to_pascal(sub_controller_mapping.controller.path),
-                    layout=SubScreen(),
-                    children=self.extract_mapping_components(sub_controller_mapping),
-                )
-            )
-
         device = Device(label=options.title, children=components)
 
+        formatter = DLSFormatter()
         formatter.format(device, options.output_path)
 
     def extract_mapping_components(self, mapping: SingleMapping) -> list[Component]:
         components: Tree[Component] = []
         attr_path = mapping.controller.path
+
+        for sub_controller in mapping.controller.get_sub_controllers():
+            components.append(
+                Group(
+                    # TODO: Build assumption that SubController has at least one path
+                    # element into typing
+                    name=snake_to_pascal(sub_controller.path[-1]),
+                    layout=SubScreen(),
+                    children=self.extract_mapping_components(
+                        _get_single_mapping(sub_controller)
+                    ),
+                )
+            )
 
         groups: dict[str, list[Component]] = {}
         for attr_name, attribute in mapping.attributes.items():
@@ -158,6 +158,9 @@ class EpicsGUI:
                 case Attribute(group=group) if group is not None:
                     if group not in groups:
                         groups[group] = []
+
+                    # Remove duplication of group name and signal name
+                    signal.name = signal.name.removeprefix(group)
 
                     groups[group].append(signal)
                 case _:

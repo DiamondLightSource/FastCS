@@ -88,7 +88,7 @@ def _create_and_link_attribute_pvs(mapping: Mapping) -> None:
         path = single_mapping.controller.path
         for attr_name, attribute in single_mapping.attributes.items():
             attr_name = attr_name.title().replace("_", "")
-            pv_name = path.upper() + ":" + attr_name if path else attr_name
+            pv_name = f"{':'.join(path).upper()}:{attr_name}" if path else attr_name
 
             match attribute:
                 case AttrRW():
@@ -103,9 +103,9 @@ def _create_and_link_attribute_pvs(mapping: Mapping) -> None:
 def _create_and_link_command_pvs(mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
-        for name, method in single_mapping.command_methods.items():
-            name = name.title().replace("_", "")
-            pv_name = path.upper() + ":" + name if path else name
+        for attr_name, method in single_mapping.command_methods.items():
+            attr_name = attr_name.title().replace("_", "")
+            pv_name = f"{':'.join(path).upper()}:{attr_name}" if path else attr_name
 
             _create_and_link_command_pv(
                 pv_name, MethodType(method.fn, single_mapping.controller)

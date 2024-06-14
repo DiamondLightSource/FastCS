@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 from .attributes import Attribute
@@ -18,36 +19,7 @@ class SingleMapping:
 class Mapping:
     def __init__(self, controller: Controller) -> None:
         self.controller = controller
-
-        self._controller_mappings: list[SingleMapping] = []
-        self._controller_mappings.append(self._get_single_mapping(controller))
-
-        for sub_controller in controller.get_sub_controllers():
-            self._controller_mappings.append(self._get_single_mapping(sub_controller))
-
-    @staticmethod
-    def _get_single_mapping(controller: BaseController) -> SingleMapping:
-        scan_methods = {}
-        put_methods = {}
-        command_methods = {}
-        attributes = {}
-        for attr_name in dir(controller):
-            attr = getattr(controller, attr_name)
-            match attr:
-                case WrappedMethod(fastcs_method=fastcs_method):
-                    match fastcs_method:
-                        case Put():
-                            put_methods[attr_name] = fastcs_method
-                        case Scan():
-                            scan_methods[attr_name] = fastcs_method
-                        case Command():
-                            command_methods[attr_name] = fastcs_method
-                case Attribute():
-                    attributes[attr_name] = attr
-
-        return SingleMapping(
-            controller, scan_methods, put_methods, command_methods, attributes
-        )
+        self._controller_mappings = list(_walk_mappings(controller))
 
     def __str__(self) -> str:
         result = "Controller mappings:\n"
@@ -57,3 +29,33 @@ class Mapping:
 
     def get_controller_mappings(self) -> list[SingleMapping]:
         return self._controller_mappings
+
+
+def _walk_mappings(controller: BaseController) -> Iterator[SingleMapping]:
+    yield _get_single_mapping(controller)
+    for sub_controller in controller.get_sub_controllers():
+        yield from _walk_mappings(sub_controller)
+
+
+def _get_single_mapping(controller: BaseController) -> SingleMapping:
+    scan_methods = {}
+    put_methods = {}
+    command_methods = {}
+    attributes = {}
+    for attr_name in dir(controller):
+        attr = getattr(controller, attr_name)
+        match attr:
+            case WrappedMethod(fastcs_method=fastcs_method):
+                match fastcs_method:
+                    case Put():
+                        put_methods[attr_name] = fastcs_method
+                    case Scan():
+                        scan_methods[attr_name] = fastcs_method
+                    case Command():
+                        command_methods[attr_name] = fastcs_method
+            case Attribute():
+                attributes[attr_name] = attr
+
+    return SingleMapping(
+        controller, scan_methods, put_methods, command_methods, attributes
+    )
