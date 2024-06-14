@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.controller &#8212; FastCS 0.3.2.dev4+g61a896a documentation</title>
+    <title>fastcs.controller &#8212; FastCS 0.3.2.dev6+gfc7401f documentation</title>
   
   
   
@@ -37,7 +37,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
   <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
 
-    <script src="../../_static/documentation_options.js?v=942b4bf7"></script>
+    <script src="../../_static/documentation_options.js?v=dd37a3e6"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -475,12 +475,15 @@ document.write(`
 
 
 <span class="k">class</span> <span class="nc">BaseController</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">path</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SubController</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_bind_attrs</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Path prefix of attributes, recursively including parent ``Controller``s.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
 
     <span class="k">def</span> <span class="nf">_bind_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -489,6 +492,12 @@ document.write(`
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
                 <span class="n">new_attribute</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">new_attribute</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">register_sub_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">SubController</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_sub_controllers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SubController</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span>
 
 
 <div class="viewcode-block" id="Controller">
@@ -504,16 +513,9 @@ document.write(`
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SubController</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span>
-
-    <span class="k">def</span> <span class="nf">register_sub_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">SubController</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">get_sub_controllers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SubController</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span></div>
+        <span class="k">pass</span></div>
 
 
 
@@ -526,7 +528,7 @@ document.write(`
 <span class="sd">    it as part of a larger device.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
 </pre></div>
