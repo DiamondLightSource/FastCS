@@ -50,9 +50,8 @@ class EpicsGUI:
         self._pv_prefix = pv_prefix
 
     def _get_pv(self, attr_path: list[str], name: str):
-        attr_prefix = ":".join(attr_path)
-        pv_prefix = ":".join((self._pv_prefix, attr_prefix))
-        return f"{pv_prefix}:{name.title().replace('_', '')}"
+        attr_prefix = ":".join([self._pv_prefix] + attr_path)
+        return f"{attr_prefix}:{name.title().replace('_', '')}"
 
     @staticmethod
     def _get_read_widget(datatype: DataType) -> ReadWidget:
