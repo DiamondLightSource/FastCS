@@ -26,6 +26,7 @@ from pvi.device import (
 )
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.backends.epics.utils import get_mbb_record_fields
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.exceptions import FastCSException
@@ -78,13 +79,21 @@ class EpicsGUI:
             case Float():
                 return TextWrite()
             case Int():
-                if attribute.dropdown_mapping is None:
-                    return TextWrite()
-                return ComboBox(choices=list(attribute.dropdown_mapping.keys()))
+                if any(
+                    True for kw in attribute.kwargs if kw in get_mbb_record_fields()
+                ):
+                    choices = [
+                        v
+                        for k, v in attribute.kwargs.items()
+                        if k in get_mbb_record_fields()
+                    ]
+                    return ComboBox(choices=choices)
+                return TextWrite()
             case String():
-                if attribute.dropdown_mapping is None:
-                    return TextWrite(format=TextFormat.string)
-                return ComboBox(choices=list(attribute.dropdown_mapping.values()))
+                allowed_values = attribute.kwargs.get("allowed_values", None)
+                if isinstance(allowed_values, list):  # is not None
+                    return ComboBox(choices=allowed_values)
+                return TextWrite(format=TextFormat.string)
             case _:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 

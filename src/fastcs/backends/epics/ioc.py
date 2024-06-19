@@ -8,28 +8,10 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backend import Backend
+from fastcs.backends.epics.utils import get_epics_record_fields, get_mbb_record_fields
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
-
-ENUM_ST_MAPPING = {
-    0: "ZRST",
-    1: "ONST",
-    2: "TWST",
-    3: "THST",
-    4: "FRST",
-    5: "FVST",
-    6: "SXST",
-    7: "SVST",
-    8: "EIST",
-    9: "NIST",
-    10: "TEST",
-    11: "ELST",
-    12: "TVST",
-    13: "TTST",
-    14: "FTST",
-    15: "FFST",
-}
 
 
 @dataclass
@@ -39,21 +21,21 @@ class EpicsIOCOptions:
 
 def _get_input_record(pv_name: str, attribute: AttrR) -> RecordWrapper:
     datatype = attribute.datatype
+    epics_kwargs = {
+        k: v for k, v in attribute.kwargs.items() if k in get_epics_record_fields()
+    }
     match datatype:
         case Bool(znam, onam):
-            return builder.boolIn(pv_name, ZNAM=znam, ONAM=onam)
+            return builder.boolIn(pv_name, ZNAM=znam, ONAM=onam, **epics_kwargs)
         case Int():
-            if attribute.dropdown_mapping is None:
-                return builder.longIn(pv_name)
-            kwargs = {
-                ENUM_ST_MAPPING[enum_val]: enum_name
-                for enum_name, enum_val in attribute.dropdown_mapping.items()
-            }
-            return builder.mbbIn(pv_name, **kwargs)
+            # check if we need to use an mbb record
+            if any(True for kw in attribute.kwargs if kw in get_mbb_record_fields()):
+                return builder.mbbIn(pv_name, **epics_kwargs)
+            return builder.longIn(pv_name, **epics_kwargs)
         case Float(prec):
-            return builder.aIn(pv_name, PREC=prec)
+            return builder.aIn(pv_name, PREC=prec, **epics_kwargs)
         case String():
-            return builder.longStringIn(pv_name)
+            return builder.longStringIn(pv_name, **epics_kwargs)
         case _:
             raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
@@ -69,6 +51,9 @@ def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
 
 def _get_output_record(pv_name: str, attribute: AttrW, on_update: Callable) -> Any:
     datatype = attribute.datatype
+    epics_kwargs = {
+        k: v for k, v in attribute.kwargs.items() if k in get_epics_record_fields()
+    }
     match datatype:
         case Bool(znam, onam):
             return builder.boolOut(
@@ -77,24 +62,28 @@ def _get_output_record(pv_name: str, attribute: AttrW, on_update: Callable) -> A
                 ONAM=onam,
                 always_update=True,
                 on_update=on_update,
+                **epics_kwargs,
             )
         case Int():
+            # check if we need to use an mbb record
+            if any(True for kw in attribute.kwargs if kw in get_mbb_record_fields()):
+                return builder.mbbOut(
+                    pv_name, always_update=True, on_update=on_update, **epics_kwargs
+                )
+            return builder.longIn(pv_name, **epics_kwargs)
             if attribute.dropdown_mapping is None:
                 return builder.longOut(pv_name, always_update=True, on_update=on_update)
-            kwargs = {
-                ENUM_ST_MAPPING[enum_val]: enum_name
-                for enum_name, enum_val in attribute.dropdown_mapping.items()
-            }
-            return builder.mbbOut(
-                pv_name, always_update=True, on_update=on_update, **kwargs
-            )
         case Float(prec):
             return builder.aOut(
-                pv_name, always_update=True, on_update=on_update, PREC=prec
+                pv_name,
+                always_update=True,
+                on_update=on_update,
+                PREC=prec,
+                **epics_kwargs,
             )
         case String():
             return builder.longStringOut(
-                pv_name, always_update=True, on_update=on_update
+                pv_name, always_update=True, on_update=on_update, **epics_kwargs
             )
         case _:
             raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
