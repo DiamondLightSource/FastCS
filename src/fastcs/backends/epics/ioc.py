@@ -8,7 +8,8 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backend import Backend
-from fastcs.datatypes import Bool, DataType, Float, Int, String
+from fastcs.backends.epics.utils import get_epics_record_fields, get_mbb_record_fields
+from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
@@ -18,22 +19,29 @@ class EpicsIOCOptions:
     terminal: bool = True
 
 
-def _get_input_record(pv_name: str, datatype: DataType) -> RecordWrapper:
+def _get_input_record(pv_name: str, attribute: AttrR) -> RecordWrapper:
+    datatype = attribute.datatype
+    epics_kwargs = {
+        k: v for k, v in attribute.kwargs.items() if k in get_epics_record_fields()
+    }
     match datatype:
         case Bool(znam, onam):
-            return builder.boolIn(pv_name, ZNAM=znam, ONAM=onam)
+            return builder.boolIn(pv_name, ZNAM=znam, ONAM=onam, **epics_kwargs)
         case Int():
-            return builder.longIn(pv_name)
+            # check if we need to use an mbb record
+            if any(True for kw in attribute.kwargs if kw in get_mbb_record_fields()):
+                return builder.mbbIn(pv_name, **epics_kwargs)
+            return builder.longIn(pv_name, **epics_kwargs)
         case Float(prec):
-            return builder.aIn(pv_name, PREC=prec)
+            return builder.aIn(pv_name, PREC=prec, **epics_kwargs)
         case String():
-            return builder.longStringIn(pv_name)
+            return builder.longStringIn(pv_name, **epics_kwargs)
         case _:
             raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
 
 def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
-    record = _get_input_record(pv_name, attribute._datatype)
+    record = _get_input_record(pv_name, attribute)
 
     async def async_wrapper(v):
         record.set(v)
@@ -41,7 +49,11 @@ def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
     attribute.set_update_callback(async_wrapper)
 
 
-def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) -> Any:
+def _get_output_record(pv_name: str, attribute: AttrW, on_update: Callable) -> Any:
+    datatype = attribute.datatype
+    epics_kwargs = {
+        k: v for k, v in attribute.kwargs.items() if k in get_epics_record_fields()
+    }
     match datatype:
         case Bool(znam, onam):
             return builder.boolOut(
@@ -50,16 +62,28 @@ def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) ->
                 ONAM=onam,
                 always_update=True,
                 on_update=on_update,
+                **epics_kwargs,
             )
         case Int():
-            return builder.longOut(pv_name, always_update=True, on_update=on_update)
+            # check if we need to use an mbb record
+            if any(True for kw in attribute.kwargs if kw in get_mbb_record_fields()):
+                return builder.mbbOut(
+                    pv_name, always_update=True, on_update=on_update, **epics_kwargs
+                )
+            return builder.longIn(pv_name, **epics_kwargs)
+            if attribute.dropdown_mapping is None:
+                return builder.longOut(pv_name, always_update=True, on_update=on_update)
         case Float(prec):
             return builder.aOut(
-                pv_name, always_update=True, on_update=on_update, PREC=prec
+                pv_name,
+                always_update=True,
+                on_update=on_update,
+                PREC=prec,
+                **epics_kwargs,
             )
         case String():
             return builder.longStringOut(
-                pv_name, always_update=True, on_update=on_update
+                pv_name, always_update=True, on_update=on_update, **epics_kwargs
             )
         case _:
             raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
@@ -67,7 +91,7 @@ def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) ->
 
 def _create_and_link_write_pv(pv_name: str, attribute: AttrW) -> None:
     record = _get_output_record(
-        pv_name, attribute.datatype, on_update=attribute.process_without_display_update
+        pv_name, attribute, on_update=attribute.process_without_display_update
     )
 
     async def async_wrapper(v):
