@@ -8,7 +8,7 @@ from .attributes import Attribute
 class BaseController:
     def __init__(self, path: list[str] | None = None) -> None:
         self._path: list[str] = path or []
-        self.__sub_controllers: list[SubController] = []
+        self.__sub_controller_tree: dict[str, BaseController] = {}
 
         self._bind_attrs()
 
@@ -24,11 +24,21 @@ class BaseController:
                 new_attribute = copy(attr)
                 setattr(self, attr_name, new_attribute)
 
-    def register_sub_controller(self, controller: SubController):
-        self.__sub_controllers.append(controller)
+    def register_sub_controller(self, name: str, sub_controller: SubController):
+        if name in self.__sub_controller_tree.keys():
+            raise ValueError(
+                f"Controller {self} already has a sub controller registered as {name}"
+            )
+        if sub_controller.path:
+            raise ValueError(
+                f"Sub controller is already registered under {sub_controller.path}"
+            )
 
-    def get_sub_controllers(self) -> list[SubController]:
-        return self.__sub_controllers
+        self.__sub_controller_tree[name] = sub_controller
+        sub_controller._path = self.path + [name]
+
+    def get_sub_controllers(self) -> dict[str, BaseController]:
+        return self.__sub_controller_tree
 
 
 class Controller(BaseController):
@@ -54,5 +64,5 @@ class SubController(BaseController):
     it as part of a larger device.
     """
 
-    def __init__(self, path: list[str]) -> None:
-        super().__init__(path)
+    def __init__(self) -> None:
+        super().__init__()

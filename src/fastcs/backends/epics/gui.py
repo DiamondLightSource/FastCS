@@ -23,6 +23,7 @@ from pvi.device import (
     Tree,
     WriteWidget,
 )
+from pydantic import ValidationError
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.cs_methods import Command
@@ -132,12 +133,10 @@ class EpicsGUI:
         components: Tree[Component] = []
         attr_path = mapping.controller.path
 
-        for sub_controller in mapping.controller.get_sub_controllers():
+        for name, sub_controller in mapping.controller.get_sub_controllers().items():
             components.append(
                 Group(
-                    # TODO: Build assumption that SubController has at least one path
-                    # element into typing
-                    name=snake_to_pascal(sub_controller.path[-1]),
+                    name=snake_to_pascal(name),
                     layout=SubScreen(),
                     children=self.extract_mapping_components(
                         _get_single_mapping(sub_controller)
@@ -147,11 +146,15 @@ class EpicsGUI:
 
         groups: dict[str, list[Component]] = {}
         for attr_name, attribute in mapping.attributes.items():
-            signal = self._get_attribute_component(
-                attr_path,
-                attr_name,
-                attribute,
-            )
+            try:
+                signal = self._get_attribute_component(
+                    attr_path,
+                    attr_name,
+                    attribute,
+                )
+            except ValidationError as e:
+                print(f"Invalid name:\n{e}")
+                continue
 
             match attribute:
                 case Attribute(group=group) if group is not None:

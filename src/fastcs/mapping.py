@@ -33,7 +33,7 @@ class Mapping:
 
 def _walk_mappings(controller: BaseController) -> Iterator[SingleMapping]:
     yield _get_single_mapping(controller)
-    for sub_controller in controller.get_sub_controllers():
+    for sub_controller in controller.get_sub_controllers().values():
         yield from _walk_mappings(sub_controller)
 
 
