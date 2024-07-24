@@ -27,11 +27,11 @@ class BaseController:
     def register_sub_controller(self, name: str, sub_controller: SubController):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
-                f"Controller {self} already has a sub controller registered as {name}"
+                f"Controller {self} already has a SubController registered as {name}"
             )
         if sub_controller.path:
             raise ValueError(
-                f"Sub controller is already registered under {sub_controller.path}"
+                f"SubController is already registered under {sub_controller.path}"
             )
 
         self.__sub_controller_tree[name] = sub_controller

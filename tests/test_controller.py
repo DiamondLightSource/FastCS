@@ -1,3 +1,5 @@
+import pytest
+
 from fastcs.controller import Controller, SubController
 from fastcs.mapping import _get_single_mapping, _walk_mappings
 
@@ -17,3 +19,13 @@ def test_controller_nesting():
         _get_single_mapping(sub_controller),
         _get_single_mapping(sub_sub_controller),
     ]
+
+    with pytest.raises(
+        ValueError, match=r"Controller .* already has a SubController registered as .*"
+    ):
+        controller.register_sub_controller("a", SubController())
+
+    with pytest.raises(
+        ValueError, match=r"SubController is already registered under .*"
+    ):
+        controller.register_sub_controller("c", sub_controller)
