@@ -29,6 +29,8 @@ def _wrap_updater_fget(
     attr_name: str, attribute: AttrR, controller: BaseController
 ) -> Callable[[Any], Any]:
     async def fget(tango_device: Device):
+        assert attribute.updater is not None
+
         await attribute.updater.update(controller, attribute)
         tango_device.info_stream(f"called fget method: {attr_name}")
         return attribute.get()
@@ -56,6 +58,8 @@ def _wrap_updater_fset(
     attr_name: str, attribute: AttrW, controller: BaseController
 ) -> Callable[[Any, Any], Any]:
     async def fset(tango_device: Device, val):
+        assert attribute.sender is not None
+
         await attribute.sender.put(controller, attribute, val)
         tango_device.info_stream(f"called fset method: {attr_name}")
 
