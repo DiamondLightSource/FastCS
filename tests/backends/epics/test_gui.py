@@ -1,5 +1,6 @@
 from pvi.device import (
     ButtonPanel,
+    ComboBox,
     SignalR,
     SignalRW,
     SignalW,
@@ -32,17 +33,19 @@ def test_get_components(mapping):
             read_pv="DEVICE:ReadInt",
             read_widget=TextRead(),
         ),
-        SignalR(
-            name="ReadString",
-            read_pv="DEVICE:ReadString",
-            read_widget=TextRead(format="string"),
-        ),
         SignalRW(
             name="ReadWriteFloat",
             write_pv="DEVICE:ReadWriteFloat",
             write_widget=TextWrite(),
             read_pv="DEVICE:ReadWriteFloat_RBV",
             read_widget=TextRead(),
+        ),
+        SignalRW(
+            name="StringEnum",
+            read_pv="DEVICE:StringEnum_RBV",
+            read_widget=TextRead(format="string"),
+            write_pv="DEVICE:StringEnum",
+            write_widget=ComboBox(choices=["red", "green", "blue"]),
         ),
         SignalW(
             name="WriteBool",
