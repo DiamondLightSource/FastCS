@@ -42,7 +42,14 @@ def _add_scan_method_tasks(
 
 def _create_updater_callback(attribute, controller):
     async def callback():
-        await attribute.updater.update(controller, attribute)
+        try:
+            await attribute.updater.update(controller, attribute)
+        except Exception as e:
+            print(
+                f"Update loop in {attribute.updater} stopped:\n"
+                f"{e.__class__.__name__}: {e}"
+            )
+            raise
 
     return callback
 
