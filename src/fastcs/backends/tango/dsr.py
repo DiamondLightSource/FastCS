@@ -5,6 +5,7 @@ from typing import Any
 
 import tango
 from tango import AttrWriteType, Database, DbDevInfo, DevState, server
+from tango.server import Device
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.backend import (
@@ -27,9 +28,9 @@ class TangoDSROptions:
 def _wrap_updater_fget(
     attr_name: str, attribute: AttrR, controller: BaseController
 ) -> Callable[[Any], Any]:
-    async def fget(self):
+    async def fget(tango_device: Device):
         await attribute.updater.update(controller, attribute)
-        self.info_stream(f"called fget method: {attr_name}")
+        tango_device.info_stream(f"called fget method: {attr_name}")
         return attribute.get()
 
     return fget
@@ -54,9 +55,9 @@ def _tango_display_format(attribute: Attribute) -> str:
 def _wrap_updater_fset(
     attr_name: str, attribute: AttrW, controller: BaseController
 ) -> Callable[[Any, Any], Any]:
-    async def fset(self, val):
+    async def fset(tango_device: Device, val):
         await attribute.sender.put(controller, attribute, val)
-        self.info_stream(f"called fset method: {attr_name}")
+        tango_device.info_stream(f"called fset method: {attr_name}")
 
     return fset
 
@@ -113,8 +114,8 @@ def _collect_dev_attributes(mapping: Mapping) -> dict[str, Any]:
 def _wrap_command_f(
     method_name: str, method: Callable, controller: BaseController
 ) -> Callable[..., Awaitable[None]]:
-    async def _dynamic_f(self) -> None:
-        self.info_stream(f"called {controller} f method: {method_name}")
+    async def _dynamic_f(tango_device: Device) -> None:
+        tango_device.info_stream(f"called {controller} f method: {method_name}")
         return await MethodType(method, controller)()
 
     _dynamic_f.__name__ = method_name
@@ -142,9 +143,9 @@ def _collect_dev_properties(mapping: Mapping) -> dict[str, Any]:
 
 
 def _collect_dev_init(mapping: Mapping) -> dict[str, Callable]:
-    async def init_device(self):
-        await server.Device.init_device(self)
-        self.set_state(DevState.ON)
+    async def init_device(tango_device: Device):
+        await server.Device.init_device(tango_device)
+        tango_device.set_state(DevState.ON)
         await mapping.controller.connect()
 
     return {"init_device": init_device}
