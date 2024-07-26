@@ -11,14 +11,14 @@ def test_collect_attributes(mapping):
     # Check that attributes are created and of expected type
     assert list(attributes.keys()) == [
         "ReadInt",
-        "ReadString",
         "ReadWriteFloat",
+        "StringEnum",
         "WriteBool",
     ]
     assert attributes["ReadInt"].attr_write == AttrWriteType.READ
     assert attributes["ReadInt"].attr_type == CmdArgType.DevLong64
-    assert attributes["ReadString"].attr_write == AttrWriteType.READ
-    assert attributes["ReadString"].attr_type == CmdArgType.DevString
+    assert attributes["StringEnum"].attr_write == AttrWriteType.READ_WRITE
+    assert attributes["StringEnum"].attr_type == CmdArgType.DevString
     assert attributes["ReadWriteFloat"].attr_write == AttrWriteType.READ_WRITE
     assert attributes["ReadWriteFloat"].attr_type == CmdArgType.DevDouble
     assert attributes["WriteBool"].attr_write == AttrWriteType.WRITE

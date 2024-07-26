@@ -25,7 +25,7 @@ class TestController(Controller):
     read_int: AttrR = AttrR(Int())
     read_write_float: AttrRW = AttrRW(Float())
     write_bool: AttrW = AttrW(Bool())
-    read_string: AttrR = AttrR(String())
+    string_enum: AttrRW = AttrRW(String(), allowed_values=["red", "green", "blue"])
 
     @command()
     async def go(self):

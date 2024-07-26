@@ -117,11 +117,18 @@ class AttrW(Attribute[T]):
         access_mode=AttrMode.WRITE,
         group: str | None = None,
         handler: Sender | None = None,
+        allowed_values: list[str] | None = None,
     ) -> None:
         super().__init__(datatype, access_mode, group, handler)  # type: ignore
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
         self._sender = handler
+
+        self._allowed_values = allowed_values
+
+    @property
+    def allowed_values(self) -> list[str] | None:
+        return self._allowed_values
 
     async def process(self, value: T) -> None:
         if self._write_display_callback is not None:
@@ -156,8 +163,9 @@ class AttrRW(AttrW[T], AttrR[T]):
         access_mode=AttrMode.READ_WRITE,
         group: str | None = None,
         handler: Handler | None = None,
+        allowed_values: list[str] | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode, group, handler)  # type: ignore
+        super().__init__(datatype, access_mode, group, handler, allowed_values)  # type: ignore
 
     async def process(self, value: T) -> None:
         await self.set(value)
