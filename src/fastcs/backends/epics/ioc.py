@@ -33,7 +33,7 @@ def _get_input_record(pv_name: str, datatype: DataType) -> RecordWrapper:
 
 
 def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
-    record = _get_input_record(pv_name, attribute._datatype)
+    record = _get_input_record(pv_name, attribute.datatype)
 
     async def async_wrapper(v):
         record.set(v)
