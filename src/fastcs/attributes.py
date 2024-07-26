@@ -131,14 +131,16 @@ class AttrW(Attribute[T]):
         return self._allowed_values
 
     async def process(self, value: T) -> None:
-        if self._write_display_callback is not None:
-            await self._write_display_callback(self._datatype.dtype(value))
-
         await self.process_without_display_update(value)
+        await self.update_display_without_process(value)
 
     async def process_without_display_update(self, value: T) -> None:
         if self._process_callback is not None:
             await self._process_callback(self._datatype.dtype(value))
+
+    async def update_display_without_process(self, value: T) -> None:
+        if self._write_display_callback is not None:
+            await self._write_display_callback(self._datatype.dtype(value))
 
     def set_process_callback(self, callback: AttrCallback[T] | None) -> None:
         self._process_callback = callback

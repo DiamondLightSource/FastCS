@@ -17,6 +17,12 @@ class BaseController:
         """Path prefix of attributes, recursively including parent ``Controller``s."""
         return self._path
 
+    def set_path(self, path: list[str]):
+        if self._path:
+            raise ValueError(f"SubController is already registered under {self.path}")
+
+        self._path = path
+
     def _bind_attrs(self) -> None:
         for attr_name in dir(self):
             attr = getattr(self, attr_name)
@@ -29,13 +35,9 @@ class BaseController:
             raise ValueError(
                 f"Controller {self} already has a SubController registered as {name}"
             )
-        if sub_controller.path:
-            raise ValueError(
-                f"SubController is already registered under {sub_controller.path}"
-            )
 
         self.__sub_controller_tree[name] = sub_controller
-        sub_controller._path = self.path + [name]
+        sub_controller.set_path(self.path + [name])
 
     def get_sub_controllers(self) -> dict[str, BaseController]:
         return self.__sub_controller_tree

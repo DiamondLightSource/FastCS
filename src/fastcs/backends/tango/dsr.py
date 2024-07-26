@@ -211,7 +211,7 @@ def register_dev(dev_name: str, dev_class: str, dsr_instance: str) -> None:
     dsr_name = f"{dev_class}/{dsr_instance}"
     dev_info = DbDevInfo()
     dev_info.name = dev_name
-    dev_info._class = dev_class
+    dev_info._class = dev_class  # noqa
     dev_info.server = dsr_name
 
     db = Database()
