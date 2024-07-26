@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>API &#8212; FastCS 0.4.3.dev13+gdb33d03 documentation</title>
+    <title>API &#8212; FastCS 0.4.3.dev16+g178eb0a documentation</title>
   
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=23c22fd5"></script>
+    <script src="../_static/documentation_options.js?v=f221bdaa"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -51,7 +51,7 @@
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'main';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
-    <link rel="icon" href="../_static/fastcs.svg"/>
+    <link rel="icon" href="../_static/dls-logo.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Index" href="../genindex.html" />
@@ -135,8 +135,8 @@
       
     
     
-    <img src="../_static/fastcs.svg" class="logo__image only-light" alt=""/>
-    <script>document.write(`<img src="../_static/fastcs.svg" class="logo__image only-dark" alt=""/>`);</script>
+    <img src="../_static/dls-logo.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/dls-logo.svg" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">FastCS</p>
@@ -487,115 +487,18 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="api">
-<h1>API<a class="headerlink" href="#api" title="Link to this heading">#</a></h1>
-<p>This is the internal API reference for fastcs. The key modules are summarised below.</p>
-<section id="module-fastcs.controller">
-<span id="controllers"></span><h2>Controllers<a class="headerlink" href="#module-fastcs.controller" title="Link to this heading">#</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.controller.Controller">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.controller.</span></span><span class="sig-name descname"><span class="pre">Controller</span></span><a class="reference internal" href="../_modules/fastcs/controller.html#Controller"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controller.Controller" title="Link to this definition">#</a></dt>
-<dd><p>Top-level controller for a device.</p>
-<p>This is the primary class for implementing device support in FastCS. Instances of
-this class can be loaded into a backend to access its <code class="docutils literal notranslate"><span class="pre">Attribute``s.</span> <span class="pre">The</span> <span class="pre">backend</span>
-<span class="pre">can</span> <span class="pre">then</span> <span class="pre">perform</span> <span class="pre">a</span> <span class="pre">specific</span> <span class="pre">function</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">set</span> <span class="pre">of</span> <span class="pre">``Attributes</span></code>, such as
-generating a UI or creating parameters for a control system.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.controller.SubController">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.controller.</span></span><span class="sig-name descname"><span class="pre">SubController</span></span><a class="reference internal" href="../_modules/fastcs/controller.html#SubController"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controller.SubController" title="Link to this definition">#</a></dt>
-<dd><p>A subordinate to a <code class="docutils literal notranslate"><span class="pre">Controller</span></code> for managing a subset of a device.</p>
-<p>An instance of this class can be registered with a parent <code class="docutils literal notranslate"><span class="pre">Controller</span></code> to include
-it as part of a larger device.</p>
-</dd></dl>
-
+  <section id="module-fastcs">
+<span id="api"></span><h1>API<a class="headerlink" href="#module-fastcs" title="Link to this heading">#</a></h1>
+<section id="fastcs">
+<h2><code class="docutils literal notranslate"><span class="pre">fastcs</span></code><a class="headerlink" href="#fastcs" title="Link to this heading">#</a></h2>
 </section>
-<section id="module-fastcs.attributes">
-<span id="attributes"></span><h2>Attributes<a class="headerlink" href="#module-fastcs.attributes" title="Link to this heading">#</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrMode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrMode" title="Link to this definition">#</a></dt>
-<dd><p>Access mode of an <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
+<p>This is the internal API reference for fastcs</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="fastcs.fastcs.__version__">
+<span class="sig-prename descclassname"><span class="pre">fastcs.</span></span><span class="sig-name descname"><span class="pre">__version__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></em><a class="headerlink" href="#fastcs.fastcs.__version__" title="Link to this definition">#</a></dt>
+<dd><p>Version number as calculated by <a class="github reference external" href="https://github.com/pypa/setuptools_scm">pypa/setuptools_scm</a></p>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.Sender">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">Sender</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#Sender"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.Sender" title="Link to this definition">#</a></dt>
-<dd><p>Protocol for setting the value of an <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.Updater">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">Updater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#Updater"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.Updater" title="Link to this definition">#</a></dt>
-<dd><p>Protocol for updating the cached readback value of an <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.Handler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">Handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#Handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.Handler" title="Link to this definition">#</a></dt>
-<dd><p>Protocol encapsulating both <code class="docutils literal notranslate"><span class="pre">Sender</span></code> and <code class="docutils literal notranslate"><span class="pre">Updater</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.Attribute">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">Attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.attributes.AttrMode" title="fastcs.attributes.AttrMode"><span class="pre">AttrMode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#Attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.Attribute" title="Link to this definition">#</a></dt>
-<dd><p>Base FastCS attribute.</p>
-<p>Instances of this class added to a <code class="docutils literal notranslate"><span class="pre">Controller</span></code> will be used by the backend.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrR">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AttrMode.READ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.attributes.Updater" title="fastcs.attributes.Updater"><span class="pre">Updater</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrR" title="Link to this definition">#</a></dt>
-<dd><p>A read-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrW">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AttrMode.WRITE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.attributes.Sender" title="fastcs.attributes.Sender"><span class="pre">Sender</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrW" title="Link to this definition">#</a></dt>
-<dd><p>A write-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrRW">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrRW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AttrMode.READ_WRITE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.attributes.Handler" title="fastcs.attributes.Handler"><span class="pre">Handler</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrRW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrRW" title="Link to this definition">#</a></dt>
-<dd><p>A read-write <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
-</dd></dl>
-
-</section>
-<section id="module-fastcs.datatypes">
-<span id="datatypes"></span><h2>Datatypes<a class="headerlink" href="#module-fastcs.datatypes" title="Link to this heading">#</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.DataType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">DataType</span></span><a class="reference internal" href="../_modules/fastcs/datatypes.html#DataType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.DataType" title="Link to this definition">#</a></dt>
-<dd><p>Generic datatype mapping to a python type, with additional metadata.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Int">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Int</span></span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Int" title="Link to this definition">#</a></dt>
-<dd><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">int</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Float">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Float" title="Link to this definition">#</a></dt>
-<dd><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Bool">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">znam</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'OFF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onam</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ON'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Bool" title="Link to this definition">#</a></dt>
-<dd><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">bool</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.String">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">String</span></span><a class="reference internal" href="../_modules/fastcs/datatypes.html#String"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.String" title="Link to this definition">#</a></dt>
-<dd><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">str</span></code>.</p>
-</dd></dl>
-
-</section>
 </section>
 
 
@@ -644,30 +547,8 @@ it as part of a larger device.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-fastcs.controller">Controllers</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.SubController"><code class="docutils literal notranslate"><span class="pre">SubController</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-fastcs.attributes">Attributes</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrMode"><code class="docutils literal notranslate"><span class="pre">AttrMode</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.Sender"><code class="docutils literal notranslate"><span class="pre">Sender</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.Updater"><code class="docutils literal notranslate"><span class="pre">Updater</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.Handler"><code class="docutils literal notranslate"><span class="pre">Handler</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.Attribute"><code class="docutils literal notranslate"><span class="pre">Attribute</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrR"><code class="docutils literal notranslate"><span class="pre">AttrR</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrW"><code class="docutils literal notranslate"><span class="pre">AttrW</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrRW"><code class="docutils literal notranslate"><span class="pre">AttrRW</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-fastcs.datatypes">Datatypes</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.DataType"><code class="docutils literal notranslate"><span class="pre">DataType</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Int"><code class="docutils literal notranslate"><span class="pre">Int</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Float"><code class="docutils literal notranslate"><span class="pre">Float</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Bool"><code class="docutils literal notranslate"><span class="pre">Bool</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.String"><code class="docutils literal notranslate"><span class="pre">String</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs"><code class="docutils literal notranslate"><span class="pre">fastcs</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.fastcs.__version__"><code class="docutils literal notranslate"><span class="pre">fastcs.__version__</span></code></a></li>
 </ul>
   </nav></div>
 

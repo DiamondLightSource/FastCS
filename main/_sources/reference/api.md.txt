@@ -1,24 +1,17 @@
 # API
 
-This is the internal API reference for fastcs. The key modules are summarised below.
-
-## Controllers
-
 ```{eval-rst}
-.. automodule:: fastcs.controller
-    :members:
+.. automodule:: fastcs
+
+    ``fastcs``
+    -----------------------------------
 ```
 
-## Attributes
+This is the internal API reference for fastcs
 
 ```{eval-rst}
-.. automodule:: fastcs.attributes
-    :members:
-```
+.. data:: fastcs.__version__
+    :type: str
 
-## Datatypes
-
-```{eval-rst}
-.. automodule:: fastcs.datatypes
-    :members:
+    Version number as calculated by https://github.com/pypa/setuptools_scm
 ```
