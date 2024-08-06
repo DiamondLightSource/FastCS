@@ -55,6 +55,9 @@ class Controller(BaseController):
     def __init__(self) -> None:
         super().__init__()
 
+    async def initialise(self) -> None:
+        pass
+
     async def connect(self) -> None:
         pass
 
