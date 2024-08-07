@@ -8,10 +8,6 @@ from tango import AttrWriteType, Database, DbDevInfo, DevState, server
 from tango.server import Device
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.backend import (
-    _link_attribute_sender_class,
-    _link_single_controller_put_tasks,
-)
 from fastcs.controller import BaseController
 from fastcs.datatypes import Float
 from fastcs.mapping import Mapping
@@ -176,16 +172,9 @@ class TangoDSR:
     def __init__(self, mapping: Mapping):
         self._mapping = mapping
 
-    def _link_process_tasks(self) -> None:
-        for single_mapping in self._mapping.get_controller_mappings():
-            _link_single_controller_put_tasks(single_mapping)
-            _link_attribute_sender_class(single_mapping)
-
     def run(self, options: TangoDSROptions | None = None) -> None:
         if options is None:
             options = TangoDSROptions()
-
-        self._link_process_tasks()
 
         class_dict: dict = {
             **_collect_dev_attributes(self._mapping),
