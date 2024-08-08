@@ -1,11 +1,14 @@
-from fastcs.mapping import Mapping
+from fastcs.backend import Backend
+from fastcs.controller import Controller
 
 from .dsr import TangoDSR
 
 
-class TangoBackend:
-    def __init__(self, mapping: Mapping):
-        self._mapping = mapping
+class TangoBackend(Backend):
+    def __init__(self, controller: Controller):
+        super().__init__(controller)
 
-    def get_dsr(self) -> TangoDSR:
-        return TangoDSR(self._mapping)
+        self._dsr = TangoDSR(self._mapping)
+
+    def _run(self):
+        self._dsr.run()

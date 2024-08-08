@@ -1,30 +1,13 @@
-from softioc import asyncio_dispatcher, softioc
+from softioc import softioc
 
 from fastcs.backend import Backend
-from fastcs.mapping import Mapping
+from fastcs.controller import Controller
 
 
-class AsyncioBackend:
-    def __init__(self, mapping: Mapping):
-        self._mapping = mapping
+class AsyncioBackend(Backend):
+    def __init__(self, controller: Controller):  # noqa: F821
+        super().__init__(controller)
 
-    def run_interactive_session(self):
-        # Create an asyncio dispatcher; the event loop is now running
-        dispatcher = asyncio_dispatcher.AsyncioDispatcher()
-
-        backend = Backend(self._mapping, dispatcher.loop)
-
-        backend.link_process_tasks()
-        backend.run_initial_tasks()
-        backend.start_scan_tasks()
-
+    def _run(self):
         # Run the interactive shell
-        global_variables = globals()
-        global_variables.update(
-            {
-                "dispatcher": dispatcher,
-                "mapping": self._mapping,
-                "controller": self._mapping.controller,
-            }
-        )
-        softioc.interactive_ioc(globals())
+        softioc.interactive_ioc(self._context)
