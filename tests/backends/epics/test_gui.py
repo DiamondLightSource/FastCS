@@ -1,4 +1,5 @@
 from pvi.device import (
+    LED,
     ButtonPanel,
     ComboBox,
     SignalR,
@@ -28,6 +29,7 @@ def test_get_components(mapping):
 
     components = gui.extract_mapping_components(mapping.get_controller_mappings()[0])
     assert components == [
+        SignalR(name="ReadBool", read_pv="DEVICE:ReadBool", read_widget=LED()),
         SignalR(
             name="ReadInt",
             read_pv="DEVICE:ReadInt",
@@ -38,6 +40,13 @@ def test_get_components(mapping):
             write_pv="DEVICE:ReadWriteFloat",
             write_widget=TextWrite(),
             read_pv="DEVICE:ReadWriteFloat_RBV",
+            read_widget=TextRead(),
+        ),
+        SignalRW(
+            name="ReadWriteInt",
+            write_pv="DEVICE:ReadWriteInt",
+            write_widget=TextWrite(),
+            read_pv="DEVICE:ReadWriteInt_RBV",
             read_widget=TextRead(),
         ),
         SignalRW(
