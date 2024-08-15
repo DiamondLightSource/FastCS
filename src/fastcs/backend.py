@@ -2,7 +2,6 @@ import asyncio
 from collections import defaultdict
 from collections.abc import Callable
 from types import MethodType
-from typing import Any
 
 from softioc.asyncio_dispatcher import AsyncioDispatcher
 
@@ -13,9 +12,6 @@ from .mapping import Mapping, SingleMapping
 
 
 class Backend:
-    _initial_tasks: list[Callable] = []
-    _context: dict[str, Any] = {}
-
     def __init__(
         self, controller: Controller, loop: asyncio.AbstractEventLoop | None = None
     ):
@@ -23,7 +19,7 @@ class Backend:
         self._loop = self._dispatcher.loop
         self._controller = controller
 
-        self._initial_tasks.append(controller.connect)
+        self._initial_tasks = [controller.connect]
 
         asyncio.run_coroutine_threadsafe(
             self._controller.initialise(), self._loop
@@ -32,13 +28,11 @@ class Backend:
         self._mapping = Mapping(self._controller)
         self._link_process_tasks()
 
-        self._context.update(
-            {
-                "dispatcher": self._dispatcher,
-                "controller": self._controller,
-                "mapping": self._mapping,
-            }
-        )
+        self._context = {
+            "dispatcher": self._dispatcher,
+            "controller": self._controller,
+            "mapping": self._mapping,
+        }
 
     def _link_process_tasks(self):
         for single_mapping in self._mapping.get_controller_mappings():
