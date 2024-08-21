@@ -1,13 +1,14 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from types import MethodType
-from typing import Any
+from typing import Any, Literal
 
 from softioc import builder, softioc
 from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controller import BaseController
 from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
@@ -20,10 +21,11 @@ class EpicsIOCOptions:
 
 class EpicsIOC:
     def __init__(self, pv_prefix: str, mapping: Mapping):
-        builder.SetDeviceName(pv_prefix)
+        _add_pvi_info(f"{pv_prefix}:PVI")
+        _add_sub_controller_pvi_info(pv_prefix, mapping.controller)
 
-        _create_and_link_attribute_pvs(mapping)
-        _create_and_link_command_pvs(mapping)
+        _create_and_link_attribute_pvs(pv_prefix, mapping)
+        _create_and_link_command_pvs(pv_prefix, mapping)
 
     def run(
         self,
@@ -40,25 +42,95 @@ class EpicsIOC:
         softioc.interactive_ioc(context)
 
 
-def _create_and_link_attribute_pvs(mapping: Mapping) -> None:
+def _add_pvi_info(
+    pvi: str,
+    parent_pvi: str = "",
+    name: str = "",
+):
+    """Add PVI metadata for a controller.
+
+    Args:
+        pvi: PVI PV of controller
+        parent_pvi: PVI PV of parent controller
+        name: Name to register controller with parent as
+
+    """
+    # Create a record to attach the info tags to
+    record = builder.longStringIn(
+        f"{pvi}_PV",
+        initial_value=pvi,
+        DESC="The records in this controller",
+    )
+
+    # Create PVI PV in preparation for adding attribute info tags to it
+    q_group = {
+        pvi: {
+            "+id": "epics:nt/NTPVI:1.0",
+            "display.description": {"+type": "plain", "+channel": "DESC"},
+            "": {"+type": "meta", "+channel": "VAL"},
+        }
+    }
+    # If this controller has a parent, add a link in the parent to this controller
+    if parent_pvi and name:
+        q_group.update(
+            {
+                parent_pvi: {
+                    f"value.{name}.d": {
+                        "+channel": "VAL",
+                        "+type": "plain",
+                        "+trigger": f"value.{name}.d",
+                    }
+                }
+            }
+        )
+
+    record.add_info("Q:group", q_group)
+
+
+def _add_sub_controller_pvi_info(pv_prefix: str, parent: BaseController):
+    """Add PVI references from controller to its sub controllers, recursively.
+
+    Args:
+        pv_prefix: PV Prefix of IOC
+        parent: Controller to add PVI refs for
+
+    """
+    parent_pvi = ":".join([pv_prefix] + parent.path + ["PVI"])
+
+    for child in parent.get_sub_controllers().values():
+        child_pvi = ":".join([pv_prefix] + child.path + ["PVI"])
+        child_name = child.path[-1].lower()
+
+        _add_pvi_info(child_pvi, parent_pvi, child_name)
+
+        _add_sub_controller_pvi_info(pv_prefix, child)
+
+
+def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
         for attr_name, attribute in single_mapping.attributes.items():
-            attr_name = attr_name.title().replace("_", "")
-            pv_name = f"{':'.join(path)}:{attr_name}" if path else attr_name
+            pv_name = attr_name.title().replace("_", "")
+            _pv_prefix = ":".join([pv_prefix] + path)
 
             match attribute:
                 case AttrRW():
-                    _create_and_link_read_pv(pv_name + "_RBV", attribute)
-                    _create_and_link_write_pv(pv_name, attribute)
+                    _create_and_link_read_pv(
+                        _pv_prefix, f"{pv_name}_RBV", attr_name, attribute
+                    )
+                    _create_and_link_write_pv(_pv_prefix, pv_name, attr_name, attribute)
                 case AttrR():
-                    _create_and_link_read_pv(pv_name, attribute)
+                    _create_and_link_read_pv(_pv_prefix, pv_name, attr_name, attribute)
                 case AttrW():
-                    _create_and_link_write_pv(pv_name, attribute)
+                    _create_and_link_write_pv(_pv_prefix, pv_name, attr_name, attribute)
 
 
-def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
-    record = _get_input_record(pv_name, attribute.datatype)
+def _create_and_link_read_pv(
+    pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR
+) -> None:
+    record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute.datatype)
+
+    _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
     async def async_wrapper(v):
         record.set(v)
@@ -66,24 +138,30 @@ def _create_and_link_read_pv(pv_name: str, attribute: AttrR) -> None:
     attribute.set_update_callback(async_wrapper)
 
 
-def _get_input_record(pv_name: str, datatype: DataType) -> RecordWrapper:
+def _get_input_record(pv: str, datatype: DataType) -> RecordWrapper:
     match datatype:
         case Bool(znam, onam):
-            return builder.boolIn(pv_name, ZNAM=znam, ONAM=onam)
+            return builder.boolIn(pv, ZNAM=znam, ONAM=onam)
         case Int():
-            return builder.longIn(pv_name)
+            return builder.longIn(pv)
         case Float(prec):
-            return builder.aIn(pv_name, PREC=prec)
+            return builder.aIn(pv, PREC=prec)
         case String():
-            return builder.longStringIn(pv_name)
+            return builder.longStringIn(pv)
         case _:
             raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
 
-def _create_and_link_write_pv(pv_name: str, attribute: AttrW) -> None:
+def _create_and_link_write_pv(
+    pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW
+) -> None:
     record = _get_output_record(
-        pv_name, attribute.datatype, on_update=attribute.process_without_display_update
+        f"{pv_prefix}:{pv_name}",
+        attribute.datatype,
+        on_update=attribute.process_without_display_update,
     )
+
+    _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
     async def async_wrapper(v):
         record.set(v, process=False)
@@ -91,44 +169,81 @@ def _create_and_link_write_pv(pv_name: str, attribute: AttrW) -> None:
     attribute.set_write_display_callback(async_wrapper)
 
 
-def _get_output_record(pv_name: str, datatype: DataType, on_update: Callable) -> Any:
+def _get_output_record(pv: str, datatype: DataType, on_update: Callable) -> Any:
     match datatype:
         case Bool(znam, onam):
             return builder.boolOut(
-                pv_name,
+                pv,
                 ZNAM=znam,
                 ONAM=onam,
                 always_update=True,
                 on_update=on_update,
             )
         case Int():
-            return builder.longOut(pv_name, always_update=True, on_update=on_update)
+            return builder.longOut(pv, always_update=True, on_update=on_update)
         case Float(prec):
-            return builder.aOut(
-                pv_name, always_update=True, on_update=on_update, PREC=prec
-            )
+            return builder.aOut(pv, always_update=True, on_update=on_update, PREC=prec)
         case String():
-            return builder.longStringOut(
-                pv_name, always_update=True, on_update=on_update
-            )
+            return builder.longStringOut(pv, always_update=True, on_update=on_update)
         case _:
             raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
 
-def _create_and_link_command_pvs(mapping: Mapping) -> None:
+def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
         for attr_name, method in single_mapping.command_methods.items():
-            attr_name = attr_name.title().replace("_", "")
-            pv_name = f"{':'.join(path)}:{attr_name}" if path else attr_name
+            pv_name = attr_name.title().replace("_", "")
+            _pv_prefix = ":".join([pv_prefix] + path)
 
             _create_and_link_command_pv(
-                pv_name, MethodType(method.fn, single_mapping.controller)
+                _pv_prefix,
+                pv_name,
+                attr_name,
+                MethodType(method.fn, single_mapping.controller),
             )
 
 
-def _create_and_link_command_pv(pv_name: str, method: Callable) -> None:
+def _create_and_link_command_pv(
+    pv_prefix: str, pv_name: str, attr_name: str, method: Callable
+) -> None:
     async def wrapped_method(_: Any):
         await method()
 
-    builder.aOut(pv_name, initial_value=0, always_update=True, on_update=wrapped_method)
+    record = builder.aOut(
+        f"{pv_prefix}:{pv_name}",
+        initial_value=0,
+        always_update=True,
+        on_update=wrapped_method,
+    )
+
+    _add_attr_pvi_info(record, pv_prefix, attr_name, "x")
+
+
+def _add_attr_pvi_info(
+    record: RecordWrapper,
+    prefix: str,
+    name: str,
+    access_mode: Literal["r", "w", "rw", "x"],
+):
+    """Add an info tag to a record to include it in the PVI for the controller.
+
+    Args:
+        record: Record to add info tag to
+        prefix: PV prefix of controller
+        name: Name of parameter to add to PVI
+        access_mode: Access mode of parameter
+
+    """
+    record.add_info(
+        "Q:group",
+        {
+            f"{prefix}:PVI": {
+                f"value.{name}.{access_mode}": {
+                    "+channel": "NAME",
+                    "+type": "plain",
+                    "+trigger": f"value.{name}.{access_mode}",
+                }
+            }
+        },
+    )
