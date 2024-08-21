@@ -41,6 +41,8 @@ dev = [
     "sphinx-design",
     "tox-direct",
     "types-mock",
+    "aioca",
+    "p4p",
 ]
 
 [project.scripts]
