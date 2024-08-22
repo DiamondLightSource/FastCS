@@ -23,7 +23,7 @@ class DummyBackend(Backend):
 async def test_backend(controller):
     backend = DummyBackend(controller)
 
-    # Controller should be initialised by Backend, bit not connected
+    # Controller should be initialised by Backend, but not connected
     assert controller.initialised
     assert not controller.connected
 
