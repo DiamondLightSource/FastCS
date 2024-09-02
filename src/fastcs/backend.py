@@ -1,6 +1,7 @@
 import asyncio
 from collections import defaultdict
 from collections.abc import Callable
+from concurrent.futures import Future
 from types import MethodType
 
 from softioc.asyncio_dispatcher import AsyncioDispatcher
@@ -20,6 +21,7 @@ class Backend:
         self._controller = controller
 
         self._initial_tasks = [controller.connect]
+        self._scan_tasks: list[Future] = []
 
         asyncio.run_coroutine_threadsafe(
             self._controller.initialise(), self._loop

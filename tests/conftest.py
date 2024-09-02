@@ -1,6 +1,12 @@
 import os
+import random
+import string
+import subprocess
+import time
+from pathlib import Path
 
 import pytest
+from aioca import purge_channel_caches
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
 from fastcs.controller import Controller
@@ -72,3 +78,35 @@ def controller():
 @pytest.fixture
 def mapping(controller):
     return Mapping(controller)
+
+
+PV_PREFIX = "".join(random.choice(string.ascii_lowercase) for _ in range(12))
+HERE = Path(os.path.dirname(os.path.abspath(__file__)))
+
+
+@pytest.fixture(scope="module")
+def ioc():
+    process = subprocess.Popen(
+        ["python", HERE / "ioc.py"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True,
+    )
+
+    start_time = time.monotonic()
+    while "iocRun: All initialization complete" not in (
+        process.stdout.readline().strip()
+    ):
+        if time.monotonic() - start_time > 10:
+            raise TimeoutError("IOC did not start in time")
+
+    yield
+
+    # close backend caches before the event loop
+    purge_channel_caches()
+    try:
+        print(process.communicate("exit")[0])
+    except ValueError:
+        # Someone else already called communicate
+        pass
