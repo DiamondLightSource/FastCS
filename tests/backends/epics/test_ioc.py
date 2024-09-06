@@ -1,12 +1,17 @@
 from pytest_mock import MockerFixture
 
+from fastcs.attributes import AttrR
 from fastcs.backends.epics.ioc import (
     EpicsIOC,
     _add_attr_pvi_info,
     _add_pvi_info,
     _add_sub_controller_pvi_info,
 )
+from fastcs.controller import Controller
+from fastcs.datatypes import Int
 from fastcs.mapping import Mapping
+
+DEVICE = "DEVICE"
 
 
 def test_ioc(mocker: MockerFixture, mapping: Mapping):
@@ -16,37 +21,37 @@ def test_ioc(mocker: MockerFixture, mapping: Mapping):
         "fastcs.backends.epics.ioc._add_sub_controller_pvi_info"
     )
 
-    EpicsIOC("DEVICE", mapping)
+    EpicsIOC(DEVICE, mapping)
 
     # Check records are created
-    builder.boolIn.assert_called_once_with("DEVICE:ReadBool", ZNAM="OFF", ONAM="ON")
-    builder.longIn.assert_any_call("DEVICE:ReadInt")
-    builder.aIn.assert_called_once_with("DEVICE:ReadWriteFloat_RBV", PREC=2)
+    builder.boolIn.assert_called_once_with(f"{DEVICE}:ReadBool", ZNAM="OFF", ONAM="ON")
+    builder.longIn.assert_any_call(f"{DEVICE}:ReadInt")
+    builder.aIn.assert_called_once_with(f"{DEVICE}:ReadWriteFloat_RBV", PREC=2)
     builder.aOut.assert_any_call(
-        "DEVICE:ReadWriteFloat", always_update=True, on_update=mocker.ANY, PREC=2
+        f"{DEVICE}:ReadWriteFloat", always_update=True, on_update=mocker.ANY, PREC=2
     )
-    builder.longIn.assert_any_call("DEVICE:ReadWriteInt_RBV")
+    builder.longIn.assert_any_call(f"{DEVICE}:ReadWriteInt_RBV")
     builder.longOut.assert_called_with(
-        "DEVICE:ReadWriteInt", always_update=True, on_update=mocker.ANY
+        f"{DEVICE}:ReadWriteInt", always_update=True, on_update=mocker.ANY
     )
-    builder.longStringIn.assert_called_once_with("DEVICE:StringEnum_RBV")
+    builder.longStringIn.assert_called_once_with(f"{DEVICE}:StringEnum_RBV")
     builder.longStringOut.assert_called_once_with(
-        "DEVICE:StringEnum", always_update=True, on_update=mocker.ANY
+        f"{DEVICE}:StringEnum", always_update=True, on_update=mocker.ANY
     )
     builder.boolOut.assert_called_once_with(
-        "DEVICE:WriteBool",
+        f"{DEVICE}:WriteBool",
         ZNAM="OFF",
         ONAM="ON",
         always_update=True,
         on_update=mocker.ANY,
     )
     builder.aOut.assert_any_call(
-        "DEVICE:Go", initial_value=0, always_update=True, on_update=mocker.ANY
+        f"{DEVICE}:Go", initial_value=0, always_update=True, on_update=mocker.ANY
     )
 
     # Check info tags are added
-    add_pvi_info.assert_called_once_with("DEVICE:PVI")
-    add_sub_controller_pvi_info.assert_called_once_with("DEVICE", mapping.controller)
+    add_pvi_info.assert_called_once_with(f"{DEVICE}:PVI")
+    add_sub_controller_pvi_info.assert_called_once_with(DEVICE, mapping.controller)
 
 
 def test_add_pvi_info(mocker: MockerFixture):
@@ -57,18 +62,18 @@ def test_add_pvi_info(mocker: MockerFixture):
     child.path = ["Child"]
     controller.get_sub_controllers.return_value = {"d": child}
 
-    _add_pvi_info("DEVICE:PVI")
+    _add_pvi_info(f"{DEVICE}:PVI")
 
     builder.longStringIn.assert_called_once_with(
-        "DEVICE:PVI_PV",
-        initial_value="DEVICE:PVI",
+        f"{DEVICE}:PVI_PV",
+        initial_value=f"{DEVICE}:PVI",
         DESC="The records in this controller",
     )
     record = builder.longStringIn.return_value
     record.add_info.assert_called_once_with(
         "Q:group",
         {
-            "DEVICE:PVI": {
+            f"{DEVICE}:PVI": {
                 "+id": "epics:nt/NTPVI:1.0",
                 "display.description": {"+type": "plain", "+channel": "DESC"},
                 "": {"+type": "meta", "+channel": "VAL"},
@@ -86,23 +91,23 @@ def test_add_pvi_info_with_parent(mocker: MockerFixture):
     controller.get_sub_controllers.return_value = {"d": child}
 
     child = mocker.MagicMock()
-    _add_pvi_info("DEVICE:Child:PVI", "DEVICE:PVI", "child")
+    _add_pvi_info(f"{DEVICE}:Child:PVI", f"{DEVICE}:PVI", "child")
 
     builder.longStringIn.assert_called_once_with(
-        "DEVICE:Child:PVI_PV",
-        initial_value="DEVICE:Child:PVI",
+        f"{DEVICE}:Child:PVI_PV",
+        initial_value=f"{DEVICE}:Child:PVI",
         DESC="The records in this controller",
     )
     record = builder.longStringIn.return_value
     record.add_info.assert_called_once_with(
         "Q:group",
         {
-            "DEVICE:Child:PVI": {
+            f"{DEVICE}:Child:PVI": {
                 "+id": "epics:nt/NTPVI:1.0",
                 "display.description": {"+type": "plain", "+channel": "DESC"},
                 "": {"+type": "meta", "+channel": "VAL"},
             },
-            "DEVICE:PVI": {
+            f"{DEVICE}:PVI": {
                 "value.child.d": {
                     "+channel": "VAL",
                     "+type": "plain",
@@ -121,20 +126,22 @@ def test_add_sub_controller_pvi_info(mocker: MockerFixture):
     child.path = ["Child"]
     controller.get_sub_controllers.return_value = {"d": child}
 
-    _add_sub_controller_pvi_info("DEVICE", controller)
+    _add_sub_controller_pvi_info(DEVICE, controller)
 
-    add_pvi_info.assert_called_once_with("DEVICE:Child:PVI", "DEVICE:PVI", "child")
+    add_pvi_info.assert_called_once_with(
+        f"{DEVICE}:Child:PVI", f"{DEVICE}:PVI", "child"
+    )
 
 
 def test_add_attr_pvi_info(mocker: MockerFixture):
     record = mocker.MagicMock()
 
-    _add_attr_pvi_info(record, "DEVICE", "attr", "r")
+    _add_attr_pvi_info(record, DEVICE, "attr", "r")
 
     record.add_info.assert_called_once_with(
         "Q:group",
         {
-            "DEVICE:PVI": {
+            f"{DEVICE}:PVI": {
                 "value.attr.r": {
                     "+channel": "NAME",
                     "+type": "plain",
@@ -142,4 +149,40 @@ def test_add_attr_pvi_info(mocker: MockerFixture):
                 }
             }
         },
+    )
+
+
+class ControllerLongNames(Controller):
+    attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name = AttrR(Int())
+    attr_r_short_name = AttrR(Int())
+
+
+def test_long_pv_names_discarded(mocker: MockerFixture):
+    mocker.patch("fastcs.backends.epics.ioc.builder")
+    long_name_controller = ControllerLongNames()
+    long_name_mapping = Mapping(long_name_controller)
+    assert (
+        "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
+        in long_name_mapping.get_controller_mappings()[0].attributes
+    )
+    assert hasattr(
+        long_name_mapping.controller,
+        "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name",
+    )
+    assert (
+        "attr_r_short_name" in long_name_mapping.get_controller_mappings()[0].attributes
+    )
+    assert hasattr(long_name_mapping.controller, "attr_r_short_name")
+    EpicsIOC(DEVICE, long_name_mapping)
+    assert (
+        "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
+        not in long_name_mapping.get_controller_mappings()[0].attributes
+    )
+    assert (
+        getattr(
+            long_name_mapping.controller,
+            "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name",
+            None,
+        )
+        is None
     )
