@@ -127,7 +127,7 @@ def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
 
             match attribute:
                 case AttrRW():
-                    if full_pv_name_length >= 57:
+                    if full_pv_name_length > (EPICS_MAX_NAME_LENGTH - 4):
                         if full_pv_name_length <= EPICS_MAX_NAME_LENGTH:
                             print(
                                 f"Not creating PVs for {attr_name} as _RBV PV"
