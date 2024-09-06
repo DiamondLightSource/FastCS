@@ -1,8 +1,9 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from fastcs.attributes import AttrR
+from fastcs.attributes import AttrR, AttrRW
 from fastcs.backends.epics.ioc import (
+    EPICS_MAX_NAME_LENGTH,
     EpicsIOC,
     _add_attr_pvi_info,
     _add_pvi_info,
@@ -155,7 +156,8 @@ def test_add_attr_pvi_info(mocker: MockerFixture):
 
 class ControllerLongNames(Controller):
     attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name = AttrR(Int())
-    attr_r_short_name = AttrR(Int())
+    attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV = AttrRW(Int())
+    attr_rw_short_name = AttrRW(Int())
 
 
 def test_long_pv_names_discarded(mocker: MockerFixture):
@@ -163,17 +165,40 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     long_name_controller = ControllerLongNames()
     long_name_mapping = Mapping(long_name_controller)
     long_attr_name = "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
-    assert long_name_controller.attr_r_short_name.enabled
+    long_rw_name = "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
+    assert long_name_controller.attr_rw_short_name.enabled
     assert getattr(long_name_controller, long_attr_name).enabled
     EpicsIOC(DEVICE, long_name_mapping)
-    assert long_name_controller.attr_r_short_name.enabled
+    assert long_name_controller.attr_rw_short_name.enabled
     assert not getattr(long_name_controller, long_attr_name).enabled
 
-    short_pv_name = "attr_r_short_name".title().replace("_", "")
-    builder.longIn.assert_called_once_with(
+    short_pv_name = "attr_rw_short_name".title().replace("_", "")
+    builder.longOut.assert_called_once_with(
         f"{DEVICE}:{short_pv_name}",
+        always_update=True,
+        on_update=mocker.ANY,
+    )
+    builder.longIn.assert_called_once_with(
+        f"{DEVICE}:{short_pv_name}_RBV",
     )
 
     long_pv_name = long_attr_name.title().replace("_", "")
     with pytest.raises(AssertionError):
         builder.longIn.assert_called_once_with(f"{DEVICE}:{long_pv_name}")
+
+    long_rw_pv_name = long_rw_name.title().replace("_", "")
+    # neither the readback nor setpoint PV gets made if the full pv name with _RBV
+    # suffix is too long
+    assert (
+        EPICS_MAX_NAME_LENGTH - 4
+        < len(f"{DEVICE}:{long_rw_pv_name}")
+        < EPICS_MAX_NAME_LENGTH
+    )
+
+    with pytest.raises(AssertionError):
+        builder.longOut.assert_called_once_with(
+            f"{DEVICE}:{long_rw_pv_name}",
+            always_update=True,
+            on_update=mocker.ANY,
+        )
+        builder.longIn.assert_called_once_with(f"{DEVICE}:{long_rw_pv_name}_RBV")
