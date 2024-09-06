@@ -58,6 +58,7 @@ class Attribute(Generic[T]):
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
         self._group = group
+        self.enabled = True
 
     @property
     def datatype(self) -> DataType[T]:

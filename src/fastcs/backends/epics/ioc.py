@@ -111,25 +111,30 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: BaseController):
 def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
-        invalid_attr_names = []
         for attr_name, attribute in single_mapping.attributes.items():
             pv_name = attr_name.title().replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
             full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
 
-            if full_pv_name_length > 60:
-                invalid_attr_names.append(attr_name)
+            if full_pv_name_length > EPICS_MAX_NAME_LENGTH:
+                attribute.enabled = False
+                print(
+                    f"Not creating PV for {attr_name} for controller"
+                    f" {single_mapping.controller.path} as full name would exceed"
+                    f" {EPICS_MAX_NAME_LENGTH} characters"
+                )
                 continue
+
             match attribute:
                 case AttrRW():
                     if full_pv_name_length >= 57:
-                        if full_pv_name_length <= 60:
+                        if full_pv_name_length <= EPICS_MAX_NAME_LENGTH:
                             print(
                                 f"Not creating PVs for {attr_name} as _RBV PV"
                                 f" name would exceed {EPICS_MAX_NAME_LENGTH}"
                                 " characters"
                             )
-                            invalid_attr_names.append(attr_name)
+                            attribute.enabled = False
                     else:
                         _create_and_link_read_pv(
                             _pv_prefix, f"{pv_name}_RBV", attr_name, attribute
@@ -141,18 +146,6 @@ def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
                     _create_and_link_read_pv(_pv_prefix, pv_name, attr_name, attribute)
                 case AttrW():
                     _create_and_link_write_pv(_pv_prefix, pv_name, attr_name, attribute)
-        if invalid_attr_names:
-            print(
-                "Warning: implement logic to shorten PV names in FastCS plugin for"
-                f" controller {single_mapping.controller.path}."
-            )
-            for key in invalid_attr_names:
-                print(
-                    f"Not creating PV for {key} as full name would exceed"
-                    f" {EPICS_MAX_NAME_LENGTH} characters"
-                )
-                single_mapping.attributes.pop(key)
-                setattr(single_mapping.controller, key, None)
 
 
 def _create_and_link_read_pv(
@@ -222,12 +215,15 @@ def _get_output_record(pv: str, datatype: DataType, on_update: Callable) -> Any:
 def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
-        invalid_attr_names = []
         for attr_name, method in single_mapping.command_methods.items():
             pv_name = attr_name.title().replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
             if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
-                invalid_attr_names.append(attr_name)
+                print(
+                    f"Not creating PV for {attr_name} as full name would exceed"
+                    f" {EPICS_MAX_NAME_LENGTH} characters"
+                )
+                method.enabled = False
             else:
                 _create_and_link_command_pv(
                     _pv_prefix,
@@ -235,18 +231,6 @@ def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
                     attr_name,
                     MethodType(method.fn, single_mapping.controller),
                 )
-        if invalid_attr_names:
-            print(
-                "Warning: implement logic to shorten PV names in FastCS plugin for"
-                f" controller {single_mapping.controller.path}."
-            )
-            for key in invalid_attr_names:
-                print(
-                    f"Not creating PV for {key} as full name would exceed"
-                    f" {EPICS_MAX_NAME_LENGTH} characters"
-                )
-                single_mapping.command_methods.pop(key)
-                setattr(single_mapping.controller, key, None)
 
 
 def _create_and_link_command_pv(

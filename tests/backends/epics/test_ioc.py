@@ -1,3 +1,4 @@
+import pytest
 from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrR
@@ -158,31 +159,21 @@ class ControllerLongNames(Controller):
 
 
 def test_long_pv_names_discarded(mocker: MockerFixture):
-    mocker.patch("fastcs.backends.epics.ioc.builder")
+    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
     long_name_controller = ControllerLongNames()
     long_name_mapping = Mapping(long_name_controller)
-    assert (
-        "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
-        in long_name_mapping.get_controller_mappings()[0].attributes
-    )
-    assert hasattr(
-        long_name_mapping.controller,
-        "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name",
-    )
-    assert (
-        "attr_r_short_name" in long_name_mapping.get_controller_mappings()[0].attributes
-    )
-    assert hasattr(long_name_mapping.controller, "attr_r_short_name")
+    long_attr_name = "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
+    assert long_name_controller.attr_r_short_name.enabled
+    assert getattr(long_name_controller, long_attr_name).enabled
     EpicsIOC(DEVICE, long_name_mapping)
-    assert (
-        "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
-        not in long_name_mapping.get_controller_mappings()[0].attributes
+    assert long_name_controller.attr_r_short_name.enabled
+    assert not getattr(long_name_controller, long_attr_name).enabled
+
+    short_pv_name = "attr_r_short_name".title().replace("_", "")
+    builder.longIn.assert_called_once_with(
+        f"{DEVICE}:{short_pv_name}",
     )
-    assert (
-        getattr(
-            long_name_mapping.controller,
-            "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name",
-            None,
-        )
-        is None
-    )
+
+    long_pv_name = long_attr_name.title().replace("_", "")
+    with pytest.raises(AssertionError):
+        builder.longIn.assert_called_once_with(f"{DEVICE}:{long_pv_name}")

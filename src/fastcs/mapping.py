@@ -46,15 +46,17 @@ def _get_single_mapping(controller: BaseController) -> SingleMapping:
         attr = getattr(controller, attr_name)
         match attr:
             case WrappedMethod(fastcs_method=fastcs_method):
-                match fastcs_method:
-                    case Put():
-                        put_methods[attr_name] = fastcs_method
-                    case Scan():
-                        scan_methods[attr_name] = fastcs_method
-                    case Command():
-                        command_methods[attr_name] = fastcs_method
+                if fastcs_method.enabled:
+                    match fastcs_method:
+                        case Put():
+                            put_methods[attr_name] = fastcs_method
+                        case Scan():
+                            scan_methods[attr_name] = fastcs_method
+                        case Command():
+                            command_methods[attr_name] = fastcs_method
             case Attribute():
-                attributes[attr_name] = attr
+                if attr.enabled:
+                    attributes[attr_name] = attr
 
     return SingleMapping(
         controller, scan_methods, put_methods, command_methods, attributes
