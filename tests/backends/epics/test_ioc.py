@@ -201,4 +201,5 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
             always_update=True,
             on_update=mocker.ANY,
         )
+    with pytest.raises(AssertionError):
         builder.longIn.assert_called_once_with(f"{DEVICE}:{long_rw_pv_name}_RBV")
