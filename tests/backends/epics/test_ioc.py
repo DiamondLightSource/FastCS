@@ -10,6 +10,7 @@ from fastcs.backends.epics.ioc import (
     _add_sub_controller_pvi_info,
 )
 from fastcs.controller import Controller
+from fastcs.cs_methods import Command
 from fastcs.datatypes import Int
 from fastcs.mapping import Mapping
 
@@ -154,10 +155,20 @@ def test_add_attr_pvi_info(mocker: MockerFixture):
     )
 
 
+async def do_nothing(arg): ...
+
+
+class NothingCommand:
+    def __init__(self):  # make fastcs_method instance variable
+        self.fastcs_method = Command(do_nothing)
+
+
 class ControllerLongNames(Controller):
     attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name = AttrR(Int())
     attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV = AttrRW(Int())
     attr_rw_short_name = AttrRW(Int())
+    command_with_reallyreallyreallyreallyreallyreallyreally_long_name = NothingCommand()
+    command_short_name = NothingCommand()
 
 
 def test_long_pv_names_discarded(mocker: MockerFixture):
@@ -203,3 +214,25 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
         )
     with pytest.raises(AssertionError):
         builder.longIn.assert_called_once_with(f"{DEVICE}:{long_rw_pv_name}_RBV")
+
+    assert long_name_controller.command_short_name.fastcs_method.enabled
+    long_command_name = (
+        "command_with_" "reallyreallyreallyreallyreallyreallyreally_long_name"
+    )
+    assert not getattr(long_name_controller, long_command_name).fastcs_method.enabled
+
+    short_command_pv_name = "command_short_name".title().replace("_", "")
+    builder.aOut.assert_called_once_with(
+        f"{DEVICE}:{short_command_pv_name}",
+        initial_value=0,
+        always_update=True,
+        on_update=mocker.ANY,
+    )
+    with pytest.raises(AssertionError):
+        long_command_pv_name = long_command_name.title().replace("_", "")
+        builder.aOut.assert_called_once_with(
+            f"{DEVICE}:{long_command_pv_name}",
+            initial_value=0,
+            always_update=True,
+            on_update=mocker.ANY,
+        )
