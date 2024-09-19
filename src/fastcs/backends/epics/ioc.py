@@ -13,6 +13,8 @@ from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
+EPICS_MAX_NAME_LENGTH = 60
+
 
 @dataclass
 class EpicsIOCOptions:
@@ -112,13 +114,33 @@ def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
         for attr_name, attribute in single_mapping.attributes.items():
             pv_name = attr_name.title().replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
+            full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
+
+            if full_pv_name_length > EPICS_MAX_NAME_LENGTH:
+                attribute.enabled = False
+                print(
+                    f"Not creating PV for {attr_name} for controller"
+                    f" {single_mapping.controller.path} as full name would exceed"
+                    f" {EPICS_MAX_NAME_LENGTH} characters"
+                )
+                continue
 
             match attribute:
                 case AttrRW():
-                    _create_and_link_read_pv(
-                        _pv_prefix, f"{pv_name}_RBV", attr_name, attribute
-                    )
-                    _create_and_link_write_pv(_pv_prefix, pv_name, attr_name, attribute)
+                    if full_pv_name_length > (EPICS_MAX_NAME_LENGTH - 4):
+                        print(
+                            f"Not creating PVs for {attr_name} as _RBV PV"
+                            f" name would exceed {EPICS_MAX_NAME_LENGTH}"
+                            " characters"
+                        )
+                        attribute.enabled = False
+                    else:
+                        _create_and_link_read_pv(
+                            _pv_prefix, f"{pv_name}_RBV", attr_name, attribute
+                        )
+                        _create_and_link_write_pv(
+                            _pv_prefix, pv_name, attr_name, attribute
+                        )
                 case AttrR():
                     _create_and_link_read_pv(_pv_prefix, pv_name, attr_name, attribute)
                 case AttrW():
@@ -195,13 +217,19 @@ def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
         for attr_name, method in single_mapping.command_methods.items():
             pv_name = attr_name.title().replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
-
-            _create_and_link_command_pv(
-                _pv_prefix,
-                pv_name,
-                attr_name,
-                MethodType(method.fn, single_mapping.controller),
-            )
+            if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
+                print(
+                    f"Not creating PV for {attr_name} as full name would exceed"
+                    f" {EPICS_MAX_NAME_LENGTH} characters"
+                )
+                method.enabled = False
+            else:
+                _create_and_link_command_pv(
+                    _pv_prefix,
+                    pv_name,
+                    attr_name,
+                    MethodType(method.fn, single_mapping.controller),
+                )
 
 
 def _create_and_link_command_pv(

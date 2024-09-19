@@ -38,22 +38,20 @@ def _walk_mappings(controller: BaseController) -> Iterator[SingleMapping]:
 
 
 def _get_single_mapping(controller: BaseController) -> SingleMapping:
-    scan_methods = {}
-    put_methods = {}
-    command_methods = {}
-    attributes = {}
+    scan_methods: dict[str, Scan] = {}
+    put_methods: dict[str, Put] = {}
+    command_methods: dict[str, Command] = {}
+    attributes: dict[str, Attribute] = {}
     for attr_name in dir(controller):
         attr = getattr(controller, attr_name)
         match attr:
-            case WrappedMethod(fastcs_method=fastcs_method):
-                match fastcs_method:
-                    case Put():
-                        put_methods[attr_name] = fastcs_method
-                    case Scan():
-                        scan_methods[attr_name] = fastcs_method
-                    case Command():
-                        command_methods[attr_name] = fastcs_method
-            case Attribute():
+            case WrappedMethod(fastcs_method=Put(enabled=True) as put_method):
+                put_methods[attr_name] = put_method
+            case WrappedMethod(fastcs_method=Scan(enabled=True) as scan_method):
+                scan_methods[attr_name] = scan_method
+            case WrappedMethod(fastcs_method=Command(enabled=True) as command_method):
+                command_methods[attr_name] = command_method
+            case Attribute(enabled=True):
                 attributes[attr_name] = attr
 
     return SingleMapping(

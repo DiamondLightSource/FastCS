@@ -18,6 +18,7 @@ class Method:
 
         self._fn = fn
         self._group = group
+        self.enabled = True
 
     def _validate(self, fn: Callable) -> None:
         if self.return_type not in (None, Signature.empty):
