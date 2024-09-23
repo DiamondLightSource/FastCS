@@ -1,20 +1,95 @@
+from typing import Any
+
 import pytest
 from pytest_mock import MockerFixture
 
-from fastcs.attributes import AttrR, AttrRW
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backends.epics.ioc import (
     EPICS_MAX_NAME_LENGTH,
     EpicsIOC,
     _add_attr_pvi_info,
     _add_pvi_info,
     _add_sub_controller_pvi_info,
+    _get_input_record,
+    _get_output_record,
 )
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Int
+from fastcs.datatypes import Int, String
+from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
 DEVICE = "DEVICE"
+
+SEVENTEEN_VALUES = [str(i) for i in range(1, 18)]
+ONOFF_STATES = {"ZRST": "disabled", "ONST": "enabled"}
+
+
+@pytest.mark.parametrize(
+    "attribute,record_type,kwargs",
+    (
+        (AttrR(String()), "longStringIn", {}),
+        (
+            AttrR(String(), allowed_values=list(ONOFF_STATES.values())),
+            "mbbIn",
+            ONOFF_STATES,
+        ),
+        (AttrR(String(), allowed_values=SEVENTEEN_VALUES), "longStringIn", {}),
+    ),
+)
+def test_get_input_record(
+    attribute: AttrR,
+    record_type: str,
+    kwargs: dict[str, Any],
+    mocker: MockerFixture,
+):
+    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+
+    pv = "PV"
+    _get_input_record(pv, attribute)
+
+    getattr(builder, record_type).assert_called_once_with(pv, **kwargs)
+
+
+def test_get_input_record_raises(mocker: MockerFixture):
+    # Pass a mock as attribute to provoke the fallback case matching on datatype
+    with pytest.raises(FastCSException):
+        _get_input_record("PV", mocker.MagicMock())
+
+
+@pytest.mark.parametrize(
+    "attribute,record_type,kwargs",
+    (
+        (AttrR(String()), "longStringOut", {}),
+        (
+            AttrR(String(), allowed_values=list(ONOFF_STATES.values())),
+            "mbbOut",
+            ONOFF_STATES,
+        ),
+        (AttrR(String(), allowed_values=SEVENTEEN_VALUES), "longStringOut", {}),
+    ),
+)
+def test_get_output_record(
+    attribute: AttrW,
+    record_type: str,
+    kwargs: dict[str, Any],
+    mocker: MockerFixture,
+):
+    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+    update = mocker.MagicMock()
+
+    pv = "PV"
+    _get_output_record(pv, attribute, on_update=update)
+
+    getattr(builder, record_type).assert_called_once_with(
+        pv, always_update=True, on_update=update, **kwargs
+    )
+
+
+def test_get_output_record_raises(mocker: MockerFixture):
+    # Pass a mock as attribute to provoke the fallback case matching on datatype
+    with pytest.raises(FastCSException):
+        _get_output_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
 
 
 def test_ioc(mocker: MockerFixture, mapping: Mapping):
