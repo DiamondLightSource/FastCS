@@ -51,6 +51,7 @@ class Attribute(Generic[T]):
         access_mode: AttrMode,
         group: str | None = None,
         handler: Any = None,
+        allowed_values: list[T] | None = None,
     ) -> None:
         assert (
             datatype.dtype in ATTRIBUTE_TYPES
@@ -59,6 +60,7 @@ class Attribute(Generic[T]):
         self._access_mode: AttrMode = access_mode
         self._group = group
         self.enabled = True
+        self._allowed_values: list[T] | None = allowed_values
 
     @property
     def datatype(self) -> DataType[T]:
@@ -76,6 +78,10 @@ class Attribute(Generic[T]):
     def group(self) -> str | None:
         return self._group
 
+    @property
+    def allowed_values(self) -> list[T] | None:
+        return self._allowed_values
+
 
 class AttrR(Attribute[T]):
     """A read-only ``Attribute``."""
@@ -86,8 +92,15 @@ class AttrR(Attribute[T]):
         access_mode=AttrMode.READ,
         group: str | None = None,
         handler: Updater | None = None,
+        allowed_values: list[T] | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode, group, handler)  # type: ignore
+        super().__init__(
+            datatype,  # type: ignore
+            access_mode,
+            group,
+            handler,
+            allowed_values=allowed_values,  # type: ignore
+        )
         self._value: T = datatype.dtype()
         self._update_callback: AttrCallback[T] | None = None
         self._updater = handler
@@ -118,18 +131,18 @@ class AttrW(Attribute[T]):
         access_mode=AttrMode.WRITE,
         group: str | None = None,
         handler: Sender | None = None,
-        allowed_values: list[str] | None = None,
+        allowed_values: list[T] | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode, group, handler)  # type: ignore
+        super().__init__(
+            datatype,  # type: ignore
+            access_mode,
+            group,
+            handler,
+            allowed_values=allowed_values,  # type: ignore
+        )
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
         self._sender = handler
-
-        self._allowed_values = allowed_values
-
-    @property
-    def allowed_values(self) -> list[str] | None:
-        return self._allowed_values
 
     async def process(self, value: T) -> None:
         await self.process_without_display_update(value)
@@ -166,9 +179,15 @@ class AttrRW(AttrW[T], AttrR[T]):
         access_mode=AttrMode.READ_WRITE,
         group: str | None = None,
         handler: Handler | None = None,
-        allowed_values: list[str] | None = None,
+        allowed_values: list[T] | None = None,
     ) -> None:
-        super().__init__(datatype, access_mode, group, handler, allowed_values)  # type: ignore
+        super().__init__(
+            datatype,  # type: ignore
+            access_mode,
+            group,
+            handler,
+            allowed_values,  # type: ignore
+        )
 
     async def process(self, value: T) -> None:
         await self.set(value)

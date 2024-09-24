@@ -21,4 +21,3 @@ def test_ioc(ioc: None):
         "c": {"w": "DEVICE:Child:C"},
         "d": {"x": "DEVICE:Child:D"},
     }
-    pass

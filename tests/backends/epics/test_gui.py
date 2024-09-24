@@ -29,6 +29,7 @@ def test_get_components(mapping):
 
     components = gui.extract_mapping_components(mapping.get_controller_mappings()[0])
     assert components == [
+        SignalR(name="BigEnum", read_pv="DEVICE:BigEnum", read_widget=TextRead()),
         SignalR(name="ReadBool", read_pv="DEVICE:ReadBool", read_widget=LED()),
         SignalR(
             name="ReadInt",
