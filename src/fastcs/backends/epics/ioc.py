@@ -162,7 +162,7 @@ def _create_and_link_read_pv(
             record.set(enum_value_to_index(attribute, value))
     else:
 
-        async def async_record_set(value: T):  # type: ignore
+        async def async_record_set(value: T):
             record.set(value)
 
     record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute)
@@ -173,8 +173,10 @@ def _create_and_link_read_pv(
 
 def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
     if attr_is_enum(attribute):
-        # https://github.com/python/mypy/issues/16789
-        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))  # type: ignore
+        assert attribute.allowed_values is not None and all(
+            isinstance(v, str) for v in attribute.allowed_values
+        )
+        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
         return builder.mbbIn(pv, **state_keys)
 
     match attribute.datatype:
@@ -210,7 +212,7 @@ def _create_and_link_write_pv(
         async def on_update(value):
             await attribute.process_without_display_update(value)
 
-        async def async_write_display(value: T):  # type: ignore
+        async def async_write_display(value: T):
             record.set(value, process=False)
 
     record = _get_output_record(
@@ -223,7 +225,10 @@ def _create_and_link_write_pv(
 
 def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
     if attr_is_enum(attribute):
-        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))  # type: ignore
+        assert attribute.allowed_values is not None and all(
+            isinstance(v, str) for v in attribute.allowed_values
+        )
+        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
         return builder.mbbOut(pv, always_update=True, on_update=on_update, **state_keys)
 
     match attribute.datatype:

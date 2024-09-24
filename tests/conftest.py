@@ -106,7 +106,7 @@ def ioc():
 
     start_time = time.monotonic()
     while "iocRun: All initialization complete" not in (
-        process.stdout.readline().strip()
+        process.stdout.readline().strip()  # type: ignore
     ):
         if time.monotonic() - start_time > 10:
             raise TimeoutError("IOC did not start in time")

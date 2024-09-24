@@ -144,7 +144,7 @@ def _collect_dev_properties(mapping: Mapping) -> dict[str, Any]:
 
 def _collect_dev_init(mapping: Mapping) -> dict[str, Callable]:
     async def init_device(tango_device: Device):
-        await server.Device.init_device(tango_device)
+        await server.Device.init_device(tango_device)  # type: ignore
         tango_device.set_state(DevState.ON)
         await mapping.controller.connect()
 

@@ -12,43 +12,59 @@ class IPConnectionSettings:
     port: int = 25565
 
 
-class IPConnection:
-    def __init__(self):
-        self._reader, self._writer = (None, None)
+@dataclass
+class StreamConnection:
+    reader: asyncio.StreamReader
+    writer: asyncio.StreamWriter
+
+    def __post_init__(self):
         self._lock = asyncio.Lock()
 
-    async def connect(self, settings: IPConnectionSettings):
-        self._reader, self._writer = await asyncio.open_connection(
-            settings.ip, settings.port
-        )
+    async def __aenter__(self):
+        await self._lock.acquire()
+        return self
 
-    def ensure_connected(self):
-        if self._reader is None or self._writer is None:
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        self._lock.release()
+
+    async def send_message(self, message) -> None:
+        self.writer.write(message.encode("utf-8"))
+        await self.writer.drain()
+
+    async def receive_response(self) -> str:
+        data = await self.reader.readline()
+        return data.decode("utf-8")
+
+    async def close(self):
+        self.writer.close()
+        await self.writer.wait_closed()
+
+
+class IPConnection:
+    def __init__(self):
+        self.__connection = None
+
+    @property
+    def _connection(self) -> StreamConnection:
+        if self.__connection is None:
             raise DisconnectedError("Need to call connect() before using IPConnection.")
 
+        return self.__connection
+
+    async def connect(self, settings: IPConnectionSettings):
+        reader, writer = await asyncio.open_connection(settings.ip, settings.port)
+        self.__connection = StreamConnection(reader, writer)
+
     async def send_command(self, message) -> None:
-        async with self._lock:
-            self.ensure_connected()
-            await self._send_message(message)
+        async with self._connection as connection:
+            await connection.send_message(message)
 
     async def send_query(self, message) -> str:
-        async with self._lock:
-            self.ensure_connected()
-            await self._send_message(message)
-            return await self._receive_response()
+        async with self._connection as connection:
+            await connection.send_message(message)
+            return await connection.receive_response()
 
-    # TODO: Figure out type hinting for connections. TypeGuard fails to work as expected
     async def close(self):
-        async with self._lock:
-            self.ensure_connected()
-            self._writer.close()
-            await self._writer.wait_closed()
-            self._reader, self._writer = (None, None)
-
-    async def _send_message(self, message) -> None:
-        self._writer.write(message.encode("utf-8"))
-        await self._writer.drain()
-
-    async def _receive_response(self) -> str:
-        data = await self._reader.readline()
-        return data.decode("utf-8")
+        async with self._connection as connection:
+            await connection.close()
+            self.__connection = None

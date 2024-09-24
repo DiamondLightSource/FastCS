@@ -7,11 +7,11 @@ from pvi.device import (
     LED,
     ButtonPanel,
     ComboBox,
-    Component,
+    ComponentUnion,
     Device,
     Grid,
     Group,
-    ReadWidget,
+    ReadWidgetUnion,
     SignalR,
     SignalRW,
     SignalW,
@@ -22,7 +22,7 @@ from pvi.device import (
     TextWrite,
     ToggleButton,
     Tree,
-    WriteWidget,
+    WriteWidgetUnion,
 )
 from pydantic import ValidationError
 
@@ -56,7 +56,7 @@ class EpicsGUI:
         return f"{attr_prefix}:{name.title().replace('_', '')}"
 
     @staticmethod
-    def _get_read_widget(attribute: AttrR) -> ReadWidget:
+    def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion:
         match attribute.datatype:
             case Bool():
                 return LED()
@@ -68,7 +68,7 @@ class EpicsGUI:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     @staticmethod
-    def _get_write_widget(attribute: AttrW) -> WriteWidget:
+    def _get_write_widget(attribute: AttrW) -> WriteWidgetUnion:
         match attribute.allowed_values:
             case allowed_values if allowed_values is not None:
                 return ComboBox(choices=allowed_values)
@@ -87,7 +87,7 @@ class EpicsGUI:
 
     def _get_attribute_component(
         self, attr_path: list[str], name: str, attribute: Attribute
-    ):
+    ) -> SignalR | SignalW | SignalRW:
         pv = self._get_pv(attr_path, name)
         name = name.title().replace("_", "")
 
@@ -108,6 +108,8 @@ class EpicsGUI:
             case AttrW():
                 write_widget = self._get_write_widget(attribute)
                 return SignalW(name=name, write_pv=pv, write_widget=write_widget)
+            case _:
+                raise FastCSException(f"Unsupported attribute type: {type(attribute)}")
 
     def _get_command_component(self, attr_path: list[str], name: str):
         pv = self._get_pv(attr_path, name)
@@ -136,8 +138,8 @@ class EpicsGUI:
         formatter = DLSFormatter()
         formatter.format(device, options.output_path)
 
-    def extract_mapping_components(self, mapping: SingleMapping) -> list[Component]:
-        components: Tree[Component] = []
+    def extract_mapping_components(self, mapping: SingleMapping) -> Tree:
+        components: Tree = []
         attr_path = mapping.controller.path
 
         for name, sub_controller in mapping.controller.get_sub_controllers().items():
@@ -151,7 +153,7 @@ class EpicsGUI:
                 )
             )
 
-        groups: dict[str, list[Component]] = {}
+        groups: dict[str, list[ComponentUnion]] = {}
         for attr_name, attribute in mapping.attributes.items():
             try:
                 signal = self._get_attribute_component(
