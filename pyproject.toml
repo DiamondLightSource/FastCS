@@ -26,11 +26,11 @@ requires-python = ">=3.11"
 [project.optional-dependencies]
 dev = [
     "copier",
-    "mypy",
     "myst-parser",
     "pipdeptree",
     "pre-commit",
     "pydata-sphinx-theme>=0.12",
+    "pyright",
     "pytest",
     "pytest-cov",
     "pytest-mock",
@@ -59,8 +59,9 @@ name = "Martin Gaughran"
 [tool.setuptools_scm]
 version_file = "src/fastcs/_version.py"
 
-[tool.mypy]
-ignore_missing_imports = true # Ignore missing stubs in imported modules
+[tool.pyright]
+typeCheckingMode = "standard"
+reportMissingImports = false # Ignore missing stubs in imported modules
 
 [tool.pytest.ini_options]
 # Run pytest with all our checkers, and don't spam us with massive tracebacks on error
@@ -93,12 +94,12 @@ passenv = *
 allowlist_externals =
     pytest
     pre-commit
-    mypy
+    pyright
     sphinx-build
     sphinx-autobuild
 commands =
     pre-commit: pre-commit run --all-files --show-diff-on-failure {posargs}
-    type-checking: mypy src tests {posargs}
+    type-checking: pyright src tests {posargs}
     tests: pytest --cov=fastcs --cov-report term --cov-report xml:cov.xml {posargs}
     docs: sphinx-{posargs:build -EW --keep-going} -T docs build/html
 """

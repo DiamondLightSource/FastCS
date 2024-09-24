@@ -6,7 +6,7 @@ Technical reference material including APIs and release notes.
 :maxdepth: 1
 :glob:
 
-reference/*
+API <_api/fastcs>
 genindex
 Release Notes <https://github.com/DiamondLightSource/FastCS/releases>
 ```
