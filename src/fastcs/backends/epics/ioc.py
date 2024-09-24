@@ -9,9 +9,10 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backends.epics.util import (
-    MBB_MAX_CHOICES,
     MBB_STATE_FIELDS,
-    convert_if_enum,
+    attr_is_enum,
+    enum_index_to_value,
+    enum_value_to_index,
 )
 from fastcs.controller import BaseController
 from fastcs.datatypes import Bool, Float, Int, String, T
@@ -155,23 +156,25 @@ def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
 def _create_and_link_read_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
 ) -> None:
+    if attr_is_enum(attribute):
+
+        async def async_record_set(value: T):
+            record.set(enum_value_to_index(attribute, value))
+    else:
+
+        async def async_record_set(value: T):  # type: ignore
+            record.set(value)
+
     record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute)
-
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
-
-    async def async_record_set(value: T):
-        record.set(convert_if_enum(attribute, value))
 
     attribute.set_update_callback(async_record_set)
 
 
 def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
-    if (
-        isinstance(attribute.datatype, String)
-        and attribute.allowed_values is not None
-        and len(attribute.allowed_values) <= MBB_MAX_CHOICES
-    ):
-        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
+    if attr_is_enum(attribute):
+        # https://github.com/python/mypy/issues/16789
+        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))  # type: ignore
         return builder.mbbIn(pv, **state_keys)
 
     match attribute.datatype:
@@ -192,40 +195,35 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
 def _create_and_link_write_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW[T]
 ) -> None:
-    async def on_update(value):
-        if (
-            isinstance(attribute.datatype, String)
-            and isinstance(value, int)
-            and attribute.allowed_values is not None
-        ):
-            try:
-                value = attribute.allowed_values[value]
-            except IndexError:
-                raise IndexError(
-                    f"Invalid index {value}, allowed values: {attribute.allowed_values}"
-                ) from None
+    if attr_is_enum(attribute):
 
-        await attribute.process_without_display_update(value)
+        async def on_update(value):
+            await attribute.process_without_display_update(
+                enum_index_to_value(attribute, value)
+            )
+
+        async def async_write_display(value: T):
+            record.set(enum_value_to_index(attribute, value), process=False)
+
+    else:
+
+        async def on_update(value):
+            await attribute.process_without_display_update(value)
+
+        async def async_write_display(value: T):  # type: ignore
+            record.set(value, process=False)
 
     record = _get_output_record(
         f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
     )
-
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
-    async def async_record_set(value: T):
-        record.set(convert_if_enum(attribute, value), process=False)
-
-    attribute.set_write_display_callback(async_record_set)
+    attribute.set_write_display_callback(async_write_display)
 
 
 def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
-    if (
-        isinstance(attribute.datatype, String)
-        and attribute.allowed_values is not None
-        and len(attribute.allowed_values) <= MBB_MAX_CHOICES
-    ):
-        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
+    if attr_is_enum(attribute):
+        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))  # type: ignore
         return builder.mbbOut(pv, always_update=True, on_update=on_update, **state_keys)
 
     match attribute.datatype:

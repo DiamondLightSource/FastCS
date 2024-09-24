@@ -10,6 +10,8 @@ from fastcs.backends.epics.ioc import (
     _add_attr_pvi_info,
     _add_pvi_info,
     _add_sub_controller_pvi_info,
+    _create_and_link_read_pv,
+    _create_and_link_write_pv,
     _get_input_record,
     _get_output_record,
 )
@@ -23,6 +25,54 @@ DEVICE = "DEVICE"
 
 SEVENTEEN_VALUES = [str(i) for i in range(1, 18)]
 ONOFF_STATES = {"ZRST": "disabled", "ONST": "enabled"}
+
+
+@pytest.mark.asyncio
+async def test_create_and_link_read_pv(mocker: MockerFixture):
+    get_input_record = mocker.patch("fastcs.backends.epics.ioc._get_input_record")
+    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
+    attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
+    record = get_input_record.return_value
+
+    attribute = mocker.MagicMock()
+
+    attr_is_enum.return_value = False
+    _create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
+
+    get_input_record.assert_called_once_with("PREFIX:PV", attribute)
+    add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "r")
+
+    # Extract the callback generated and set in the function and call it
+    attribute.set_update_callback.assert_called_once_with(mocker.ANY)
+    record_set_callback = attribute.set_update_callback.call_args[0][0]
+    await record_set_callback(1)
+
+    record.set.assert_called_once_with(1)
+
+
+@pytest.mark.asyncio
+async def test_create_and_link_read_pv_enum(mocker: MockerFixture):
+    get_input_record = mocker.patch("fastcs.backends.epics.ioc._get_input_record")
+    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
+    attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
+    record = get_input_record.return_value
+    enum_value_to_index = mocker.patch("fastcs.backends.epics.ioc.enum_value_to_index")
+
+    attribute = mocker.MagicMock()
+
+    attr_is_enum.return_value = True
+    _create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
+
+    get_input_record.assert_called_once_with("PREFIX:PV", attribute)
+    add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "r")
+
+    # Extract the callback generated and set in the function and call it
+    attribute.set_update_callback.assert_called_once_with(mocker.ANY)
+    record_set_callback = attribute.set_update_callback.call_args[0][0]
+    await record_set_callback(1)
+
+    enum_value_to_index.assert_called_once_with(attribute, 1)
+    record.set.assert_called_once_with(enum_value_to_index.return_value)
 
 
 @pytest.mark.parametrize(
@@ -55,6 +105,75 @@ def test_get_input_record_raises(mocker: MockerFixture):
     # Pass a mock as attribute to provoke the fallback case matching on datatype
     with pytest.raises(FastCSException):
         _get_input_record("PV", mocker.MagicMock())
+
+
+@pytest.mark.asyncio
+async def test_create_and_link_write_pv(mocker: MockerFixture):
+    get_output_record = mocker.patch("fastcs.backends.epics.ioc._get_output_record")
+    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
+    attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
+    record = get_output_record.return_value
+
+    attribute = mocker.MagicMock()
+    attribute.process_without_display_update = mocker.AsyncMock()
+
+    attr_is_enum.return_value = False
+    _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
+
+    get_output_record.assert_called_once_with(
+        "PREFIX:PV", attribute, on_update=mocker.ANY
+    )
+    add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "w")
+
+    # Extract the write update callback generated and set in the function and call it
+    attribute.set_write_display_callback.assert_called_once_with(mocker.ANY)
+    write_display_callback = attribute.set_write_display_callback.call_args[0][0]
+    await write_display_callback(1)
+
+    record.set.assert_called_once_with(1, process=False)
+
+    # Extract the on update callback generated and set in the function and call it
+    on_update_callback = get_output_record.call_args[1]["on_update"]
+    await on_update_callback(1)
+
+    attribute.process_without_display_update.assert_called_once_with(1)
+
+
+@pytest.mark.asyncio
+async def test_create_and_link_write_pv_enum(mocker: MockerFixture):
+    get_output_record = mocker.patch("fastcs.backends.epics.ioc._get_output_record")
+    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
+    attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
+    enum_value_to_index = mocker.patch("fastcs.backends.epics.ioc.enum_value_to_index")
+    enum_index_to_value = mocker.patch("fastcs.backends.epics.ioc.enum_index_to_value")
+    record = get_output_record.return_value
+
+    attribute = mocker.MagicMock()
+    attribute.process_without_display_update = mocker.AsyncMock()
+
+    attr_is_enum.return_value = True
+    _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
+
+    get_output_record.assert_called_once_with(
+        "PREFIX:PV", attribute, on_update=mocker.ANY
+    )
+    add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "w")
+
+    # Extract the write update callback generated and set in the function and call it
+    attribute.set_write_display_callback.assert_called_once_with(mocker.ANY)
+    write_display_callback = attribute.set_write_display_callback.call_args[0][0]
+    await write_display_callback(1)
+
+    enum_value_to_index.assert_called_once_with(attribute, 1)
+    record.set.assert_called_once_with(enum_value_to_index.return_value, process=False)
+
+    # Extract the on update callback generated and set in the function and call it
+    on_update_callback = get_output_record.call_args[1]["on_update"]
+    await on_update_callback(1)
+
+    attribute.process_without_display_update.assert_called_once_with(
+        enum_index_to_value.return_value
+    )
 
 
 @pytest.mark.parametrize(
