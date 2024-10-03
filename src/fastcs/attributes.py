@@ -18,7 +18,7 @@ class AttrMode(Enum):
 class Sender(Protocol):
     """Protocol for setting the value of an ``Attribute``."""
 
-    async def put(self, controller: Any, attr: AttrW, value: Any) -> None:
+    async def put(self, controller: Any, attr: AttrW[T], value: Any) -> None:
         pass
 
 
@@ -28,7 +28,7 @@ class Updater(Protocol):
 
     update_period: float
 
-    async def update(self, controller: Any, attr: AttrR) -> None:
+    async def update(self, controller: Any, attr: AttrR[T]) -> None:
         pass
 
 
@@ -89,7 +89,7 @@ class AttrR(Attribute[T]):
     def __init__(
         self,
         datatype: DataType[T],
-        access_mode=AttrMode.READ,
+        access_mode: AttrMode = AttrMode.READ,
         group: str | None = None,
         handler: Updater | None = None,
         allowed_values: list[T] | None = None,
@@ -128,7 +128,7 @@ class AttrW(Attribute[T]):
     def __init__(
         self,
         datatype: DataType[T],
-        access_mode=AttrMode.WRITE,
+        access_mode: AttrMode = AttrMode.WRITE,
         group: str | None = None,
         handler: Sender | None = None,
         allowed_values: list[T] | None = None,
@@ -176,7 +176,7 @@ class AttrRW(AttrW[T], AttrR[T]):
     def __init__(
         self,
         datatype: DataType[T],
-        access_mode=AttrMode.READ_WRITE,
+        access_mode: AttrMode = AttrMode.READ_WRITE,
         group: str | None = None,
         handler: Handler | None = None,
         allowed_values: list[T] | None = None,

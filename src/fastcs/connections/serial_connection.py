@@ -40,10 +40,10 @@ class SerialConnection:
             await self._send_message(message)
             return await self._receive_response(response_size)
 
-    async def _send_message(self, message):
+    async def _send_message(self, message: bytes):
         await self._stream.write_async(message)
 
-    async def _receive_response(self, size):
+    async def _receive_response(self, size: int):
         return await self._stream.read_async(size)
 
     async def close(self) -> None:

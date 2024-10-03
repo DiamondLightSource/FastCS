@@ -16,10 +16,10 @@ from fastcs.backends.epics.ioc import (
     _get_output_record,
 )
 from fastcs.controller import Controller
-from fastcs.cs_methods import Command
 from fastcs.datatypes import Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
+from fastcs.wrappers import command
 
 DEVICE = "DEVICE"
 
@@ -88,7 +88,7 @@ async def test_create_and_link_read_pv_enum(mocker: MockerFixture):
     ),
 )
 def test_get_input_record(
-    attribute: AttrR,
+    attribute: AttrR[Any],
     record_type: str,
     kwargs: dict[str, Any],
     mocker: MockerFixture,
@@ -189,7 +189,7 @@ async def test_create_and_link_write_pv_enum(mocker: MockerFixture):
     ),
 )
 def test_get_output_record(
-    attribute: AttrW,
+    attribute: AttrW[Any],
     record_type: str,
     kwargs: dict[str, Any],
     mocker: MockerFixture,
@@ -357,20 +357,18 @@ def test_add_attr_pvi_info(mocker: MockerFixture):
     )
 
 
-async def do_nothing(arg): ...
-
-
-class NothingCommand:
-    def __init__(self):  # make fastcs_method instance variable
-        self.fastcs_method = Command(do_nothing)
-
-
 class ControllerLongNames(Controller):
     attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name = AttrR(Int())
     attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV = AttrRW(Int())
     attr_rw_short_name = AttrRW(Int())
-    command_with_reallyreallyreallyreallyreallyreallyreally_long_name = NothingCommand()
-    command_short_name = NothingCommand()
+
+    @command()
+    async def command_short_name(self):
+        pass
+
+    @command()
+    async def command_with_reallyreallyreallyreallyreallyreallyreally_long_name(self):
+        pass
 
 
 def test_long_pv_names_discarded(mocker: MockerFixture):
@@ -417,11 +415,11 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     with pytest.raises(AssertionError):
         builder.longIn.assert_called_once_with(f"{DEVICE}:{long_rw_pv_name}_RBV")
 
-    assert long_name_controller.command_short_name.fastcs_method.enabled
+    assert long_name_controller.command_short_name.enabled
     long_command_name = (
         "command_with_" "reallyreallyreallyreallyreallyreallyreally_long_name"
     )
-    assert not getattr(long_name_controller, long_command_name).fastcs_method.enabled
+    assert not getattr(long_name_controller, long_command_name).enabled
 
     short_command_pv_name = "command_short_name".title().replace("_", "")
     builder.aOut.assert_called_once_with(

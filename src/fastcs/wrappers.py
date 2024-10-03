@@ -1,41 +1,36 @@
-from typing import Any, Protocol, runtime_checkable
+from collections.abc import Callable
 
-from .cs_methods import Command, Method, Put, Scan
-from .exceptions import FastCSException
+from .cs_methods import (
+    Command,
+    CommandCallback,
+    ControllerType,
+    Put,
+    PutCallback,
+    Scan,
+    ScanCallback,
+)
 
 
-@runtime_checkable
-class WrappedMethod(Protocol):
-    fastcs_method: Method
-
-
-# TODO: Consider type hints with the use of typing.Protocol
-def scan(period: float) -> Any:
+def scan(
+    period: float,
+) -> Callable[[ScanCallback[ControllerType]], Scan[ControllerType]]:
     if period <= 0:
-        raise FastCSException("Scan method must have a positive scan period")
+        raise ValueError("Scan method must have a positive scan period")
 
-    def wrapper(fn):
-        fn.fastcs_method = Scan(fn, period)
-        return fn
+    def wrapper(fn: ScanCallback[ControllerType]) -> Scan[ControllerType]:
+        return Scan(fn, period)
 
     return wrapper
 
 
-def put(fn) -> Any:
-    fn.fastcs_method = Put(fn)
-    return fn
+def put(fn: PutCallback[ControllerType]) -> Put[ControllerType]:
+    return Put(fn)
 
 
-def command(*, group: str | None = None) -> Any:
-    """Decorator to map a `Controller` method into a `Command`.
-
-    Args:
-        group: Group to display the widget for this command in on the UI
-
-    """
-
-    def wrapper(fn):
-        fn.fastcs_method = Command(fn, group=group)
-        return fn
+def command(
+    *, group: str | None = None
+) -> Callable[[CommandCallback[ControllerType]], Command[ControllerType]]:
+    def wrapper(fn: CommandCallback[ControllerType]) -> Command[ControllerType]:
+        return Command(fn, group=group)
 
     return wrapper

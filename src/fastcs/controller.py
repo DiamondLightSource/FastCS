@@ -8,7 +8,7 @@ from .attributes import Attribute
 class BaseController:
     def __init__(self, path: list[str] | None = None) -> None:
         self._path: list[str] = path or []
-        self.__sub_controller_tree: dict[str, BaseController] = {}
+        self.__sub_controller_tree: dict[str, SubController] = {}
 
         self._bind_attrs()
 
@@ -24,11 +24,36 @@ class BaseController:
         self._path = path
 
     def _bind_attrs(self) -> None:
+        """Search for `Attributes` and `Methods` to bind them to this instance.
+
+        This method will search the attributes of this controller class to bind them to
+        this specific instance. For `Attribute`s, this is just a case of copying and
+        re-assigning to `self` to make it unique across multiple instances of this
+        controller class. For `Method`s, this requires creating a bound method from a
+        class method and a controller instance, so that it can be called from any
+        context with an implicit `self` argument as the instance.
+
+        """
+        # Lazy import to avoid circular references
+        from fastcs.cs_methods import (
+            BoundCommand,
+            BoundPut,
+            BoundScan,
+            Command,
+            Put,
+            Scan,
+        )
+
         for attr_name in dir(self):
             attr = getattr(self, attr_name)
             if isinstance(attr, Attribute):
-                new_attribute = copy(attr)
-                setattr(self, attr_name, new_attribute)
+                setattr(self, attr_name, copy(attr))
+            elif isinstance(attr, Command):
+                setattr(self, attr_name, BoundCommand(attr, self))
+            elif isinstance(attr, Put):
+                setattr(self, attr_name, BoundPut(attr, self))
+            elif isinstance(attr, Scan):
+                setattr(self, attr_name, BoundScan(attr, self))
 
     def register_sub_controller(self, name: str, sub_controller: SubController):
         if name in self.__sub_controller_tree.keys():
@@ -39,7 +64,7 @@ class BaseController:
         self.__sub_controller_tree[name] = sub_controller
         sub_controller.set_path(self.path + [name])
 
-    def get_sub_controllers(self) -> dict[str, BaseController]:
+    def get_sub_controllers(self) -> dict[str, SubController]:
         return self.__sub_controller_tree
 
 

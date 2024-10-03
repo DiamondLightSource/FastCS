@@ -1,6 +1,5 @@
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from types import MethodType
 from typing import Any
 
 import tango
@@ -9,7 +8,7 @@ from tango.server import Device
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController
-from fastcs.datatypes import Float
+from fastcs.datatypes import Float, T
 from fastcs.mapping import Mapping
 
 
@@ -22,7 +21,7 @@ class TangoDSROptions:
 
 
 def _wrap_updater_fget(
-    attr_name: str, attribute: AttrR, controller: BaseController
+    attr_name: str, attribute: AttrR[T], controller: BaseController
 ) -> Callable[[Any], Any]:
     async def fget(tango_device: Device):
         assert attribute.updater is not None
@@ -34,7 +33,7 @@ def _wrap_updater_fget(
     return fget
 
 
-def _tango_polling_period(attribute: AttrR) -> int:
+def _tango_polling_period(attribute: AttrR[T]) -> int:
     if attribute.updater is not None:
         # Convert to integer milliseconds
         return int(attribute.updater.update_period * 1000)
@@ -42,7 +41,7 @@ def _tango_polling_period(attribute: AttrR) -> int:
     return -1  # `tango.server.attribute` default for `polling_period`
 
 
-def _tango_display_format(attribute: Attribute) -> str:
+def _tango_display_format(attribute: Attribute[T]) -> str:
     match attribute.datatype:
         case Float(prec):
             return f"%.{prec}"
@@ -51,9 +50,9 @@ def _tango_display_format(attribute: Attribute) -> str:
 
 
 def _wrap_updater_fset(
-    attr_name: str, attribute: AttrW, controller: BaseController
+    attr_name: str, attribute: AttrW[T], controller: BaseController
 ) -> Callable[[Any, Any], Any]:
-    async def fset(tango_device: Device, val):
+    async def fset(tango_device: Device, val: Any):
         assert attribute.sender is not None
 
         await attribute.sender.put(controller, attribute, val)
@@ -112,11 +111,11 @@ def _collect_dev_attributes(mapping: Mapping) -> dict[str, Any]:
 
 
 def _wrap_command_f(
-    method_name: str, method: Callable, controller: BaseController
+    method_name: str, method: Callable[..., Awaitable[None]]
 ) -> Callable[..., Awaitable[None]]:
     async def _dynamic_f(tango_device: Device) -> None:
-        tango_device.info_stream(f"called {controller} f method: {method_name}")
-        return await MethodType(method, controller)()
+        tango_device.info_stream(f"called command method: {method_name}")
+        return await method()
 
     _dynamic_f.__name__ = method_name
     return _dynamic_f
@@ -127,11 +126,11 @@ def _collect_dev_commands(mapping: Mapping) -> dict[str, Any]:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
 
-        for name, method in single_mapping.command_methods.items():
+        for name, command in single_mapping.command_methods.items():
             cmd_name = name.title().replace("_", "")
             d_cmd_name = f"{'_'.join(path)}_{cmd_name}" if path else cmd_name
             collection[d_cmd_name] = server.command(
-                f=_wrap_command_f(d_cmd_name, method.fn, single_mapping.controller)
+                f=_wrap_command_f(d_cmd_name, command)
             )
 
     return collection
@@ -142,7 +141,9 @@ def _collect_dev_properties(mapping: Mapping) -> dict[str, Any]:
     return collection
 
 
-def _collect_dev_init(mapping: Mapping) -> dict[str, Callable]:
+def _collect_dev_init(
+    mapping: Mapping,
+) -> dict[str, Callable[[Device], Awaitable[None]]]:
     async def init_device(tango_device: Device):
         await server.Device.init_device(tango_device)  # type: ignore
         tango_device.set_state(DevState.ON)
@@ -160,7 +161,7 @@ def _collect_dev_flags(mapping: Mapping) -> dict[str, Any]:
 
 
 def _collect_dsr_args(options: TangoDSROptions) -> list[str]:
-    args = []
+    args: list[str] = []
 
     if options.debug:
         args.append("-v4")
@@ -176,7 +177,7 @@ class TangoDSR:
         if options is None:
             options = TangoDSROptions()
 
-        class_dict: dict = {
+        class_dict: dict[str, Any] = {
             **_collect_dev_attributes(self._mapping),
             **_collect_dev_commands(self._mapping),
             **_collect_dev_properties(self._mapping),

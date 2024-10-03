@@ -1,6 +1,5 @@
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from types import MethodType
 from typing import Any, Literal
 
 from softioc import builder, softioc
@@ -156,6 +155,7 @@ def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
 def _create_and_link_read_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
 ) -> None:
+    record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute)
     if attr_is_enum(attribute):
 
         async def async_record_set(value: T):
@@ -165,13 +165,12 @@ def _create_and_link_read_pv(
         async def async_record_set(value: T):
             record.set(value)
 
-    record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
     attribute.set_update_callback(async_record_set)
 
 
-def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
+def _get_input_record(pv: str, attribute: AttrR[T]) -> RecordWrapper:
     if attr_is_enum(attribute):
         assert attribute.allowed_values is not None and all(
             isinstance(v, str) for v in attribute.allowed_values
@@ -199,31 +198,40 @@ def _create_and_link_write_pv(
 ) -> None:
     if attr_is_enum(attribute):
 
-        async def on_update(value):
+        async def on_update_enum(value: int):
             await attribute.process_without_display_update(
                 enum_index_to_value(attribute, value)
             )
+
+        record = _get_output_record(
+            f"{pv_prefix}:{pv_name}", attribute, on_update=on_update_enum
+        )
 
         async def async_write_display(value: T):
             record.set(enum_value_to_index(attribute, value), process=False)
 
     else:
 
-        async def on_update(value):
+        async def on_update(value: T):
             await attribute.process_without_display_update(value)
+
+        record = _get_output_record(
+            f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
+        )
 
         async def async_write_display(value: T):
             record.set(value, process=False)
 
-    record = _get_output_record(
-        f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
-    )
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
     attribute.set_write_display_callback(async_write_display)
 
 
-def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
+def _get_output_record(
+    pv: str,
+    attribute: AttrW[T],
+    on_update: Callable[..., Coroutine[None, None, None]],
+) -> Any:
     if attr_is_enum(attribute):
         assert attribute.allowed_values is not None and all(
             isinstance(v, str) for v in attribute.allowed_values
@@ -255,7 +263,7 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
 def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
-        for attr_name, method in single_mapping.command_methods.items():
+        for attr_name, command in single_mapping.command_methods.items():
             pv_name = attr_name.title().replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
             if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
@@ -263,18 +271,16 @@ def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
                     f"Not creating PV for {attr_name} as full name would exceed"
                     f" {EPICS_MAX_NAME_LENGTH} characters"
                 )
-                method.enabled = False
+                command.enabled = False
             else:
-                _create_and_link_command_pv(
-                    _pv_prefix,
-                    pv_name,
-                    attr_name,
-                    MethodType(method.fn, single_mapping.controller),
-                )
+                _create_and_link_command_pv(_pv_prefix, pv_name, attr_name, command)
 
 
 def _create_and_link_command_pv(
-    pv_prefix: str, pv_name: str, attr_name: str, method: Callable
+    pv_prefix: str,
+    pv_name: str,
+    attr_name: str,
+    method: Callable[[], Coroutine[None, None, None]],
 ) -> None:
     async def wrapped_method(_: Any):
         await method()

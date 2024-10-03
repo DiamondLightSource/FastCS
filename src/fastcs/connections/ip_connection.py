@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from types import TracebackType
 
 
 class DisconnectedError(Exception):
@@ -24,10 +25,15 @@ class StreamConnection:
         await self._lock.acquire()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ):
         self._lock.release()
 
-    async def send_message(self, message) -> None:
+    async def send_message(self, message: str) -> None:
         self.writer.write(message.encode("utf-8"))
         await self.writer.drain()
 
@@ -55,11 +61,11 @@ class IPConnection:
         reader, writer = await asyncio.open_connection(settings.ip, settings.port)
         self.__connection = StreamConnection(reader, writer)
 
-    async def send_command(self, message) -> None:
+    async def send_command(self, message: str) -> None:
         async with self._connection as connection:
             await connection.send_message(message)
 
-    async def send_query(self, message) -> str:
+    async def send_query(self, message: str) -> str:
         async with self._connection as connection:
             await connection.send_message(message)
             return await connection.receive_response()

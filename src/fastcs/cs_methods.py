@@ -1,14 +1,22 @@
 from asyncio import iscoroutinefunction
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable, Coroutine
 from inspect import Signature, getdoc, signature
+from typing import Any, Generic, TypeVar
+
+from fastcs.controller import BaseController
 
 from .exceptions import FastCSException
 
-ScanCallback = Callable[..., Awaitable[None]]
+ControllerType = TypeVar("ControllerType", bound=BaseController)
+# These callbacks are `Controller` instance methods, so the first parameter is `self`
+MethodCallback = Callable[..., Coroutine[None, None, Any]]
+CommandCallback = Callable[[ControllerType], Coroutine[None, None, None]]
+ScanCallback = Callable[[ControllerType], Coroutine[None, None, None]]
+PutCallback = Callable[[ControllerType, Any], Coroutine[None, None, None]]
 
 
-class Method:
-    def __init__(self, fn: Callable, *, group: str | None = None) -> None:
+class Method(Generic[ControllerType]):
+    def __init__(self, fn: MethodCallback, *, group: str | None = None) -> None:
         self._docstring = getdoc(fn)
 
         sig = signature(fn, eval_str=True)
@@ -20,7 +28,7 @@ class Method:
         self._group = group
         self.enabled = True
 
-    def _validate(self, fn: Callable) -> None:
+    def _validate(self, fn: MethodCallback) -> None:
         if self.return_type not in (None, Signature.empty):
             raise FastCSException("Method return type must be None or empty")
 
@@ -48,13 +56,13 @@ class Method:
         return self._group
 
 
-class Scan(Method):
-    def __init__(self, fn: Callable, period) -> None:
+class Scan(Method[ControllerType]):
+    def __init__(self, fn: ScanCallback[ControllerType], period: float) -> None:
         super().__init__(fn)
 
         self._period = period
 
-    def _validate(self, fn: Callable) -> None:
+    def _validate(self, fn: ScanCallback[ControllerType]) -> None:
         super()._validate(fn)
 
         if not len(self.parameters) == 1:
@@ -65,23 +73,55 @@ class Scan(Method):
         return self._period
 
 
-class Put(Method):
-    def __init__(self, fn: Callable) -> None:
+class Put(Method[ControllerType]):
+    def __init__(self, fn: PutCallback[ControllerType]) -> None:
         super().__init__(fn)
 
-    def _validate(self, fn: Callable) -> None:
+    def _validate(self, fn: PutCallback[ControllerType]) -> None:
         super()._validate(fn)
 
         if not len(self.parameters) == 2:
             raise FastCSException("Put method can only take one argument")
 
 
-class Command(Method):
-    def __init__(self, fn: Callable, *, group: str | None = None) -> None:
+class Command(Method[ControllerType]):
+    def __init__(
+        self, fn: CommandCallback[ControllerType], *, group: str | None = None
+    ) -> None:
         super().__init__(fn, group=group)
 
-    def _validate(self, fn: Callable) -> None:
+    def _validate(self, fn: CommandCallback[ControllerType]) -> None:
         super()._validate(fn)
 
         if not len(self.parameters) == 1:
             raise FastCSException("Command method cannot have arguments")
+
+
+class BoundScan(Scan):
+    def __init__(self, scan: Scan[BaseController], controller: BaseController) -> None:
+        super().__init__(scan.fn, scan.period)
+
+        self._controller = controller
+
+    async def __call__(self):
+        return await self._fn(self._controller)
+
+
+class BoundPut(Put):
+    def __init__(self, put: Put, controller: BaseController) -> None:
+        super().__init__(put.fn)
+
+        self._controller = controller
+
+    async def __call__(self, value: bool | int | float | str):
+        return await self._fn(self._controller, value)
+
+
+class BoundCommand(Command):
+    def __init__(self, command: Command, controller: BaseController) -> None:
+        super().__init__(command.fn)
+
+        self._controller = controller
+
+    async def __call__(self):
+        return await self._fn(self._controller)

@@ -3,9 +3,10 @@ from pytest_mock import MockerFixture
 from tango._tango import AttrWriteType, CmdArgType
 
 from fastcs.backends.tango.dsr import _collect_dev_attributes, _collect_dev_commands
+from fastcs.mapping import Mapping
 
 
-def test_collect_attributes(mapping):
+def test_collect_attributes(mapping: Mapping):
     attributes = _collect_dev_attributes(mapping)
 
     # Check that attributes are created and of expected type
@@ -29,7 +30,7 @@ def test_collect_attributes(mapping):
 
 
 @pytest.mark.asyncio
-async def test_collect_commands(mapping, mocker: MockerFixture):
+async def test_collect_commands(mapping: Mapping, mocker: MockerFixture):
     commands = _collect_dev_commands(mapping)
 
     # Check that command is created and it can be called

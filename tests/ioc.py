@@ -6,12 +6,12 @@ from fastcs.wrappers import command
 
 
 class ParentController(Controller):
-    a: AttrR = AttrR(Int())
-    b: AttrRW = AttrRW(Int())
+    a: AttrR[int] = AttrR(Int())
+    b: AttrRW[int] = AttrRW(Int())
 
 
 class ChildController(SubController):
-    c: AttrW = AttrW(Int())
+    c: AttrW[int] = AttrW(Int())
 
     @command()
     async def d(self):

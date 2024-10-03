@@ -10,8 +10,8 @@ import pytest
 from aioca import purge_channel_caches
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
-from fastcs.controller import Controller
-from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.controller import BaseController, Controller
+from fastcs.datatypes import Bool, Float, Int, String, T
 from fastcs.mapping import Mapping
 from fastcs.wrappers import command, scan
 
@@ -36,12 +36,12 @@ if os.getenv("PYTEST_RAISE", "0") == "1":
 class TestUpdater(Updater):
     update_period = 1
 
-    async def update(self, controller, attr):
+    async def update(self, controller: BaseController, attr: AttrR[T]):
         print(f"{controller} update {attr}")
 
 
 class TestSender(Sender):
-    async def put(self, controller, attr, value):
+    async def put(self, controller: BaseController, attr: AttrW[T], value: T):
         print(f"{controller}: {attr} = {value}")
 
 
@@ -50,13 +50,13 @@ class TestHandler(Handler, TestUpdater, TestSender):
 
 
 class TestController(Controller):
-    read_int: AttrR = AttrR(Int(), handler=TestUpdater())
-    read_write_int: AttrRW = AttrRW(Int(), handler=TestHandler())
-    read_write_float: AttrRW = AttrRW(Float())
-    read_bool: AttrR = AttrR(Bool())
-    write_bool: AttrW = AttrW(Bool(), handler=TestSender())
-    string_enum: AttrRW = AttrRW(String(), allowed_values=["red", "green", "blue"])
-    big_enum: AttrR = AttrR(
+    read_int: AttrR[int] = AttrR(Int(), handler=TestUpdater())
+    read_write_int: AttrRW[int] = AttrRW(Int(), handler=TestHandler())
+    read_write_float: AttrRW[float] = AttrRW(Float())
+    read_bool: AttrR[bool] = AttrR(Bool())
+    write_bool: AttrW[bool] = AttrW(Bool(), handler=TestSender())
+    string_enum: AttrRW[str] = AttrRW(String(), allowed_values=["red", "green", "blue"])
+    big_enum: AttrR[int] = AttrR(
         Int(),
         allowed_values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
     )
@@ -81,12 +81,12 @@ class TestController(Controller):
 
 
 @pytest.fixture
-def controller():
+def controller() -> TestController:
     return TestController()
 
 
 @pytest.fixture
-def mapping(controller):
+def mapping(controller: TestController) -> Mapping:
     return Mapping(controller)
 
 

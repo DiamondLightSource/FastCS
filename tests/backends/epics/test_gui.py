@@ -25,7 +25,7 @@ def test_get_pv():
     assert gui._get_pv(["D", "E"], "F") == "DEVICE:D:E:F"
 
 
-def test_get_components(mapping):
+def test_get_components(mapping: Mapping):
     gui = EpicsGUI(mapping, "DEVICE")
 
     components = gui.extract_mapping_components(mapping.get_controller_mappings()[0])

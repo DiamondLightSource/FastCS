@@ -25,7 +25,7 @@ MBB_VALUE_FIELDS = tuple(f"{p}VL" for p in _MBB_FIELD_PREFIXES)
 MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
-def attr_is_enum(attribute: Attribute) -> bool:
+def attr_is_enum(attribute: Attribute[T]) -> bool:
     """Check if the `Attribute` has a `String` datatype and has `allowed_values` set.
 
     Args:

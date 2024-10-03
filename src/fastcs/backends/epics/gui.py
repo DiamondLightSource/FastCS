@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 from pvi._format.dls import DLSFormatter
 from pvi.device import (
@@ -28,9 +29,9 @@ from pydantic import ValidationError
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.datatypes import Bool, Float, Int, String, T
 from fastcs.exceptions import FastCSException
-from fastcs.mapping import Mapping, SingleMapping, _get_single_mapping
+from fastcs.mapping import Mapping, SingleMapping, get_single_mapping
 from fastcs.util import snake_to_pascal
 
 
@@ -56,7 +57,7 @@ class EpicsGUI:
         return f"{attr_prefix}:{name.title().replace('_', '')}"
 
     @staticmethod
-    def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion:
+    def _get_read_widget(attribute: AttrR[T]) -> ReadWidgetUnion:
         match attribute.datatype:
             case Bool():
                 return LED()
@@ -68,10 +69,11 @@ class EpicsGUI:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     @staticmethod
-    def _get_write_widget(attribute: AttrW) -> WriteWidgetUnion:
+    def _get_write_widget(attribute: AttrW[T]) -> WriteWidgetUnion:
         match attribute.allowed_values:
             case allowed_values if allowed_values is not None:
-                return ComboBox(choices=allowed_values)
+                choices = [v for v in allowed_values if isinstance(v, str)]
+                return ComboBox(choices=choices)
             case _:
                 pass
 
@@ -86,7 +88,7 @@ class EpicsGUI:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     def _get_attribute_component(
-        self, attr_path: list[str], name: str, attribute: Attribute
+        self, attr_path: list[str], name: str, attribute: Attribute[Any]
     ) -> SignalR | SignalW | SignalRW:
         pv = self._get_pv(attr_path, name)
         name = name.title().replace("_", "")
@@ -148,7 +150,7 @@ class EpicsGUI:
                     name=snake_to_pascal(name),
                     layout=SubScreen(),
                     children=self.extract_mapping_components(
-                        _get_single_mapping(sub_controller)
+                        get_single_mapping(sub_controller)
                     ),
                 )
             )
