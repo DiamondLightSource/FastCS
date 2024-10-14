@@ -5,6 +5,6 @@ metadata:
   title: FastCS
   description: Control system agnostic framework for building Device support in Python that will work for both EPICS and Tango
 spec:
-  type: documentation
+  type: library
   lifecycle: experimental
   owner: user:mef65357

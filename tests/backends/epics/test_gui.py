@@ -6,6 +6,7 @@ from pvi.device import (
     SignalRW,
     SignalW,
     SignalX,
+    TextFormat,
     TextRead,
     TextWrite,
     ToggleButton,
@@ -53,7 +54,7 @@ def test_get_components(mapping):
         SignalRW(
             name="StringEnum",
             read_pv="DEVICE:StringEnum_RBV",
-            read_widget=TextRead(format="string"),
+            read_widget=TextRead(format=TextFormat.string),
             write_pv="DEVICE:StringEnum",
             write_widget=ComboBox(choices=["red", "green", "blue"]),
         ),

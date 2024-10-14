@@ -4,6 +4,7 @@ import string
 import subprocess
 import time
 from pathlib import Path
+from typing import Any
 
 import pytest
 from aioca import purge_channel_caches
@@ -19,11 +20,16 @@ from fastcs.wrappers import command, scan
 if os.getenv("PYTEST_RAISE", "0") == "1":
 
     @pytest.hookimpl(tryfirst=True)
-    def pytest_exception_interact(call):
-        raise call.excinfo.value
+    def pytest_exception_interact(call: pytest.CallInfo[Any]):
+        if call.excinfo is not None:
+            raise call.excinfo.value
+        else:
+            raise RuntimeError(
+                f"{call} has no exception data, an unknown error has occurred"
+            )
 
     @pytest.hookimpl(tryfirst=True)
-    def pytest_internalerror(excinfo):
+    def pytest_internalerror(excinfo: pytest.ExceptionInfo[Any]):
         raise excinfo.value
 
 
@@ -100,7 +106,7 @@ def ioc():
 
     start_time = time.monotonic()
     while "iocRun: All initialization complete" not in (
-        process.stdout.readline().strip()
+        process.stdout.readline().strip()  # type: ignore
     ):
         if time.monotonic() - start_time > 10:
             raise TimeoutError("IOC did not start in time")
