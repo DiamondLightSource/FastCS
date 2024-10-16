@@ -35,25 +35,14 @@ class BaseController:
 
         """
         # Lazy import to avoid circular references
-        from fastcs.cs_methods import (
-            BoundCommand,
-            BoundPut,
-            BoundScan,
-            Command,
-            Put,
-            Scan,
-        )
+        from fastcs.cs_methods import Command, Put, Scan
 
         for attr_name in dir(self):
             attr = getattr(self, attr_name)
             if isinstance(attr, Attribute):
                 setattr(self, attr_name, copy(attr))
-            elif isinstance(attr, Command):
-                setattr(self, attr_name, BoundCommand(attr, self))
-            elif isinstance(attr, Put):
-                setattr(self, attr_name, BoundPut(attr, self))
-            elif isinstance(attr, Scan):
-                setattr(self, attr_name, BoundScan(attr, self))
+            elif isinstance(attr, Put | Scan | Command):
+                setattr(self, attr_name, attr.bind(self))
 
     def register_sub_controller(self, name: str, sub_controller: SubController):
         if name in self.__sub_controller_tree.keys():

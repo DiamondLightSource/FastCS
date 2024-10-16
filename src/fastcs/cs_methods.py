@@ -1,6 +1,7 @@
 from asyncio import iscoroutinefunction
 from collections.abc import Callable, Coroutine
 from inspect import Signature, getdoc, signature
+from types import MethodType
 from typing import Any, Generic, TypeVar
 
 from fastcs.controller import BaseController
@@ -13,6 +14,14 @@ MethodCallback = Callable[..., Coroutine[None, None, Any]]
 CommandCallback = Callable[[ControllerType], Coroutine[None, None, None]]
 ScanCallback = Callable[[ControllerType], Coroutine[None, None, None]]
 PutCallback = Callable[[ControllerType, Any], Coroutine[None, None, None]]
+BoundCommandCallback = Callable[[], Coroutine[None, None, None]]
+BoundScanCallback = Callable[[], Coroutine[None, None, None]]
+BoundPutCallback = Callable[[Any], Coroutine[None, None, None]]
+
+
+method_not_bound_error = NotImplementedError(
+    "Method must be bound to a controller instance to be callable"
+)
 
 
 class Method(Generic[ControllerType]):
@@ -62,15 +71,21 @@ class Scan(Method[ControllerType]):
 
         self._period = period
 
+    @property
+    def period(self):
+        return self._period
+
     def _validate(self, fn: ScanCallback[ControllerType]) -> None:
         super()._validate(fn)
 
         if not len(self.parameters) == 1:
             raise FastCSException("Scan method cannot have arguments")
 
-    @property
-    def period(self):
-        return self._period
+    def bind(self, controller: ControllerType) -> "BoundScan":
+        return BoundScan(MethodType(self.fn, controller), self._period)
+
+    def __call__(self):
+        raise method_not_bound_error
 
 
 class Put(Method[ControllerType]):
@@ -82,6 +97,12 @@ class Put(Method[ControllerType]):
 
         if not len(self.parameters) == 2:
             raise FastCSException("Put method can only take one argument")
+
+    def bind(self, controller: ControllerType) -> "BoundPut":
+        return BoundPut(MethodType(self.fn, controller))
+
+    def __call__(self, value: Any):
+        raise method_not_bound_error
 
 
 class Command(Method[ControllerType]):
@@ -96,32 +117,56 @@ class Command(Method[ControllerType]):
         if not len(self.parameters) == 1:
             raise FastCSException("Command method cannot have arguments")
 
+    def bind(self, controller: ControllerType) -> "BoundCommand":
+        return BoundCommand(MethodType(self.fn, controller))
 
-class BoundScan(Scan):
-    def __init__(self, scan: Scan[BaseController], controller: BaseController) -> None:
-        super().__init__(scan.fn, scan.period)
-
-        self._controller = controller
-
-    async def __call__(self):
-        return await self._fn(self._controller)
+    def __call__(self):
+        raise method_not_bound_error
 
 
-class BoundPut(Put):
-    def __init__(self, put: Put, controller: BaseController) -> None:
-        super().__init__(put.fn)
+class BoundScan(Method[BaseController]):
+    def __init__(self, fn: BoundScanCallback, period: float):
+        super().__init__(fn)
 
-        self._controller = controller
+        self._period = period
 
-    async def __call__(self, value: bool | int | float | str):
-        return await self._fn(self._controller, value)
+    @property
+    def period(self):
+        return self._period
+
+    def _validate(self, fn: BoundScanCallback) -> None:
+        super()._validate(fn)
+
+        if not len(self.parameters) == 0:
+            raise FastCSException("Scan method cannot have arguments")
+
+    def __call__(self):
+        return self._fn()
 
 
-class BoundCommand(Command):
-    def __init__(self, command: Command, controller: BaseController) -> None:
-        super().__init__(command.fn)
+class BoundPut(Method[BaseController]):
+    def __init__(self, fn: BoundPutCallback):
+        super().__init__(fn)
 
-        self._controller = controller
+    def _validate(self, fn: BoundPutCallback) -> None:
+        super()._validate(fn)
 
-    async def __call__(self):
-        return await self._fn(self._controller)
+        if not len(self.parameters) == 1:
+            raise FastCSException("Put method can only take one argument")
+
+    def __call__(self, value: Any):
+        return self._fn(value)
+
+
+class BoundCommand(Method[BaseController]):
+    def __init__(self, fn: BoundCommandCallback):
+        super().__init__(fn)
+
+    def _validate(self, fn: BoundCommandCallback) -> None:
+        super()._validate(fn)
+
+        if not len(self.parameters) == 0:
+            raise FastCSException("Command method cannot have arguments")
+
+    def __call__(self):
+        return self._fn()

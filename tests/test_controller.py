@@ -2,6 +2,7 @@ import pytest
 
 from fastcs.backend import Backend
 from fastcs.controller import Controller, SubController
+from fastcs.cs_methods import BoundCommand
 from fastcs.mapping import _walk_mappings, get_single_mapping
 from fastcs.wrappers import command
 
@@ -36,11 +37,20 @@ def test_controller_nesting():
 @pytest.mark.asyncio
 async def test_controller_methods():
     class TestController(Controller):
+        def __init__(self):
+            super().__init__()
+            self.do_nothing2 = BoundCommand(self.do_nothing2)
+
         @command()
         async def do_nothing(self):
             pass
 
+        async def do_nothing2(self):
+            pass
+
     c = TestController()
-    b = Backend(c)
     await c.do_nothing()
+    await c.do_nothing2()
+    b = Backend(c)
     await b._mapping.get_controller_mappings()[0].command_methods["do_nothing"]()
+    await b._mapping.get_controller_mappings()[0].command_methods["do_nothing2"]()

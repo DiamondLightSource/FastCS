@@ -47,14 +47,20 @@ def get_single_mapping(controller: BaseController) -> SingleMapping:
     for attr_name in dir(controller):
         attr = getattr(controller, attr_name)
         match attr:
-            case Put(enabled=True):
-                put_methods[attr_name] = BoundPut(attr, controller)
-            case Scan(enabled=True):
-                scan_methods[attr_name] = BoundScan(attr, controller)
-            case Command(enabled=True):
-                command_methods[attr_name] = BoundCommand(attr, controller)
             case Attribute(enabled=True):
                 attributes[attr_name] = attr
+            case BoundPut(enabled=True):
+                put_methods[attr_name] = attr
+            case Put(enabled=True):
+                put_methods[attr_name] = attr.bind(controller)
+            case BoundScan(enabled=True):
+                scan_methods[attr_name] = attr
+            case Scan(enabled=True):
+                scan_methods[attr_name] = attr.bind(controller)
+            case BoundCommand(enabled=True):
+                command_methods[attr_name] = attr
+            case Command(enabled=True):
+                command_methods[attr_name] = attr.bind(controller)
             case _:
                 pass
 
