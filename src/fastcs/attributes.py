@@ -52,7 +52,7 @@ class Attribute(Generic[T]):
         group: str | None = None,
         handler: Any = None,
         allowed_values: list[T] | None = None,
-        description: str | None = None
+        description: str | None = None,
     ) -> None:
         assert (
             datatype.dtype in ATTRIBUTE_TYPES
@@ -103,7 +103,7 @@ class AttrR(Attribute[T]):
             group,
             handler,
             allowed_values=allowed_values,  # type: ignore
-            description=description
+            description=description,
         )
         self._value: T = datatype.dtype()
         self._update_callback: AttrCallback[T] | None = None
@@ -136,7 +136,7 @@ class AttrW(Attribute[T]):
         group: str | None = None,
         handler: Sender | None = None,
         allowed_values: list[T] | None = None,
-        description: str | None = None
+        description: str | None = None,
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
@@ -144,7 +144,7 @@ class AttrW(Attribute[T]):
             group,
             handler,
             allowed_values=allowed_values,  # type: ignore
-            description=description
+            description=description,
         )
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
@@ -186,7 +186,7 @@ class AttrRW(AttrW[T], AttrR[T]):
         group: str | None = None,
         handler: Handler | None = None,
         allowed_values: list[T] | None = None,
-        description: str | None = None
+        description: str | None = None,
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
@@ -194,7 +194,7 @@ class AttrRW(AttrW[T], AttrR[T]):
             group,
             handler,
             allowed_values,  # type: ignore
-            description=description
+            description=description,
         )
 
     async def process(self, value: T) -> None:

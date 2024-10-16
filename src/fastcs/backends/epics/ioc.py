@@ -118,7 +118,7 @@ def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
         for attr_name, attribute in single_mapping.attributes.items():
-            pv_name = attr_name.title().replace("_", "")
+            pv_name = attr_name.replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
             full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
 
@@ -222,6 +222,10 @@ def _create_and_link_write_pv(
     record = _get_output_record(
         f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
     )
+    pascal_case_pv_name = pv_name.title()
+    if pascal_case_pv_name != pv_name:
+        record.add_alias(f"{pv_prefix}:{pascal_case_pv_name}")
+
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
     attribute.set_write_display_callback(async_write_display)
@@ -236,7 +240,13 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
             isinstance(v, str) for v in attribute.allowed_values
         )
         state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
-        return builder.mbbOut(pv, always_update=True, on_update=on_update, **state_keys, **attribute_fields)
+        return builder.mbbOut(
+            pv,
+            always_update=True,
+            on_update=on_update,
+            **state_keys,
+            **attribute_fields,
+        )
 
     match attribute.datatype:
         case Bool(znam, onam):
@@ -248,11 +258,21 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
                 on_update=on_update,
             )
         case Int():
-            return builder.longOut(pv, always_update=True, on_update=on_update, **attribute_fields)
+            return builder.longOut(
+                pv, always_update=True, on_update=on_update, **attribute_fields
+            )
         case Float(prec):
-            return builder.aOut(pv, always_update=True, on_update=on_update, PREC=prec, **attribute_fields)
+            return builder.aOut(
+                pv,
+                always_update=True,
+                on_update=on_update,
+                PREC=prec,
+                **attribute_fields,
+            )
         case String():
-            return builder.longStringOut(pv, always_update=True, on_update=on_update, **attribute_fields)
+            return builder.longStringOut(
+                pv, always_update=True, on_update=on_update, **attribute_fields
+            )
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
