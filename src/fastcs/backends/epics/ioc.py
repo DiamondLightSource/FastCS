@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from dataclasses import dataclass
+from enum import Enum
 from types import MethodType
 from typing import Any, Literal
 
@@ -22,32 +23,41 @@ from fastcs.mapping import Mapping
 EPICS_MAX_NAME_LENGTH = 60
 
 
+class PvNamingConvention(Enum):
+    NO_CONVERSION = 0
+    PASCAL = 1
+    CAPITALIZED = 2
+
+
 @dataclass
 class EpicsIOCOptions:
     terminal: bool = True
+    pv_naming_convention: PvNamingConvention = PvNamingConvention.PASCAL
 
 
 class EpicsIOC:
-    def __init__(self, pv_prefix: str, mapping: Mapping):
+    def __init__(
+        self, pv_prefix: str, mapping: Mapping, options: EpicsIOCOptions | None = None
+    ):
+        self.options = options or EpicsIOCOptions()
         _add_pvi_info(f"{pv_prefix}:PVI")
         _add_sub_controller_pvi_info(pv_prefix, mapping.controller)
 
         _create_and_link_attribute_pvs(pv_prefix, mapping)
-        _create_and_link_command_pvs(pv_prefix, mapping)
+        _create_and_link_command_pvs(
+            pv_prefix, mapping, self.options.pv_naming_convention
+        )
 
     def run(
         self,
         dispatcher: AsyncioDispatcher,
         context: dict[str, Any],
-        options: EpicsIOCOptions | None = None,
     ) -> None:
-        if options is None:
-            options = EpicsIOCOptions()
-
         builder.LoadDatabase()
         softioc.iocInit(dispatcher)
 
-        softioc.interactive_ioc(context)
+        if self.options.terminal:
+            softioc.interactive_ioc(context)
 
 
 def _add_pvi_info(
@@ -222,9 +232,6 @@ def _create_and_link_write_pv(
     record = _get_output_record(
         f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
     )
-    pascal_case_pv_name = pv_name.title()
-    if pascal_case_pv_name != pv_name:
-        record.add_alias(f"{pv_prefix}:{pascal_case_pv_name}")
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
@@ -279,11 +286,23 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
             )
 
 
-def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
+def _convert_attr_name_to_pv_name(
+    attr_name: str, naming_convention: PvNamingConvention
+) -> str:
+    if naming_convention == PvNamingConvention.PASCAL:
+        return attr_name.title().replace("_", "")
+    elif naming_convention == PvNamingConvention.CAPITALIZED:
+        return attr_name.upper().replace("_", "-")
+    return attr_name
+
+
+def _create_and_link_command_pvs(
+    pv_prefix: str, mapping: Mapping, naming_convention: PvNamingConvention
+) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
         for attr_name, method in single_mapping.command_methods.items():
-            pv_name = attr_name.title().replace("_", "")
+            pv_name = _convert_attr_name_to_pv_name(attr_name, naming_convention)
             _pv_prefix = ":".join([pv_prefix] + path)
             if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
                 print(
