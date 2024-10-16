@@ -357,7 +357,8 @@ def test_add_attr_pvi_info(mocker: MockerFixture):
     )
 
 
-async def do_nothing(arg): ...
+async def do_nothing(arg):
+    ...
 
 
 class NothingCommand:

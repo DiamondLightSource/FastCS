@@ -118,7 +118,7 @@ def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
         for attr_name, attribute in single_mapping.attributes.items():
-            pv_name = attr_name.title().replace("_", "")
+            pv_name = attr_name.replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
             full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
 
@@ -218,6 +218,10 @@ def _create_and_link_write_pv(
     record = _get_output_record(
         f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
     )
+    pascal_case_pv_name = pv_name.title()
+    if pascal_case_pv_name != pv_name:
+        record.add_alias(f"{pv_prefix}:{pascal_case_pv_name}")
+
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
     attribute.set_write_display_callback(async_write_display)
