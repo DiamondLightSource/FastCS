@@ -52,6 +52,7 @@ class Attribute(Generic[T]):
         group: str | None = None,
         handler: Any = None,
         allowed_values: list[T] | None = None,
+        description: str | None = None
     ) -> None:
         assert (
             datatype.dtype in ATTRIBUTE_TYPES
@@ -61,6 +62,7 @@ class Attribute(Generic[T]):
         self._group = group
         self.enabled = True
         self._allowed_values: list[T] | None = allowed_values
+        self.description = description
 
     @property
     def datatype(self) -> DataType[T]:
@@ -93,6 +95,7 @@ class AttrR(Attribute[T]):
         group: str | None = None,
         handler: Updater | None = None,
         allowed_values: list[T] | None = None,
+        description: str | None = None,
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
@@ -100,6 +103,7 @@ class AttrR(Attribute[T]):
             group,
             handler,
             allowed_values=allowed_values,  # type: ignore
+            description=description
         )
         self._value: T = datatype.dtype()
         self._update_callback: AttrCallback[T] | None = None
@@ -132,6 +136,7 @@ class AttrW(Attribute[T]):
         group: str | None = None,
         handler: Sender | None = None,
         allowed_values: list[T] | None = None,
+        description: str | None = None
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
@@ -139,6 +144,7 @@ class AttrW(Attribute[T]):
             group,
             handler,
             allowed_values=allowed_values,  # type: ignore
+            description=description
         )
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
@@ -180,6 +186,7 @@ class AttrRW(AttrW[T], AttrR[T]):
         group: str | None = None,
         handler: Handler | None = None,
         allowed_values: list[T] | None = None,
+        description: str | None = None
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
@@ -187,6 +194,7 @@ class AttrRW(AttrW[T], AttrR[T]):
             group,
             handler,
             allowed_values,  # type: ignore
+            description=description
         )
 
     async def process(self, value: T) -> None:
