@@ -1,6 +1,5 @@
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import Enum
 from types import MethodType
 from typing import Any, Literal
 
@@ -11,6 +10,8 @@ from softioc.pythonSoftIoc import RecordWrapper
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backends.epics.util import (
     MBB_STATE_FIELDS,
+    EpicsNameOptions,
+    PvNamingConvention,
     attr_is_enum,
     enum_index_to_value,
     enum_value_to_index,
@@ -23,20 +24,10 @@ from fastcs.mapping import Mapping
 EPICS_MAX_NAME_LENGTH = 60
 
 
-class PvNamingConvention(Enum):
-    NO_CONVERSION = "NO_CONVERSION"
-    PASCAL = "PASCAL"
-    CAPITALIZED = "CAPITALIZED"
-
-
-DEFAULT_PV_SEPARATOR = ":"
-
-
-@dataclass
+@dataclass(frozen=True)
 class EpicsIOCOptions:
     terminal: bool = True
-    pv_naming_convention: PvNamingConvention = PvNamingConvention.PASCAL
-    pv_separator: str = DEFAULT_PV_SEPARATOR
+    name_options: EpicsNameOptions = EpicsNameOptions()
 
 
 def _convert_attr_name_to_pv_name(
@@ -53,8 +44,10 @@ class EpicsIOC:
     def __init__(
         self, pv_prefix: str, mapping: Mapping, options: EpicsIOCOptions | None = None
     ):
-        self.options = options or EpicsIOCOptions()
-        _add_pvi_info(f"{pv_prefix}{self.options.pv_separator}PVI")
+        self._options = options or EpicsIOCOptions()
+        self._name_options = self._options.name_options
+
+        _add_pvi_info(f"{pv_prefix}{self._name_options.pv_separator}PVI")
         self._add_sub_controller_pvi_info(pv_prefix, mapping.controller)
 
         self._create_and_link_attribute_pvs(pv_prefix, mapping)
@@ -68,7 +61,7 @@ class EpicsIOC:
         builder.LoadDatabase()
         softioc.iocInit(dispatcher)
 
-        if self.options.terminal:
+        if self._options.terminal:
             softioc.interactive_ioc(context)
 
     def _add_sub_controller_pvi_info(self, pv_prefix: str, parent: BaseController):
@@ -79,14 +72,16 @@ class EpicsIOC:
             parent: Controller to add PVI refs for
 
         """
-        parent_pvi = self.options.pv_separator.join([pv_prefix] + parent.path + ["PVI"])
+        parent_pvi = self._name_options.pv_separator.join(
+            [pv_prefix] + parent.path + ["PVI"]
+        )
 
         for child in parent.get_sub_controllers().values():
-            child_pvi = self.options.pv_separator.join(
+            child_pvi = self._name_options.pv_separator.join(
                 [pv_prefix]
                 + [
                     _convert_attr_name_to_pv_name(
-                        path, self.options.pv_naming_convention
+                        path, self._name_options.pv_naming_convention
                     )
                     for path in child.path
                 ]
@@ -101,18 +96,20 @@ class EpicsIOC:
     def _create_and_link_attribute_pvs(self, pv_prefix: str, mapping: Mapping) -> None:
         for single_mapping in mapping.get_controller_mappings():
             formatted_path = [
-                _convert_attr_name_to_pv_name(p, self.options.pv_naming_convention)
+                _convert_attr_name_to_pv_name(
+                    p, self._name_options.pv_naming_convention
+                )
                 for p in single_mapping.controller.path
             ]
             for attr_name, attribute in single_mapping.attributes.items():
                 pv_name = _convert_attr_name_to_pv_name(
-                    attr_name, self.options.pv_naming_convention
+                    attr_name, self._name_options.pv_naming_convention
                 )
-                _pv_prefix = self.options.pv_separator.join(
+                _pv_prefix = self._name_options.pv_separator.join(
                     [pv_prefix] + formatted_path
                 )
                 full_pv_name_length = len(
-                    f"{_pv_prefix}{self.options.pv_separator}{pv_name}"
+                    f"{_pv_prefix}{self._name_options.pv_separator}{pv_name}"
                 )
 
                 if full_pv_name_length > EPICS_MAX_NAME_LENGTH:
@@ -163,7 +160,7 @@ class EpicsIOC:
                 record.set(value)
 
         record = _get_input_record(
-            f"{pv_prefix}{self.options.pv_separator}{pv_name}", attribute
+            f"{pv_prefix}{self._name_options.pv_separator}{pv_name}", attribute
         )
         self._add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
@@ -172,18 +169,20 @@ class EpicsIOC:
     def _create_and_link_command_pvs(self, pv_prefix: str, mapping: Mapping) -> None:
         for single_mapping in mapping.get_controller_mappings():
             formatted_path = [
-                _convert_attr_name_to_pv_name(p, self.options.pv_naming_convention)
+                _convert_attr_name_to_pv_name(
+                    p, self._name_options.pv_naming_convention
+                )
                 for p in single_mapping.controller.path
             ]
             for attr_name, method in single_mapping.command_methods.items():
                 pv_name = _convert_attr_name_to_pv_name(
-                    attr_name, self.options.pv_naming_convention
+                    attr_name, self._name_options.pv_naming_convention
                 )
-                _pv_prefix = self.options.pv_separator.join(
+                _pv_prefix = self._name_options.pv_separator.join(
                     [pv_prefix] + formatted_path
                 )
                 if (
-                    len(f"{_pv_prefix}{self.options.pv_separator}{pv_name}")
+                    len(f"{_pv_prefix}{self._name_options.pv_separator}{pv_name}")
                     > EPICS_MAX_NAME_LENGTH
                 ):
                     print(
@@ -221,7 +220,7 @@ class EpicsIOC:
                 record.set(value, process=False)
 
         record = _get_output_record(
-            f"{pv_prefix}{self.options.pv_separator}{pv_name}",
+            f"{pv_prefix}{self._name_options.pv_separator}{pv_name}",
             attribute,
             on_update=on_update,
         )
@@ -237,7 +236,7 @@ class EpicsIOC:
             await method()
 
         record = builder.aOut(
-            f"{pv_prefix}{self.options.pv_separator}{pv_name}",
+            f"{pv_prefix}{self._name_options.pv_separator}{pv_name}",
             initial_value=0,
             always_update=True,
             on_update=wrapped_method,
@@ -264,7 +263,7 @@ class EpicsIOC:
         record.add_info(
             "Q:group",
             {
-                f"{prefix}{self.options.pv_separator}PVI": {
+                f"{prefix}{self._name_options.pv_separator}PVI": {
                     f"value.{name}.{access_mode}": {
                         "+channel": "NAME",
                         "+type": "plain",

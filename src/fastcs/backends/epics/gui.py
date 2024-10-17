@@ -27,6 +27,7 @@ from pvi.device import (
 from pydantic import ValidationError
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.backends.epics.util import EpicsNameOptions, _convert_attr_name_to_pv_name
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.exceptions import FastCSException
@@ -39,7 +40,7 @@ class EpicsGUIFormat(Enum):
     edl = ".edl"
 
 
-@dataclass
+@dataclass(frozen=True)
 class EpicsGUIOptions:
     output_path: Path = Path.cwd() / "output.bob"
     file_format: EpicsGUIFormat = EpicsGUIFormat.bob
@@ -47,13 +48,33 @@ class EpicsGUIOptions:
 
 
 class EpicsGUI:
-    def __init__(self, mapping: Mapping, pv_prefix: str) -> None:
+    def __init__(
+        self,
+        mapping: Mapping,
+        pv_prefix: str,
+        epics_name_options: EpicsNameOptions | None = None,
+    ) -> None:
         self._mapping = mapping
         self._pv_prefix = pv_prefix
+        self.epics_name_options = epics_name_options or EpicsNameOptions()
 
     def _get_pv(self, attr_path: list[str], name: str):
-        attr_prefix = ":".join([self._pv_prefix] + attr_path)
-        return f"{attr_prefix}:{name.title().replace('_', '')}"
+        return self.epics_name_options.pv_separator.join(
+            [
+                self._pv_prefix,
+            ]
+            + [
+                _convert_attr_name_to_pv_name(
+                    attr_name, self.epics_name_options.pv_naming_convention
+                )
+                for attr_name in attr_path
+            ]
+            + [
+                _convert_attr_name_to_pv_name(
+                    name, self.epics_name_options.pv_naming_convention
+                ),
+            ],
+        )
 
     @staticmethod
     def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion:
