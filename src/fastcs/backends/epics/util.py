@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from enum import Enum
+
 from fastcs.attributes import Attribute
 from fastcs.datatypes import String, T
 
@@ -25,6 +28,31 @@ MBB_VALUE_FIELDS = tuple(f"{p}VL" for p in _MBB_FIELD_PREFIXES)
 MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
+class PvNamingConvention(Enum):
+    NO_CONVERSION = "NO_CONVERSION"
+    PASCAL = "PASCAL"
+    CAPITALIZED = "CAPITALIZED"
+
+
+DEFAULT_PV_SEPARATOR = ":"
+
+
+@dataclass(frozen=True)
+class EpicsNameOptions:
+    pv_naming_convention: PvNamingConvention = PvNamingConvention.PASCAL
+    pv_separator: str = DEFAULT_PV_SEPARATOR
+
+
+def _convert_attr_name_to_pv_name(
+    attr_name: str, naming_convention: PvNamingConvention
+) -> str:
+    if naming_convention == PvNamingConvention.PASCAL:
+        return attr_name.title().replace("_", "")
+    elif naming_convention == PvNamingConvention.CAPITALIZED:
+        return attr_name.upper().replace("_", "-")
+    return attr_name
+
+
 def attr_is_enum(attribute: Attribute) -> bool:
     """Check if the `Attribute` has a `String` datatype and has `allowed_values` set.
 
@@ -36,9 +64,9 @@ def attr_is_enum(attribute: Attribute) -> bool:
 
     """
     match attribute:
-        case Attribute(
-            datatype=String(), allowed_values=allowed_values
-        ) if allowed_values is not None and len(allowed_values) <= MBB_MAX_CHOICES:
+        case Attribute(datatype=String(), allowed_values=allowed_values) if (
+            allowed_values is not None and len(allowed_values) <= MBB_MAX_CHOICES
+        ):
             return True
         case _:
             return False
