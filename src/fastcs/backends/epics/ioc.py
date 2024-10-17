@@ -24,15 +24,29 @@ EPICS_MAX_NAME_LENGTH = 60
 
 
 class PvNamingConvention(Enum):
-    NO_CONVERSION = 0
-    PASCAL = 1
-    CAPITALIZED = 2
+    NO_CONVERSION = "NO_CONVERSION"
+    PASCAL = "PASCAL"
+    CAPITALIZED = "CAPITALIZED"
+
+
+DEFAULT_PV_SEPARATOR = ":"
 
 
 @dataclass
 class EpicsIOCOptions:
     terminal: bool = True
     pv_naming_convention: PvNamingConvention = PvNamingConvention.PASCAL
+    pv_separator: str = DEFAULT_PV_SEPARATOR
+
+
+def _convert_attr_name_to_pv_name(
+    attr_name: str, naming_convention: PvNamingConvention
+) -> str:
+    if naming_convention == PvNamingConvention.PASCAL:
+        return attr_name.title().replace("_", "")
+    elif naming_convention == PvNamingConvention.CAPITALIZED:
+        return attr_name.upper().replace("_", "-")
+    return attr_name
 
 
 class EpicsIOC:
@@ -40,13 +54,11 @@ class EpicsIOC:
         self, pv_prefix: str, mapping: Mapping, options: EpicsIOCOptions | None = None
     ):
         self.options = options or EpicsIOCOptions()
-        _add_pvi_info(f"{pv_prefix}:PVI")
-        _add_sub_controller_pvi_info(pv_prefix, mapping.controller)
+        _add_pvi_info(f"{pv_prefix}{self.options.pv_separator}PVI")
+        self._add_sub_controller_pvi_info(pv_prefix, mapping.controller)
 
-        _create_and_link_attribute_pvs(pv_prefix, mapping)
-        _create_and_link_command_pvs(
-            pv_prefix, mapping, self.options.pv_naming_convention
-        )
+        self._create_and_link_attribute_pvs(pv_prefix, mapping)
+        self._create_and_link_command_pvs(pv_prefix, mapping)
 
     def run(
         self,
@@ -58,6 +70,209 @@ class EpicsIOC:
 
         if self.options.terminal:
             softioc.interactive_ioc(context)
+
+    def _add_sub_controller_pvi_info(self, pv_prefix: str, parent: BaseController):
+        """Add PVI references from controller to its sub controllers, recursively.
+
+        Args:
+            pv_prefix: PV Prefix of IOC
+            parent: Controller to add PVI refs for
+
+        """
+        parent_pvi = self.options.pv_separator.join([pv_prefix] + parent.path + ["PVI"])
+
+        for child in parent.get_sub_controllers().values():
+            child_pvi = self.options.pv_separator.join(
+                [pv_prefix]
+                + [
+                    _convert_attr_name_to_pv_name(
+                        path, self.options.pv_naming_convention
+                    )
+                    for path in child.path
+                ]
+                + ["PVI"]
+            )
+            child_name = child.path[-1].lower()
+
+            _add_pvi_info(child_pvi, parent_pvi, child_name)
+
+            self._add_sub_controller_pvi_info(pv_prefix, child)
+
+    def _create_and_link_attribute_pvs(self, pv_prefix: str, mapping: Mapping) -> None:
+        for single_mapping in mapping.get_controller_mappings():
+            formatted_path = [
+                _convert_attr_name_to_pv_name(p, self.options.pv_naming_convention)
+                for p in single_mapping.controller.path
+            ]
+            for attr_name, attribute in single_mapping.attributes.items():
+                pv_name = _convert_attr_name_to_pv_name(
+                    attr_name, self.options.pv_naming_convention
+                )
+                _pv_prefix = self.options.pv_separator.join(
+                    [pv_prefix] + formatted_path
+                )
+                full_pv_name_length = len(
+                    f"{_pv_prefix}{self.options.pv_separator}{pv_name}"
+                )
+
+                if full_pv_name_length > EPICS_MAX_NAME_LENGTH:
+                    attribute.enabled = False
+                    print(
+                        f"Not creating PV for {attr_name} for controller"
+                        f" {single_mapping.controller.path} as full name would exceed"
+                        f" {EPICS_MAX_NAME_LENGTH} characters"
+                    )
+                    continue
+
+                match attribute:
+                    case AttrRW():
+                        if full_pv_name_length > (EPICS_MAX_NAME_LENGTH - 4):
+                            print(
+                                f"Not creating PVs for {attr_name} as _RBV PV"
+                                f" name would exceed {EPICS_MAX_NAME_LENGTH}"
+                                " characters"
+                            )
+                            attribute.enabled = False
+                        else:
+                            self._create_and_link_read_pv(
+                                _pv_prefix, f"{pv_name}_RBV", attr_name, attribute
+                            )
+                            self._create_and_link_write_pv(
+                                _pv_prefix, pv_name, attr_name, attribute
+                            )
+                    case AttrR():
+                        self._create_and_link_read_pv(
+                            _pv_prefix, pv_name, attr_name, attribute
+                        )
+                    case AttrW():
+                        self._create_and_link_write_pv(
+                            _pv_prefix, pv_name, attr_name, attribute
+                        )
+
+    def _create_and_link_read_pv(
+        self, pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
+    ) -> None:
+        if attr_is_enum(attribute):
+
+            async def async_record_set(value: T):
+                record.set(enum_value_to_index(attribute, value))
+
+        else:
+
+            async def async_record_set(value: T):
+                record.set(value)
+
+        record = _get_input_record(
+            f"{pv_prefix}{self.options.pv_separator}{pv_name}", attribute
+        )
+        self._add_attr_pvi_info(record, pv_prefix, attr_name, "r")
+
+        attribute.set_update_callback(async_record_set)
+
+    def _create_and_link_command_pvs(self, pv_prefix: str, mapping: Mapping) -> None:
+        for single_mapping in mapping.get_controller_mappings():
+            formatted_path = [
+                _convert_attr_name_to_pv_name(p, self.options.pv_naming_convention)
+                for p in single_mapping.controller.path
+            ]
+            for attr_name, method in single_mapping.command_methods.items():
+                pv_name = _convert_attr_name_to_pv_name(
+                    attr_name, self.options.pv_naming_convention
+                )
+                _pv_prefix = self.options.pv_separator.join(
+                    [pv_prefix] + formatted_path
+                )
+                if (
+                    len(f"{_pv_prefix}{self.options.pv_separator}{pv_name}")
+                    > EPICS_MAX_NAME_LENGTH
+                ):
+                    print(
+                        f"Not creating PV for {attr_name} as full name would exceed"
+                        f" {EPICS_MAX_NAME_LENGTH} characters"
+                    )
+                    method.enabled = False
+                else:
+                    self._create_and_link_command_pv(
+                        _pv_prefix,
+                        pv_name,
+                        attr_name,
+                        MethodType(method.fn, single_mapping.controller),
+                    )
+
+    def _create_and_link_write_pv(
+        self, pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW[T]
+    ) -> None:
+        if attr_is_enum(attribute):
+
+            async def on_update(value):
+                await attribute.process_without_display_update(
+                    enum_index_to_value(attribute, value)
+                )
+
+            async def async_write_display(value: T):
+                record.set(enum_value_to_index(attribute, value), process=False)
+
+        else:
+
+            async def on_update(value):
+                await attribute.process_without_display_update(value)
+
+            async def async_write_display(value: T):
+                record.set(value, process=False)
+
+        record = _get_output_record(
+            f"{pv_prefix}{self.options.pv_separator}{pv_name}",
+            attribute,
+            on_update=on_update,
+        )
+
+        self._add_attr_pvi_info(record, pv_prefix, attr_name, "w")
+
+        attribute.set_write_display_callback(async_write_display)
+
+    def _create_and_link_command_pv(
+        self, pv_prefix: str, pv_name: str, attr_name: str, method: Callable
+    ) -> None:
+        async def wrapped_method(_: Any):
+            await method()
+
+        record = builder.aOut(
+            f"{pv_prefix}{self.options.pv_separator}{pv_name}",
+            initial_value=0,
+            always_update=True,
+            on_update=wrapped_method,
+        )
+
+        self._add_attr_pvi_info(record, pv_prefix, attr_name, "x")
+
+    def _add_attr_pvi_info(
+        self,
+        record: RecordWrapper,
+        prefix: str,
+        name: str,
+        access_mode: Literal["r", "w", "rw", "x"],
+    ):
+        """Add an info tag to a record to include it in the PVI for the controller.
+
+        Args:
+            record: Record to add info tag to
+            prefix: PV prefix of controller
+            name: Name of parameter to add to PVI
+            access_mode: Access mode of parameter
+
+        """
+        record.add_info(
+            "Q:group",
+            {
+                f"{prefix}{self.options.pv_separator}PVI": {
+                    f"value.{name}.{access_mode}": {
+                        "+channel": "NAME",
+                        "+type": "plain",
+                        "+trigger": f"value.{name}.{access_mode}",
+                    }
+                }
+            },
+        )
 
 
 def _add_pvi_info(
@@ -105,82 +320,6 @@ def _add_pvi_info(
     record.add_info("Q:group", q_group)
 
 
-def _add_sub_controller_pvi_info(pv_prefix: str, parent: BaseController):
-    """Add PVI references from controller to its sub controllers, recursively.
-
-    Args:
-        pv_prefix: PV Prefix of IOC
-        parent: Controller to add PVI refs for
-
-    """
-    parent_pvi = ":".join([pv_prefix] + parent.path + ["PVI"])
-
-    for child in parent.get_sub_controllers().values():
-        child_pvi = ":".join([pv_prefix] + child.path + ["PVI"])
-        child_name = child.path[-1].lower()
-
-        _add_pvi_info(child_pvi, parent_pvi, child_name)
-
-        _add_sub_controller_pvi_info(pv_prefix, child)
-
-
-def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
-    for single_mapping in mapping.get_controller_mappings():
-        path = single_mapping.controller.path
-        for attr_name, attribute in single_mapping.attributes.items():
-            pv_name = attr_name.replace("_", "")
-            _pv_prefix = ":".join([pv_prefix] + path)
-            full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
-
-            if full_pv_name_length > EPICS_MAX_NAME_LENGTH:
-                attribute.enabled = False
-                print(
-                    f"Not creating PV for {attr_name} for controller"
-                    f" {single_mapping.controller.path} as full name would exceed"
-                    f" {EPICS_MAX_NAME_LENGTH} characters"
-                )
-                continue
-
-            match attribute:
-                case AttrRW():
-                    if full_pv_name_length > (EPICS_MAX_NAME_LENGTH - 4):
-                        print(
-                            f"Not creating PVs for {attr_name} as _RBV PV"
-                            f" name would exceed {EPICS_MAX_NAME_LENGTH}"
-                            " characters"
-                        )
-                        attribute.enabled = False
-                    else:
-                        _create_and_link_read_pv(
-                            _pv_prefix, f"{pv_name}_RBV", attr_name, attribute
-                        )
-                        _create_and_link_write_pv(
-                            _pv_prefix, pv_name, attr_name, attribute
-                        )
-                case AttrR():
-                    _create_and_link_read_pv(_pv_prefix, pv_name, attr_name, attribute)
-                case AttrW():
-                    _create_and_link_write_pv(_pv_prefix, pv_name, attr_name, attribute)
-
-
-def _create_and_link_read_pv(
-    pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
-) -> None:
-    if attr_is_enum(attribute):
-
-        async def async_record_set(value: T):
-            record.set(enum_value_to_index(attribute, value))
-    else:
-
-        async def async_record_set(value: T):
-            record.set(value)
-
-    record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute)
-    _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
-
-    attribute.set_update_callback(async_record_set)
-
-
 def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
     if attr_is_enum(attribute):
         assert attribute.allowed_values is not None and all(
@@ -202,36 +341,6 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
             )
-
-
-def _create_and_link_write_pv(
-    pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW[T]
-) -> None:
-    if attr_is_enum(attribute):
-
-        async def on_update(value):
-            await attribute.process_without_display_update(
-                enum_index_to_value(attribute, value)
-            )
-
-        async def async_write_display(value: T):
-            record.set(enum_value_to_index(attribute, value), process=False)
-
-    else:
-
-        async def on_update(value):
-            await attribute.process_without_display_update(value)
-
-        async def async_write_display(value: T):
-            record.set(value, process=False)
-
-    record = _get_output_record(
-        f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
-    )
-
-    _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
-
-    attribute.set_write_display_callback(async_write_display)
 
 
 def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
@@ -261,81 +370,3 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
             )
-
-
-def _convert_attr_name_to_pv_name(
-    attr_name: str, naming_convention: PvNamingConvention
-) -> str:
-    if naming_convention == PvNamingConvention.PASCAL:
-        return attr_name.title().replace("_", "")
-    elif naming_convention == PvNamingConvention.CAPITALIZED:
-        return attr_name.upper().replace("_", "-")
-    return attr_name
-
-
-def _create_and_link_command_pvs(
-    pv_prefix: str, mapping: Mapping, naming_convention: PvNamingConvention
-) -> None:
-    for single_mapping in mapping.get_controller_mappings():
-        path = single_mapping.controller.path
-        for attr_name, method in single_mapping.command_methods.items():
-            pv_name = _convert_attr_name_to_pv_name(attr_name, naming_convention)
-            _pv_prefix = ":".join([pv_prefix] + path)
-            if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
-                print(
-                    f"Not creating PV for {attr_name} as full name would exceed"
-                    f" {EPICS_MAX_NAME_LENGTH} characters"
-                )
-                method.enabled = False
-            else:
-                _create_and_link_command_pv(
-                    _pv_prefix,
-                    pv_name,
-                    attr_name,
-                    MethodType(method.fn, single_mapping.controller),
-                )
-
-
-def _create_and_link_command_pv(
-    pv_prefix: str, pv_name: str, attr_name: str, method: Callable
-) -> None:
-    async def wrapped_method(_: Any):
-        await method()
-
-    record = builder.aOut(
-        f"{pv_prefix}:{pv_name}",
-        initial_value=0,
-        always_update=True,
-        on_update=wrapped_method,
-    )
-
-    _add_attr_pvi_info(record, pv_prefix, attr_name, "x")
-
-
-def _add_attr_pvi_info(
-    record: RecordWrapper,
-    prefix: str,
-    name: str,
-    access_mode: Literal["r", "w", "rw", "x"],
-):
-    """Add an info tag to a record to include it in the PVI for the controller.
-
-    Args:
-        record: Record to add info tag to
-        prefix: PV prefix of controller
-        name: Name of parameter to add to PVI
-        access_mode: Access mode of parameter
-
-    """
-    record.add_info(
-        "Q:group",
-        {
-            f"{prefix}:PVI": {
-                f"value.{name}.{access_mode}": {
-                    "+channel": "NAME",
-                    "+type": "plain",
-                    "+trigger": f"value.{name}.{access_mode}",
-                }
-            }
-        },
-    )
