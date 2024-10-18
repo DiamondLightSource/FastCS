@@ -69,5 +69,7 @@ class SubController(BaseController):
     it as part of a larger device.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, label: str | None = None) -> None:
         super().__init__()
+
+        self.label = label

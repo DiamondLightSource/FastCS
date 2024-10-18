@@ -145,7 +145,7 @@ class EpicsGUI:
         for name, sub_controller in mapping.controller.get_sub_controllers().items():
             components.append(
                 Group(
-                    name=snake_to_pascal(name),
+                    name=sub_controller.label or snake_to_pascal(name),
                     layout=SubScreen(),
                     children=self.extract_mapping_components(
                         _get_single_mapping(sub_controller)
