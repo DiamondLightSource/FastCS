@@ -13,6 +13,12 @@ class BaseController:
         self._bind_attrs()
 
     @property
+    def additional_attributes(self) -> dict[str, Attribute] | None:
+        """FastCS will look for attributes on the controller, but additional attribtues
+        be provided here."""
+        return None
+
+    @property
     def path(self) -> list[str]:
         """Path prefix of attributes, recursively including parent ``Controller``s."""
         return self._path

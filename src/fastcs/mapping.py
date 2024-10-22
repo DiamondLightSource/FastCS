@@ -54,6 +54,8 @@ def _get_single_mapping(controller: BaseController) -> SingleMapping:
             case Attribute(enabled=True):
                 attributes[attr_name] = attr
 
+    attributes.update(controller.additional_attributes or {})
+
     return SingleMapping(
         controller, scan_methods, put_methods, command_methods, attributes
     )
