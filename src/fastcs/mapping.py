@@ -56,10 +56,10 @@ def _get_single_mapping(controller: BaseController) -> SingleMapping:
                     attributes[attr_name] = attr
 
     additional_attributes = controller.additional_attributes
-    if common_attributes := additional_attributes.keys() ^ attributes.keys():
+    if common_attributes := additional_attributes.keys() & attributes.keys():
         raise RuntimeError(
             f"Received additional attributes {common_attributes} "
-            "already present in the controller."
+            f"already present in the controller {controller}."
         )
 
     attributes.update(additional_attributes)
