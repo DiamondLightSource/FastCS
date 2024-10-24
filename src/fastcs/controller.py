@@ -6,17 +6,22 @@ from .attributes import Attribute
 
 
 class BaseController:
-    def __init__(self, path: list[str] | None = None) -> None:
+    def __init__(
+        self, path: list[str] | None = None, search_device_for_attributes: bool = True
+    ) -> None:
         self._path: list[str] = path or []
-        self.__sub_controller_tree: dict[str, BaseController] = {}
+        # If this is set to `False`, FastCS will only use attributes defined in
+        # `additional_attributes`.
+        self.search_device_for_attributes = search_device_for_attributes
 
+        self.__sub_controller_tree: dict[str, BaseController] = {}
         self._bind_attrs()
 
     @property
-    def additional_attributes(self) -> dict[str, Attribute] | None:
-        """FastCS will look for attributes on the controller, but additional attribtues
-        be provided here."""
-        return None
+    def additional_attributes(self) -> dict[str, Attribute]:
+        """FastCS will look for attributes on the controller, but additional attributes
+        are provided by this method."""
+        return {}
 
     @property
     def path(self) -> list[str]:
@@ -58,8 +63,8 @@ class Controller(BaseController):
     generating a UI or creating parameters for a control system.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, search_device_for_attributes: bool = True) -> None:
+        super().__init__(search_device_for_attributes=search_device_for_attributes)
 
     async def initialise(self) -> None:
         pass
@@ -75,5 +80,5 @@ class SubController(BaseController):
     it as part of a larger device.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, search_device_for_attributes: bool = True) -> None:
+        super().__init__(search_device_for_attributes=search_device_for_attributes)

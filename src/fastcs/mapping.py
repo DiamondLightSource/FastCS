@@ -52,9 +52,17 @@ def _get_single_mapping(controller: BaseController) -> SingleMapping:
             case WrappedMethod(fastcs_method=Command(enabled=True) as command_method):
                 command_methods[attr_name] = command_method
             case Attribute(enabled=True):
-                attributes[attr_name] = attr
+                if controller.search_device_for_attributes:
+                    attributes[attr_name] = attr
 
-    attributes.update(controller.additional_attributes or {})
+    additional_attributes = controller.additional_attributes
+    if common_attributes := additional_attributes.keys() ^ attributes.keys():
+        raise RuntimeError(
+            f"Received additional attributes {common_attributes} "
+            "already present in the controller."
+        )
+
+    attributes.update(additional_attributes)
 
     return SingleMapping(
         controller, scan_methods, put_methods, command_methods, attributes
