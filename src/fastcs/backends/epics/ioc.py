@@ -11,7 +11,7 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backends.epics.util import (
     MBB_STATE_FIELDS,
     EpicsNameOptions,
-    PvNamingConvention,
+    _convert_attribute_name_to_pv_name,
     attr_is_enum,
     enum_index_to_value,
     enum_value_to_index,
@@ -29,15 +29,6 @@ class EpicsIOCOptions:
     terminal: bool = True
     name_options: EpicsNameOptions = EpicsNameOptions()
 
-
-def _convert_attr_name_to_pv_name(
-    attr_name: str, naming_convention: PvNamingConvention
-) -> str:
-    if naming_convention == PvNamingConvention.PASCAL:
-        return attr_name.title().replace("_", "")
-    elif naming_convention == PvNamingConvention.CAPITALIZED:
-        return attr_name.upper().replace("_", "-")
-    return attr_name
 
 
 class EpicsIOC:
@@ -80,8 +71,10 @@ class EpicsIOC:
             child_pvi = self._name_options.pv_separator.join(
                 [pv_prefix]
                 + [
-                    _convert_attr_name_to_pv_name(
-                        path, self._name_options.pv_naming_convention
+                    _convert_attribute_name_to_pv_name(
+                        path,
+                        self._name_options.pv_naming_convention,
+                        is_attribute=False
                     )
                     for path in child.path
                 ]
@@ -96,14 +89,14 @@ class EpicsIOC:
     def _create_and_link_attribute_pvs(self, pv_prefix: str, mapping: Mapping) -> None:
         for single_mapping in mapping.get_controller_mappings():
             formatted_path = [
-                _convert_attr_name_to_pv_name(
-                    p, self._name_options.pv_naming_convention
+                _convert_attribute_name_to_pv_name(
+                    p, self._name_options.pv_naming_convention, is_attribute=False
                 )
                 for p in single_mapping.controller.path
             ]
             for attr_name, attribute in single_mapping.attributes.items():
-                pv_name = _convert_attr_name_to_pv_name(
-                    attr_name, self._name_options.pv_naming_convention
+                pv_name = _convert_attribute_name_to_pv_name(
+                    attr_name, self._name_options.pv_naming_convention, is_attribute=True
                 )
                 _pv_prefix = self._name_options.pv_separator.join(
                     [pv_prefix] + formatted_path
@@ -169,14 +162,14 @@ class EpicsIOC:
     def _create_and_link_command_pvs(self, pv_prefix: str, mapping: Mapping) -> None:
         for single_mapping in mapping.get_controller_mappings():
             formatted_path = [
-                _convert_attr_name_to_pv_name(
-                    p, self._name_options.pv_naming_convention
+                _convert_attribute_name_to_pv_name(
+                    p, self._name_options.pv_naming_convention, is_attribute=False
                 )
                 for p in single_mapping.controller.path
             ]
             for attr_name, method in single_mapping.command_methods.items():
-                pv_name = _convert_attr_name_to_pv_name(
-                    attr_name, self._name_options.pv_naming_convention
+                pv_name = _convert_attribute_name_to_pv_name(
+                    attr_name, self._name_options.pv_naming_convention, is_attribute=True
                 )
                 _pv_prefix = self._name_options.pv_separator.join(
                     [pv_prefix] + formatted_path

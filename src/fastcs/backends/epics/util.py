@@ -32,6 +32,7 @@ class PvNamingConvention(Enum):
     NO_CONVERSION = "NO_CONVERSION"
     PASCAL = "PASCAL"
     CAPITALIZED = "CAPITALIZED"
+    CAPITALIZED_CONTROLLER_PASCAL_ATTRIBUTE = "CAPITALIZED_CONTROLLER_PASCAL_ATTRIBUTE"
 
 
 DEFAULT_PV_SEPARATOR = ":"
@@ -43,13 +44,17 @@ class EpicsNameOptions:
     pv_separator: str = DEFAULT_PV_SEPARATOR
 
 
-def _convert_attr_name_to_pv_name(
-    attr_name: str, naming_convention: PvNamingConvention
+def _convert_attribute_name_to_pv_name(
+    attr_name: str, naming_convention: PvNamingConvention, is_attribute: bool = False
 ) -> str:
     if naming_convention == PvNamingConvention.PASCAL:
         return attr_name.title().replace("_", "")
     elif naming_convention == PvNamingConvention.CAPITALIZED:
         return attr_name.upper().replace("_", "-")
+    elif naming_convention == PvNamingConvention.CAPITALIZED_CONTROLLER_PASCAL_ATTRIBUTE:
+        if is_attribute:
+            return _convert_attribute_name_to_pv_name(attr_name, PvNamingConvention.PASCAL, is_attribute)
+        return _convert_attribute_name_to_pv_name(attr_name, PvNamingConvention.CAPITALIZED)
     return attr_name
 
 
