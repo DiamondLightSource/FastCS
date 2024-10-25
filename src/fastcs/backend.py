@@ -134,6 +134,8 @@ def _add_attribute_updater_tasks(
     for attribute in single_mapping.attributes.values():
         match attribute:
             case AttrR(updater=Updater(update_period=update_period)) as attribute:
+                if update_period is None:
+                    continue
                 callback = _create_updater_callback(
                     attribute, single_mapping.controller
                 )
