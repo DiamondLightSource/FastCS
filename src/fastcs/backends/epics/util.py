@@ -51,10 +51,16 @@ def _convert_attribute_name_to_pv_name(
         return attr_name.title().replace("_", "")
     elif naming_convention == PvNamingConvention.CAPITALIZED:
         return attr_name.upper().replace("_", "-")
-    elif naming_convention == PvNamingConvention.CAPITALIZED_CONTROLLER_PASCAL_ATTRIBUTE:
+    elif (
+        naming_convention == PvNamingConvention.CAPITALIZED_CONTROLLER_PASCAL_ATTRIBUTE
+    ):
         if is_attribute:
-            return _convert_attribute_name_to_pv_name(attr_name, PvNamingConvention.PASCAL, is_attribute)
-        return _convert_attribute_name_to_pv_name(attr_name, PvNamingConvention.CAPITALIZED)
+            return _convert_attribute_name_to_pv_name(
+                attr_name, PvNamingConvention.PASCAL, is_attribute
+            )
+        return _convert_attribute_name_to_pv_name(
+            attr_name, PvNamingConvention.CAPITALIZED
+        )
     return attr_name
 
 

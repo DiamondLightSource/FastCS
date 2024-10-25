@@ -26,7 +26,8 @@ class Sender(Protocol):
 class Updater(Protocol):
     """Protocol for updating the cached readback value of an ``Attribute``."""
 
-    update_period: float
+    # If update period is None then the attribute will not be updated as a task.
+    update_period: float | None
 
     async def update(self, controller: Any, attr: AttrR) -> None:
         pass
