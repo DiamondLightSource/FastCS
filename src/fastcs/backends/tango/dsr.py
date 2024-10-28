@@ -16,7 +16,6 @@ from fastcs.mapping import Mapping
 @dataclass
 class TangoDSROptions:
     dev_name: str = "MY/DEVICE/NAME"
-    dev_class: str = "FAST_CS_DEVICE"
     dsr_instance: str = "MY_SERVER_INSTANCE"
     debug: bool = False
 
@@ -25,21 +24,10 @@ def _wrap_updater_fget(
     attr_name: str, attribute: AttrR, controller: BaseController
 ) -> Callable[[Any], Any]:
     async def fget(tango_device: Device):
-        assert attribute.updater is not None
-
-        await attribute.updater.update(controller, attribute)
         tango_device.info_stream(f"called fget method: {attr_name}")
         return attribute.get()
 
     return fget
-
-
-def _tango_polling_period(attribute: AttrR) -> int:
-    if attribute.updater is not None:
-        # Convert to integer milliseconds
-        return int(attribute.updater.update_period * 1000)
-
-    return -1  # `tango.server.attribute` default for `polling_period`
 
 
 def _tango_display_format(attribute: Attribute) -> str:
@@ -54,10 +42,8 @@ def _wrap_updater_fset(
     attr_name: str, attribute: AttrW, controller: BaseController
 ) -> Callable[[Any, Any], Any]:
     async def fset(tango_device: Device, val):
-        assert attribute.sender is not None
-
-        await attribute.sender.put(controller, attribute, val)
         tango_device.info_stream(f"called fset method: {attr_name}")
+        await attribute.process(val)
 
     return fset
 
@@ -84,7 +70,6 @@ def _collect_dev_attributes(mapping: Mapping) -> dict[str, Any]:
                         ),
                         access=AttrWriteType.READ_WRITE,
                         format=_tango_display_format(attribute),
-                        polling_period=_tango_polling_period(attribute),
                     )
                 case AttrR():
                     collection[d_attr_name] = server.attribute(
@@ -95,7 +80,6 @@ def _collect_dev_attributes(mapping: Mapping) -> dict[str, Any]:
                             attr_name, attribute, single_mapping.controller
                         ),
                         format=_tango_display_format(attribute),
-                        polling_period=_tango_polling_period(attribute),
                     )
                 case AttrW():
                     collection[d_attr_name] = server.attribute(
@@ -115,8 +99,10 @@ def _wrap_command_f(
     method_name: str, method: Callable, controller: BaseController
 ) -> Callable[..., Awaitable[None]]:
     async def _dynamic_f(tango_device: Device) -> None:
-        tango_device.info_stream(f"called {controller} f method: {method_name}")
-        return await MethodType(method, controller)()
+        tango_device.info_stream(
+            f"called {'_'.join(controller.path)} f method: {method_name}"
+        )
+        return await getattr(controller, method.__name__)()
 
     _dynamic_f.__name__ = method_name
     return _dynamic_f
@@ -146,7 +132,6 @@ def _collect_dev_init(mapping: Mapping) -> dict[str, Callable]:
     async def init_device(tango_device: Device):
         await server.Device.init_device(tango_device)  # type: ignore
         tango_device.set_state(DevState.ON)
-        await mapping.controller.connect()
 
     return {"init_device": init_device}
 
@@ -171,11 +156,10 @@ def _collect_dsr_args(options: TangoDSROptions) -> list[str]:
 class TangoDSR:
     def __init__(self, mapping: Mapping):
         self._mapping = mapping
+        self.dev_class = self._mapping.controller.__class__.__name__
+        self._device = self._create_device()
 
-    def run(self, options: TangoDSROptions | None = None) -> None:
-        if options is None:
-            options = TangoDSROptions()
-
+    def _create_device(self):
         class_dict: dict = {
             **_collect_dev_attributes(self._mapping),
             **_collect_dev_commands(self._mapping),
@@ -185,14 +169,19 @@ class TangoDSR:
         }
 
         class_bases = (server.Device,)
-        pytango_class = type(options.dev_class, class_bases, class_dict)
-        register_dev(options.dev_name, options.dev_class, options.dsr_instance)
+        pytango_class = type(self.dev_class, class_bases, class_dict)
+        return pytango_class
+
+    def run(self, options: TangoDSROptions | None = None) -> None:
+        if options is None:
+            options = TangoDSROptions()
 
         dsr_args = _collect_dsr_args(options)
 
         server.run(
-            (pytango_class,),
-            [options.dev_class, options.dsr_instance, *dsr_args],
+            (self._device,),
+            [self.dev_class, options.dsr_instance, *dsr_args],
+            green_mode=server.GreenMode.Asyncio,
         )
 
 
