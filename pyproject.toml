@@ -12,6 +12,7 @@ classifiers = [
 description = "Control system agnostic framework for building Device support in Python that will work for both EPICS and Tango"
 dependencies = [
     "aioserial",
+    "apscheduler",
     "numpy",
     "pydantic",
     "pvi~=0.10.0",
