@@ -18,6 +18,7 @@ dependencies = [
     "pvi~=0.10.0",
     "pytango",
     "softioc>=4.5.0",
+    "strawberry-graphql",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"
@@ -63,7 +64,7 @@ version_file = "src/fastcs/_version.py"
 
 [tool.pyright]
 typeCheckingMode = "standard"
-reportMissingImports = false # Ignore missing stubs in imported modules
+reportMissingImports = false  # Ignore missing stubs in imported modules
 
 [tool.pytest.ini_options]
 # Run pytest with all our checkers, and don't spam us with massive tracebacks on error
