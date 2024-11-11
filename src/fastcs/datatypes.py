@@ -25,6 +25,8 @@ class DataType(Generic[T]):
 class Int(DataType[int]):
     """`DataType` mapping to builtin ``int``."""
 
+    units: str | None = None
+
     @property
     def dtype(self) -> type[int]:
         return int
@@ -35,6 +37,7 @@ class Float(DataType[float]):
     """`DataType` mapping to builtin ``float``."""
 
     prec: int = 2
+    units: str | None = None
 
     @property
     def dtype(self) -> type[float]:
