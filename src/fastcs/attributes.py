@@ -27,7 +27,7 @@ class Updater(Protocol):
     """Protocol for updating the cached readback value of an ``Attribute``."""
 
     # If update period is None then the attribute will not be updated as a task.
-    update_period: float | None
+    update_period: float | None = None
 
     async def update(self, controller: Any, attr: AttrR) -> None:
         pass
@@ -95,6 +95,7 @@ class AttrR(Attribute[T]):
         access_mode=AttrMode.READ,
         group: str | None = None,
         handler: Updater | None = None,
+        initial_value: T | None = None,
         allowed_values: list[T] | None = None,
         description: str | None = None,
     ) -> None:
@@ -106,7 +107,7 @@ class AttrR(Attribute[T]):
             allowed_values=allowed_values,  # type: ignore
             description=description,
         )
-        self._value: T = datatype.dtype()
+        self._value: T = datatype.dtype() if initial_value is None else initial_value
         self._update_callback: AttrCallback[T] | None = None
         self._updater = handler
 
@@ -177,7 +178,7 @@ class AttrW(Attribute[T]):
         return self._sender
 
 
-class AttrRW(AttrW[T], AttrR[T]):
+class AttrRW(AttrR[T], AttrW[T]):
     """A read-write ``Attribute``."""
 
     def __init__(
@@ -186,15 +187,17 @@ class AttrRW(AttrW[T], AttrR[T]):
         access_mode=AttrMode.READ_WRITE,
         group: str | None = None,
         handler: Handler | None = None,
+        initial_value: T | None = None,
         allowed_values: list[T] | None = None,
         description: str | None = None,
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
             access_mode,
-            group,
-            handler,
-            allowed_values,  # type: ignore
+            group=group,
+            handler=handler,
+            initial_value=initial_value,
+            allowed_values=allowed_values,  # type: ignore
             description=description,
         )
 
