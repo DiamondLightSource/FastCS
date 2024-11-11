@@ -53,10 +53,18 @@ class Backend:
             future.result()
 
     def _start_scan_tasks(self):
-        scan_tasks = _get_scan_tasks(self._mapping)
+        async def run_tasks():
+            futures = [task() for task in _get_scan_tasks(self._mapping)]
+            for future in asyncio.as_completed(futures):
+                try:
+                    await future
+                except Exception as e:
+                    # We don't exit the ioc when a scan loop errors,
+                    # but we do print the information.
+                    print(f"Scan loop stopped with exception:\n    {e}")
+                    raise e
 
-        for task in scan_tasks:
-            asyncio.run_coroutine_threadsafe(task(), self._loop)
+        asyncio.run_coroutine_threadsafe(run_tasks(), self._loop)
 
     def _run(self):
         raise NotImplementedError("Specific Backend must implement _run")
