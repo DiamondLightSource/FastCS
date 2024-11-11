@@ -331,9 +331,11 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
         case Bool(znam, onam):
             return builder.boolIn(pv, ZNAM=znam, ONAM=onam, **attribute_fields)
         case Int():
-            return builder.longIn(pv, **attribute_fields)
+            return builder.longIn(pv, EGU=attribute.datatype.units, **attribute_fields)
         case Float(prec):
-            return builder.aIn(pv, PREC=prec, **attribute_fields)
+            return builder.aIn(
+                pv, EGU=attribute.datatype.units, PREC=prec, **attribute_fields
+            )
         case String():
             return builder.longStringIn(pv, **attribute_fields)
         case _:
@@ -368,15 +370,20 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
                 always_update=True,
                 on_update=on_update,
             )
-        case Int():
+        case Int(units=units):
             return builder.longOut(
-                pv, always_update=True, on_update=on_update, **attribute_fields
+                pv,
+                always_update=True,
+                on_update=on_update,
+                EGU=units,
+                **attribute_fields,
             )
-        case Float(prec):
+        case Float(prec=prec, units=units):
             return builder.aOut(
                 pv,
                 always_update=True,
                 on_update=on_update,
+                EGU=units,
                 PREC=prec,
                 **attribute_fields,
             )
