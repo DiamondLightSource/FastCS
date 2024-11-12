@@ -35,7 +35,7 @@ def _wrap_updater_fget(
 
 
 def _tango_polling_period(attribute: AttrR) -> int:
-    if attribute.updater is not None:
+    if attribute.updater is not None and attribute.updater.update_period is not None:
         # Convert to integer milliseconds
         return int(attribute.updater.update_period * 1000)
 
