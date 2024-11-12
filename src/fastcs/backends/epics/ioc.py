@@ -338,7 +338,7 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
 def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
     if attr_is_enum(attribute):
         assert attribute.allowed_values is not None and all(
-            isinstance(v, str) for v in attribute.allowed_values
+            isinstance(v, str) or isinstance(v, int) for v in attribute.allowed_values
         )
         state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
         return builder.mbbOut(pv, always_update=True, on_update=on_update, **state_keys)
