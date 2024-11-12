@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Generic, Protocol, runtime_checkable
 
-from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
+from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T, validate_value
 
 
 class AttrMode(Enum):
@@ -115,7 +115,7 @@ class AttrR(Attribute[T]):
         return self._value
 
     async def set(self, value: T) -> None:
-        self._value = self._datatype.dtype(value)
+        self._value = self._datatype.dtype(validate_value(self._datatype, value))
 
         if self._update_callback is not None:
             await self._update_callback(self._value)
@@ -202,6 +202,6 @@ class AttrRW(AttrR[T], AttrW[T]):
         )
 
     async def process(self, value: T) -> None:
-        await self.set(value)
+        await self.set(validate_value(self._datatype, value))
 
         await super().process(value)  # type: ignore
