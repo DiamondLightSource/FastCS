@@ -7,11 +7,7 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backends.epics.ioc import (
     EPICS_MAX_NAME_LENGTH,
     EpicsIOC,
-    _add_attr_pvi_info,
     _add_pvi_info,
-    _add_sub_controller_pvi_info,
-    _create_and_link_read_pv,
-    _create_and_link_write_pv,
     _get_input_record,
     _get_output_record,
 )
@@ -27,17 +23,31 @@ SEVENTEEN_VALUES = [str(i) for i in range(1, 18)]
 ONOFF_STATES = {"ZRST": "disabled", "ONST": "enabled"}
 
 
+@pytest.fixture
+def ioc_without_mapping(mocker: MockerFixture, mapping: Mapping):
+    mocker.patch("fastcs.backends.epics.ioc.builder")
+    mocker.patch("fastcs.backends.epics.ioc.EpicsIOC._create_and_link_attribute_pvs")
+    mocker.patch("fastcs.backends.epics.ioc.EpicsIOC._create_and_link_command_pvs")
+
+    return EpicsIOC(DEVICE, mapping)
+
+
 @pytest.mark.asyncio
-async def test_create_and_link_read_pv(mocker: MockerFixture):
+async def test_create_and_link_read_pv(
+    mocker: MockerFixture, ioc_without_mapping: EpicsIOC
+):
     get_input_record = mocker.patch("fastcs.backends.epics.ioc._get_input_record")
-    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
     attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
+    mocker.patch("fastcs.backends.epics.ioc._add_pvi_info")
+    add_attr_pvi_info = mocker.patch(
+        "fastcs.backends.epics.ioc.EpicsIOC._add_attr_pvi_info"
+    )
     record = get_input_record.return_value
 
     attribute = mocker.MagicMock()
-
     attr_is_enum.return_value = False
-    _create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
+
+    ioc_without_mapping._create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
 
     get_input_record.assert_called_once_with("PREFIX:PV", attribute)
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "r")
@@ -51,9 +61,13 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
 
 
 @pytest.mark.asyncio
-async def test_create_and_link_read_pv_enum(mocker: MockerFixture):
+async def test_create_and_link_read_pv_enum(
+    mocker: MockerFixture, ioc_without_mapping: EpicsIOC
+):
     get_input_record = mocker.patch("fastcs.backends.epics.ioc._get_input_record")
-    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
+    add_attr_pvi_info = mocker.patch(
+        "fastcs.backends.epics.ioc.EpicsIOC._add_attr_pvi_info"
+    )
     attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
     record = get_input_record.return_value
     enum_value_to_index = mocker.patch("fastcs.backends.epics.ioc.enum_value_to_index")
@@ -61,7 +75,7 @@ async def test_create_and_link_read_pv_enum(mocker: MockerFixture):
     attribute = mocker.MagicMock()
 
     attr_is_enum.return_value = True
-    _create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
+    ioc_without_mapping._create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
 
     get_input_record.assert_called_once_with("PREFIX:PV", attribute)
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "r")
@@ -108,9 +122,13 @@ def test_get_input_record_raises(mocker: MockerFixture):
 
 
 @pytest.mark.asyncio
-async def test_create_and_link_write_pv(mocker: MockerFixture):
+async def test_create_and_link_write_pv(
+    mocker: MockerFixture, ioc_without_mapping: EpicsIOC
+):
     get_output_record = mocker.patch("fastcs.backends.epics.ioc._get_output_record")
-    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
+    add_attr_pvi_info = mocker.patch(
+        "fastcs.backends.epics.ioc.EpicsIOC._add_attr_pvi_info"
+    )
     attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
     record = get_output_record.return_value
 
@@ -118,7 +136,7 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
     attribute.process_without_display_update = mocker.AsyncMock()
 
     attr_is_enum.return_value = False
-    _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
+    ioc_without_mapping._create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
 
     get_output_record.assert_called_once_with(
         "PREFIX:PV", attribute, on_update=mocker.ANY
@@ -140,9 +158,13 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
 
 
 @pytest.mark.asyncio
-async def test_create_and_link_write_pv_enum(mocker: MockerFixture):
+async def test_create_and_link_write_pv_enum(
+    mocker: MockerFixture, ioc_without_mapping: EpicsIOC
+):
     get_output_record = mocker.patch("fastcs.backends.epics.ioc._get_output_record")
-    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
+    add_attr_pvi_info = mocker.patch(
+        "fastcs.backends.epics.ioc.EpicsIOC._add_attr_pvi_info"
+    )
     attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
     enum_value_to_index = mocker.patch("fastcs.backends.epics.ioc.enum_value_to_index")
     enum_index_to_value = mocker.patch("fastcs.backends.epics.ioc.enum_index_to_value")
@@ -152,7 +174,7 @@ async def test_create_and_link_write_pv_enum(mocker: MockerFixture):
     attribute.process_without_display_update = mocker.AsyncMock()
 
     attr_is_enum.return_value = True
-    _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
+    ioc_without_mapping._create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
 
     get_output_record.assert_called_once_with(
         "PREFIX:PV", attribute, on_update=mocker.ANY
@@ -215,22 +237,28 @@ def test_ioc(mocker: MockerFixture, mapping: Mapping):
     builder = mocker.patch("fastcs.backends.epics.ioc.builder")
     add_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_pvi_info")
     add_sub_controller_pvi_info = mocker.patch(
-        "fastcs.backends.epics.ioc._add_sub_controller_pvi_info"
+        "fastcs.backends.epics.ioc.EpicsIOC._add_sub_controller_pvi_info"
     )
 
     EpicsIOC(DEVICE, mapping)
 
     # Check records are created
     builder.boolIn.assert_called_once_with(f"{DEVICE}:ReadBool", ZNAM="OFF", ONAM="ON")
-    builder.longIn.assert_any_call(f"{DEVICE}:ReadInt")
-    builder.aIn.assert_called_once_with(f"{DEVICE}:ReadWriteFloat_RBV", PREC=2)
-    builder.aOut.assert_any_call(
-        f"{DEVICE}:ReadWriteFloat", always_update=True, on_update=mocker.ANY, PREC=2
+    builder.longIn.assert_any_call(f"{DEVICE}:ReadInt", EGU=None)
+    builder.aIn.assert_called_once_with(
+        f"{DEVICE}:ReadWriteFloat_RBV", EGU=None, PREC=2
     )
-    builder.longIn.assert_any_call(f"{DEVICE}:BigEnum")
-    builder.longIn.assert_any_call(f"{DEVICE}:ReadWriteInt_RBV")
+    builder.aOut.assert_any_call(
+        f"{DEVICE}:ReadWriteFloat",
+        always_update=True,
+        on_update=mocker.ANY,
+        EGU=None,
+        PREC=2,
+    )
+    builder.longIn.assert_any_call(f"{DEVICE}:BigEnum", EGU=None)
+    builder.longIn.assert_any_call(f"{DEVICE}:ReadWriteInt_RBV", EGU=None)
     builder.longOut.assert_called_with(
-        f"{DEVICE}:ReadWriteInt", always_update=True, on_update=mocker.ANY
+        f"{DEVICE}:ReadWriteInt", always_update=True, on_update=mocker.ANY, EGU=None
     )
     builder.mbbIn.assert_called_once_with(
         f"{DEVICE}:StringEnum_RBV", ZRST="red", ONST="green", TWST="blue"
@@ -323,7 +351,9 @@ def test_add_pvi_info_with_parent(mocker: MockerFixture):
     )
 
 
-def test_add_sub_controller_pvi_info(mocker: MockerFixture):
+def test_add_sub_controller_pvi_info(
+    mocker: MockerFixture, ioc_without_mapping: EpicsIOC
+):
     add_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_pvi_info")
     controller = mocker.MagicMock()
     controller.path = []
@@ -331,17 +361,17 @@ def test_add_sub_controller_pvi_info(mocker: MockerFixture):
     child.path = ["Child"]
     controller.get_sub_controllers.return_value = {"d": child}
 
-    _add_sub_controller_pvi_info(DEVICE, controller)
+    ioc_without_mapping._add_sub_controller_pvi_info(DEVICE, controller)
 
     add_pvi_info.assert_called_once_with(
         f"{DEVICE}:Child:PVI", f"{DEVICE}:PVI", "child"
     )
 
 
-def test_add_attr_pvi_info(mocker: MockerFixture):
+def test_add_attr_pvi_info(mocker: MockerFixture, ioc_without_mapping: EpicsIOC):
     record = mocker.MagicMock()
 
-    _add_attr_pvi_info(record, DEVICE, "attr", "r")
+    ioc_without_mapping._add_attr_pvi_info(record, DEVICE, "attr", "r")
 
     record.add_info.assert_called_once_with(
         "Q:group",
@@ -387,13 +417,9 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
 
     short_pv_name = "attr_rw_short_name".title().replace("_", "")
     builder.longOut.assert_called_once_with(
-        f"{DEVICE}:{short_pv_name}",
-        always_update=True,
-        on_update=mocker.ANY,
+        f"{DEVICE}:{short_pv_name}", always_update=True, on_update=mocker.ANY, EGU=None
     )
-    builder.longIn.assert_called_once_with(
-        f"{DEVICE}:{short_pv_name}_RBV",
-    )
+    builder.longIn.assert_called_once_with(f"{DEVICE}:{short_pv_name}_RBV", EGU=None)
 
     long_pv_name = long_attr_name.title().replace("_", "")
     with pytest.raises(AssertionError):
