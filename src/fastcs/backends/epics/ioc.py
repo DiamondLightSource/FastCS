@@ -330,11 +330,26 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
     match attribute.datatype:
         case Bool(znam, onam):
             return builder.boolIn(pv, ZNAM=znam, ONAM=onam, **attribute_fields)
-        case Int():
-            return builder.longIn(pv, EGU=attribute.datatype.units, **attribute_fields)
-        case Float(prec):
+        case Int(units, min, max, min_alarm, max_alarm):
+            return builder.longIn(
+                pv,
+                EGU=units,
+                DRVL=min,
+                DRVH=max,
+                LOPR=min_alarm,
+                HOPR=max_alarm,
+                **attribute_fields,
+            )
+        case Float(prec, units, min, max, min_alarm, max_alarm):
             return builder.aIn(
-                pv, EGU=attribute.datatype.units, PREC=prec, **attribute_fields
+                pv,
+                PREC=prec,
+                EGU=units,
+                DRVL=min,
+                DRVH=max,
+                LOPR=min_alarm,
+                HOPR=max_alarm,
+                **attribute_fields,
             )
         case String():
             return builder.longStringIn(pv, **attribute_fields)
@@ -370,21 +385,29 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
                 always_update=True,
                 on_update=on_update,
             )
-        case Int(units=units):
+        case Int(units, min, max, min_alarm, max_alarm):
             return builder.longOut(
                 pv,
                 always_update=True,
                 on_update=on_update,
                 EGU=units,
+                DRVL=min,
+                DRVH=max,
+                LOPR=min_alarm,
+                HOPR=max_alarm,
                 **attribute_fields,
             )
-        case Float(prec=prec, units=units):
+        case Float(prec, units, min, max, min_alarm, max_alarm):
             return builder.aOut(
                 pv,
                 always_update=True,
                 on_update=on_update,
-                EGU=units,
                 PREC=prec,
+                EGU=units,
+                DRVL=min,
+                DRVH=max,
+                LOPR=min_alarm,
+                HOPR=max_alarm,
                 **attribute_fields,
             )
         case String():
