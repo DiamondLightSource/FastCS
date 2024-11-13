@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from enum import Enum
 from typing import Any, Generic, Protocol, runtime_checkable
 
@@ -65,6 +66,10 @@ class Attribute(Generic[T]):
         self._allowed_values: list[T] | None = allowed_values
         self.description = description
 
+        # A callback to use when setting the datatype to a different value, for example
+        # changing the units on an int. This should be implemented in the backend.
+        self._update_datatype_callback: Callable[[DataType[T]], None] | None = None
+
     @property
     def datatype(self) -> DataType[T]:
         return self._datatype
@@ -84,6 +89,18 @@ class Attribute(Generic[T]):
     @property
     def allowed_values(self) -> list[T] | None:
         return self._allowed_values
+
+    def set_update_datatype_callback(
+        self, callback: Callable[[DataType[T]], None] | None
+    ) -> None:
+        self._update_datatype_callback = callback
+
+    def update_datatype(self, datatype: DataType[T]) -> None:
+        if not isinstance(self._datatype, type(datatype)):
+            raise ValueError(f"Attribute datatype must be of type {type(datatype)}")
+        self._datatype = datatype
+        if self._update_datatype_callback is not None:
+            self._update_datatype_callback(datatype)
 
 
 class AttrR(Attribute[T]):

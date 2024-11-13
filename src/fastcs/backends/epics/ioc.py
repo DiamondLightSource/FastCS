@@ -1,10 +1,12 @@
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from types import MethodType
 from typing import Any, Literal
 
-from softioc import builder, softioc
+import numpy as np
+from softioc import builder, fields, softioc
 from softioc.asyncio_dispatcher import AsyncioDispatcher
+from softioc.imports import db_put_field
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
@@ -17,7 +19,7 @@ from fastcs.backends.epics.util import (
     enum_value_to_index,
 )
 from fastcs.controller import BaseController
-from fastcs.datatypes import Bool, Float, Int, String, T
+from fastcs.datatypes import Bool, DataType, Float, Int, String, T
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
@@ -28,6 +30,35 @@ EPICS_MAX_NAME_LENGTH = 60
 class EpicsIOCOptions:
     terminal: bool = True
     name_options: EpicsNameOptions = EpicsNameOptions()
+
+
+DATATYPE_NAME_TO_RECORD_FIELD = {
+    "prec": "PREC",
+    "units": "EGU",
+    "min": "DRVL",
+    "max": "DRVH",
+    "min_alarm": "LOPR",
+    "max_alarm": "HOPR",
+    "znam": "ZNAM",
+    "onam": "ONAM",
+}
+
+
+def datatype_to_epics_fields(datatype: DataType) -> dict[str, Any]:
+    return {
+        DATATYPE_NAME_TO_RECORD_FIELD[field]: value
+        for field, value in asdict(datatype).items()
+    }
+
+
+def reload_attribute_fields(pv: str, DataType: DataType):
+    """If the ioc side changes a field on the attribute
+    e.g ``units`` then this method will update it on the attribute"""
+
+    for name, value in datatype_to_epics_fields(DataType):
+        # TODO: can we just make every dtype a string and have the ioc convert?
+        array = np.require(value, dtype=np.dtype("S40"))
+        db_put_field(f"{pv}.{name}", fields.DBR_STRING, array, 1)
 
 
 class EpicsIOC:
@@ -327,32 +358,32 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
         state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
         return builder.mbbIn(pv, **state_keys, **attribute_fields)
 
+    def datatype_updater(datatype: DataType):
+        reload_attribute_fields(pv, datatype)
+
+    attribute.set_update_datatype_callback(datatype_updater)
+
     match attribute.datatype:
-        case Bool(znam, onam):
-            return builder.boolIn(pv, ZNAM=znam, ONAM=onam, **attribute_fields)
-        case Int(units, min, max, min_alarm, max_alarm):
+        case Bool():
+            return builder.boolIn(
+                pv, **datatype_to_epics_fields(attribute.datatype), **attribute_fields
+            )
+        case Int():
             return builder.longIn(
                 pv,
-                EGU=units,
-                DRVL=min,
-                DRVH=max,
-                LOPR=min_alarm,
-                HOPR=max_alarm,
+                **datatype_to_epics_fields(attribute.datatype),
                 **attribute_fields,
             )
-        case Float(prec, units, min, max, min_alarm, max_alarm):
+        case Float():
             return builder.aIn(
                 pv,
-                PREC=prec,
-                EGU=units,
-                DRVL=min,
-                DRVH=max,
-                LOPR=min_alarm,
-                HOPR=max_alarm,
+                **datatype_to_epics_fields(attribute.datatype),
                 **attribute_fields,
             )
         case String():
-            return builder.longStringIn(pv, **attribute_fields)
+            return builder.longStringIn(
+                pv, **datatype_to_epics_fields(attribute.datatype), **attribute_fields
+            )
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
@@ -376,38 +407,33 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
             **attribute_fields,
         )
 
+    def datatype_updater(datatype: DataType):
+        reload_attribute_fields(pv, datatype)
+
+    attribute.set_update_datatype_callback(datatype_updater)
+
     match attribute.datatype:
-        case Bool(znam, onam):
+        case Bool():
             return builder.boolOut(
                 pv,
-                ZNAM=znam,
-                ONAM=onam,
+                **datatype_to_epics_fields(attribute.datatype),
                 always_update=True,
                 on_update=on_update,
             )
-        case Int(units, min, max, min_alarm, max_alarm):
+        case Int():
             return builder.longOut(
                 pv,
                 always_update=True,
                 on_update=on_update,
-                EGU=units,
-                DRVL=min,
-                DRVH=max,
-                LOPR=min_alarm,
-                HOPR=max_alarm,
+                **datatype_to_epics_fields(attribute.datatype),
                 **attribute_fields,
             )
-        case Float(prec, units, min, max, min_alarm, max_alarm):
+        case Float():
             return builder.aOut(
                 pv,
                 always_update=True,
                 on_update=on_update,
-                PREC=prec,
-                EGU=units,
-                DRVL=min,
-                DRVH=max,
-                LOPR=min_alarm,
-                HOPR=max_alarm,
+                **datatype_to_epics_fields(attribute.datatype),
                 **attribute_fields,
             )
         case String():
