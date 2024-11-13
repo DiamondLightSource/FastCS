@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import numpy as np
+from numpy import typing as npt
 from abc import abstractmethod
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
-T = TypeVar("T", int, float, bool, str)
+T = TypeVar("T", int, float, bool, str, npt.ArrayLike)
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
 
@@ -72,6 +74,31 @@ class String(DataType[str]):
     @property
     def dtype(self) -> type[str]:
         return str
+
+
+@dataclass(frozen=True)
+class WaveForm(DataType[npt.ArrayLike]):
+    """DataType for a waveform"""
+
+    length: int | None = None
+
+    @property
+    def dtype(self) -> type[npt.ArrayLike]:
+        return np.ndarray
+
+
+@dataclass(frozen=True)
+class Table(DataType[npt.ArrayLike]):
+    """`DataType` mapping to a dictionary of numpy arrays.
+
+    Values should be a dictionary of column name to an `ArrayLike` of columns.
+    """
+
+    numpy_datatype: npt.DTypeLike
+
+    @property
+    def dtype(self) -> type[npt.ArrayLike]:
+        return np.ndarray
 
 
 def validate_value(datatype: DataType[T], value: T) -> T:
