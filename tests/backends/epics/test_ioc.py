@@ -459,3 +459,39 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
             always_update=True,
             on_update=mocker.ANY,
         )
+
+
+def test_update_datatype(mocker: MockerFixture):
+    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+
+    pv_name = f"{DEVICE}:Attr"
+
+    attr_r = AttrR(Int())
+    record_r = _get_input_record(pv_name, attr_r)
+
+    builder.longIn.assert_called_once_with(pv_name, **DEFAULT_SCALAR_FIELD_ARGS)
+    record_r.set_field.assert_not_called()
+    attr_r.update_datatype(Int(units="m", min=-3))
+    record_r.set_field.assert_any_call("EGU", "m")
+    record_r.set_field.assert_any_call("DRVL", -3)
+
+    with pytest.raises(
+        ValueError,
+        match="Attribute datatype must be of type <class 'fastcs.datatypes.Int'>",
+    ):
+        attr_r.update_datatype(String())  # type: ignore
+
+    attr_w = AttrW(Int())
+    record_w = _get_output_record(pv_name, attr_w, on_update=mocker.ANY)
+
+    builder.longIn.assert_called_once_with(pv_name, **DEFAULT_SCALAR_FIELD_ARGS)
+    record_w.set_field.assert_not_called()
+    attr_w.update_datatype(Int(units="m", min=-3))
+    record_w.set_field.assert_any_call("EGU", "m")
+    record_w.set_field.assert_any_call("DRVL", -3)
+
+    with pytest.raises(
+        ValueError,
+        match="Attribute datatype must be of type <class 'fastcs.datatypes.Int'>",
+    ):
+        attr_w.update_datatype(String())  # type: ignore

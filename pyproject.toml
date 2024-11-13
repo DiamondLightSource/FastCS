@@ -16,7 +16,7 @@ dependencies = [
     "pydantic",
     "pvi~=0.10.0",
     "pytango",
-    "softioc",
+    "softioc>=4.5.0",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"
@@ -42,7 +42,7 @@ dev = [
     "tox-direct",
     "types-mock",
     "aioca",
-    "p4p",
+    "p4p>=4.2.0",
 ]
 
 [project.scripts]
@@ -61,7 +61,7 @@ version_file = "src/fastcs/_version.py"
 
 [tool.pyright]
 typeCheckingMode = "standard"
-reportMissingImports = false # Ignore missing stubs in imported modules
+reportMissingImports = false  # Ignore missing stubs in imported modules
 
 [tool.pytest.ini_options]
 # Run pytest with all our checkers, and don't spam us with massive tracebacks on error

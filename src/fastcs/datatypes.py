@@ -12,6 +12,7 @@ ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 AttrCallback = Callable[[T], Awaitable[None]]
 
 
+@dataclass(frozen=True)  # So that we can type hint with dataclass methods
 class DataType(Generic[T]):
     """Generic datatype mapping to a python type, with additional metadata."""
 
