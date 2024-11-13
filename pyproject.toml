@@ -16,7 +16,7 @@ dependencies = [
     "pydantic",
     "pvi~=0.10.0",
     "pytango",
-    "softioc",
+    "softioc>=4.5.0",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"
