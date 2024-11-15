@@ -26,8 +26,8 @@ class RestServer:
 
     def _create_app(self):
         app = FastAPI()
-        _add_dev_attributes(app, self._mapping)
-        _add_dev_commands(app, self._mapping)
+        _add_attribute_api_routes(app, self._mapping)
+        _add_command_api_routes(app, self._mapping)
 
         return app
 
@@ -44,6 +44,11 @@ class RestServer:
 
 
 def _put_request_body(attribute: AttrW[T]):
+    """
+    Creates a pydantic model for each datatype which defines the schema
+    of the PUT request body
+    """
+    # key=(type, ...) to declare a field without default value
     return create_model(
         f"Put{str(attribute.datatype.dtype)}Value",
         **{"value": (attribute.datatype.dtype, ...)},  # type: ignore
@@ -63,6 +68,11 @@ def _wrap_attr_put(
 
 
 def _get_response_body(attribute: AttrR[T]):
+    """
+    Creates a pydantic model for each datatype which defines the schema
+    of the GET request body
+    """
+    # key=(type, ...) to declare a field without default value
     return create_model(
         f"Get{str(attribute.datatype.dtype)}Value",
         **{"value": (attribute.datatype.dtype, ...)},  # type: ignore
@@ -79,33 +89,33 @@ def _wrap_attr_get(
     return attr_get
 
 
-def _add_dev_attributes(app: FastAPI, mapping: Mapping) -> None:
+def _add_attribute_api_routes(app: FastAPI, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
 
         for attr_name, attribute in single_mapping.attributes.items():
             attr_name = attr_name.title().replace("_", "")
-            d_attr_name = f"{'/'.join(path)}/{attr_name}" if path else attr_name
+            route = f"{'/'.join(path)}/{attr_name}" if path else attr_name
 
             match attribute:
                 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
                 case AttrRW():
                     app.add_api_route(
-                        f"/{d_attr_name}",
+                        f"/{route}",
                         _wrap_attr_get(attribute),
-                        methods=["GET"],  # Idemponent and safe data retrieval,
+                        methods=["GET"],  # Idempotent and safe data retrieval,
                         status_code=200,  # https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
                         response_model=_get_response_body(attribute),
                     )
                     app.add_api_route(
-                        f"/{d_attr_name}",
+                        f"/{route}",
                         _wrap_attr_put(attribute),
                         methods=["PUT"],  # Idempotent state change
                         status_code=204,  # https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
                     )
                 case AttrR():
                     app.add_api_route(
-                        f"/{d_attr_name}",
+                        f"/{route}",
                         _wrap_attr_get(attribute),
                         methods=["GET"],
                         status_code=200,
@@ -113,7 +123,7 @@ def _add_dev_attributes(app: FastAPI, mapping: Mapping) -> None:
                     )
                 case AttrW():
                     app.add_api_route(
-                        f"/{d_attr_name}",
+                        f"/{route}",
                         _wrap_attr_put(attribute),
                         methods=["PUT"],
                         status_code=204,
@@ -129,15 +139,15 @@ def _wrap_command(
     return command
 
 
-def _add_dev_commands(app: FastAPI, mapping: Mapping) -> None:
+def _add_command_api_routes(app: FastAPI, mapping: Mapping) -> None:
     for single_mapping in mapping.get_controller_mappings():
         path = single_mapping.controller.path
 
         for name, method in single_mapping.command_methods.items():
             cmd_name = name.title().replace("_", "")
-            d_cmd_name = f"{'/'.join(path)}/{cmd_name}" if path else cmd_name
+            route = f"/{'/'.join(path)}/{cmd_name}" if path else cmd_name
             app.add_api_route(
-                f"/{d_cmd_name}",
+                f"/{route}",
                 _wrap_command(
                     method.fn,
                     single_mapping.controller,
