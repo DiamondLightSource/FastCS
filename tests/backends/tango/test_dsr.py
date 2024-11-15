@@ -8,10 +8,13 @@ from tango.test_context import DeviceTestContext
 
 from fastcs.attributes import AttrR
 from fastcs.backends.tango.backend import TangoBackend
-from fastcs.datatypes import Bool, Float, Int
+from fastcs.datatypes import Bool, Float, Int, String
 
 
 def pascal_2_snake(input: list[str]) -> list[str]:
+    """
+    Converts the last entry in a list of strings
+    """
     snake_list = copy.deepcopy(input)
     snake_list[-1] = re.sub(r"(?<!^)(?=[A-Z])", "_", snake_list[-1]).lower()
     return snake_list
@@ -24,6 +27,7 @@ class TestTangoDevice:
 
     @pytest.fixture(scope="class")
     def tango_context(self):
+        # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
         device = TangoBackend(self.controller)._dsr._device
         with DeviceTestContext(device) as proxy:
             yield proxy
@@ -103,8 +107,10 @@ class TestTangoDevice:
     def test_write_bool(self, client_write):
         client_write(["WriteBool"], AttrR(Bool())._value)
 
-    # # We need to discuss enums
-    # def test_string_enum(self, client_read, client_write):
+    def test_string_enum(self, client_read, client_write):
+        enum = AttrR(String(), allowed_values=["red", "green", "blue"])._value
+        client_read(["StringEnum"], enum)
+        client_write(["StringEnum"], enum)
 
     def test_big_enum(self, client_read):
         client_read(["BigEnum"], AttrR(Int(), allowed_values=list(range(1, 18)))._value)

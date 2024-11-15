@@ -105,6 +105,11 @@ class AssertableController(TestController):
     def assertPerformed(
         self, path: list[str], action: Literal["READ", "WRITE", "EXECUTE"]
     ):
+        """
+        This context manager can be used to confirm that a fastcs
+        controller's respective attribute or command methods are called
+        a single time witin the context block
+        """
         queue = copy.deepcopy(path)
         match action:
             case "READ":
