@@ -108,7 +108,7 @@ class AssertableController(TestController):
         """
         This context manager can be used to confirm that a fastcs
         controller's respective attribute or command methods are called
-        a single time witin the context block
+        a single time within the context block
         """
         queue = copy.deepcopy(path)
         match action:
