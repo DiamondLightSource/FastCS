@@ -2,10 +2,12 @@ from pvi.device import (
     LED,
     ButtonPanel,
     ComboBox,
+    Group,
     SignalR,
     SignalRW,
     SignalW,
     SignalX,
+    SubScreen,
     TextFormat,
     TextRead,
     TextWrite,
@@ -30,6 +32,28 @@ def test_get_components(mapping):
 
     components = gui.extract_mapping_components(mapping.get_controller_mappings()[0])
     assert components == [
+        Group(
+            name="SubController01",
+            layout=SubScreen(labelled=True),
+            children=[
+                SignalR(
+                    name="ReadInt",
+                    read_pv="DEVICE:SubController01:ReadInt",
+                    read_widget=TextRead(),
+                )
+            ],
+        ),
+        Group(
+            name="SubController02",
+            layout=SubScreen(labelled=True),
+            children=[
+                SignalR(
+                    name="ReadInt",
+                    read_pv="DEVICE:SubController01:ReadInt",
+                    read_widget=TextRead(),
+                )
+            ],
+        ),
         SignalR(name="BigEnum", read_pv="DEVICE:BigEnum", read_widget=TextRead()),
         SignalR(name="ReadBool", read_pv="DEVICE:ReadBool", read_widget=LED()),
         SignalR(

@@ -1,6 +1,5 @@
 from collections.abc import Awaitable, Callable, Coroutine
 from dataclasses import dataclass
-from types import MethodType
 from typing import Any
 
 import uvicorn

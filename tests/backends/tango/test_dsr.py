@@ -17,6 +17,8 @@ def test_collect_attributes(mapping):
         "ReadWriteInt",
         "StringEnum",
         "WriteBool",
+        "SubController01_ReadInt",
+        "SubController02_ReadInt",
     ]
     assert attributes["ReadInt"].attr_write == AttrWriteType.READ
     assert attributes["ReadInt"].attr_type == CmdArgType.DevLong64
