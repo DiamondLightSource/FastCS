@@ -47,9 +47,10 @@ def _put_request_body(attribute: AttrW[T]):
     Creates a pydantic model for each datatype which defines the schema
     of the PUT request body
     """
+    type_name = str(attribute.datatype.dtype.__name__).title()
     # key=(type, ...) to declare a field without default value
     return create_model(
-        f"Put{str(attribute.datatype.dtype)}Value",
+        f"Put{type_name}Value",
         value=(attribute.datatype.dtype, ...),
     )
 
@@ -71,9 +72,10 @@ def _get_response_body(attribute: AttrR[T]):
     Creates a pydantic model for each datatype which defines the schema
     of the GET request body
     """
+    type_name = str(attribute.datatype.dtype.__name__).title()
     # key=(type, ...) to declare a field without default value
     return create_model(
-        f"Get{str(attribute.datatype.dtype)}Value",
+        f"Get{type_name}Value",
         **{"value": (attribute.datatype.dtype, ...)},  # type: ignore
     )
 
