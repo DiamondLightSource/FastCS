@@ -27,7 +27,10 @@ from pvi.device import (
 from pydantic import ValidationError
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.backends.epics.util import EpicsNameOptions, _convert_attribute_name_to_pv_name
+from fastcs.backends.epics.util import (
+    EpicsNameOptions,
+    _convert_attribute_name_to_pv_name,
+)
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.exceptions import FastCSException
@@ -65,13 +68,17 @@ class EpicsGUI:
             ]
             + [
                 _convert_attribute_name_to_pv_name(
-                    attr_name, self.epics_name_options.pv_naming_convention, is_attribute=False
+                    attr_name,
+                    self.epics_name_options.pv_naming_convention,
+                    is_attribute=False,
                 )
                 for attr_name in attr_path
             ]
             + [
                 _convert_attribute_name_to_pv_name(
-                    name, self.epics_name_options.pv_naming_convention, is_attribute=True
+                    name,
+                    self.epics_name_options.pv_naming_convention,
+                    is_attribute=True,
                 ),
             ],
         )

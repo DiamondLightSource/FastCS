@@ -30,7 +30,6 @@ class EpicsIOCOptions:
     name_options: EpicsNameOptions = EpicsNameOptions()
 
 
-
 class EpicsIOC:
     def __init__(
         self, pv_prefix: str, mapping: Mapping, options: EpicsIOCOptions | None = None
@@ -74,7 +73,7 @@ class EpicsIOC:
                     _convert_attribute_name_to_pv_name(
                         path,
                         self._name_options.pv_naming_convention,
-                        is_attribute=False
+                        is_attribute=False,
                     )
                     for path in child.path
                 ]
@@ -96,7 +95,9 @@ class EpicsIOC:
             ]
             for attr_name, attribute in single_mapping.attributes.items():
                 pv_name = _convert_attribute_name_to_pv_name(
-                    attr_name, self._name_options.pv_naming_convention, is_attribute=True
+                    attr_name,
+                    self._name_options.pv_naming_convention,
+                    is_attribute=True,
                 )
                 _pv_prefix = self._name_options.pv_separator.join(
                     [pv_prefix] + formatted_path
@@ -169,7 +170,9 @@ class EpicsIOC:
             ]
             for attr_name, method in single_mapping.command_methods.items():
                 pv_name = _convert_attribute_name_to_pv_name(
-                    attr_name, self._name_options.pv_naming_convention, is_attribute=True
+                    attr_name,
+                    self._name_options.pv_naming_convention,
+                    is_attribute=True,
                 )
                 _pv_prefix = self._name_options.pv_separator.join(
                     [pv_prefix] + formatted_path
