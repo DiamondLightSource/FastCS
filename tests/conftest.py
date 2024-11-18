@@ -102,22 +102,24 @@ class AssertableController(TestController):
         self.mocker = mocker
 
     @contextmanager
-    def assertPerformed(
-        self, path: list[str], action: Literal["READ", "WRITE", "EXECUTE"]
-    ):
+    def assert_read_here(self, path: list[str]):
+        yield from self._assert_method(path, "get")
+
+    @contextmanager
+    def assert_write_here(self, path: list[str]):
+        yield from self._assert_method(path, "process")
+
+    @contextmanager
+    def assert_execute_here(self, path: list[str]):
+        yield from self._assert_method(path, "")
+
+    def _assert_method(self, path: list[str], method: Literal["get", "process", ""]):
         """
         This context manager can be used to confirm that a fastcs
         controller's respective attribute or command methods are called
-        a single time within the context block
+        a single time within a context block
         """
         queue = copy.deepcopy(path)
-        match action:
-            case "READ":
-                method = "get"
-            case "WRITE":
-                method = "process"
-            case "EXECUTE":
-                method = ""
 
         # Navigate to subcontroller
         controller = self
