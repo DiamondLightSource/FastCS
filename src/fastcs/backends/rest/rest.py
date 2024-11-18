@@ -50,7 +50,7 @@ def _put_request_body(attribute: AttrW[T]):
     # key=(type, ...) to declare a field without default value
     return create_model(
         f"Put{str(attribute.datatype.dtype)}Value",
-        **{"value": (attribute.datatype.dtype, ...)},  # type: ignore
+        value=(attribute.datatype.dtype, ...),
     )
 
 
