@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import numpy as np
-from numpy import typing as npt
 from abc import abstractmethod
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Any, Generic, Literal, TypeVar
 
-T = TypeVar("T", int, float, bool, str, npt.ArrayLike)
+import numpy as np
+
+T = TypeVar("T", int, float, bool, str, np.ndarray)  # type: ignore
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
 
@@ -20,7 +20,20 @@ class DataType(Generic[T]):
 
     @property
     @abstractmethod
-    def dtype(self) -> type[T]:  # Using property due to lack of Generic ClassVars
+    def dtype(
+        self,
+    ) -> type[T]:  # Using property due to lack of Generic ClassVars
+        pass
+
+    @property
+    @abstractmethod
+    def initial_value(self) -> T:
+        """Return an initial value for the datatype."""
+        pass
+
+    @abstractmethod
+    def cast(self, value: Any) -> T:
+        """Cast a value to the datatype to put to the backend."""
         pass
 
 
@@ -38,6 +51,17 @@ class Int(DataType[int]):
     def dtype(self) -> type[int]:
         return int
 
+    @property
+    def initial_value(self) -> Literal[0]:
+        return 0
+
+    def cast(self, value: Any) -> int:
+        if self.min is not None and value < self.min:
+            raise ValueError(f"Value {value} is less than minimum {self.min}")
+        if self.max is not None and value > self.max:
+            raise ValueError(f"Value {value} is greater than maximum {self.max}")
+        return int(value)
+
 
 @dataclass(frozen=True)
 class Float(DataType[float]):
@@ -54,6 +78,17 @@ class Float(DataType[float]):
     def dtype(self) -> type[float]:
         return float
 
+    @property
+    def intial_value(self) -> float:
+        return 0.0
+
+    def cast(self, value: Any) -> float:
+        if self.min is not None and value < self.min:
+            raise ValueError(f"Value {value} is less than minimum {self.min}")
+        if self.max is not None and value > self.max:
+            raise ValueError(f"Value {value} is greater than maximum {self.max}")
+        return float(value)
+
 
 @dataclass(frozen=True)
 class Bool(DataType[bool]):
@@ -66,6 +101,13 @@ class Bool(DataType[bool]):
     def dtype(self) -> type[bool]:
         return bool
 
+    @property
+    def intial_value(self) -> Literal[False]:
+        return False
+
+    def cast(self, value: Any) -> bool:
+        return bool(value)
+
 
 @dataclass(frozen=True)
 class String(DataType[str]):
@@ -75,39 +117,45 @@ class String(DataType[str]):
     def dtype(self) -> type[str]:
         return str
 
-
-@dataclass(frozen=True)
-class WaveForm(DataType[npt.ArrayLike]):
-    """DataType for a waveform"""
-
-    length: int | None = None
-
     @property
-    def dtype(self) -> type[npt.ArrayLike]:
-        return np.ndarray
+    def intial_value(self) -> Literal[""]:
+        return ""
+
+    def cast(self, value: Any) -> str:
+        return str(value)
+
+
+DEFAULT_WAVEFORM_LENGTH = 20000
 
 
 @dataclass(frozen=True)
-class Table(DataType[npt.ArrayLike]):
-    """`DataType` mapping to a dictionary of numpy arrays.
-
-    Values should be a dictionary of column name to an `ArrayLike` of columns.
+class WaveForm(DataType[np.ndarray]):
+    """
+    DataType for a waveform, values are of the numpy `datatype`
     """
 
-    numpy_datatype: npt.DTypeLike
+    numpy_datatype: np.dtype
+    length: int = DEFAULT_WAVEFORM_LENGTH
 
     @property
-    def dtype(self) -> type[npt.ArrayLike]:
+    def dtype(self) -> type[np.ndarray]:
         return np.ndarray
 
+    @property
+    def initial_value(self) -> np.ndarray:
+        return np.ndarray(self.length, dtype=self.numpy_datatype)
 
-def validate_value(datatype: DataType[T], value: T) -> T:
-    """Validate a value against a datatype."""
-
-    if isinstance(datatype, (Int | Float)):
-        assert isinstance(value, (int | float)), f"Value {value} is not a number"
-        if datatype.min is not None and value < datatype.min:
-            raise ValueError(f"Value {value} is less than minimum {datatype.min}")
-        if datatype.max is not None and value > datatype.max:
-            raise ValueError(f"Value {value} is greater than maximum {datatype.max}")
-    return value
+    def cast(self, value: Sequence | np.ndarray) -> np.ndarray:
+        if len(value) > self.length:
+            raise ValueError(
+                f"Waveform length {len(value)} is greater than maximum {self.length}."
+            )
+        if isinstance(value, np.ndarray):
+            if value.dtype != self.numpy_datatype:
+                raise ValueError(
+                    f"Waveform dtype {value.dtype} does not "
+                    f"match {self.numpy_datatype}."
+                )
+            return value
+        else:
+            return np.array(value, dtype=self.numpy_datatype)

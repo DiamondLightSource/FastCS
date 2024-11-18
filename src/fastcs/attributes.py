@@ -4,7 +4,7 @@ from collections.abc import Callable
 from enum import Enum
 from typing import Any, Generic, Protocol, runtime_checkable
 
-from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T, validate_value
+from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
 
 
 class AttrMode(Enum):
@@ -124,7 +124,9 @@ class AttrR(Attribute[T]):
             allowed_values=allowed_values,  # type: ignore
             description=description,
         )
-        self._value: T = datatype.dtype() if initial_value is None else initial_value
+        self._value: T = (
+            datatype.initial_value if initial_value is None else initial_value
+        )
         self._update_callback: AttrCallback[T] | None = None
         self._updater = handler
 
@@ -132,7 +134,7 @@ class AttrR(Attribute[T]):
         return self._value
 
     async def set(self, value: T) -> None:
-        self._value = self._datatype.dtype(validate_value(self._datatype, value))
+        self._value = self._datatype.cast(value)
 
         if self._update_callback is not None:
             await self._update_callback(self._value)
@@ -175,11 +177,11 @@ class AttrW(Attribute[T]):
 
     async def process_without_display_update(self, value: T) -> None:
         if self._process_callback is not None:
-            await self._process_callback(self._datatype.dtype(value))
+            await self._process_callback(self._datatype.cast(value))
 
     async def update_display_without_process(self, value: T) -> None:
         if self._write_display_callback is not None:
-            await self._write_display_callback(self._datatype.dtype(value))
+            await self._write_display_callback(self._datatype.cast(value))
 
     def set_process_callback(self, callback: AttrCallback[T] | None) -> None:
         self._process_callback = callback
@@ -219,6 +221,6 @@ class AttrRW(AttrR[T], AttrW[T]):
         )
 
     async def process(self, value: T) -> None:
-        await self.set(validate_value(self._datatype, value))
+        await self.set(value)
 
         await super().process(value)  # type: ignore

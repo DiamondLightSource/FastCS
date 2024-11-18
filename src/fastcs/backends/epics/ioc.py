@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from types import MethodType
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 import numpy as np
 from softioc import builder, fields, softioc
@@ -18,9 +18,8 @@ from fastcs.backends.epics.util import (
     enum_index_to_value,
     enum_value_to_index,
 )
-from epicsdbbuilder import RecordName
 from fastcs.controller import BaseController
-from fastcs.datatypes import Bool, DataType, Float, Int, String, T, Table, WaveForm
+from fastcs.datatypes import Bool, DataType, Float, Int, String, T, WaveForm
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
@@ -302,114 +301,6 @@ class EpicsIOC:
             },
         )
 
-    def create_table(self, top_level_pv: str, datatype: np.dtype):
-        pva_table_name = RecordName(top_level_pv)
-
-        columns = datatype.descr
-        if not columns or not all(
-            isinstance(column, tuple) and len(column) == 2 for column in columns
-        ):
-            raise FastCSException("Table datatype must have a structured dtype.")
-
-        columns = cast(list[tuple[str, np.dtype]], columns)
-
-        labels_record: RecordWrapper = builder.WaveformOut(
-            top_level_pv + ":LABELS",
-            initial_value=np.array([name.encode() for (name, _) in columns]),
-        )
-
-        labels_record.add_info(
-            "Q:group",
-            {
-                pva_table_name: {
-                    "+id": "epics:nt/NTTable:1.0",
-                    "labels": {"+type": "plain", "+channel": "VAL"},
-                }
-            },
-        )
-
-        pv_rec = builder.longStringIn(
-            top_level_pv + ":PV",
-            initial_value=pva_table_name,
-        )
-        block, field = top_level_pv.rsplit(":", maxsplit=1)
-        _add_pvi_info(field, block, field.lower())
-
-        self.table_fields_records = OrderedDict(
-            {
-                k: TableFieldRecordContainer(v, None)
-                for k, v in field_info.fields.items()
-            }
-        )
-        self.all_values_dict = all_values_dict
-
-        pvi_table_name = epics_to_pvi_name(table_name)
-
-        # The PVI group to put all records into
-        pvi_group = PviGroup.PARAMETERS
-        Pvi.add_pvi_info(
-            table_name,
-            pvi_group,
-            SignalRW(
-                name=pvi_table_name,
-                write_pv=f"{Pvi.record_prefix}:{table_name}",
-                write_widget=TableWrite(widgets=[]),
-            ),
-        )
-
-        # Note that the table_updater's table_fields are guaranteed sorted in bit order,
-        # unlike field_info's fields. This means the record dict inside the table
-        # updater are also in the same bit order.
-        value = all_values_dict[table_name]
-        assert isinstance(value, list)
-        field_data = words_to_table(value, field_info)
-
-        for i, (field_name, field_record_container) in enumerate(
-            self.table_fields_records.items()
-        ):
-            field_details = field_record_container.field
-
-            full_name = table_name + ":" + field_name
-            full_name = EpicsName(full_name)
-            description = trim_description(field_details.description, full_name)
-
-            waveform_val = self._construct_waveform_val(
-                field_data, field_name, field_details
-            )
-
-            field_record: RecordWrapper = builder.WaveformOut(
-                full_name,
-                DESC=description,
-                validate=self.validate_waveform,
-                initial_value=waveform_val,
-                length=field_info.max_length,
-            )
-
-            field_pva_info = {
-                "+type": "plain",
-                "+channel": "VAL",
-                "+putorder": i + 1,
-                "+trigger": "",
-            }
-
-            pva_info = {f"value.{field_name.lower()}": field_pva_info}
-
-            # For the last column in the table
-            if i == len(self.table_fields_records) - 1:
-                # Trigger a monitor update
-                field_pva_info["+trigger"] = "*"
-                # Add metadata
-                pva_info[""] = {"+type": "meta", "+channel": "VAL"}
-
-            field_record.add_info(
-                "Q:group",
-                {pva_table_name: pva_info},
-            )
-
-            field_record_container.record_info = RecordInfo(lambda x: x, None, False)
-
-            field_record_container.record_info.add_record(field_record)
-
 
 def _add_pvi_info(
     pvi: str,
@@ -498,8 +389,6 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
             return builder.WaveformIn(
                 pv, **datatype_to_epics_fields(attribute.datatype), **attribute_fields
             )
-        case Table(numpy_datatype):
-            return create_table(pv, numpy_datatype)
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
