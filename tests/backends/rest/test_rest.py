@@ -1,5 +1,4 @@
 import copy
-import re
 from typing import Any
 
 import pytest
