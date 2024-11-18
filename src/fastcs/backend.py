@@ -1,6 +1,7 @@
 import asyncio
 from collections import defaultdict
 from collections.abc import Callable
+from concurrent.futures import Future
 from types import MethodType
 
 from softioc.asyncio_dispatcher import AsyncioDispatcher
@@ -19,8 +20,8 @@ class Backend:
         self._loop = self._dispatcher.loop
         self._controller = controller
 
-        self._initial_tasks = [controller.connect]
-        self._scan_tasks: list[asyncio.Task] = []
+        self._initial_coros = [controller.connect]
+        self._scan_futures: set[Future] = set()
 
         asyncio.run_coroutine_threadsafe(
             self._controller.initialise(), self._loop
@@ -41,28 +42,29 @@ class Backend:
             _link_attribute_sender_class(single_mapping)
 
     def __del__(self):
-        self.stop_scan_tasks()
+        self.stop_scan_futures()
 
     def run(self):
-        self._run_initial_tasks()
-        self.start_scan_tasks()
+        self._run_initial_futures()
+        self.start_scan_futures()
         self._run()
 
-    def _run_initial_tasks(self):
-        for task in self._initial_tasks:
-            future = asyncio.run_coroutine_threadsafe(task(), self._loop)
+    def _run_initial_futures(self):
+        for coro in self._initial_coros:
+            future = asyncio.run_coroutine_threadsafe(coro(), self._loop)
             future.result()
 
-    def start_scan_tasks(self):
-        self._scan_tasks = [
-            self._loop.create_task(coro()) for coro in _get_scan_coros(self._mapping)
-        ]
+    def start_scan_futures(self):
+        self._scan_futures = {
+            asyncio.run_coroutine_threadsafe(coro(), self._loop)
+            for coro in _get_scan_coros(self._mapping)
+        }
 
-    def stop_scan_tasks(self):
-        for task in self._scan_tasks:
-            if not task.done():
+    def stop_scan_futures(self):
+        for future in self._scan_futures:
+            if not future.done():
                 try:
-                    task.cancel()
+                    future.cancel()
                 except asyncio.CancelledError:
                     pass
 

@@ -10,7 +10,7 @@ class DummyBackend(Backend):
         super().__init__(controller)
 
         self.init_task_called = False
-        self._initial_tasks.append(self.init_task)
+        self._initial_coros.append(self.init_task)
 
     async def init_task(self):
         self.init_task_called = True
@@ -44,4 +44,4 @@ async def test_backend(controller):
         await asyncio.sleep(0.1)
         assert controller.count > count
 
-    backend.stop_scan_tasks()
+    backend.stop_scan_futures()
