@@ -10,9 +10,9 @@ from fastcs.backends.rest.backend import RestBackend
 from fastcs.datatypes import Bool, Float, Int
 
 
-def pascal_2_snake(input: list[str]) -> list[str]:
+def kebab_2_snake(input: list[str]) -> list[str]:
     snake_list = copy.deepcopy(input)
-    snake_list[-1] = re.sub(r"(?<!^)(?=[A-Z])", "_", snake_list[-1]).lower()
+    snake_list[-1] = snake_list[-1].replace("-", "_")
     return snake_list
 
 
@@ -30,7 +30,7 @@ class TestRestServer:
     def client_read(self, client):
         def _client_read(path: list[str], expected: Any):
             route = "/" + "/".join(path)
-            with self.controller.assertPerformed(pascal_2_snake(path), "READ"):
+            with self.controller.assertPerformed(kebab_2_snake(path), "READ"):
                 response = client.get(route)
             assert response.status_code == 200
             assert response.json()["value"] == expected
@@ -41,7 +41,7 @@ class TestRestServer:
     def client_write(self, client):
         def _client_write(path: list[str], value: Any):
             route = "/" + "/".join(path)
-            with self.controller.assertPerformed(pascal_2_snake(path), "WRITE"):
+            with self.controller.assertPerformed(kebab_2_snake(path), "WRITE"):
                 response = client.put(route, json={"value": value})
             assert response.status_code == 204
 
@@ -51,40 +51,42 @@ class TestRestServer:
     def client_exec(self, client):
         def _client_exec(path: list[str]):
             route = "/" + "/".join(path)
-            with self.controller.assertPerformed(pascal_2_snake(path), "EXECUTE"):
+            with self.controller.assertPerformed(kebab_2_snake(path), "EXECUTE"):
                 response = client.put(route)
             assert response.status_code == 204
 
         return _client_exec
 
     def test_read_int(self, client_read):
-        client_read(["ReadInt"], AttrR(Int())._value)
+        client_read(["read-int"], AttrR(Int())._value)
 
     def test_read_write_int(self, client_read, client_write):
-        client_read(["ReadWriteInt"], AttrR(Int())._value)
-        client_write(["ReadWriteInt"], AttrR(Int())._value)
+        client_read(["read-write-int"], AttrR(Int())._value)
+        client_write(["read-write-int"], AttrR(Int())._value)
 
     def test_read_write_float(self, client_read, client_write):
-        client_read(["ReadWriteFloat"], AttrR(Float())._value)
-        client_write(["ReadWriteFloat"], AttrR(Float())._value)
+        client_read(["read-write-float"], AttrR(Float())._value)
+        client_write(["read-write-float"], AttrR(Float())._value)
 
     def test_read_bool(self, client_read):
-        client_read(["ReadBool"], AttrR(Bool())._value)
+        client_read(["read-bool"], AttrR(Bool())._value)
 
     def test_write_bool(self, client_write):
-        client_write(["WriteBool"], AttrR(Bool())._value)
+        client_write(["write-bool"], AttrR(Bool())._value)
 
     # # We need to discuss enums
     # def test_string_enum(self, client_read, client_write):
 
     def test_big_enum(self, client_read):
-        client_read(["BigEnum"], AttrR(Int(), allowed_values=list(range(1, 18)))._value)
+        client_read(
+            ["big-enum"], AttrR(Int(), allowed_values=list(range(1, 18)))._value
+        )
 
     def test_go(self, client_exec):
-        client_exec(["Go"])
+        client_exec(["go"])
 
     def test_read_child1(self, client_read):
-        client_read(["SubController01", "ReadInt"], AttrR(Int())._value)
+        client_read(["SubController01", "read-int"], AttrR(Int())._value)
 
     def test_read_child2(self, client_read):
-        client_read(["SubController02", "ReadInt"], AttrR(Int())._value)
+        client_read(["SubController02", "read-int"], AttrR(Int())._value)

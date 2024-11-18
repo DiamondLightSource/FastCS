@@ -93,7 +93,7 @@ def _add_attribute_api_routes(app: FastAPI, mapping: Mapping) -> None:
         path = single_mapping.controller.path
 
         for attr_name, attribute in single_mapping.attributes.items():
-            attr_name = attr_name.title().replace("_", "")
+            attr_name = attr_name.replace("_", "-")
             route = f"{'/'.join(path)}/{attr_name}" if path else attr_name
 
             match attribute:
@@ -143,7 +143,7 @@ def _add_command_api_routes(app: FastAPI, mapping: Mapping) -> None:
         path = single_mapping.controller.path
 
         for name, method in single_mapping.command_methods.items():
-            cmd_name = name.title().replace("_", "")
+            cmd_name = name.replace("_", "-")
             route = f"/{'/'.join(path)}/{cmd_name}" if path else cmd_name
             app.add_api_route(
                 f"/{route}",
