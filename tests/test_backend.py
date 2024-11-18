@@ -1,4 +1,4 @@
-from time import sleep
+import asyncio
 
 import pytest
 
@@ -16,7 +16,7 @@ class DummyBackend(Backend):
         self.init_task_called = True
 
     def _run(self):
-        pass
+        asyncio.run_coroutine_threadsafe(asyncio.sleep(0.3), self._loop)
 
 
 @pytest.mark.asyncio
@@ -41,5 +41,7 @@ async def test_backend(controller):
     # Scan tasks should be running
     for _ in range(3):
         count = controller.count
-        sleep(0.05)
+        await asyncio.sleep(0.1)
         assert controller.count > count
+
+    backend.stop_scan_tasks()
