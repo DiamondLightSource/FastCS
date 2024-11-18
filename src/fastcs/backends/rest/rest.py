@@ -76,7 +76,7 @@ def _get_response_body(attribute: AttrR[T]):
     # key=(type, ...) to declare a field without default value
     return create_model(
         f"Get{type_name}Value",
-        **{"value": (attribute.datatype.dtype, ...)},  # type: ignore
+        value=(attribute.datatype.dtype, ...),
     )
 
 
