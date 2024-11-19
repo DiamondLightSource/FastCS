@@ -1,16 +1,19 @@
+import copy
 import os
 import random
 import string
 import subprocess
 import time
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import pytest
 from aioca import purge_channel_caches
+from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
-from fastcs.controller import Controller
+from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.mapping import Mapping
 from fastcs.wrappers import command, scan
@@ -49,7 +52,20 @@ class TestHandler(Handler, TestUpdater, TestSender):
     pass
 
 
+class TestSubController(SubController):
+    read_int: AttrR = AttrR(Int(), handler=TestUpdater())
+
+
 class TestController(Controller):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self._sub_controllers: list[TestSubController] = []
+        for index in range(1, 3):
+            controller = TestSubController()
+            self._sub_controllers.append(controller)
+            self.register_sub_controller(f"SubController{index:02d}", controller)
+
     read_int: AttrR = AttrR(Int(), handler=TestUpdater())
     read_write_int: AttrRW = AttrRW(Int(), handler=TestHandler())
     read_write_float: AttrRW = AttrRW(Float())
@@ -80,9 +96,63 @@ class TestController(Controller):
         self.count += 1
 
 
+class AssertableController(TestController):
+    def __init__(self, mocker: MockerFixture) -> None:
+        super().__init__()
+        self.mocker = mocker
+
+    @contextmanager
+    def assert_read_here(self, path: list[str]):
+        yield from self._assert_method(path, "get")
+
+    @contextmanager
+    def assert_write_here(self, path: list[str]):
+        yield from self._assert_method(path, "process")
+
+    @contextmanager
+    def assert_execute_here(self, path: list[str]):
+        yield from self._assert_method(path, "")
+
+    def _assert_method(self, path: list[str], method: Literal["get", "process", ""]):
+        """
+        This context manager can be used to confirm that a fastcs
+        controller's respective attribute or command methods are called
+        a single time within a context block
+        """
+        queue = copy.deepcopy(path)
+
+        # Navigate to subcontroller
+        controller = self
+        item_name = queue.pop(-1)
+        for item in queue:
+            controllers = controller.get_sub_controllers()
+            controller = controllers[item]
+
+        # create probe
+        if method:
+            attr = getattr(controller, item_name)
+            spy = self.mocker.spy(attr, method)
+        else:
+            spy = self.mocker.spy(controller, item_name)
+        initial = spy.call_count
+        try:
+            yield  # Enter context
+        finally:  # Exit context
+            final = spy.call_count
+            assert final == initial + 1, (
+                f"Expected {'.'.join(path + [method] if method else path)} "
+                f"to be called once, but it was called {final - initial} times."
+            )
+
+
 @pytest.fixture
 def controller():
     return TestController()
+
+
+@pytest.fixture(scope="class")
+def assertable_controller(class_mocker: MockerFixture):
+    return AssertableController(class_mocker)
 
 
 @pytest.fixture
