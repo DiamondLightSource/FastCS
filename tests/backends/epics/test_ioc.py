@@ -7,11 +7,13 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backends.epics.ioc import (
     EPICS_MAX_NAME_LENGTH,
     EpicsIOC,
+    EpicsIOCOptions,
     _add_pvi_info,
     _get_input_record,
     _get_output_record,
 )
-from fastcs.controller import Controller
+from fastcs.backends.epics.util import EpicsNameOptions, PvNamingConvention
+from fastcs.controller import Controller, SubController
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Int, String
 from fastcs.exceptions import FastCSException
@@ -461,3 +463,76 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
             always_update=True,
             on_update=mocker.ANY,
         )
+
+
+class FooSubController(SubController):
+    def __init__(self):
+        self.foo_bar_2 = AttrR(Int())
+        super().__init__()
+
+
+class FooController(Controller):
+    def __init__(self):
+        self.foo_bar_1 = AttrR(Int())
+        self.sub_controller = FooSubController()
+        super().__init__()
+        self.register_sub_controller("sub_controller", self.sub_controller)
+
+
+@pytest.mark.parametrize(
+    ("naming_convention", "separator", "foo_bar_1", "sub_controller", "foo_bar_2"),
+    [
+        (
+            PvNamingConvention.NO_CONVERSION,
+            "&",
+            f"{DEVICE}&foo_bar_1",
+            f"{DEVICE}&sub_controller&PVI",
+            f"{DEVICE}&sub_controller&foo_bar_2",
+        ),
+        (
+            PvNamingConvention.PASCAL,
+            ":",
+            f"{DEVICE}:FooBar1",
+            f"{DEVICE}:SubController:PVI",
+            f"{DEVICE}:SubController:FooBar2",
+        ),
+        (
+            PvNamingConvention.CAPITALIZED,
+            ":",
+            f"{DEVICE}:FOO-BAR-1",
+            f"{DEVICE}:SUB-CONTROLLER:PVI",
+            f"{DEVICE}:SUB-CONTROLLER:FOO-BAR-2",
+        ),
+        (
+            PvNamingConvention.CAPITALIZED_CONTROLLER_PASCAL_ATTRIBUTE,
+            ":",
+            f"{DEVICE}:FooBar1",
+            f"{DEVICE}:SUB-CONTROLLER:PVI",
+            f"{DEVICE}:SUB-CONTROLLER:FooBar2",
+        ),
+    ],
+)
+def test_pv_naming_conventions(
+    mocker: MockerFixture,
+    naming_convention: PvNamingConvention,
+    separator: str,
+    foo_bar_1: str,
+    sub_controller: str,
+    foo_bar_2: str,
+):
+    options = EpicsIOCOptions(
+        name_options=EpicsNameOptions(
+            pv_naming_convention=naming_convention, pv_separator=separator
+        )
+    )
+    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+    controller = FooController()
+    mapping = Mapping(controller)
+    EpicsIOC(DEVICE, mapping, options=options)
+    builder.longIn.assert_any_call(foo_bar_1)
+    builder.longIn.assert_any_call(foo_bar_2)
+    builder.longStringIn.assert_any_call(
+        f"{sub_controller}_PV",
+        initial_value=f"{sub_controller}",
+        DESC="The records in this controller",
+    )
