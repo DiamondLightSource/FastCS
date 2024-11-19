@@ -244,21 +244,18 @@ def test_ioc(mocker: MockerFixture, mapping: Mapping):
 
     # Check records are created
     builder.boolIn.assert_called_once_with(f"{DEVICE}:ReadBool", ZNAM="OFF", ONAM="ON")
-    builder.longIn.assert_any_call(f"{DEVICE}:ReadInt", EGU=None)
-    builder.aIn.assert_called_once_with(
-        f"{DEVICE}:ReadWriteFloat_RBV", EGU=None, PREC=2
-    )
+    builder.longIn.assert_any_call(f"{DEVICE}:ReadInt")
+    builder.aIn.assert_called_once_with(f"{DEVICE}:ReadWriteFloat_RBV", PREC=2)
     builder.aOut.assert_any_call(
         f"{DEVICE}:ReadWriteFloat",
         always_update=True,
         on_update=mocker.ANY,
-        EGU=None,
         PREC=2,
     )
-    builder.longIn.assert_any_call(f"{DEVICE}:BigEnum", EGU=None)
-    builder.longIn.assert_any_call(f"{DEVICE}:ReadWriteInt_RBV", EGU=None)
+    builder.longIn.assert_any_call(f"{DEVICE}:BigEnum")
+    builder.longIn.assert_any_call(f"{DEVICE}:ReadWriteInt_RBV")
     builder.longOut.assert_called_with(
-        f"{DEVICE}:ReadWriteInt", always_update=True, on_update=mocker.ANY, EGU=None
+        f"{DEVICE}:ReadWriteInt", always_update=True, on_update=mocker.ANY
     )
     builder.mbbIn.assert_called_once_with(
         f"{DEVICE}:StringEnum_RBV", ZRST="red", ONST="green", TWST="blue"
@@ -417,9 +414,9 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
 
     short_pv_name = "attr_rw_short_name".title().replace("_", "")
     builder.longOut.assert_called_once_with(
-        f"{DEVICE}:{short_pv_name}", always_update=True, on_update=mocker.ANY, EGU=None
+        f"{DEVICE}:{short_pv_name}", always_update=True, on_update=mocker.ANY
     )
-    builder.longIn.assert_called_once_with(f"{DEVICE}:{short_pv_name}_RBV", EGU=None)
+    builder.longIn.assert_called_once_with(f"{DEVICE}:{short_pv_name}_RBV")
 
     long_pv_name = long_attr_name.title().replace("_", "")
     with pytest.raises(AssertionError):
