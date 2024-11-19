@@ -40,8 +40,8 @@ class TestTangoDevice:
         assert tango_context.command_inout("State") == DevState.ON
 
     def test_status(self, tango_context):
-        expected = "The device is in ON state."
-        assert tango_context.command_inout("Status") == expected
+        expect = "The device is in ON state."
+        assert tango_context.command_inout("Status") == expect
 
     def test_read_int(self, assertable_controller, tango_context):
         expect = 0
@@ -54,16 +54,20 @@ class TestTangoDevice:
         with assertable_controller.assert_read_here(["read_write_int"]):
             result = tango_context.read_attribute("ReadWriteInt").value
         assert result == expect
+        new = 9
         with assertable_controller.assert_write_here(["read_write_int"]):
-            tango_context.write_attribute("ReadWriteInt", expect)
+            tango_context.write_attribute("ReadWriteInt", new)
+        assert tango_context.read_attribute("ReadWriteInt").value == new
 
     def test_read_write_float(self, assertable_controller, tango_context):
         expect = 0.0
         with assertable_controller.assert_read_here(["read_write_float"]):
             result = tango_context.read_attribute("ReadWriteFloat").value
         assert result == expect
+        new = 0.5
         with assertable_controller.assert_write_here(["read_write_float"]):
-            tango_context.write_attribute("ReadWriteFloat", expect)
+            tango_context.write_attribute("ReadWriteFloat", new)
+        assert tango_context.read_attribute("ReadWriteFloat").value == new
 
     def test_read_bool(self, assertable_controller, tango_context):
         expect = False
@@ -80,8 +84,10 @@ class TestTangoDevice:
         with assertable_controller.assert_read_here(["string_enum"]):
             result = tango_context.read_attribute("StringEnum").value
         assert result == expect
+        new = "new"
         with assertable_controller.assert_write_here(["string_enum"]):
-            tango_context.write_attribute("StringEnum", expect)
+            tango_context.write_attribute("StringEnum", new)
+        assert tango_context.read_attribute("StringEnum").value == new
 
     def test_big_enum(self, assertable_controller, tango_context):
         expect = 0
