@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T", int, float, bool, str)
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
@@ -21,6 +21,18 @@ class DataType(Generic[T]):
     def dtype(self) -> type[T]:  # Using property due to lack of Generic ClassVars
         pass
 
+    @abstractmethod
+    def cast(self, value: T) -> Any:
+        """Cast a value to a more primative datatype for `Attribute` push.
+
+        Also validate it against fields in the datatype.
+        """
+        pass
+
+    @property
+    def initial_value(self) -> T:
+        return self.dtype()
+
 
 T_Numerical = TypeVar("T_Numerical", int, float)
 
@@ -32,6 +44,13 @@ class _Numerical(DataType[T_Numerical]):
     max: int | None = None
     min_alarm: int | None = None
     max_alarm: int | None = None
+
+    def cast(self, value: T_Numerical) -> T_Numerical:
+        if self.min is not None and value < self.min:
+            raise ValueError(f"Value {value} is less than minimum {self.min}")
+        if self.max is not None and value > self.max:
+            raise ValueError(f"Value {value} is greater than maximum {self.max}")
+        return value
 
 
 @dataclass(frozen=True)
@@ -65,6 +84,9 @@ class Bool(DataType[bool]):
     def dtype(self) -> type[bool]:
         return bool
 
+    def cast(self, value: bool) -> bool:
+        return value
+
 
 @dataclass(frozen=True)
 class String(DataType[str]):
@@ -74,14 +96,5 @@ class String(DataType[str]):
     def dtype(self) -> type[str]:
         return str
 
-
-def validate_value(datatype: DataType[T], value: T) -> T:
-    """Validate a value against a datatype."""
-
-    if isinstance(datatype, (Int | Float)):
-        assert isinstance(value, (int | float)), f"Value {value} is not a number"
-        if datatype.min is not None and value < datatype.min:
-            raise ValueError(f"Value {value} is less than minimum {datatype.min}")
-        if datatype.max is not None and value > datatype.max:
-            raise ValueError(f"Value {value} is greater than maximum {datatype.max}")
-    return value
+    def cast(self, value: str) -> str:
+        return value
