@@ -22,15 +22,21 @@ class DataType(Generic[T]):
         pass
 
 
-@dataclass(frozen=True)
-class Int(DataType[int]):
-    """`DataType` mapping to builtin ``int``."""
+T_Numerical = TypeVar("T_Numerical", int, float)
 
+
+@dataclass(frozen=True)
+class _Numerical(DataType[T_Numerical]):
     units: str | None = None
     min: int | None = None
     max: int | None = None
     min_alarm: int | None = None
     max_alarm: int | None = None
+
+
+@dataclass(frozen=True)
+class Int(_Numerical[int]):
+    """`DataType` mapping to builtin ``int``."""
 
     @property
     def dtype(self) -> type[int]:
@@ -38,15 +44,10 @@ class Int(DataType[int]):
 
 
 @dataclass(frozen=True)
-class Float(DataType[float]):
+class Float(_Numerical[float]):
     """`DataType` mapping to builtin ``float``."""
 
     prec: int = 2
-    units: str | None = None
-    min: float | None = None
-    max: float | None = None
-    min_alarm: float | None = None
-    max_alarm: float | None = None
 
     @property
     def dtype(self) -> type[float]:
