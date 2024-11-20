@@ -28,7 +28,10 @@ class EpicsIOCOptions:
 
 
 class EpicsIOC:
-    def __init__(self, pv_prefix: str, mapping: Mapping):
+    def __init__(
+        self, pv_prefix: str, mapping: Mapping, options: EpicsIOCOptions | None = None
+    ):
+        self.options = options or EpicsIOCOptions()
         _add_pvi_info(f"{pv_prefix}:PVI")
         _add_sub_controller_pvi_info(pv_prefix, mapping.controller)
 
@@ -39,15 +42,12 @@ class EpicsIOC:
         self,
         dispatcher: AsyncioDispatcher,
         context: dict[str, Any],
-        options: EpicsIOCOptions | None = None,
     ) -> None:
-        if options is None:
-            options = EpicsIOCOptions()
-
         builder.LoadDatabase()
         softioc.iocInit(dispatcher)
 
-        softioc.interactive_ioc(context)
+        if self.options.terminal:
+            softioc.interactive_ioc(context)
 
 
 def _add_pvi_info(
@@ -218,6 +218,7 @@ def _create_and_link_write_pv(
     record = _get_output_record(
         f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
     )
+
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
     attribute.set_write_display_callback(async_write_display)
