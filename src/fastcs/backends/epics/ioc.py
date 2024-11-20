@@ -43,6 +43,7 @@ def datatype_to_epics_fields(datatype: DataType) -> dict[str, Any]:
     return {
         DATATYPE_NAME_TO_RECORD_FIELD[field]: value
         for field, value in asdict(datatype).items()
+        if field in DATATYPE_NAME_TO_RECORD_FIELD
     }
 
 
