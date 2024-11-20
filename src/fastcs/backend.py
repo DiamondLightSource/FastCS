@@ -137,7 +137,8 @@ def _add_attribute_updater_tasks(
                 callback = _create_updater_callback(
                     attribute, single_mapping.controller
                 )
-                scan_dict[update_period].append(callback)
+                if update_period is not None:
+                    scan_dict[update_period].append(callback)
 
 
 def _create_updater_callback(attribute, controller):
