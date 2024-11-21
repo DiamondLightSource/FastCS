@@ -172,22 +172,43 @@ def _create_and_link_read_pv(
 
 
 def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
+    attribute_fields = {}
+    if attribute.description is not None:
+        attribute_fields.update({"DESC": attribute.description})
+
     if attr_is_enum(attribute):
         assert attribute.allowed_values is not None and all(
             isinstance(v, str) for v in attribute.allowed_values
         )
         state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
-        return builder.mbbIn(pv, **state_keys)
+        return builder.mbbIn(pv, **state_keys, **attribute_fields)
 
     match attribute.datatype:
         case Bool(znam, onam):
-            return builder.boolIn(pv, ZNAM=znam, ONAM=onam)
-        case Int():
-            return builder.longIn(pv)
-        case Float(prec):
-            return builder.aIn(pv, PREC=prec)
+            return builder.boolIn(pv, ZNAM=znam, ONAM=onam, **attribute_fields)
+        case Int(units, min, max, min_alarm, max_alarm):
+            return builder.longIn(
+                pv,
+                EGU=units,
+                DRVL=min,
+                DRVH=max,
+                LOPR=min_alarm,
+                HOPR=max_alarm,
+                **attribute_fields,
+            )
+        case Float(prec, units, min, max, min_alarm, max_alarm):
+            return builder.aIn(
+                pv,
+                PREC=prec,
+                EGU=units,
+                DRVL=min,
+                DRVH=max,
+                LOPR=min_alarm,
+                HOPR=max_alarm,
+                **attribute_fields,
+            )
         case String():
-            return builder.longStringIn(pv)
+            return builder.longStringIn(pv, **attribute_fields)
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
@@ -224,12 +245,21 @@ def _create_and_link_write_pv(
 
 
 def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
+    attribute_fields = {}
+    if attribute.description is not None:
+        attribute_fields.update({"DESC": attribute.description})
     if attr_is_enum(attribute):
         assert attribute.allowed_values is not None and all(
             isinstance(v, str) for v in attribute.allowed_values
         )
         state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
-        return builder.mbbOut(pv, always_update=True, on_update=on_update, **state_keys)
+        return builder.mbbOut(
+            pv,
+            always_update=True,
+            on_update=on_update,
+            **state_keys,
+            **attribute_fields,
+        )
 
     match attribute.datatype:
         case Bool(znam, onam):
@@ -240,12 +270,35 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
                 always_update=True,
                 on_update=on_update,
             )
-        case Int():
-            return builder.longOut(pv, always_update=True, on_update=on_update)
-        case Float(prec):
-            return builder.aOut(pv, always_update=True, on_update=on_update, PREC=prec)
+        case Int(units, min, max, min_alarm, max_alarm):
+            return builder.longOut(
+                pv,
+                always_update=True,
+                on_update=on_update,
+                EGU=units,
+                DRVL=min,
+                DRVH=max,
+                LOPR=min_alarm,
+                HOPR=max_alarm,
+                **attribute_fields,
+            )
+        case Float(prec, units, min, max, min_alarm, max_alarm):
+            return builder.aOut(
+                pv,
+                always_update=True,
+                on_update=on_update,
+                PREC=prec,
+                EGU=units,
+                DRVL=min,
+                DRVH=max,
+                LOPR=min_alarm,
+                HOPR=max_alarm,
+                **attribute_fields,
+            )
         case String():
-            return builder.longStringOut(pv, always_update=True, on_update=on_update)
+            return builder.longStringOut(
+                pv, always_update=True, on_update=on_update, **attribute_fields
+            )
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
