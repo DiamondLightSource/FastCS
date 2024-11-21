@@ -211,6 +211,15 @@ def test_get_output_record_raises(mocker: MockerFixture):
         _get_output_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
 
 
+DEFAULT_SCALAR_FIELD_ARGS = {
+    "EGU": None,
+    "DRVL": None,
+    "DRVH": None,
+    "LOPR": None,
+    "HOPR": None,
+}
+
+
 def test_ioc(mocker: MockerFixture, mapping: Mapping):
     builder = mocker.patch("fastcs.backends.epics.ioc.builder")
     add_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_pvi_info")
@@ -222,15 +231,26 @@ def test_ioc(mocker: MockerFixture, mapping: Mapping):
 
     # Check records are created
     builder.boolIn.assert_called_once_with(f"{DEVICE}:ReadBool", ZNAM="OFF", ONAM="ON")
-    builder.longIn.assert_any_call(f"{DEVICE}:ReadInt")
-    builder.aIn.assert_called_once_with(f"{DEVICE}:ReadWriteFloat_RBV", PREC=2)
-    builder.aOut.assert_any_call(
-        f"{DEVICE}:ReadWriteFloat", always_update=True, on_update=mocker.ANY, PREC=2
+    builder.longIn.assert_any_call(f"{DEVICE}:ReadInt", **DEFAULT_SCALAR_FIELD_ARGS)
+    builder.aIn.assert_called_once_with(
+        f"{DEVICE}:ReadWriteFloat_RBV", PREC=2, **DEFAULT_SCALAR_FIELD_ARGS
     )
-    builder.longIn.assert_any_call(f"{DEVICE}:BigEnum")
-    builder.longIn.assert_any_call(f"{DEVICE}:ReadWriteInt_RBV")
+    builder.aOut.assert_any_call(
+        f"{DEVICE}:ReadWriteFloat",
+        always_update=True,
+        on_update=mocker.ANY,
+        PREC=2,
+        **DEFAULT_SCALAR_FIELD_ARGS,
+    )
+    builder.longIn.assert_any_call(f"{DEVICE}:BigEnum", **DEFAULT_SCALAR_FIELD_ARGS)
+    builder.longIn.assert_any_call(
+        f"{DEVICE}:ReadWriteInt_RBV", **DEFAULT_SCALAR_FIELD_ARGS
+    )
     builder.longOut.assert_called_with(
-        f"{DEVICE}:ReadWriteInt", always_update=True, on_update=mocker.ANY
+        f"{DEVICE}:ReadWriteInt",
+        always_update=True,
+        on_update=mocker.ANY,
+        **DEFAULT_SCALAR_FIELD_ARGS,
     )
     builder.mbbIn.assert_called_once_with(
         f"{DEVICE}:StringEnum_RBV", ZRST="red", ONST="green", TWST="blue"
@@ -390,9 +410,10 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
         f"{DEVICE}:{short_pv_name}",
         always_update=True,
         on_update=mocker.ANY,
+        **DEFAULT_SCALAR_FIELD_ARGS,
     )
     builder.longIn.assert_called_once_with(
-        f"{DEVICE}:{short_pv_name}_RBV",
+        f"{DEVICE}:{short_pv_name}_RBV", **DEFAULT_SCALAR_FIELD_ARGS
     )
 
     long_pv_name = long_attr_name.title().replace("_", "")
@@ -438,3 +459,39 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
             always_update=True,
             on_update=mocker.ANY,
         )
+
+
+def test_update_datatype(mocker: MockerFixture):
+    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+
+    pv_name = f"{DEVICE}:Attr"
+
+    attr_r = AttrR(Int())
+    record_r = _get_input_record(pv_name, attr_r)
+
+    builder.longIn.assert_called_once_with(pv_name, **DEFAULT_SCALAR_FIELD_ARGS)
+    record_r.set_field.assert_not_called()
+    attr_r.update_datatype(Int(units="m", min=-3))
+    record_r.set_field.assert_any_call("EGU", "m")
+    record_r.set_field.assert_any_call("DRVL", -3)
+
+    with pytest.raises(
+        ValueError,
+        match="Attribute datatype must be of type <class 'fastcs.datatypes.Int'>",
+    ):
+        attr_r.update_datatype(String())  # type: ignore
+
+    attr_w = AttrW(Int())
+    record_w = _get_output_record(pv_name, attr_w, on_update=mocker.ANY)
+
+    builder.longIn.assert_called_once_with(pv_name, **DEFAULT_SCALAR_FIELD_ARGS)
+    record_w.set_field.assert_not_called()
+    attr_w.update_datatype(Int(units="m", min=-3))
+    record_w.set_field.assert_any_call("EGU", "m")
+    record_w.set_field.assert_any_call("DRVL", -3)
+
+    with pytest.raises(
+        ValueError,
+        match="Attribute datatype must be of type <class 'fastcs.datatypes.Int'>",
+    ):
+        attr_w.update_datatype(String())  # type: ignore
