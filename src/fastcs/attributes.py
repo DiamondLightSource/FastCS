@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from enum import Enum
 from typing import Any, Generic, Protocol, runtime_checkable
 
@@ -26,7 +27,8 @@ class Sender(Protocol):
 class Updater(Protocol):
     """Protocol for updating the cached readback value of an ``Attribute``."""
 
-    update_period: float
+    # If update period is None then the attribute will not be updated as a task.
+    update_period: float | None = None
 
     async def update(self, controller: Any, attr: AttrR) -> None:
         pass
@@ -52,6 +54,7 @@ class Attribute(Generic[T]):
         group: str | None = None,
         handler: Any = None,
         allowed_values: list[T] | None = None,
+        description: str | None = None,
     ) -> None:
         assert (
             datatype.dtype in ATTRIBUTE_TYPES
@@ -61,6 +64,11 @@ class Attribute(Generic[T]):
         self._group = group
         self.enabled = True
         self._allowed_values: list[T] | None = allowed_values
+        self.description = description
+
+        # A callback to use when setting the datatype to a different value, for example
+        # changing the units on an int. This should be implemented in the backend.
+        self._update_datatype_callbacks: list[Callable[[DataType[T]], None]] = []
 
     @property
     def datatype(self) -> DataType[T]:
@@ -82,6 +90,20 @@ class Attribute(Generic[T]):
     def allowed_values(self) -> list[T] | None:
         return self._allowed_values
 
+    def add_update_datatype_callback(
+        self, callback: Callable[[DataType[T]], None]
+    ) -> None:
+        self._update_datatype_callbacks.append(callback)
+
+    def update_datatype(self, datatype: DataType[T]) -> None:
+        if not isinstance(self._datatype, type(datatype)):
+            raise ValueError(
+                f"Attribute datatype must be of type {type(self._datatype)}"
+            )
+        self._datatype = datatype
+        for callback in self._update_datatype_callbacks:
+            callback(datatype)
+
 
 class AttrR(Attribute[T]):
     """A read-only ``Attribute``."""
@@ -92,7 +114,9 @@ class AttrR(Attribute[T]):
         access_mode=AttrMode.READ,
         group: str | None = None,
         handler: Updater | None = None,
+        initial_value: T | None = None,
         allowed_values: list[T] | None = None,
+        description: str | None = None,
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
@@ -100,8 +124,11 @@ class AttrR(Attribute[T]):
             group,
             handler,
             allowed_values=allowed_values,  # type: ignore
+            description=description,
         )
-        self._value: T = datatype.dtype()
+        self._value: T = (
+            datatype.initial_value if initial_value is None else initial_value
+        )
         self._update_callback: AttrCallback[T] | None = None
         self._updater = handler
 
@@ -109,7 +136,7 @@ class AttrR(Attribute[T]):
         return self._value
 
     async def set(self, value: T) -> None:
-        self._value = self._datatype.dtype(value)
+        self._value = self._datatype.validate(value)
 
         if self._update_callback is not None:
             await self._update_callback(self._value)
@@ -132,6 +159,7 @@ class AttrW(Attribute[T]):
         group: str | None = None,
         handler: Sender | None = None,
         allowed_values: list[T] | None = None,
+        description: str | None = None,
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
@@ -139,6 +167,7 @@ class AttrW(Attribute[T]):
             group,
             handler,
             allowed_values=allowed_values,  # type: ignore
+            description=description,
         )
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
@@ -150,11 +179,11 @@ class AttrW(Attribute[T]):
 
     async def process_without_display_update(self, value: T) -> None:
         if self._process_callback is not None:
-            await self._process_callback(self._datatype.dtype(value))
+            await self._process_callback(self._datatype.validate(value))
 
     async def update_display_without_process(self, value: T) -> None:
         if self._write_display_callback is not None:
-            await self._write_display_callback(self._datatype.dtype(value))
+            await self._write_display_callback(self._datatype.validate(value))
 
     def set_process_callback(self, callback: AttrCallback[T] | None) -> None:
         self._process_callback = callback
@@ -170,7 +199,7 @@ class AttrW(Attribute[T]):
         return self._sender
 
 
-class AttrRW(AttrW[T], AttrR[T]):
+class AttrRW(AttrR[T], AttrW[T]):
     """A read-write ``Attribute``."""
 
     def __init__(
@@ -179,14 +208,18 @@ class AttrRW(AttrW[T], AttrR[T]):
         access_mode=AttrMode.READ_WRITE,
         group: str | None = None,
         handler: Handler | None = None,
+        initial_value: T | None = None,
         allowed_values: list[T] | None = None,
+        description: str | None = None,
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
             access_mode,
-            group,
-            handler,
-            allowed_values,  # type: ignore
+            group=group,
+            handler=handler,
+            initial_value=initial_value,
+            allowed_values=allowed_values,  # type: ignore
+            description=description,
         )
 
     async def process(self, value: T) -> None:

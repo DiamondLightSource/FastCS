@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from types import MethodType
 from typing import Any, Literal
 
@@ -15,7 +15,7 @@ from fastcs.backends.epics.util import (
     enum_value_to_index,
 )
 from fastcs.controller import BaseController
-from fastcs.datatypes import Bool, Float, Int, String, T
+from fastcs.datatypes import Bool, DataType, Float, Int, String, T
 from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping
 
@@ -25,6 +25,26 @@ EPICS_MAX_NAME_LENGTH = 60
 @dataclass
 class EpicsIOCOptions:
     terminal: bool = True
+
+
+DATATYPE_NAME_TO_RECORD_FIELD = {
+    "prec": "PREC",
+    "units": "EGU",
+    "min": "DRVL",
+    "max": "DRVH",
+    "min_alarm": "LOPR",
+    "max_alarm": "HOPR",
+    "znam": "ZNAM",
+    "onam": "ONAM",
+}
+
+
+def datatype_to_epics_fields(datatype: DataType) -> dict[str, Any]:
+    return {
+        DATATYPE_NAME_TO_RECORD_FIELD[field]: value
+        for field, value in asdict(datatype).items()
+        if field in DATATYPE_NAME_TO_RECORD_FIELD
+    }
 
 
 class EpicsIOC:
@@ -172,26 +192,49 @@ def _create_and_link_read_pv(
 
 
 def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
+    attribute_fields = {}
+    if attribute.description is not None:
+        attribute_fields.update({"DESC": attribute.description})
+
     if attr_is_enum(attribute):
         assert attribute.allowed_values is not None and all(
             isinstance(v, str) for v in attribute.allowed_values
         )
         state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
-        return builder.mbbIn(pv, **state_keys)
+        return builder.mbbIn(pv, **state_keys, **attribute_fields)
 
     match attribute.datatype:
-        case Bool(znam, onam):
-            return builder.boolIn(pv, ZNAM=znam, ONAM=onam)
+        case Bool():
+            record = builder.boolIn(
+                pv, **datatype_to_epics_fields(attribute.datatype), **attribute_fields
+            )
         case Int():
-            return builder.longIn(pv)
-        case Float(prec):
-            return builder.aIn(pv, PREC=prec)
+            record = builder.longIn(
+                pv,
+                **datatype_to_epics_fields(attribute.datatype),
+                **attribute_fields,
+            )
+        case Float():
+            record = builder.aIn(
+                pv,
+                **datatype_to_epics_fields(attribute.datatype),
+                **attribute_fields,
+            )
         case String():
-            return builder.longStringIn(pv)
+            record = builder.longStringIn(
+                pv, **datatype_to_epics_fields(attribute.datatype), **attribute_fields
+            )
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
             )
+
+    def datatype_updater(datatype: DataType):
+        for name, value in datatype_to_epics_fields(datatype).items():
+            record.set_field(name, value)
+
+    attribute.add_update_datatype_callback(datatype_updater)
+    return record
 
 
 def _create_and_link_write_pv(
@@ -225,32 +268,61 @@ def _create_and_link_write_pv(
 
 
 def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
+    attribute_fields = {}
+    if attribute.description is not None:
+        attribute_fields.update({"DESC": attribute.description})
     if attr_is_enum(attribute):
         assert attribute.allowed_values is not None and all(
             isinstance(v, str) for v in attribute.allowed_values
         )
         state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
-        return builder.mbbOut(pv, always_update=True, on_update=on_update, **state_keys)
+        return builder.mbbOut(
+            pv,
+            always_update=True,
+            on_update=on_update,
+            **state_keys,
+            **attribute_fields,
+        )
 
     match attribute.datatype:
-        case Bool(znam, onam):
-            return builder.boolOut(
+        case Bool():
+            record = builder.boolOut(
                 pv,
-                ZNAM=znam,
-                ONAM=onam,
+                **datatype_to_epics_fields(attribute.datatype),
                 always_update=True,
                 on_update=on_update,
             )
         case Int():
-            return builder.longOut(pv, always_update=True, on_update=on_update)
-        case Float(prec):
-            return builder.aOut(pv, always_update=True, on_update=on_update, PREC=prec)
+            record = builder.longOut(
+                pv,
+                always_update=True,
+                on_update=on_update,
+                **datatype_to_epics_fields(attribute.datatype),
+                **attribute_fields,
+            )
+        case Float():
+            record = builder.aOut(
+                pv,
+                always_update=True,
+                on_update=on_update,
+                **datatype_to_epics_fields(attribute.datatype),
+                **attribute_fields,
+            )
         case String():
-            return builder.longStringOut(pv, always_update=True, on_update=on_update)
+            record = builder.longStringOut(
+                pv, always_update=True, on_update=on_update, **attribute_fields
+            )
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
             )
+
+    def datatype_updater(datatype: DataType):
+        for name, value in datatype_to_epics_fields(datatype).items():
+            record.set_field(name, value)
+
+    attribute.add_update_datatype_callback(datatype_updater)
+    return record
 
 
 def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
