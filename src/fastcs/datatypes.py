@@ -21,8 +21,20 @@ class DataType(Generic[T]):
         pass
 
 
+T_Numerical = TypeVar("T_Numerical", int, float)
+
+
 @dataclass(frozen=True)
-class Int(DataType[int]):
+class _Numerical(DataType[T_Numerical]):
+    units: str | None = None
+    min: int | None = None
+    max: int | None = None
+    min_alarm: int | None = None
+    max_alarm: int | None = None
+
+
+@dataclass(frozen=True)
+class Int(_Numerical[int]):
     """`DataType` mapping to builtin ``int``."""
 
     @property
@@ -31,7 +43,7 @@ class Int(DataType[int]):
 
 
 @dataclass(frozen=True)
-class Float(DataType[float]):
+class Float(_Numerical[float]):
     """`DataType` mapping to builtin ``float``."""
 
     prec: int = 2
@@ -60,3 +72,15 @@ class String(DataType[str]):
     @property
     def dtype(self) -> type[str]:
         return str
+
+
+def validate_value(datatype: DataType[T], value: T) -> T:
+    """Validate a value against a datatype."""
+
+    if isinstance(datatype, (Int | Float)):
+        assert isinstance(value, (int | float)), f"Value {value} is not a number"
+        if datatype.min is not None and value < datatype.min:
+            raise ValueError(f"Value {value} is less than minimum {datatype.min}")
+        if datatype.max is not None and value > datatype.max:
+            raise ValueError(f"Value {value} is greater than maximum {datatype.max}")
+    return value
