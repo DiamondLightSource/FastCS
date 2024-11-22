@@ -2,7 +2,7 @@ from asyncio import iscoroutinefunction
 from collections.abc import Callable, Coroutine
 from inspect import Signature, getdoc, signature
 from types import MethodType
-from typing import Any, Generic, TypeVar
+from typing import Any, Concatenate, Generic, ParamSpec, TypeVar
 
 from fastcs.controller import BaseController
 
@@ -124,24 +124,21 @@ class Command(Method[ControllerType]):
         raise method_not_bound_error
 
 
-class BoundScan(Method[BaseController]):
-    def __init__(self, fn: BoundScanCallback, period: float):
-        super().__init__(fn)
+P = ParamSpec("P")
+R = TypeVar("R")
 
+
+class BoundScan(Method[BaseController], Generic[P]):
+    def __init__(self, fn: Callable[Concatenate[ControllerType, P], R], period: float):
+        self._fn = fn
         self._period = period
 
     @property
     def period(self):
         return self._period
 
-    def _validate(self, fn: BoundScanCallback) -> None:
-        super()._validate(fn)
-
-        if not len(self.parameters) == 0:
-            raise FastCSException("Scan method cannot have arguments")
-
-    def __call__(self):
-        return self._fn()
+    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> R:
+        return self._fn(*args, **kwargs)
 
 
 class BoundPut(Method[BaseController]):

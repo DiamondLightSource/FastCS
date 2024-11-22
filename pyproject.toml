@@ -60,7 +60,7 @@ name = "Martin Gaughran"
 version_file = "src/fastcs/_version.py"
 
 [tool.pyright]
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 reportMissingImports = false # Ignore missing stubs in imported modules
 
 [tool.pytest.ini_options]

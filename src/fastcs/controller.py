@@ -40,7 +40,7 @@ class BaseController:
         for attr_name in dir(self):
             attr = getattr(self, attr_name)
             if isinstance(attr, Attribute):
-                setattr(self, attr_name, copy(attr))
+                setattr(self, attr_name, copy(attr))  # type: ignore
             elif isinstance(attr, Put | Scan | Command):
                 setattr(self, attr_name, attr.bind(self))
 
