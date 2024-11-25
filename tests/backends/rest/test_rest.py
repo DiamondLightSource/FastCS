@@ -8,7 +8,8 @@ class TestRestServer:
     @pytest.fixture(scope="class")
     def client(self, assertable_controller):
         app = RestBackend(assertable_controller)._server._app
-        return TestClient(app)
+        with TestClient(app) as client:
+            yield client
 
     def test_read_int(self, assertable_controller, client):
         expect = 0
