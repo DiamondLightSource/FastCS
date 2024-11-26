@@ -1,4 +1,4 @@
-from fastcs.mapping import Mapping
+from fastcs.controller import Controller
 from fastcs.transport.adapter import TransportAdapter
 
 from .options import RestOptions
@@ -8,12 +8,11 @@ from .rest import RestServer
 class RestTransport(TransportAdapter):
     def __init__(
         self,
-        mapping: Mapping,
+        controller: Controller,
         options: RestOptions | None = None,
     ):
         self.options = options or RestOptions()
-        self._mapping = mapping
-        self._server = RestServer(self._mapping)
+        self._server = RestServer(controller)
 
     def create_docs(self) -> None:
         raise NotImplementedError

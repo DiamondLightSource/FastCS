@@ -23,18 +23,18 @@ from pvi.device import (
 from pydantic import ValidationError
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.controller import Controller, SingleMapping, _get_single_mapping
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.exceptions import FastCSException
-from fastcs.mapping import Mapping, SingleMapping, _get_single_mapping
 from fastcs.util import snake_to_pascal
 
 from .options import EpicsGUIFormat, EpicsGUIOptions
 
 
 class EpicsGUI:
-    def __init__(self, mapping: Mapping, pv_prefix: str) -> None:
-        self._mapping = mapping
+    def __init__(self, controller: Controller, pv_prefix: str) -> None:
+        self._controller = controller
         self._pv_prefix = pv_prefix
 
     def _get_pv(self, attr_path: list[str], name: str):
@@ -117,7 +117,7 @@ class EpicsGUI:
 
         assert options.output_path.suffix == options.file_format.value
 
-        controller_mapping = self._mapping.get_controller_mappings()[0]
+        controller_mapping = self._controller.get_controller_mappings()[0]
         components = self.extract_mapping_components(controller_mapping)
         device = Device(label=options.title, children=components)
 

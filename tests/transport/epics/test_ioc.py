@@ -8,7 +8,6 @@ from fastcs.controller import Controller
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Int, String
 from fastcs.exceptions import FastCSException
-from fastcs.mapping import Mapping
 from fastcs.transport.epics.ioc import (
     EPICS_MAX_NAME_LENGTH,
     EpicsIOC,
@@ -220,14 +219,14 @@ DEFAULT_SCALAR_FIELD_ARGS = {
 }
 
 
-def test_ioc(mocker: MockerFixture, mapping: Mapping):
+def test_ioc(mocker: MockerFixture, controller: Controller):
     builder = mocker.patch("fastcs.transport.epics.ioc.builder")
     add_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_pvi_info")
     add_sub_controller_pvi_info = mocker.patch(
         "fastcs.transport.epics.ioc._add_sub_controller_pvi_info"
     )
 
-    EpicsIOC(DEVICE, mapping)
+    EpicsIOC(DEVICE, controller)
 
     # Check records are created
     builder.boolIn.assert_called_once_with(f"{DEVICE}:ReadBool", ZNAM="OFF", ONAM="ON")
@@ -276,7 +275,7 @@ def test_ioc(mocker: MockerFixture, mapping: Mapping):
 
     # Check info tags are added
     add_pvi_info.assert_called_once_with(f"{DEVICE}:PVI")
-    add_sub_controller_pvi_info.assert_called_once_with(DEVICE, mapping.controller)
+    add_sub_controller_pvi_info.assert_called_once_with(DEVICE, controller)
 
 
 def test_add_pvi_info(mocker: MockerFixture):
@@ -396,12 +395,11 @@ class ControllerLongNames(Controller):
 def test_long_pv_names_discarded(mocker: MockerFixture):
     builder = mocker.patch("fastcs.transport.epics.ioc.builder")
     long_name_controller = ControllerLongNames()
-    long_name_mapping = Mapping(long_name_controller)
     long_attr_name = "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
     long_rw_name = "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
     assert long_name_controller.attr_rw_short_name.enabled
     assert getattr(long_name_controller, long_attr_name).enabled
-    EpicsIOC(DEVICE, long_name_mapping)
+    EpicsIOC(DEVICE, long_name_controller)
     assert long_name_controller.attr_rw_short_name.enabled
     assert not getattr(long_name_controller, long_attr_name).enabled
 

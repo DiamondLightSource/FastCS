@@ -32,8 +32,7 @@ class FastCS:
                 from .transport.epics.adapter import EpicsTransport
 
                 self._transport = EpicsTransport(
-                    self._backend.mapping,
-                    self._backend.context,
+                    controller,
                     self._backend.dispatcher,
                     transport_options,
                 )
@@ -41,14 +40,14 @@ class FastCS:
                 from .transport.tango.adapter import TangoTransport
 
                 self._transport = TangoTransport(
-                    self._backend.mapping,
+                    controller,
                     transport_options,
                 )
             case RestOptions():
                 from .transport.rest.adapter import RestTransport
 
                 self._transport = RestTransport(
-                    self._backend.mapping,
+                    controller,
                     transport_options,
                 )
 

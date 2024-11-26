@@ -14,23 +14,21 @@ from pvi.device import (
     ToggleButton,
 )
 
-from fastcs.controller import Controller
-from fastcs.mapping import Mapping
 from fastcs.transport.epics.gui import EpicsGUI
 
 
-def test_get_pv():
-    gui = EpicsGUI(Mapping(Controller()), "DEVICE")
+def test_get_pv(controller):
+    gui = EpicsGUI(controller, "DEVICE")
 
     assert gui._get_pv([], "A") == "DEVICE:A"
     assert gui._get_pv(["B"], "C") == "DEVICE:B:C"
     assert gui._get_pv(["D", "E"], "F") == "DEVICE:D:E:F"
 
 
-def test_get_components(mapping):
-    gui = EpicsGUI(mapping, "DEVICE")
+def test_get_components(controller):
+    gui = EpicsGUI(controller, "DEVICE")
 
-    components = gui.extract_mapping_components(mapping.get_controller_mappings()[0])
+    components = gui.extract_mapping_components(controller.get_controller_mappings()[0])
     assert components == [
         Group(
             name="SubController01",

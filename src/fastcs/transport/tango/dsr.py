@@ -8,7 +8,6 @@ from tango.server import Device
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController
 from fastcs.datatypes import Float
-from fastcs.mapping import Mapping
 
 from .options import TangoDSROptions
 
@@ -41,9 +40,9 @@ def _wrap_updater_fset(
     return fset
 
 
-def _collect_dev_attributes(mapping: Mapping) -> dict[str, Any]:
+def _collect_dev_attributes(controller: BaseController) -> dict[str, Any]:
     collection: dict[str, Any] = {}
-    for single_mapping in mapping.get_controller_mappings():
+    for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
 
         for attr_name, attribute in single_mapping.attributes.items():
@@ -101,9 +100,9 @@ def _wrap_command_f(
     return _dynamic_f
 
 
-def _collect_dev_commands(mapping: Mapping) -> dict[str, Any]:
+def _collect_dev_commands(controller: BaseController) -> dict[str, Any]:
     collection: dict[str, Any] = {}
-    for single_mapping in mapping.get_controller_mappings():
+    for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
 
         for name, method in single_mapping.command_methods.items():
@@ -116,12 +115,12 @@ def _collect_dev_commands(mapping: Mapping) -> dict[str, Any]:
     return collection
 
 
-def _collect_dev_properties(mapping: Mapping) -> dict[str, Any]:
+def _collect_dev_properties(controller: BaseController) -> dict[str, Any]:
     collection: dict[str, Any] = {}
     return collection
 
 
-def _collect_dev_init(mapping: Mapping) -> dict[str, Callable]:
+def _collect_dev_init(controller: BaseController) -> dict[str, Callable]:
     async def init_device(tango_device: Device):
         await server.Device.init_device(tango_device)  # type: ignore
         tango_device.set_state(DevState.ON)
@@ -129,7 +128,7 @@ def _collect_dev_init(mapping: Mapping) -> dict[str, Callable]:
     return {"init_device": init_device}
 
 
-def _collect_dev_flags(mapping: Mapping) -> dict[str, Any]:
+def _collect_dev_flags(controller: BaseController) -> dict[str, Any]:
     collection: dict[str, Any] = {}
 
     collection["green_mode"] = tango.GreenMode.Asyncio
@@ -147,18 +146,18 @@ def _collect_dsr_args(options: TangoDSROptions) -> list[str]:
 
 
 class TangoDSR:
-    def __init__(self, mapping: Mapping):
-        self._mapping = mapping
-        self.dev_class = self._mapping.controller.__class__.__name__
+    def __init__(self, controller: BaseController):
+        self._controller = controller
+        self.dev_class = self._controller.__class__.__name__
         self._device = self._create_device()
 
     def _create_device(self):
         class_dict: dict = {
-            **_collect_dev_attributes(self._mapping),
-            **_collect_dev_commands(self._mapping),
-            **_collect_dev_properties(self._mapping),
-            **_collect_dev_init(self._mapping),
-            **_collect_dev_flags(self._mapping),
+            **_collect_dev_attributes(self._controller),
+            **_collect_dev_commands(self._controller),
+            **_collect_dev_properties(self._controller),
+            **_collect_dev_init(self._controller),
+            **_collect_dev_flags(self._controller),
         }
 
         class_bases = (server.Device,)

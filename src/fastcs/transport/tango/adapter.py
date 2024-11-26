@@ -1,4 +1,4 @@
-from fastcs.mapping import Mapping
+from fastcs.controller import Controller
 from fastcs.transport.adapter import TransportAdapter
 
 from .dsr import TangoDSR
@@ -8,12 +8,11 @@ from .options import TangoOptions
 class TangoTransport(TransportAdapter):
     def __init__(
         self,
-        mapping: Mapping,
+        controller: Controller,
         options: TangoOptions | None = None,
     ):
         self.options = options or TangoOptions()
-        self._mapping = mapping
-        self._dsr = TangoDSR(self._mapping)
+        self._dsr = TangoDSR(controller)
 
     def create_docs(self) -> None:
         raise NotImplementedError

@@ -7,9 +7,8 @@ from types import MethodType
 from fastcs.util import AsyncioDispatcher
 
 from .attributes import AttrR, AttrW, Sender, Updater
-from .controller import Controller
+from .controller import Controller, SingleMapping
 from .exceptions import FastCSException
-from .mapping import Mapping, SingleMapping
 
 
 class Backend:
@@ -29,17 +28,10 @@ class Backend:
             self._controller.initialise(), self._loop
         ).result()
 
-        self.mapping = Mapping(self._controller)
         self._link_process_tasks()
 
-        self.context = {
-            "dispatcher": self.dispatcher,
-            "controller": self._controller,
-            "mapping": self.mapping,
-        }
-
     def _link_process_tasks(self):
-        for single_mapping in self.mapping.get_controller_mappings():
+        for single_mapping in self._controller.get_controller_mappings():
             _link_single_controller_put_tasks(single_mapping)
             _link_attribute_sender_class(single_mapping)
 
@@ -58,7 +50,7 @@ class Backend:
     def start_scan_futures(self):
         self._scan_futures = {
             asyncio.run_coroutine_threadsafe(coro(), self._loop)
-            for coro in _get_scan_coros(self.mapping)
+            for coro in _get_scan_coros(self._controller)
         }
 
     def stop_scan_futures(self):
@@ -106,10 +98,10 @@ def _create_sender_callback(attribute, controller):
     return callback
 
 
-def _get_scan_coros(mapping: Mapping) -> list[Callable]:
+def _get_scan_coros(controller: Controller) -> list[Callable]:
     scan_dict: dict[float, list[Callable]] = defaultdict(list)
 
-    for single_mapping in mapping.get_controller_mappings():
+    for single_mapping in controller.get_controller_mappings():
         _add_scan_method_tasks(scan_dict, single_mapping)
         _add_attribute_updater_tasks(scan_dict, single_mapping)
 
