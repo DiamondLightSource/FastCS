@@ -4,7 +4,7 @@ from collections.abc import Callable
 from concurrent.futures import Future
 from types import MethodType
 
-from softioc.asyncio_dispatcher import AsyncioDispatcher
+from fastcs.util import AsyncioDispatcher
 
 from .attributes import AttrR, AttrW, Sender, Updater
 from .controller import Controller
@@ -14,10 +14,12 @@ from .mapping import Mapping, SingleMapping
 
 class Backend:
     def __init__(
-        self, controller: Controller, loop: asyncio.AbstractEventLoop | None = None
+        self,
+        controller: Controller,
+        loop: asyncio.AbstractEventLoop | None = None,
     ):
-        self._dispatcher = AsyncioDispatcher(loop)
-        self._loop = self._dispatcher.loop
+        self.dispatcher = AsyncioDispatcher(loop)
+        self._loop = self.dispatcher.loop
         self._controller = controller
 
         self._initial_coros = [controller.connect]
@@ -27,17 +29,17 @@ class Backend:
             self._controller.initialise(), self._loop
         ).result()
 
-        self._mapping = Mapping(self._controller)
+        self.mapping = Mapping(self._controller)
         self._link_process_tasks()
 
-        self._context = {
-            "dispatcher": self._dispatcher,
+        self.context = {
+            "dispatcher": self.dispatcher,
             "controller": self._controller,
-            "mapping": self._mapping,
+            "mapping": self.mapping,
         }
 
     def _link_process_tasks(self):
-        for single_mapping in self._mapping.get_controller_mappings():
+        for single_mapping in self.mapping.get_controller_mappings():
             _link_single_controller_put_tasks(single_mapping)
             _link_attribute_sender_class(single_mapping)
 
@@ -47,7 +49,6 @@ class Backend:
     def run(self):
         self._run_initial_futures()
         self.start_scan_futures()
-        self._run()
 
     def _run_initial_futures(self):
         for coro in self._initial_coros:
@@ -57,7 +58,7 @@ class Backend:
     def start_scan_futures(self):
         self._scan_futures = {
             asyncio.run_coroutine_threadsafe(coro(), self._loop)
-            for coro in _get_scan_coros(self._mapping)
+            for coro in _get_scan_coros(self.mapping)
         }
 
     def stop_scan_futures(self):
@@ -67,9 +68,6 @@ class Backend:
                     future.cancel()
                 except asyncio.CancelledError:
                     pass
-
-    def _run(self):
-        raise NotImplementedError("Specific Backend must implement _run")
 
 
 def _link_single_controller_put_tasks(single_mapping: SingleMapping) -> None:

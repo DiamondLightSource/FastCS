@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-from enum import Enum
-from pathlib import Path
-
 from pvi._format.dls import DLSFormatter
 from pvi.device import (
     LED,
@@ -33,17 +29,7 @@ from fastcs.exceptions import FastCSException
 from fastcs.mapping import Mapping, SingleMapping, _get_single_mapping
 from fastcs.util import snake_to_pascal
 
-
-class EpicsGUIFormat(Enum):
-    bob = ".bob"
-    edl = ".edl"
-
-
-@dataclass
-class EpicsGUIOptions:
-    output_path: Path = Path.cwd() / "output.bob"
-    file_format: EpicsGUIFormat = EpicsGUIFormat.bob
-    title: str = "Simple Device"
+from .options import EpicsGUIFormat, EpicsGUIOptions
 
 
 class EpicsGUI:

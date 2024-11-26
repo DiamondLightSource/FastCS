@@ -1,5 +1,4 @@
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
 from typing import Any
 
 import tango
@@ -11,12 +10,7 @@ from fastcs.controller import BaseController
 from fastcs.datatypes import Float
 from fastcs.mapping import Mapping
 
-
-@dataclass
-class TangoDSROptions:
-    dev_name: str = "MY/DEVICE/NAME"
-    dsr_instance: str = "MY_SERVER_INSTANCE"
-    debug: bool = False
+from .options import TangoDSROptions
 
 
 def _wrap_updater_fget(

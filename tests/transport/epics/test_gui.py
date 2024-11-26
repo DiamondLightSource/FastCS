@@ -14,9 +14,9 @@ from pvi.device import (
     ToggleButton,
 )
 
-from fastcs.backends.epics.gui import EpicsGUI
 from fastcs.controller import Controller
 from fastcs.mapping import Mapping
+from fastcs.transport.epics.gui import EpicsGUI
 
 
 def test_get_pv():

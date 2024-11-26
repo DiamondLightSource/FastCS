@@ -1,13 +1,6 @@
-from dataclasses import dataclass
-from pathlib import Path
-
 from fastcs.mapping import Mapping
 
-
-@dataclass
-class EpicsDocsOptions:
-    path: Path = Path.cwd()
-    depth: int | None = None
+from .options import EpicsDocsOptions
 
 
 class EpicsDocs:

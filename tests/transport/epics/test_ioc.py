@@ -4,7 +4,12 @@ import pytest
 from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.backends.epics.ioc import (
+from fastcs.controller import Controller
+from fastcs.cs_methods import Command
+from fastcs.datatypes import Int, String
+from fastcs.exceptions import FastCSException
+from fastcs.mapping import Mapping
+from fastcs.transport.epics.ioc import (
     EPICS_MAX_NAME_LENGTH,
     EpicsIOC,
     _add_attr_pvi_info,
@@ -15,11 +20,6 @@ from fastcs.backends.epics.ioc import (
     _get_input_record,
     _get_output_record,
 )
-from fastcs.controller import Controller
-from fastcs.cs_methods import Command
-from fastcs.datatypes import Int, String
-from fastcs.exceptions import FastCSException
-from fastcs.mapping import Mapping
 
 DEVICE = "DEVICE"
 
@@ -29,9 +29,9 @@ ONOFF_STATES = {"ZRST": "disabled", "ONST": "enabled"}
 
 @pytest.mark.asyncio
 async def test_create_and_link_read_pv(mocker: MockerFixture):
-    get_input_record = mocker.patch("fastcs.backends.epics.ioc._get_input_record")
-    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
-    attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
+    get_input_record = mocker.patch("fastcs.transport.epics.ioc._get_input_record")
+    add_attr_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_attr_pvi_info")
+    attr_is_enum = mocker.patch("fastcs.transport.epics.ioc.attr_is_enum")
     record = get_input_record.return_value
 
     attribute = mocker.MagicMock()
@@ -52,11 +52,11 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
 
 @pytest.mark.asyncio
 async def test_create_and_link_read_pv_enum(mocker: MockerFixture):
-    get_input_record = mocker.patch("fastcs.backends.epics.ioc._get_input_record")
-    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
-    attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
+    get_input_record = mocker.patch("fastcs.transport.epics.ioc._get_input_record")
+    add_attr_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_attr_pvi_info")
+    attr_is_enum = mocker.patch("fastcs.transport.epics.ioc.attr_is_enum")
     record = get_input_record.return_value
-    enum_value_to_index = mocker.patch("fastcs.backends.epics.ioc.enum_value_to_index")
+    enum_value_to_index = mocker.patch("fastcs.transport.epics.ioc.enum_value_to_index")
 
     attribute = mocker.MagicMock()
 
@@ -93,7 +93,7 @@ def test_get_input_record(
     kwargs: dict[str, Any],
     mocker: MockerFixture,
 ):
-    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
 
     pv = "PV"
     _get_input_record(pv, attribute)
@@ -109,9 +109,9 @@ def test_get_input_record_raises(mocker: MockerFixture):
 
 @pytest.mark.asyncio
 async def test_create_and_link_write_pv(mocker: MockerFixture):
-    get_output_record = mocker.patch("fastcs.backends.epics.ioc._get_output_record")
-    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
-    attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
+    get_output_record = mocker.patch("fastcs.transport.epics.ioc._get_output_record")
+    add_attr_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_attr_pvi_info")
+    attr_is_enum = mocker.patch("fastcs.transport.epics.ioc.attr_is_enum")
     record = get_output_record.return_value
 
     attribute = mocker.MagicMock()
@@ -141,11 +141,11 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
 
 @pytest.mark.asyncio
 async def test_create_and_link_write_pv_enum(mocker: MockerFixture):
-    get_output_record = mocker.patch("fastcs.backends.epics.ioc._get_output_record")
-    add_attr_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_attr_pvi_info")
-    attr_is_enum = mocker.patch("fastcs.backends.epics.ioc.attr_is_enum")
-    enum_value_to_index = mocker.patch("fastcs.backends.epics.ioc.enum_value_to_index")
-    enum_index_to_value = mocker.patch("fastcs.backends.epics.ioc.enum_index_to_value")
+    get_output_record = mocker.patch("fastcs.transport.epics.ioc._get_output_record")
+    add_attr_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_attr_pvi_info")
+    attr_is_enum = mocker.patch("fastcs.transport.epics.ioc.attr_is_enum")
+    enum_value_to_index = mocker.patch("fastcs.transport.epics.ioc.enum_value_to_index")
+    enum_index_to_value = mocker.patch("fastcs.transport.epics.ioc.enum_index_to_value")
     record = get_output_record.return_value
 
     attribute = mocker.MagicMock()
@@ -194,7 +194,7 @@ def test_get_output_record(
     kwargs: dict[str, Any],
     mocker: MockerFixture,
 ):
-    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
     update = mocker.MagicMock()
 
     pv = "PV"
@@ -221,10 +221,10 @@ DEFAULT_SCALAR_FIELD_ARGS = {
 
 
 def test_ioc(mocker: MockerFixture, mapping: Mapping):
-    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
-    add_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_pvi_info")
+    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
+    add_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_pvi_info")
     add_sub_controller_pvi_info = mocker.patch(
-        "fastcs.backends.epics.ioc._add_sub_controller_pvi_info"
+        "fastcs.transport.epics.ioc._add_sub_controller_pvi_info"
     )
 
     EpicsIOC(DEVICE, mapping)
@@ -280,7 +280,7 @@ def test_ioc(mocker: MockerFixture, mapping: Mapping):
 
 
 def test_add_pvi_info(mocker: MockerFixture):
-    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
     controller = mocker.MagicMock()
     controller.path = []
     child = mocker.MagicMock()
@@ -308,7 +308,7 @@ def test_add_pvi_info(mocker: MockerFixture):
 
 
 def test_add_pvi_info_with_parent(mocker: MockerFixture):
-    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
     controller = mocker.MagicMock()
     controller.path = []
     child = mocker.MagicMock()
@@ -344,7 +344,7 @@ def test_add_pvi_info_with_parent(mocker: MockerFixture):
 
 
 def test_add_sub_controller_pvi_info(mocker: MockerFixture):
-    add_pvi_info = mocker.patch("fastcs.backends.epics.ioc._add_pvi_info")
+    add_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_pvi_info")
     controller = mocker.MagicMock()
     controller.path = []
     child = mocker.MagicMock()
@@ -394,7 +394,7 @@ class ControllerLongNames(Controller):
 
 
 def test_long_pv_names_discarded(mocker: MockerFixture):
-    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
     long_name_controller = ControllerLongNames()
     long_name_mapping = Mapping(long_name_controller)
     long_attr_name = "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
@@ -462,7 +462,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
 
 
 def test_update_datatype(mocker: MockerFixture):
-    builder = mocker.patch("fastcs.backends.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
 
     pv_name = f"{DEVICE}:Attr"
 

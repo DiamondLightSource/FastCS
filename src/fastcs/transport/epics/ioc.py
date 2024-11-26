@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from types import MethodType
 from typing import Any, Literal
 
@@ -8,23 +8,20 @@ from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.backends.epics.util import (
+from fastcs.controller import BaseController
+from fastcs.datatypes import Bool, DataType, Float, Int, String, T
+from fastcs.exceptions import FastCSException
+from fastcs.mapping import Mapping
+from fastcs.transport.epics.util import (
     MBB_STATE_FIELDS,
     attr_is_enum,
     enum_index_to_value,
     enum_value_to_index,
 )
-from fastcs.controller import BaseController
-from fastcs.datatypes import Bool, DataType, Float, Int, String, T
-from fastcs.exceptions import FastCSException
-from fastcs.mapping import Mapping
+
+from .options import EpicsIOCOptions
 
 EPICS_MAX_NAME_LENGTH = 60
-
-
-@dataclass
-class EpicsIOCOptions:
-    terminal: bool = True
 
 
 DATATYPE_NAME_TO_RECORD_FIELD = {

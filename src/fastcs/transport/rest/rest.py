@@ -1,5 +1,4 @@
 from collections.abc import Awaitable, Callable, Coroutine
-from dataclasses import dataclass
 from typing import Any
 
 import uvicorn
@@ -10,12 +9,7 @@ from fastcs.attributes import AttrR, AttrRW, AttrW, T
 from fastcs.controller import BaseController
 from fastcs.mapping import Mapping
 
-
-@dataclass
-class RestServerOptions:
-    host: str = "localhost"
-    port: int = 8080
-    log_level: str = "info"
+from .options import RestServerOptions
 
 
 class RestServer:
@@ -30,10 +24,8 @@ class RestServer:
 
         return app
 
-    def run(self, options: RestServerOptions | None = None) -> None:
-        if options is None:
-            options = RestServerOptions()
-
+    def run(self, options: RestServerOptions | None) -> None:
+        options = options or RestServerOptions()
         uvicorn.run(
             self._app,
             host=options.host,

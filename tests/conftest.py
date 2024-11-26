@@ -18,6 +18,14 @@ from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.mapping import Mapping
 from fastcs.wrappers import command, scan
 
+DATA_PATH = Path(__file__).parent / "data"
+
+
+@pytest.fixture
+def data() -> Path:
+    return DATA_PATH
+
+
 # Prevent pytest from catching exceptions when debugging in vscode so that break on
 # exception works correctly (see: https://github.com/pytest-dev/pytest/issues/7409)
 if os.getenv("PYTEST_RAISE", "0") == "1":
