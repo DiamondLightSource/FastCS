@@ -6,9 +6,8 @@ from types import MethodType
 
 from fastcs.util import AsyncioDispatcher
 
-from .attributes import AttrR, AttrW, Sender, Updater
+from .attributes import AttrR, Updater
 from .controller import Controller, SingleMapping
-from .exceptions import FastCSException
 
 
 class Backend:
@@ -27,13 +26,6 @@ class Backend:
         asyncio.run_coroutine_threadsafe(
             self._controller.initialise(), self._loop
         ).result()
-
-        self._link_process_tasks()
-
-    def _link_process_tasks(self):
-        for single_mapping in self._controller.get_controller_mappings():
-            _link_single_controller_put_tasks(single_mapping)
-            _link_attribute_sender_class(single_mapping)
 
     def __del__(self):
         self.stop_scan_futures()
@@ -60,42 +52,6 @@ class Backend:
                     future.cancel()
                 except asyncio.CancelledError:
                     pass
-
-
-def _link_single_controller_put_tasks(single_mapping: SingleMapping) -> None:
-    for name, method in single_mapping.put_methods.items():
-        name = name.removeprefix("put_")
-
-        attribute = single_mapping.attributes[name]
-        match attribute:
-            case AttrW():
-                attribute.set_process_callback(
-                    MethodType(method.fn, single_mapping.controller)
-                )
-            case _:
-                raise FastCSException(
-                    f"Mode {attribute.access_mode} does not "
-                    f"support put operations for {name}"
-                )
-
-
-def _link_attribute_sender_class(single_mapping: SingleMapping) -> None:
-    for attr_name, attribute in single_mapping.attributes.items():
-        match attribute:
-            case AttrW(sender=Sender()):
-                assert (
-                    not attribute.has_process_callback()
-                ), f"Cannot assign both put method and Sender object to {attr_name}"
-
-                callback = _create_sender_callback(attribute, single_mapping.controller)
-                attribute.set_process_callback(callback)
-
-
-def _create_sender_callback(attribute, controller):
-    async def callback(value):
-        await attribute.sender.put(controller, attribute, value)
-
-    return callback
 
 
 def _get_scan_coros(controller: Controller) -> list[Callable]:
