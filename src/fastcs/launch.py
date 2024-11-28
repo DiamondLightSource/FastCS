@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Annotated, TypeAlias, get_type_hints
 
 import typer
-from pydantic import create_model
+from pydantic import BaseModel, create_model
 from ruamel.yaml import YAML
 
 from .backend import Backend
@@ -90,35 +90,7 @@ def launch(controller_class: type[Controller]) -> None:
 
 
 def _launch(controller_class: type[Controller]) -> typer.Typer:
-    sig = inspect.signature(controller_class.__init__)
-    args = inspect.getfullargspec(controller_class.__init__)[0]
-    if len(args) == 1:
-        fastcs_options = create_model(
-            f"{controller_class.__name__}",
-            transport=(TransportOptions, ...),
-            __config__={"extra": "forbid"},
-        )
-    elif len(args) == 2:
-        hints = get_type_hints(controller_class.__init__)
-        if hints:
-            options_type = list(hints.values())[-1]
-        else:
-            raise LaunchError(
-                f"Expected typehinting in '{controller_class.__name__}"
-                f".__init__' but received {sig}. Add a typehint for `{args[-1]}`."
-            )
-        fastcs_options = create_model(
-            f"{controller_class.__name__}",
-            controller=(options_type, ...),
-            transport=(TransportOptions, ...),
-            __config__={"extra": "forbid"},
-        )
-    else:
-        raise LaunchError(
-            f"Expected no more than 2 arguments for '{controller_class.__name__}"
-            f".__init__' but received {len(args)} as `{sig}`"
-        )
-
+    fastcs_options = _extract_options_model(controller_class)
     launch_typer = typer.Typer()
 
     class LaunchContext:
@@ -175,3 +147,35 @@ def _launch(controller_class: type[Controller]) -> typer.Typer:
         instance.run()
 
     return launch_typer
+
+
+def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel]:
+    sig = inspect.signature(controller_class.__init__)
+    args = inspect.getfullargspec(controller_class.__init__)[0]
+    if len(args) == 1:
+        fastcs_options = create_model(
+            f"{controller_class.__name__}",
+            transport=(TransportOptions, ...),
+            __config__={"extra": "forbid"},
+        )
+    elif len(args) == 2:
+        hints = get_type_hints(controller_class.__init__)
+        if hints:
+            options_type = list(hints.values())[-1]
+        else:
+            raise LaunchError(
+                f"Expected typehinting in '{controller_class.__name__}"
+                f".__init__' but received {sig}. Add a typehint for `{args[-1]}`."
+            )
+        fastcs_options = create_model(
+            f"{controller_class.__name__}",
+            controller=(options_type, ...),
+            transport=(TransportOptions, ...),
+            __config__={"extra": "forbid"},
+        )
+    else:
+        raise LaunchError(
+            f"Expected no more than 2 arguments for '{controller_class.__name__}"
+            f".__init__' but received {len(args)} as `{sig}`"
+        )
+    return fastcs_options
