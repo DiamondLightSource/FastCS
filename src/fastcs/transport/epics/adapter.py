@@ -1,10 +1,7 @@
-from typing import cast
-
-from softioc.asyncio_dispatcher import AsyncioDispatcher as Dispatcher
+from softioc.asyncio_dispatcher import AsyncioDispatcher
 
 from fastcs.controller import Controller
 from fastcs.transport.adapter import TransportAdapter
-from fastcs.util import AsyncioDispatcher
 
 from .docs import EpicsDocs
 from .gui import EpicsGUI
@@ -32,6 +29,4 @@ class EpicsTransport(TransportAdapter):
         EpicsGUI(self._controller, self._pv_prefix).create_gui(self.options.gui)
 
     def run(self):
-        self._ioc.run(
-            cast(Dispatcher, self._dispatcher),
-        )
+        self._ioc.run(self._dispatcher)

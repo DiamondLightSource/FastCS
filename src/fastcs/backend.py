@@ -4,7 +4,7 @@ from collections.abc import Callable
 from concurrent.futures import Future
 from types import MethodType
 
-from fastcs.util import AsyncioDispatcher
+from softioc.asyncio_dispatcher import AsyncioDispatcher
 
 from .attributes import AttrR, AttrW, Sender, Updater
 from .controller import Controller, SingleMapping
