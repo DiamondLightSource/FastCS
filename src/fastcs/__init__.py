@@ -7,7 +7,7 @@
 """
 
 from ._version import __version__
-from .main import FastCS as FastCS
-from .main import launch as launch
+from .launch import FastCS as FastCS
+from .launch import launch as launch
 
 __all__ = ["__version__"]

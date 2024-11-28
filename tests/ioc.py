@@ -1,7 +1,7 @@
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Int
-from fastcs.main import FastCS
+from fastcs.launch import FastCS
 from fastcs.transport.epics.options import EpicsIOCOptions, EpicsOptions
 from fastcs.wrappers import command
 

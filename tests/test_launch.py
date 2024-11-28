@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 
 from fastcs.controller import Controller
 from fastcs.exceptions import LaunchError
-from fastcs.main import TransportOptions, _launch, launch
+from fastcs.launch import TransportOptions, _launch, launch
 
 
 @dataclass
@@ -91,7 +91,7 @@ def test_over_defined_schema():
     error = (
         ""
         "Expected no more than 2 arguments for 'ManyArgs.__init__' "
-        "but received 3 as `(self, arg: test_main.SomeConfig, too_many)`"
+        "but received 3 as `(self, arg: test_launch.SomeConfig, too_many)`"
     )
 
     with pytest.raises(LaunchError) as exc_info:
@@ -100,9 +100,9 @@ def test_over_defined_schema():
 
 
 def test_launch_minimal(mocker: MockerFixture, data):
-    run = mocker.patch("fastcs.main.FastCS.run")
-    gui = mocker.patch("fastcs.main.FastCS.create_gui")
-    docs = mocker.patch("fastcs.main.FastCS.create_docs")
+    run = mocker.patch("fastcs.launch.FastCS.run")
+    gui = mocker.patch("fastcs.launch.FastCS.create_gui")
+    docs = mocker.patch("fastcs.launch.FastCS.create_docs")
 
     app = _launch(SingleArg)
     result = runner.invoke(app, ["run", str(data / "config_minimal.yaml")])
@@ -114,9 +114,9 @@ def test_launch_minimal(mocker: MockerFixture, data):
 
 
 def test_launch_full(mocker: MockerFixture, data):
-    run = mocker.patch("fastcs.main.FastCS.run")
-    gui = mocker.patch("fastcs.main.FastCS.create_gui")
-    docs = mocker.patch("fastcs.main.FastCS.create_docs")
+    run = mocker.patch("fastcs.launch.FastCS.run")
+    gui = mocker.patch("fastcs.launch.FastCS.create_gui")
+    docs = mocker.patch("fastcs.launch.FastCS.create_docs")
 
     app = _launch(IsHinted)
     result = runner.invoke(app, ["run", str(data / "config_full.yaml")])
