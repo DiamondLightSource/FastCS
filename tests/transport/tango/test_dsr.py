@@ -10,7 +10,7 @@ class TestTangoDevice:
     def tango_context(self, assertable_controller):
         # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
         device = TangoTransport(assertable_controller)._dsr._device
-        with DeviceTestContext(device) as proxy:
+        with DeviceTestContext(device, debug=0) as proxy:
             yield proxy
 
     def test_list_attributes(self, tango_context):
