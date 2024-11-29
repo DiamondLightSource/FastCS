@@ -2,14 +2,14 @@ import pytest
 from tango import DevState
 from tango.test_context import DeviceTestContext
 
-from fastcs.backends.tango.backend import TangoBackend
+from fastcs.transport.tango.adapter import TangoTransport
 
 
 class TestTangoDevice:
     @pytest.fixture(scope="class")
     def tango_context(self, assertable_controller):
         # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
-        device = TangoBackend(assertable_controller)._dsr._device
+        device = TangoTransport(assertable_controller)._dsr._device
         with DeviceTestContext(device) as proxy:
             yield proxy
 

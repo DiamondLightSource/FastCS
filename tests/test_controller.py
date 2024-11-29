@@ -1,7 +1,11 @@
 import pytest
 
-from fastcs.controller import Controller, SubController
-from fastcs.mapping import _get_single_mapping, _walk_mappings
+from fastcs.controller import (
+    Controller,
+    SubController,
+    _get_single_mapping,
+    _walk_mappings,
+)
 
 
 def test_controller_nesting():

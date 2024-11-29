@@ -1,13 +1,13 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from fastcs.backends.rest.backend import RestBackend
+from fastcs.transport.rest.adapter import RestTransport
 
 
 class TestRestServer:
     @pytest.fixture(scope="class")
     def client(self, assertable_controller):
-        app = RestBackend(assertable_controller)._server._app
+        app = RestTransport(assertable_controller)._server._app
         with TestClient(app) as client:
             yield client
 

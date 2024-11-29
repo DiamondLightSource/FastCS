@@ -1,12 +1,12 @@
 import pytest
 
 from fastcs.attributes import AttrR
-from fastcs.backends.epics.util import (
+from fastcs.datatypes import String
+from fastcs.transport.epics.util import (
     attr_is_enum,
     enum_index_to_value,
     enum_value_to_index,
 )
-from fastcs.datatypes import String
 
 
 def test_attr_is_enum():

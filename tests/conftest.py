@@ -15,8 +15,15 @@ from pytest_mock import MockerFixture
 from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Bool, Float, Int, String
-from fastcs.mapping import Mapping
 from fastcs.wrappers import command, scan
+
+DATA_PATH = Path(__file__).parent / "data"
+
+
+@pytest.fixture
+def data() -> Path:
+    return DATA_PATH
+
 
 # Prevent pytest from catching exceptions when debugging in vscode so that break on
 # exception works correctly (see: https://github.com/pytest-dev/pytest/issues/7409)
@@ -153,11 +160,6 @@ def controller():
 @pytest.fixture(scope="class")
 def assertable_controller(class_mocker: MockerFixture):
     return AssertableController(class_mocker)
-
-
-@pytest.fixture
-def mapping(controller):
-    return Mapping(controller)
 
 
 PV_PREFIX = "".join(random.choice(string.ascii_lowercase) for _ in range(12))

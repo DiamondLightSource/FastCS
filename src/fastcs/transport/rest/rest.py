@@ -1,5 +1,4 @@
 from collections.abc import Awaitable, Callable, Coroutine
-from dataclasses import dataclass
 from typing import Any
 
 import uvicorn
@@ -7,33 +6,25 @@ from fastapi import FastAPI
 from pydantic import create_model
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, T
-from fastcs.controller import BaseController
-from fastcs.mapping import Mapping
+from fastcs.controller import BaseController, Controller
 
-
-@dataclass
-class RestServerOptions:
-    host: str = "localhost"
-    port: int = 8080
-    log_level: str = "info"
+from .options import RestServerOptions
 
 
 class RestServer:
-    def __init__(self, mapping: Mapping):
-        self._mapping = mapping
+    def __init__(self, controller: Controller):
+        self._controller = controller
         self._app = self._create_app()
 
     def _create_app(self):
         app = FastAPI()
-        _add_attribute_api_routes(app, self._mapping)
-        _add_command_api_routes(app, self._mapping)
+        _add_attribute_api_routes(app, self._controller)
+        _add_command_api_routes(app, self._controller)
 
         return app
 
-    def run(self, options: RestServerOptions | None = None) -> None:
-        if options is None:
-            options = RestServerOptions()
-
+    def run(self, options: RestServerOptions | None) -> None:
+        options = options or RestServerOptions()
         uvicorn.run(
             self._app,
             host=options.host,
@@ -90,8 +81,8 @@ def _wrap_attr_get(
     return attr_get
 
 
-def _add_attribute_api_routes(app: FastAPI, mapping: Mapping) -> None:
-    for single_mapping in mapping.get_controller_mappings():
+def _add_attribute_api_routes(app: FastAPI, controller: Controller) -> None:
+    for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
 
         for attr_name, attribute in single_mapping.attributes.items():
@@ -140,8 +131,8 @@ def _wrap_command(
     return command
 
 
-def _add_command_api_routes(app: FastAPI, mapping: Mapping) -> None:
-    for single_mapping in mapping.get_controller_mappings():
+def _add_command_api_routes(app: FastAPI, controller: Controller) -> None:
+    for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
 
         for name, method in single_mapping.command_methods.items():

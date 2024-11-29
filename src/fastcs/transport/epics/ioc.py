@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from types import MethodType
 from typing import Any, Literal
 
@@ -8,23 +8,19 @@ from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.backends.epics.util import (
+from fastcs.controller import BaseController, Controller
+from fastcs.datatypes import Bool, DataType, Float, Int, String, T
+from fastcs.exceptions import FastCSException
+from fastcs.transport.epics.util import (
     MBB_STATE_FIELDS,
     attr_is_enum,
     enum_index_to_value,
     enum_value_to_index,
 )
-from fastcs.controller import BaseController
-from fastcs.datatypes import Bool, DataType, Float, Int, String, T
-from fastcs.exceptions import FastCSException
-from fastcs.mapping import Mapping
+
+from .options import EpicsIOCOptions
 
 EPICS_MAX_NAME_LENGTH = 60
-
-
-@dataclass
-class EpicsIOCOptions:
-    terminal: bool = True
 
 
 DATATYPE_NAME_TO_RECORD_FIELD = {
@@ -49,24 +45,31 @@ def datatype_to_epics_fields(datatype: DataType) -> dict[str, Any]:
 
 class EpicsIOC:
     def __init__(
-        self, pv_prefix: str, mapping: Mapping, options: EpicsIOCOptions | None = None
+        self,
+        pv_prefix: str,
+        controller: Controller,
+        options: EpicsIOCOptions | None = None,
     ):
         self.options = options or EpicsIOCOptions()
+        self._controller = controller
         _add_pvi_info(f"{pv_prefix}:PVI")
-        _add_sub_controller_pvi_info(pv_prefix, mapping.controller)
+        _add_sub_controller_pvi_info(pv_prefix, controller)
 
-        _create_and_link_attribute_pvs(pv_prefix, mapping)
-        _create_and_link_command_pvs(pv_prefix, mapping)
+        _create_and_link_attribute_pvs(pv_prefix, controller)
+        _create_and_link_command_pvs(pv_prefix, controller)
 
     def run(
         self,
         dispatcher: AsyncioDispatcher,
-        context: dict[str, Any],
     ) -> None:
         builder.LoadDatabase()
         softioc.iocInit(dispatcher)
 
         if self.options.terminal:
+            context = {
+                "dispatcher": dispatcher,
+                "controller": self._controller,
+            }
             softioc.interactive_ioc(context)
 
 
@@ -134,8 +137,8 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: BaseController):
         _add_sub_controller_pvi_info(pv_prefix, child)
 
 
-def _create_and_link_attribute_pvs(pv_prefix: str, mapping: Mapping) -> None:
-    for single_mapping in mapping.get_controller_mappings():
+def _create_and_link_attribute_pvs(pv_prefix: str, controller: Controller) -> None:
+    for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
         for attr_name, attribute in single_mapping.attributes.items():
             pv_name = attr_name.title().replace("_", "")
@@ -325,8 +328,8 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
     return record
 
 
-def _create_and_link_command_pvs(pv_prefix: str, mapping: Mapping) -> None:
-    for single_mapping in mapping.get_controller_mappings():
+def _create_and_link_command_pvs(pv_prefix: str, controller: Controller) -> None:
+    for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
         for attr_name, method in single_mapping.command_methods.items():
             pv_name = attr_name.title().replace("_", "")
