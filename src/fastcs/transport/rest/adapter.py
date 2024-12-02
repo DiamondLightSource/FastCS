@@ -1,3 +1,5 @@
+from collections.abc import Coroutine
+
 from fastcs.controller import Controller
 from fastcs.transport.adapter import TransportAdapter
 
@@ -11,8 +13,12 @@ class RestTransport(TransportAdapter):
         controller: Controller,
         options: RestOptions | None = None,
     ):
-        self.options = options or RestOptions()
+        self._options = options or RestOptions()
         self._server = RestServer(controller)
+
+    @property
+    def options(self) -> RestOptions:
+        return self._options
 
     def create_docs(self) -> None:
         raise NotImplementedError
@@ -20,5 +26,5 @@ class RestTransport(TransportAdapter):
     def create_gui(self) -> None:
         raise NotImplementedError
 
-    def run(self) -> None:
-        self._server.run(self.options.rest)
+    def run(self) -> Coroutine:
+        return self._server.run(self.options.rest)

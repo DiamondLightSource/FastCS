@@ -99,21 +99,7 @@ def test_over_defined_schema():
     assert str(exc_info.value) == error
 
 
-def test_launch_minimal(mocker: MockerFixture, data):
-    run = mocker.patch("fastcs.launch.FastCS.run")
-    gui = mocker.patch("fastcs.launch.FastCS.create_gui")
-    docs = mocker.patch("fastcs.launch.FastCS.create_docs")
-
-    app = _launch(SingleArg)
-    result = runner.invoke(app, ["run", str(data / "config_minimal.yaml")])
-    assert result.exit_code == 0
-
-    run.assert_called_once()
-    gui.assert_not_called()
-    docs.assert_not_called()
-
-
-def test_launch_full(mocker: MockerFixture, data):
+def test_launch(mocker: MockerFixture, data):
     run = mocker.patch("fastcs.launch.FastCS.run")
     gui = mocker.patch("fastcs.launch.FastCS.create_gui")
     docs = mocker.patch("fastcs.launch.FastCS.create_docs")

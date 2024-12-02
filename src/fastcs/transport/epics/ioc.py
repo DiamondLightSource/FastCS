@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import Callable
 from dataclasses import asdict
 from types import MethodType
@@ -60,17 +61,18 @@ class EpicsIOC:
 
     def run(
         self,
-        dispatcher: AsyncioDispatcher,
+        loop: asyncio.AbstractEventLoop,
     ) -> None:
+        dispatcher = AsyncioDispatcher(loop)  # Needs running loop
         builder.LoadDatabase()
         softioc.iocInit(dispatcher)
 
-        if self.options.terminal:
-            context = {
-                "dispatcher": dispatcher,
-                "controller": self._controller,
-            }
-            softioc.interactive_ioc(context)
+        # if False:
+        #     context = {
+        #         "dispatcher": dispatcher,
+        #         "controller": self._controller,
+        #     }
+        #     softioc.interactive_ioc(context)
 
 
 def _add_pvi_info(
