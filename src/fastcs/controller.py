@@ -20,14 +20,14 @@ class SingleMapping:
 
 
 class BaseController:
-    #! Attributes passed from the device at runtime.
+    #: Attributes passed from the device at runtime.
     attributes: dict[str, Attribute]
 
     def __init__(self, path: list[str] | None = None) -> None:
         if not hasattr(self, "attributes"):
             self.attributes = {}
         self._path: list[str] = path or []
-        self.__sub_controller_tree: dict[str, BaseController] = {}
+        self.__sub_controller_tree: dict[str, SubController] = {}
 
         self._bind_attrs()
 
@@ -48,6 +48,9 @@ class BaseController:
         class_type_hints = get_type_hints(type(self))
 
         for attr_name in {**class_dir, **class_type_hints}:
+            if attr_name == "root_attribute":
+                continue
+
             attr = getattr(self, attr_name, None)
             if isinstance(attr, Attribute):
                 if (
@@ -60,7 +63,6 @@ class BaseController:
                     )
                 new_attribute = copy(attr)
                 setattr(self, attr_name, new_attribute)
-
                 self.attributes[attr_name] = new_attribute
 
     def register_sub_controller(self, name: str, sub_controller: SubController):
@@ -72,7 +74,16 @@ class BaseController:
         self.__sub_controller_tree[name] = sub_controller
         sub_controller.set_path(self.path + [name])
 
-    def get_sub_controllers(self) -> dict[str, BaseController]:
+        if isinstance(sub_controller.root_attribute, Attribute):
+            if name in self.attributes:
+                raise TypeError(
+                    f"Cannot set SubController `{name}` root attribute "
+                    f"on the parent controller `{type(self).__name__}` "
+                    f"as it already has an attribute of that name."
+                )
+            self.attributes[name] = sub_controller.root_attribute
+
+    def get_sub_controllers(self) -> dict[str, SubController]:
         return self.__sub_controller_tree
 
     def get_controller_mappings(self) -> list[SingleMapping]:
@@ -104,6 +115,7 @@ def _get_single_mapping(controller: BaseController) -> SingleMapping:
         for name, attribute in controller.attributes.items()
         if attribute.enabled
     }
+
     return SingleMapping(
         controller, scan_methods, put_methods, command_methods, enabled_attributes
     )
@@ -134,6 +146,8 @@ class SubController(BaseController):
     An instance of this class can be registered with a parent ``Controller`` to include
     it as part of a larger device.
     """
+
+    root_attribute: Attribute | None = None
 
     def __init__(self) -> None:
         super().__init__()

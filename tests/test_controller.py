@@ -91,3 +91,36 @@ def test_attribute_parsing():
     assert sub_controller_mapping.attributes == {
         "sub_attribute": sub_controller.sub_attribute,
     }
+
+
+def test_attribute_in_both_class_and_get_attributes():
+    class FailingController(Controller):
+        duplicate_attribute = AttrR(Int())
+
+        def __init__(self):
+            self.attributes = {"duplicate_attribute": AttrR(Int())}
+            super().__init__()
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "`FailingController` has conflicting attribute `duplicate_attribute` "
+            "already present in the attributes dict."
+        ),
+    ):
+        FailingController()
+
+
+def test_root_attribute():
+    class FailingController(SomeController):
+        sub_controller = AttrR(Int())
+
+    with pytest.raises(
+        TypeError,
+        match=(
+            "Cannot set SubController `sub_controller` root attribute "
+            "on the parent controller `FailingController` as it already "
+            "has an attribute of that name."
+        ),
+    ):
+        next(_walk_mappings(FailingController(SomeSubController())))
