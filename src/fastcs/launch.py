@@ -1,3 +1,4 @@
+import asyncio
 import inspect
 import json
 from pathlib import Path
@@ -19,7 +20,9 @@ from .transport.rest.options import RestOptions
 from .transport.tango.options import TangoOptions
 
 # Define a type alias for transport options
-TransportOptions: TypeAlias = EpicsOptions | TangoOptions | RestOptions | GraphQLOptions
+TransportOptions: TypeAlias = list[
+    EpicsOptions | TangoOptions | RestOptions | GraphQLOptions
+]
 
 
 class FastCS:
@@ -28,48 +31,63 @@ class FastCS:
         controller: Controller,
         transport_options: TransportOptions,
     ):
-        self._backend = Backend(controller)
-        self._transport: TransportAdapter
-        match transport_options:
-            case EpicsOptions():
-                from .transport.epics.adapter import EpicsTransport
+        self._loop = asyncio.get_event_loop()
+        self._backend = Backend(controller, self._loop)
+        transport: TransportAdapter
+        self._transports: list[TransportAdapter] = []
+        for option in transport_options:
+            match option:
+                case EpicsOptions():
+                    from .transport.epics.adapter import EpicsTransport
 
-                self._transport = EpicsTransport(
-                    controller,
-                    self._backend.dispatcher,
-                    transport_options,
-                )
-            case GraphQLOptions():
-                from .transport.graphQL.adapter import GraphQLTransport
+                    transport = EpicsTransport(
+                        controller,
+                        self._loop,
+                        option,
+                    )
+                case TangoOptions():
+                    from .transport.tango.adapter import TangoTransport
 
-                self._transport = GraphQLTransport(
-                    controller,
-                    transport_options,
-                )
-            case TangoOptions():
-                from .transport.tango.adapter import TangoTransport
+                    transport = TangoTransport(
+                        controller,
+                        self._loop,
+                        option,
+                    )
+                case RestOptions():
+                    from .transport.rest.adapter import RestTransport
 
-                self._transport = TangoTransport(
-                    controller,
-                    transport_options,
-                )
-            case RestOptions():
-                from .transport.rest.adapter import RestTransport
+                    transport = RestTransport(
+                        controller,
+                        option,
+                    )
+                case GraphQLOptions():
+                    from .transport.graphQL.adapter import GraphQLTransport
 
-                self._transport = RestTransport(
-                    controller,
-                    transport_options,
-                )
+                    transport = GraphQLTransport(
+                        controller,
+                        option,
+                    )
+            self._transports.append(transport)
 
     def create_docs(self) -> None:
-        self._transport.create_docs()
+        for transport in self._transports:
+            if hasattr(transport.options, "docs"):
+                transport.create_docs()
 
     def create_gui(self) -> None:
-        self._transport.create_gui()
+        for transport in self._transports:
+            if hasattr(transport.options, "gui"):
+                transport.create_docs()
 
-    def run(self) -> None:
-        self._backend.run()
-        self._transport.run()
+    def run(self):
+        self._loop.run_until_complete(
+            self.serve(),
+        )
+
+    async def serve(self) -> None:
+        coros = [self._backend.serve()]
+        coros.extend([transport.serve() for transport in self._transports])
+        await asyncio.gather(*coros)
 
 
 def launch(
@@ -158,10 +176,8 @@ def _launch(
             instance_options.transport,
         )
 
-        if "gui" in options_yaml["transport"]:
-            instance.create_gui()
-        if "docs" in options_yaml["transport"]:
-            instance.create_docs()
+        instance.create_gui()
+        instance.create_docs()
         instance.run()
 
     @launch_typer.command(name="version", help=f"{controller_class.__name__} version")

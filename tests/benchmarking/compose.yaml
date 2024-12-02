@@ -1,0 +1,22 @@
+# Spin up a local minimal tango cs
+
+version: "3.7"
+services:
+  mysql:
+    image: registry.gitlab.com/tango-controls/docker/mysql:5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+  tango-cs:
+    hostname: localhost
+    image: registry.gitlab.com/tango-controls/docker/tango-cs:9
+    ports:
+      - "10000:10000"
+    environment:
+      - TANGO_HOST=localhost:10000
+      - MYSQL_HOST=mysql:3306
+      - MYSQL_USER=tango
+      - MYSQL_PASSWORD=tango
+      - MYSQL_DATABASE=tango
+    depends_on:
+      - mysql

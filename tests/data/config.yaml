@@ -1,7 +1,10 @@
 # yaml-language-server: $schema=schema.json
 transport:
-  ioc: {}
-  docs: {}
-  gui: {}
+  - ioc: {}
+    docs: {}
+    gui: {}
+  - rest: {}
+  - dsr: {}
+  - gql: {}
 controller:
   name: controller-name

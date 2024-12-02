@@ -11,8 +11,12 @@ class GraphQLTransport(TransportAdapter):
         controller: Controller,
         options: GraphQLOptions | None = None,
     ):
-        self.options = options or GraphQLOptions()
+        self._options = options or GraphQLOptions()
         self._server = GraphQLServer(controller)
+
+    @property
+    def options(self) -> GraphQLOptions:
+        return self._options
 
     def create_docs(self) -> None:
         raise NotImplementedError
@@ -20,5 +24,5 @@ class GraphQLTransport(TransportAdapter):
     def create_gui(self) -> None:
         raise NotImplementedError
 
-    def run(self) -> None:
-        self._server.run(self.options.gql)
+    async def serve(self) -> None:
+        await self._server.serve(self.options.gql)

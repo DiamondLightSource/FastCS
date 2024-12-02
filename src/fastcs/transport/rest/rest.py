@@ -23,14 +23,17 @@ class RestServer:
 
         return app
 
-    def run(self, options: RestServerOptions | None) -> None:
+    async def serve(self, options: RestServerOptions | None):
         options = options or RestServerOptions()
-        uvicorn.run(
-            self._app,
-            host=options.host,
-            port=options.port,
-            log_level=options.log_level,
+        self._serv = uvicorn.Server(
+            uvicorn.Config(
+                app=self._app,
+                host=options.host,
+                port=options.port,
+                log_level=options.log_level,
+            )
         )
+        await self._serv.serve()
 
 
 def _put_request_body(attribute: AttrW[T]):
