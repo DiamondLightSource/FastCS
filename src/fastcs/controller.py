@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from copy import copy
 from dataclasses import dataclass
+from typing import get_type_hints
 
 from .attributes import Attribute
 from .cs_methods import Command, Put, Scan
@@ -19,7 +20,12 @@ class SingleMapping:
 
 
 class BaseController:
+    #! Attributes passed from the device at runtime.
+    attributes: dict[str, Attribute]
+
     def __init__(self, path: list[str] | None = None) -> None:
+        if not hasattr(self, "attributes"):
+            self.attributes = {}
         self._path: list[str] = path or []
         self.__sub_controller_tree: dict[str, BaseController] = {}
 
@@ -37,11 +43,25 @@ class BaseController:
         self._path = path
 
     def _bind_attrs(self) -> None:
-        for attr_name in dir(self):
-            attr = getattr(self, attr_name)
+        # Using a dictionary instead of a set to maintain order.
+        class_dir = {key: None for key in dir(type(self))}
+        class_type_hints = get_type_hints(type(self))
+
+        for attr_name in {**class_dir, **class_type_hints}:
+            attr = getattr(self, attr_name, None)
             if isinstance(attr, Attribute):
+                if (
+                    attr_name in self.attributes
+                    and self.attributes[attr_name] is not attr
+                ):
+                    raise ValueError(
+                        f"`{type(self).__name__}` has conflicting attribute "
+                        f"`{attr_name}` already present in the attributes dict."
+                    )
                 new_attribute = copy(attr)
                 setattr(self, attr_name, new_attribute)
+
+                self.attributes[attr_name] = new_attribute
 
     def register_sub_controller(self, name: str, sub_controller: SubController):
         if name in self.__sub_controller_tree.keys():
@@ -69,7 +89,6 @@ def _get_single_mapping(controller: BaseController) -> SingleMapping:
     scan_methods: dict[str, Scan] = {}
     put_methods: dict[str, Put] = {}
     command_methods: dict[str, Command] = {}
-    attributes: dict[str, Attribute] = {}
     for attr_name in dir(controller):
         attr = getattr(controller, attr_name)
         match attr:
@@ -79,11 +98,14 @@ def _get_single_mapping(controller: BaseController) -> SingleMapping:
                 scan_methods[attr_name] = scan_method
             case WrappedMethod(fastcs_method=Command(enabled=True) as command_method):
                 command_methods[attr_name] = command_method
-            case Attribute(enabled=True):
-                attributes[attr_name] = attr
 
+    enabled_attributes = {
+        name: attribute
+        for name, attribute in controller.attributes.items()
+        if attribute.enabled
+    }
     return SingleMapping(
-        controller, scan_methods, put_methods, command_methods, attributes
+        controller, scan_methods, put_methods, command_methods, enabled_attributes
     )
 
 
