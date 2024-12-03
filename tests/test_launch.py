@@ -6,6 +6,7 @@ from pydantic import create_model
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
+from fastcs.__main__ import __version__
 from fastcs.controller import Controller
 from fastcs.exceptions import LaunchError
 from fastcs.launch import TransportOptions, _launch, launch
@@ -97,6 +98,23 @@ def test_over_defined_schema():
     with pytest.raises(LaunchError) as exc_info:
         launch(ManyArgs)
     assert str(exc_info.value) == error
+
+
+def test_version():
+    impl_version = "0.0.1"
+    expected = f"SingleArg: {impl_version}\n" f"FastCS: {__version__}\n"
+    app = _launch(SingleArg, version=impl_version)
+    result = runner.invoke(app, ["version"])
+    assert result.exit_code == 0
+    assert result.stdout == expected
+
+
+def test_no_version():
+    expected = f"FastCS: {__version__}\n"
+    app = _launch(SingleArg)
+    result = runner.invoke(app, ["version"])
+    assert result.exit_code == 0
+    assert result.stdout == expected
 
 
 def test_launch_minimal(mocker: MockerFixture, data):

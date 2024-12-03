@@ -7,6 +7,8 @@ import typer
 from pydantic import BaseModel, create_model
 from ruamel.yaml import YAML
 
+from fastcs.__main__ import __version__
+
 from .backend import Backend
 from .controller import Controller
 from .exceptions import LaunchError
@@ -62,7 +64,10 @@ class FastCS:
         self._transport.run()
 
 
-def launch(controller_class: type[Controller]) -> None:
+def launch(
+    controller_class: type[Controller],
+    version: str | None = None,
+) -> None:
     """
     Serves as an entry point for starting FastCS applications.
 
@@ -72,7 +77,9 @@ def launch(controller_class: type[Controller]) -> None:
 
     Args:
         controller_class (type[Controller]): The FastCS Controller to instantiate.
-        It must have a type-hinted __init__ method and no more than 2 arguments.
+            It must have a type-hinted __init__ method and no more than 2 arguments.
+        version (Optional[str]): The version of the FastCS Controller.
+            Optional
 
     Raises:
         LaunchError: If the class's __init__ is not as expected
@@ -86,10 +93,13 @@ def launch(controller_class: type[Controller]) -> None:
         if __name__ == "__main__":
             launch(MyController)
     """
-    _launch(controller_class)()
+    _launch(controller_class, version)()
 
 
-def _launch(controller_class: type[Controller]) -> typer.Typer:
+def _launch(
+    controller_class: type[Controller],
+    version: str | None = None,
+) -> typer.Typer:
     fastcs_options = _extract_options_model(controller_class)
     launch_typer = typer.Typer()
 
@@ -145,6 +155,12 @@ def _launch(controller_class: type[Controller]) -> typer.Typer:
         if "docs" in options_yaml["transport"]:
             instance.create_docs()
         instance.run()
+
+    @launch_typer.command(name="version", help=f"{controller_class.__name__} version")
+    def version_command():
+        if version:
+            print(f"{controller_class.__name__}: {version}")
+        print(f"FastCS: {__version__}")
 
     return launch_typer
 
