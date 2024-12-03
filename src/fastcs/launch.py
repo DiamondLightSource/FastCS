@@ -160,6 +160,8 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
         )
     elif len(args) == 2:
         hints = get_type_hints(controller_class.__init__)
+        if "return" in hints:
+            del hints["return"]
         if hints:
             options_type = list(hints.values())[-1]
         else:

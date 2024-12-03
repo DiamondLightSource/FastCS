@@ -27,7 +27,7 @@ class NotHinted(Controller):
 
 
 class IsHinted(Controller):
-    def __init__(self, arg: SomeConfig):
+    def __init__(self, arg: SomeConfig) -> None:
         super().__init__()
 
 
