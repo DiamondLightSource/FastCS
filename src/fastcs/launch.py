@@ -77,7 +77,9 @@ def launch(
 
     Args:
         controller_class (type[Controller]): The FastCS Controller to instantiate.
-        It must have a type-hinted __init__ method and no more than 2 arguments.
+            It must have a type-hinted __init__ method and no more than 2 arguments.
+        version (Optional[str]): The version of the FastCS Controller.
+            Optional
 
     Raises:
         LaunchError: If the class's __init__ is not as expected
