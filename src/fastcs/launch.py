@@ -62,7 +62,10 @@ class FastCS:
         self._transport.run()
 
 
-def launch(controller_class: type[Controller]) -> None:
+def launch(
+    controller_class: type[Controller],
+    version: str | None = None,
+) -> None:
     """
     Serves as an entry point for starting FastCS applications.
 
@@ -86,10 +89,13 @@ def launch(controller_class: type[Controller]) -> None:
         if __name__ == "__main__":
             launch(MyController)
     """
-    _launch(controller_class)()
+    _launch(controller_class, version)()
 
 
-def _launch(controller_class: type[Controller]) -> typer.Typer:
+def _launch(
+    controller_class: type[Controller],
+    version: str | None = None,
+) -> typer.Typer:
     fastcs_options = _extract_options_model(controller_class)
     launch_typer = typer.Typer()
 
@@ -145,6 +151,14 @@ def _launch(controller_class: type[Controller]) -> typer.Typer:
         if "docs" in options_yaml["transport"]:
             instance.create_docs()
         instance.run()
+
+    if version:
+
+        @launch_typer.command(
+            name="version", help=f"{controller_class.__name__} version"
+        )
+        def version_command():
+            print(version)
 
     return launch_typer
 
