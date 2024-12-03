@@ -7,6 +7,8 @@ import typer
 from pydantic import BaseModel, create_model
 from ruamel.yaml import YAML
 
+from fastcs.__main__ import __version__
+
 from .backend import Backend
 from .controller import Controller
 from .exceptions import LaunchError
@@ -152,13 +154,11 @@ def _launch(
             instance.create_docs()
         instance.run()
 
-    if version:
-
-        @launch_typer.command(
-            name="version", help=f"{controller_class.__name__} version"
-        )
-        def version_command():
-            print(version)
+    @launch_typer.command(name="version", help=f"{controller_class.__name__} version")
+    def version_command():
+        if version:
+            print(f"{controller_class.__name__}: {version}")
+        print(f"FastCS: {__version__}")
 
     return launch_typer
 
