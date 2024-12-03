@@ -42,7 +42,7 @@ runner = CliRunner()
 def test_single_arg_schema():
     target_model = create_model(
         "SingleArg",
-        transport=(TransportOptions, ...),
+        transport=(list[TransportOptions], ...),
         __config__={"extra": "forbid"},
     )
     target_dict = target_model.model_json_schema()
@@ -59,7 +59,7 @@ def test_is_hinted_schema(data):
     target_model = create_model(
         "IsHinted",
         controller=(SomeConfig, ...),
-        transport=(TransportOptions, ...),
+        transport=(list[TransportOptions], ...),
         __config__={"extra": "forbid"},
     )
     target_dict = target_model.model_json_schema()
@@ -109,8 +109,8 @@ def test_launch_minimal(mocker: MockerFixture, data):
     assert result.exit_code == 0
 
     run.assert_called_once()
-    gui.assert_not_called()
-    docs.assert_not_called()
+    gui.assert_called_once()
+    docs.assert_called_once()
 
 
 def test_launch_full(mocker: MockerFixture, data):

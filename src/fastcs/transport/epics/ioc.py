@@ -65,12 +65,12 @@ class EpicsIOC:
         builder.LoadDatabase()
         softioc.iocInit(dispatcher)
 
-        if self.options.terminal:
-            context = {
-                "dispatcher": dispatcher,
-                "controller": self._controller,
-            }
-            softioc.interactive_ioc(context)
+        # if self.options.terminal:
+        #     context = {
+        #         "dispatcher": dispatcher,
+        #         "controller": self._controller,
+        #     }
+        #     softioc.interactive_ioc(context)
 
 
 def _add_pvi_info(

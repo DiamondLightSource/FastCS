@@ -16,11 +16,15 @@ class EpicsTransport(TransportAdapter):
         dispatcher: AsyncioDispatcher,
         options: EpicsOptions | None = None,
     ) -> None:
-        self.options = options or EpicsOptions()
+        self._options = options or EpicsOptions()
         self._controller = controller
         self._dispatcher = dispatcher
         self._pv_prefix = self.options.ioc.pv_prefix
         self._ioc = EpicsIOC(self.options.ioc.pv_prefix, controller)
+
+    @property
+    def options(self) -> EpicsOptions:
+        return self._options
 
     def create_docs(self) -> None:
         EpicsDocs(self._controller).create_docs(self.options.docs)

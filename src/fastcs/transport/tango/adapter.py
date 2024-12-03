@@ -11,8 +11,12 @@ class TangoTransport(TransportAdapter):
         controller: Controller,
         options: TangoOptions | None = None,
     ):
-        self.options = options or TangoOptions()
+        self._options = options or TangoOptions()
         self._dsr = TangoDSR(controller)
+
+    @property
+    def options(self) -> TangoOptions:
+        return self._options
 
     def create_docs(self) -> None:
         raise NotImplementedError

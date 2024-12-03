@@ -33,7 +33,7 @@ class Backend:
     def _link_process_tasks(self):
         for single_mapping in self._controller.get_controller_mappings():
             _link_single_controller_put_tasks(single_mapping)
-            _link_attribute_sender_class(single_mapping)
+            _link_attribute_sender_class(self._loop, single_mapping)
 
     def __del__(self):
         self.stop_scan_futures()
@@ -79,7 +79,9 @@ def _link_single_controller_put_tasks(single_mapping: SingleMapping) -> None:
                 )
 
 
-def _link_attribute_sender_class(single_mapping: SingleMapping) -> None:
+def _link_attribute_sender_class(
+    loop: asyncio.AbstractEventLoop, single_mapping: SingleMapping
+) -> None:
     for attr_name, attribute in single_mapping.attributes.items():
         match attribute:
             case AttrW(sender=Sender()):
@@ -87,13 +89,18 @@ def _link_attribute_sender_class(single_mapping: SingleMapping) -> None:
                     not attribute.has_process_callback()
                 ), f"Cannot assign both put method and Sender object to {attr_name}"
 
-                callback = _create_sender_callback(attribute, single_mapping.controller)
+                callback = _create_sender_callback(
+                    loop, attribute, single_mapping.controller
+                )
                 attribute.set_process_callback(callback)
 
 
-def _create_sender_callback(attribute, controller):
+def _create_sender_callback(loop: asyncio.AbstractEventLoop, attribute, controller):
     async def callback(value):
-        await attribute.sender.put(controller, attribute, value)
+        future = asyncio.run_coroutine_threadsafe(
+            attribute.sender.put(controller, attribute, value), loop
+        )
+        await asyncio.wrap_future(future)
 
     return callback
 

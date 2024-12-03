@@ -23,7 +23,7 @@ def run():
     epics_options = EpicsOptions(ioc=EpicsIOCOptions(pv_prefix="DEVICE"))
     controller = ParentController()
     controller.register_sub_controller("Child", ChildController())
-    fastcs = FastCS(controller, epics_options)
+    fastcs = FastCS(controller, [epics_options])
     fastcs.run()
 
 

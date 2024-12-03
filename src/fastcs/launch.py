@@ -1,7 +1,8 @@
 import inspect
 import json
+import threading
 from pathlib import Path
-from typing import Annotated, TypeAlias, get_type_hints
+from typing import Annotated, get_type_hints
 
 import typer
 from pydantic import BaseModel, create_model
@@ -10,78 +11,85 @@ from ruamel.yaml import YAML
 from .backend import Backend
 from .controller import Controller
 from .exceptions import LaunchError
-from .transport.adapter import TransportAdapter
+from .transport.adapter import TransportAdapter, TransportOptions
 from .transport.epics.options import EpicsOptions
 from .transport.rest.options import RestOptions
 from .transport.tango.options import TangoOptions
-
-# Define a type alias for transport options
-TransportOptions: TypeAlias = EpicsOptions | TangoOptions | RestOptions
 
 
 class FastCS:
     def __init__(
         self,
         controller: Controller,
-        transport_options: TransportOptions,
+        transport_options: list[TransportOptions],
     ):
         self._backend = Backend(controller)
-        self._transport: TransportAdapter
-        match transport_options:
-            case EpicsOptions():
-                from .transport.epics.adapter import EpicsTransport
+        self._transport_threads: list[threading.Thread] = []
+        self._transports: list[TransportAdapter] = []
+        option: TransportOptions
+        transport: TransportAdapter
+        for option in transport_options:
+            match option:
+                case EpicsOptions():
+                    from .transport.epics.adapter import EpicsTransport
 
-                self._transport = EpicsTransport(
-                    controller,
-                    self._backend.dispatcher,
-                    transport_options,
-                )
-            case TangoOptions():
-                from .transport.tango.adapter import TangoTransport
+                    transport = EpicsTransport(
+                        controller,
+                        self._backend.dispatcher,
+                        option,
+                    )
+                case TangoOptions():
+                    from .transport.tango.adapter import TangoTransport
 
-                self._transport = TangoTransport(
-                    controller,
-                    transport_options,
-                )
-            case RestOptions():
-                from .transport.rest.adapter import RestTransport
+                    transport = TangoTransport(
+                        controller,
+                        option,
+                    )
+                case RestOptions():
+                    from .transport.rest.adapter import RestTransport
 
-                self._transport = RestTransport(
-                    controller,
-                    transport_options,
-                )
+                    transport = RestTransport(
+                        controller,
+                        option,
+                    )
+
+            self._transports.append(transport)
 
     def create_docs(self) -> None:
-        self._transport.create_docs()
+        for transport in self._transports:
+            if hasattr(transport.options, "docs"):
+                transport.create_docs()
 
     def create_gui(self) -> None:
-        self._transport.create_gui()
+        for transport in self._transports:
+            if hasattr(transport.options, "gui"):
+                transport.create_docs()
 
     def run(self) -> None:
         self._backend.run()
-        self._transport.run()
+        for transport in self._transports:
+            self._transport_threads.append(threading.Thread(target=transport.run))
+            self._transport_threads[-1].start()
+
+        for thread in self._transport_threads:
+            thread.join()
 
 
 def launch(controller_class: type[Controller]) -> None:
     """
     Serves as an entry point for starting FastCS applications.
-
     By utilizing type hints in a Controller's __init__ method, this
     function provides a command-line interface to describe and gather the
     required configuration before instantiating the application.
-
     Args:
         controller_class (type[Controller]): The FastCS Controller to instantiate.
         It must have a type-hinted __init__ method and no more than 2 arguments.
-
     Raises:
         LaunchError: If the class's __init__ is not as expected
-
     Example of the expected Controller implementation:
         class MyController(Controller):
             def __init__(self, my_arg: MyControllerOptions) -> None:
                 ...
-
     Typical usage:
         if __name__ == "__main__":
             launch(MyController)
@@ -140,10 +148,8 @@ def _launch(controller_class: type[Controller]) -> typer.Typer:
             instance_options.transport,
         )
 
-        if "gui" in options_yaml["transport"]:
-            instance.create_gui()
-        if "docs" in options_yaml["transport"]:
-            instance.create_docs()
+        instance.create_gui()
+        instance.create_docs()
         instance.run()
 
     return launch_typer
@@ -155,7 +161,7 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
     if len(args) == 1:
         fastcs_options = create_model(
             f"{controller_class.__name__}",
-            transport=(TransportOptions, ...),
+            transport=(list[TransportOptions], ...),
             __config__={"extra": "forbid"},
         )
     elif len(args) == 2:
@@ -170,7 +176,7 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
         fastcs_options = create_model(
             f"{controller_class.__name__}",
             controller=(options_type, ...),
-            transport=(TransportOptions, ...),
+            transport=(list[TransportOptions], ...),
             __config__={"extra": "forbid"},
         )
     else:

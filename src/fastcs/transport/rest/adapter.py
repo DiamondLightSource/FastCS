@@ -11,8 +11,12 @@ class RestTransport(TransportAdapter):
         controller: Controller,
         options: RestOptions | None = None,
     ):
-        self.options = options or RestOptions()
+        self._options = options or RestOptions()
         self._server = RestServer(controller)
+
+    @property
+    def options(self) -> RestOptions:
+        return self._options
 
     def create_docs(self) -> None:
         raise NotImplementedError
@@ -21,4 +25,4 @@ class RestTransport(TransportAdapter):
         raise NotImplementedError
 
     def run(self) -> None:
-        self._server.run(self.options.rest)
+        self._server.run(self._options.rest)
