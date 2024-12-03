@@ -99,6 +99,14 @@ def test_over_defined_schema():
     assert str(exc_info.value) == error
 
 
+def test_version():
+    expected = "0.0.1"
+    app = _launch(SingleArg, version=expected)
+    result = runner.invoke(app, ["version"])
+    assert result.exit_code == 0
+    assert result.stdout.strip() == expected
+
+
 def test_launch_minimal(mocker: MockerFixture, data):
     run = mocker.patch("fastcs.launch.FastCS.run")
     gui = mocker.patch("fastcs.launch.FastCS.create_gui")
