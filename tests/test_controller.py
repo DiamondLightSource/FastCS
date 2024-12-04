@@ -1,11 +1,13 @@
 import pytest
 
+from fastcs.attributes import AttrR
 from fastcs.controller import (
     Controller,
     SubController,
     _get_single_mapping,
     _walk_mappings,
 )
+from fastcs.datatypes import Int
 
 
 def test_controller_nesting():
@@ -33,3 +35,92 @@ def test_controller_nesting():
         ValueError, match=r"SubController is already registered under .*"
     ):
         controller.register_sub_controller("c", sub_controller)
+
+
+class SomeSubController(SubController):
+    def __init__(self):
+        super().__init__()
+
+    sub_attribute = AttrR(Int())
+
+    root_attribute = AttrR(Int())
+
+
+class SomeController(Controller):
+    annotated_attr: AttrR
+    annotated_attr_not_defined_in_init: AttrR[int]
+    equal_attr = AttrR(Int())
+    annotated_and_equal_attr: AttrR[int] = AttrR(Int())
+
+    def __init__(self, sub_controller: SubController):
+        self.attributes = {}
+
+        self.annotated_attr = AttrR(Int())
+        self.attr_on_object = AttrR(Int())
+
+        self.attributes["_attributes_attr"] = AttrR(Int())
+        self.attributes["_attributes_attr_equal"] = self.equal_attr
+
+        super().__init__()
+        self.register_sub_controller("sub_controller", sub_controller)
+
+
+def test_attribute_parsing():
+    sub_controller = SomeSubController()
+    controller = SomeController(sub_controller)
+
+    mapping_walk = _walk_mappings(controller)
+
+    controller_mapping = next(mapping_walk)
+    assert set(controller_mapping.attributes.keys()) == {
+        "_attributes_attr",
+        "annotated_attr",
+        "_attributes_attr_equal",
+        "annotated_and_equal_attr",
+        "equal_attr",
+        "sub_controller",
+    }
+
+    assert SomeController.equal_attr is not controller.equal_attr
+    assert (
+        SomeController.annotated_and_equal_attr
+        is not controller.annotated_and_equal_attr
+    )
+
+    sub_controller_mapping = next(mapping_walk)
+    assert sub_controller_mapping.attributes == {
+        "sub_attribute": sub_controller.sub_attribute,
+    }
+
+
+def test_attribute_in_both_class_and_get_attributes():
+    class FailingController(Controller):
+        duplicate_attribute = AttrR(Int())
+
+        def __init__(self):
+            self.attributes = {"duplicate_attribute": AttrR(Int())}
+            super().__init__()
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "`FailingController` has conflicting attribute `duplicate_attribute` "
+            "already present in the attributes dict."
+        ),
+    ):
+        FailingController()
+
+
+def test_root_attribute():
+    class FailingController(SomeController):
+        sub_controller = AttrR(Int())
+
+    with pytest.raises(
+        TypeError,
+        match=(
+            "Cannot set SubController `sub_controller` root attribute "
+            "on the parent controller `FailingController` as it already "
+            "has an attribute of that name."
+        ),
+    ):
+        next(_walk_mappings(FailingController(SomeSubController())))
