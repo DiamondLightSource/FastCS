@@ -45,6 +45,7 @@ coverage.xml
 cov.xml
 .pytest_cache/
 .mypy_cache/
+.benchmarks/
 
 # Translations
 *.mo

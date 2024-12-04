@@ -33,6 +33,7 @@ dev = [
     "pydata-sphinx-theme>=0.12",
     "pyright",
     "pytest",
+    "pytest-benchmark",
     "pytest-cov",
     "pytest-mock",
     "pytest-asyncio",
@@ -63,12 +64,12 @@ version_file = "src/fastcs/_version.py"
 
 [tool.pyright]
 typeCheckingMode = "standard"
-reportMissingImports = false # Ignore missing stubs in imported modules
+reportMissingImports = false  # Ignore missing stubs in imported modules
 
 [tool.pytest.ini_options]
 # Run pytest with all our checkers, and don't spam us with massive tracebacks on error
 addopts = """
-    --tb=native -vv --doctest-modules --doctest-glob="*.rst"
+    --tb=native -vv --doctest-modules --doctest-glob="*.rst" --benchmark-autosave --benchmark-columns="min, max, mean, outliers, ops, rounds"
     """
 # https://iscinumpy.gitlab.io/post/bound-version-constraints/#watch-for-warnings
 filterwarnings = "error"
