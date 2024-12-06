@@ -355,10 +355,8 @@ def _create_and_link_command_pv(
     async def wrapped_method(_: Any):
         await method()
 
-    record = builder.aOut(
+    record = builder.Action(
         f"{pv_prefix}:{pv_name}",
-        initial_value=0,
-        always_update=True,
         on_update=wrapped_method,
     )
 

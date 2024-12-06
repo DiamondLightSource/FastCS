@@ -269,9 +269,7 @@ def test_ioc(mocker: MockerFixture, controller: Controller):
         always_update=True,
         on_update=mocker.ANY,
     )
-    builder.aOut.assert_any_call(
-        f"{DEVICE}:Go", initial_value=0, always_update=True, on_update=mocker.ANY
-    )
+    builder.Action.assert_any_call(f"{DEVICE}:Go", on_update=mocker.ANY)
 
     # Check info tags are added
     add_pvi_info.assert_called_once_with(f"{DEVICE}:PVI")
@@ -443,10 +441,8 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     assert not getattr(long_name_controller, long_command_name).fastcs_method.enabled
 
     short_command_pv_name = "command_short_name".title().replace("_", "")
-    builder.aOut.assert_called_once_with(
+    builder.Action.assert_called_once_with(
         f"{DEVICE}:{short_command_pv_name}",
-        initial_value=0,
-        always_update=True,
         on_update=mocker.ANY,
     )
     with pytest.raises(AssertionError):
