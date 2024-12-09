@@ -1,6 +1,6 @@
 import asyncio
+import warnings
 from collections.abc import Callable
-from dataclasses import asdict
 from types import MethodType
 from typing import Any, Literal
 
@@ -10,38 +10,20 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController, Controller
-from fastcs.datatypes import Bool, DataType, Float, Int, String, T
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
 from fastcs.exceptions import FastCSException
 from fastcs.transport.epics.util import (
+    MBB_MAX_CHOICES,
     MBB_STATE_FIELDS,
-    attr_is_enum,
-    enum_index_to_value,
-    enum_value_to_index,
+    get_cast_method_from_epics_type,
+    get_cast_method_to_epics_type,
+    get_record_metadata_from_attribute,
+    get_record_metadata_from_datatype,
 )
 
 from .options import EpicsIOCOptions
 
 EPICS_MAX_NAME_LENGTH = 60
-
-
-DATATYPE_NAME_TO_RECORD_FIELD = {
-    "prec": "PREC",
-    "units": "EGU",
-    "min": "DRVL",
-    "max": "DRVH",
-    "min_alarm": "LOPR",
-    "max_alarm": "HOPR",
-    "znam": "ZNAM",
-    "onam": "ONAM",
-}
-
-
-def datatype_to_epics_fields(datatype: DataType) -> dict[str, Any]:
-    return {
-        DATATYPE_NAME_TO_RECORD_FIELD[field]: value
-        for field, value in asdict(datatype).items()
-        if field in DATATYPE_NAME_TO_RECORD_FIELD
-    }
 
 
 class EpicsIOC:
@@ -174,14 +156,10 @@ def _create_and_link_attribute_pvs(pv_prefix: str, controller: Controller) -> No
 def _create_and_link_read_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
 ) -> None:
-    if attr_is_enum(attribute):
+    cast_method = get_cast_method_to_epics_type(attribute.datatype)
 
-        async def async_record_set(value: T):
-            record.set(enum_value_to_index(attribute, value))
-    else:
-
-        async def async_record_set(value: T):
-            record.set(value)
+    async def async_record_set(value: T):
+        record.set(cast_method(value))
 
     record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
@@ -190,45 +168,75 @@ def _create_and_link_read_pv(
 
 
 def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
-    attribute_fields = {}
-    if attribute.description is not None:
-        attribute_fields.update({"DESC": attribute.description})
-
-    if attr_is_enum(attribute):
-        assert attribute.allowed_values is not None and all(
-            isinstance(v, str) for v in attribute.allowed_values
-        )
-        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
-        return builder.mbbIn(pv, **state_keys, **attribute_fields)
-
     match attribute.datatype:
         case Bool():
             record = builder.boolIn(
-                pv, **datatype_to_epics_fields(attribute.datatype), **attribute_fields
+                pv,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
             )
         case Int():
             record = builder.longIn(
                 pv,
-                **datatype_to_epics_fields(attribute.datatype),
-                **attribute_fields,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
             )
         case Float():
             record = builder.aIn(
                 pv,
-                **datatype_to_epics_fields(attribute.datatype),
-                **attribute_fields,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
             )
         case String():
             record = builder.longStringIn(
-                pv, **datatype_to_epics_fields(attribute.datatype), **attribute_fields
+                pv,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
             )
+        case Enum():
+            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
+                if attribute.datatype.is_string_enum:
+                    replacement_record, replacement_str = (
+                        builder.longStringIn,
+                        "longStringIn",
+                    )
+                else:
+                    replacement_record, replacement_str = builder.longIn, "longIn"
+
+                warnings.warn(
+                    f"Received an enum datatype on attribute {attribute} "
+                    f"with more elements than the epics limit `{MBB_MAX_CHOICES}` "
+                    f"for mbbIn, will use a {replacement_str} record instead. "
+                    "To stop with warning use a different datatype with "
+                    "`allowed_values`",
+                    stacklevel=1,
+                )
+                record = replacement_record(
+                    pv,
+                    **get_record_metadata_from_datatype(attribute.datatype),
+                    **get_record_metadata_from_attribute(attribute),
+                )
+            else:
+                state_keys = dict(
+                    zip(
+                        MBB_STATE_FIELDS,
+                        [member.name for member in attribute.datatype.members],
+                        strict=False,
+                    )
+                )
+                record = builder.mbbIn(
+                    pv,
+                    **state_keys,
+                    **get_record_metadata_from_datatype(attribute.datatype),
+                    **get_record_metadata_from_attribute(attribute),
+                )
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
             )
 
     def datatype_updater(datatype: DataType):
-        for name, value in datatype_to_epics_fields(datatype).items():
+        for name, value in get_record_metadata_from_datatype(datatype).items():
             record.set_field(name, value)
 
     attribute.add_update_datatype_callback(datatype_updater)
@@ -238,23 +246,13 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
 def _create_and_link_write_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW[T]
 ) -> None:
-    if attr_is_enum(attribute):
+    cast_method = get_cast_method_from_epics_type(attribute.datatype)
 
-        async def on_update(value):
-            await attribute.process_without_display_update(
-                enum_index_to_value(attribute, value)
-            )
+    async def on_update(value):
+        await attribute.process_without_display_update(cast_method(value))
 
-        async def async_write_display(value: T):
-            record.set(enum_value_to_index(attribute, value), process=False)
-
-    else:
-
-        async def on_update(value):
-            await attribute.process_without_display_update(value)
-
-        async def async_write_display(value: T):
-            record.set(value, process=False)
+    async def async_write_display(value: T):
+        record.set(cast_method(value), process=False)
 
     record = _get_output_record(
         f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
@@ -266,57 +264,89 @@ def _create_and_link_write_pv(
 
 
 def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
-    attribute_fields = {}
-    if attribute.description is not None:
-        attribute_fields.update({"DESC": attribute.description})
-    if attr_is_enum(attribute):
-        assert attribute.allowed_values is not None and all(
-            isinstance(v, str) for v in attribute.allowed_values
-        )
-        state_keys = dict(zip(MBB_STATE_FIELDS, attribute.allowed_values, strict=False))
-        return builder.mbbOut(
-            pv,
-            always_update=True,
-            on_update=on_update,
-            **state_keys,
-            **attribute_fields,
-        )
-
     match attribute.datatype:
         case Bool():
             record = builder.boolOut(
                 pv,
-                **datatype_to_epics_fields(attribute.datatype),
                 always_update=True,
                 on_update=on_update,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
             )
         case Int():
             record = builder.longOut(
                 pv,
                 always_update=True,
                 on_update=on_update,
-                **datatype_to_epics_fields(attribute.datatype),
-                **attribute_fields,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
             )
         case Float():
             record = builder.aOut(
                 pv,
                 always_update=True,
                 on_update=on_update,
-                **datatype_to_epics_fields(attribute.datatype),
-                **attribute_fields,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
             )
         case String():
             record = builder.longStringOut(
-                pv, always_update=True, on_update=on_update, **attribute_fields
+                pv,
+                always_update=True,
+                on_update=on_update,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
             )
+        case Enum(enum_cls=enum_cls):
+            members = list(enum_cls)
+            if len(members) > MBB_MAX_CHOICES:
+                if attribute.datatype.is_string_enum:
+                    replacement_record, replacement_str = (
+                        builder.longStringOut,
+                        "longStringOut",
+                    )
+                else:
+                    replacement_record, replacement_str = builder.longOut, "longOut"
+
+                warnings.warn(
+                    f"Received an enum datatype on attribute {attribute} "
+                    f"with more elements than the epics limit `{MBB_MAX_CHOICES}` "
+                    f"for mbbOut, will use a {replacement_str} record instead. "
+                    "To stop with warning use a different datatype with "
+                    "`allowed_values`",
+                    stacklevel=1,
+                )
+                record = replacement_record(
+                    pv,
+                    always_update=True,
+                    on_update=on_update,
+                    **get_record_metadata_from_datatype(attribute.datatype),
+                    **get_record_metadata_from_attribute(attribute),
+                )
+            else:
+                state_keys = dict(
+                    zip(
+                        MBB_STATE_FIELDS,
+                        [member.name for member in members],
+                        strict=False,
+                    )
+                )
+                record = builder.mbbOut(
+                    pv,
+                    **state_keys,
+                    always_update=True,
+                    on_update=on_update,
+                    **get_record_metadata_from_datatype(attribute.datatype),
+                    **get_record_metadata_from_attribute(attribute),
+                )
+
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
             )
 
     def datatype_updater(datatype: DataType):
-        for name, value in datatype_to_epics_fields(datatype).items():
+        for name, value in get_record_metadata_from_datatype(datatype).items():
             record.set_field(name, value)
 
     attribute.add_update_datatype_callback(datatype_updater)

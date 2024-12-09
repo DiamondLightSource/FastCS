@@ -29,11 +29,12 @@ class TestTangoDevice:
     def test_list_attributes(self, tango_context):
         assert list(tango_context.get_attribute_list()) == [
             "BigEnum",
+            "Enum",
             "ReadBool",
             "ReadInt",
+            "ReadString",
             "ReadWriteFloat",
             "ReadWriteInt",
-            "StringEnum",
             "WriteBool",
             "SubController01_ReadInt",
             "SubController02_ReadInt",
@@ -92,15 +93,21 @@ class TestTangoDevice:
         with assertable_controller.assert_write_here(["write_bool"]):
             tango_context.write_attribute("WriteBool", True)
 
-    def test_string_enum(self, assertable_controller, tango_context):
-        expect = ""
-        with assertable_controller.assert_read_here(["string_enum"]):
-            result = tango_context.read_attribute("StringEnum").value
+    def test_enum(self, assertable_controller, tango_context):
+        enum_attr = assertable_controller.attributes["enum"]
+        enum_cls = enum_attr.datatype.dtype
+        assert isinstance(enum_attr.get(), enum_cls)
+        assert enum_attr.get() == enum_cls(0)
+        expect = 0
+        with assertable_controller.assert_read_here(["enum"]):
+            result = tango_context.read_attribute("Enum").value
         assert result == expect
-        new = "new"
-        with assertable_controller.assert_write_here(["string_enum"]):
-            tango_context.write_attribute("StringEnum", new)
-        assert tango_context.read_attribute("StringEnum").value == new
+        new = 1
+        with assertable_controller.assert_write_here(["enum"]):
+            tango_context.write_attribute("Enum", new)
+        assert tango_context.read_attribute("Enum").value == new
+        assert isinstance(enum_attr.get(), enum_cls)
+        assert enum_attr.get() == enum_cls(1)
 
     def test_big_enum(self, assertable_controller, tango_context):
         expect = 0

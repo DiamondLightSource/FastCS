@@ -1,5 +1,8 @@
+from collections.abc import Callable
+from dataclasses import asdict
+
 from fastcs.attributes import Attribute
-from fastcs.datatypes import String, T
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
 
 _MBB_FIELD_PREFIXES = (
     "ZR",
@@ -25,75 +28,60 @@ MBB_VALUE_FIELDS = tuple(f"{p}VL" for p in _MBB_FIELD_PREFIXES)
 MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
-def attr_is_enum(attribute: Attribute) -> bool:
-    """Check if the `Attribute` has a `String` datatype and has `allowed_values` set.
+EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String)
 
-    Args:
-        attribute: The `Attribute` to check
+DATATYPE_FIELD_TO_RECORD_FIELD = {
+    "prec": "PREC",
+    "units": "EGU",
+    "min": "DRVL",
+    "max": "DRVH",
+    "min_alarm": "LOPR",
+    "max_alarm": "HOPR",
+    "znam": "ZNAM",
+    "onam": "ONAM",
+}
 
-    Returns:
-        `True` if `Attribute` is an enum, else `False`
 
-    """
-    match attribute:
-        case Attribute(datatype=String(), allowed_values=allowed_values) if (
-            allowed_values is not None and len(allowed_values) <= MBB_MAX_CHOICES
-        ):
-            return True
+def get_record_metadata_from_attribute(
+    attribute: Attribute[T],
+) -> dict[str, str | None]:
+    return {"DESC": attribute.description}
+
+
+def get_record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
+    return {
+        DATATYPE_FIELD_TO_RECORD_FIELD[field]: value
+        for field, value in asdict(datatype).items()
+        if field in DATATYPE_FIELD_TO_RECORD_FIELD
+    }
+
+
+def get_cast_method_to_epics_type(datatype: DataType[T]) -> Callable[[T], object]:
+    match datatype:
+        case Enum():
+
+            def cast_to_epics_type(value) -> str | int:
+                return datatype.validate(value).value
+        case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
+
+            def cast_to_epics_type(value) -> object:
+                return datatype.validate(value)
         case _:
-            return False
+            raise ValueError(f"Unsupported datatype {datatype}")
+    return cast_to_epics_type
 
 
-def enum_value_to_index(attribute: Attribute[T], value: T) -> int:
-    """Convert the given value to the index within the allowed_values of the Attribute
+def get_cast_method_from_epics_type(datatype: DataType[T]) -> Callable[[object], T]:
+    match datatype:
+        case Enum(enum_cls):
 
-    Args:
-        `attribute`: The attribute
-        `value`: The value to convert
+            def cast_from_epics_type(value: object) -> T:
+                return datatype.validate(enum_cls(value))
 
-    Returns:
-        The index of the `value`
+        case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
 
-    Raises:
-        ValueError: If `attribute` has no allowed values or `value` is not a valid
-            option
-
-    """
-    if attribute.allowed_values is None:
-        raise ValueError(
-            "Cannot convert value to index for Attribute without allowed values"
-        )
-
-    try:
-        return attribute.allowed_values.index(value)
-    except ValueError:
-        raise ValueError(
-            f"{value} not in allowed values of {attribute}: {attribute.allowed_values}"
-        ) from None
-
-
-def enum_index_to_value(attribute: Attribute[T], index: int) -> T:
-    """Lookup the value from the allowed_values of an attribute at the given index.
-
-    Parameters:
-        attribute: The `Attribute` to lookup the index from
-        index: The index of the value to retrieve
-
-    Returns:
-        The value at the specified index in the allowed values list.
-
-    Raises:
-        IndexError: If the index is out of bounds
-
-    """
-    if attribute.allowed_values is None:
-        raise ValueError(
-            "Cannot lookup value by index for Attribute without allowed values"
-        )
-
-    try:
-        return attribute.allowed_values[index]
-    except IndexError:
-        raise IndexError(
-            f"Invalid index {index} into allowed values: {attribute.allowed_values}"
-        ) from None
+            def cast_from_epics_type(value) -> T:
+                return datatype.validate(value)
+        case _:
+            raise ValueError(f"Unsupported datatype {datatype}")
+    return cast_from_epics_type

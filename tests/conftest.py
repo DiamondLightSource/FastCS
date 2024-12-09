@@ -1,4 +1,5 @@
 import copy
+import enum
 import os
 import random
 import signal
@@ -80,10 +81,12 @@ class TestController(Controller):
     read_write_float: AttrRW = AttrRW(Float())
     read_bool: AttrR = AttrR(Bool())
     write_bool: AttrW = AttrW(Bool(), handler=TestSender())
-    string_enum: AttrRW = AttrRW(String(), allowed_values=["red", "green", "blue"])
+    read_string: AttrRW = AttrRW(String())
+    enum: AttrRW = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
     big_enum: AttrR = AttrR(
-        Int(),
-        allowed_values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+        Int(
+            allowed_values=list(range(17)),
+        ),
     )
 
     initialised = False

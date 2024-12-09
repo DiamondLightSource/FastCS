@@ -51,16 +51,22 @@ class TestRestServer:
         with assertable_controller.assert_write_here(["write_bool"]):
             client.put("/write-bool", json={"value": True})
 
-    def test_string_enum(self, assertable_controller, client):
-        expect = ""
-        with assertable_controller.assert_read_here(["string_enum"]):
-            response = client.get("/string-enum")
+    def test_enum(self, assertable_controller, client):
+        enum_attr = assertable_controller.attributes["enum"]
+        enum_cls = enum_attr.datatype.dtype
+        assert isinstance(enum_attr.get(), enum_cls)
+        assert enum_attr.get() == enum_cls(0)
+        expect = 0
+        with assertable_controller.assert_read_here(["enum"]):
+            response = client.get("/enum")
         assert response.status_code == 200
         assert response.json()["value"] == expect
-        new = "new"
-        with assertable_controller.assert_write_here(["string_enum"]):
-            response = client.put("/string-enum", json={"value": new})
-        assert client.get("/string-enum").json()["value"] == new
+        new = 2
+        with assertable_controller.assert_write_here(["enum"]):
+            response = client.put("/enum", json={"value": new})
+        assert client.get("/enum").json()["value"] == new
+        assert isinstance(enum_attr.get(), enum_cls)
+        assert enum_attr.get() == enum_cls(2)
 
     def test_big_enum(self, assertable_controller, client):
         expect = 0

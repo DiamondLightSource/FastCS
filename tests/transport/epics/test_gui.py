@@ -53,11 +53,23 @@ def test_get_components(controller):
             ],
         ),
         SignalR(name="BigEnum", read_pv="DEVICE:BigEnum", read_widget=TextRead()),
+        SignalRW(
+            name="Enum",
+            read_pv="DEVICE:Enum_RBV",
+            read_widget=TextRead(format=TextFormat.string),
+            write_pv="DEVICE:Enum",
+            write_widget=ComboBox(choices=["RED", "GREEN", "BLUE"]),
+        ),
         SignalR(name="ReadBool", read_pv="DEVICE:ReadBool", read_widget=LED()),
         SignalR(
             name="ReadInt",
             read_pv="DEVICE:ReadInt",
             read_widget=TextRead(),
+        ),
+        SignalRW(
+            name="ReadString",
+            read_pv="DEVICE:ReadString_RBV",
+            write_pv="DEVICE:ReadString",
         ),
         SignalRW(
             name="ReadWriteFloat",
@@ -72,13 +84,6 @@ def test_get_components(controller):
             write_widget=TextWrite(),
             read_pv="DEVICE:ReadWriteInt_RBV",
             read_widget=TextRead(),
-        ),
-        SignalRW(
-            name="StringEnum",
-            read_pv="DEVICE:StringEnum_RBV",
-            read_widget=TextRead(format=TextFormat.string),
-            write_pv="DEVICE:StringEnum",
-            write_widget=ComboBox(choices=["red", "green", "blue"]),
         ),
         SignalW(
             name="WriteBool",
