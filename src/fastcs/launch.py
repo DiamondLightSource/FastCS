@@ -14,11 +14,12 @@ from .controller import Controller
 from .exceptions import LaunchError
 from .transport.adapter import TransportAdapter
 from .transport.epics.options import EpicsOptions
+from .transport.graphQL.options import GraphQLOptions
 from .transport.rest.options import RestOptions
 from .transport.tango.options import TangoOptions
 
 # Define a type alias for transport options
-TransportOptions: TypeAlias = EpicsOptions | TangoOptions | RestOptions
+TransportOptions: TypeAlias = EpicsOptions | TangoOptions | RestOptions | GraphQLOptions
 
 
 class FastCS:
@@ -36,6 +37,13 @@ class FastCS:
                 self._transport = EpicsTransport(
                     controller,
                     self._backend.dispatcher,
+                    transport_options,
+                )
+            case GraphQLOptions():
+                from .transport.graphQL.adapter import GraphQLTransport
+
+                self._transport = GraphQLTransport(
+                    controller,
                     transport_options,
                 )
             case TangoOptions():
