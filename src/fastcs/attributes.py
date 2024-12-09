@@ -53,17 +53,15 @@ class Attribute(Generic[T]):
         access_mode: AttrMode,
         group: str | None = None,
         handler: Any = None,
-        allowed_values: list[T] | None = None,
         description: str | None = None,
     ) -> None:
-        assert (
-            datatype.dtype in ATTRIBUTE_TYPES
+        assert issubclass(
+            datatype.dtype, ATTRIBUTE_TYPES
         ), f"Attr type must be one of {ATTRIBUTE_TYPES}, received type {datatype.dtype}"
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
         self._group = group
         self.enabled = True
-        self._allowed_values: list[T] | None = allowed_values
         self.description = description
 
         # A callback to use when setting the datatype to a different value, for example
@@ -85,10 +83,6 @@ class Attribute(Generic[T]):
     @property
     def group(self) -> str | None:
         return self._group
-
-    @property
-    def allowed_values(self) -> list[T] | None:
-        return self._allowed_values
 
     def add_update_datatype_callback(
         self, callback: Callable[[DataType[T]], None]
@@ -115,7 +109,6 @@ class AttrR(Attribute[T]):
         group: str | None = None,
         handler: Updater | None = None,
         initial_value: T | None = None,
-        allowed_values: list[T] | None = None,
         description: str | None = None,
     ) -> None:
         super().__init__(
@@ -123,7 +116,6 @@ class AttrR(Attribute[T]):
             access_mode,
             group,
             handler,
-            allowed_values=allowed_values,  # type: ignore
             description=description,
         )
         self._value: T = (
@@ -158,7 +150,6 @@ class AttrW(Attribute[T]):
         access_mode=AttrMode.WRITE,
         group: str | None = None,
         handler: Sender | None = None,
-        allowed_values: list[T] | None = None,
         description: str | None = None,
     ) -> None:
         super().__init__(
@@ -166,7 +157,6 @@ class AttrW(Attribute[T]):
             access_mode,
             group,
             handler,
-            allowed_values=allowed_values,  # type: ignore
             description=description,
         )
         self._process_callback: AttrCallback[T] | None = None
@@ -209,7 +199,6 @@ class AttrRW(AttrR[T], AttrW[T]):
         group: str | None = None,
         handler: Handler | None = None,
         initial_value: T | None = None,
-        allowed_values: list[T] | None = None,
         description: str | None = None,
     ) -> None:
         super().__init__(
@@ -218,7 +207,6 @@ class AttrRW(AttrR[T], AttrW[T]):
             group=group,
             handler=handler,
             initial_value=initial_value,
-            allowed_values=allowed_values,  # type: ignore
             description=description,
         )
 
