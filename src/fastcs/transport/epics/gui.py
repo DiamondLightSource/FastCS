@@ -1,3 +1,5 @@
+import enum
+
 from pvi._format.dls import DLSFormatter
 from pvi.device import (
     LED,
@@ -25,7 +27,7 @@ from pydantic import ValidationError
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SingleMapping, _get_single_mapping
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.datatypes import Bool, Enum, Float, Int, String
 from fastcs.exceptions import FastCSException
 from fastcs.util import snake_to_pascal
 
@@ -50,17 +52,13 @@ class EpicsGUI:
                 return TextRead()
             case String():
                 return TextRead(format=TextFormat.string)
+            case Enum():
+                return TextRead(format=TextFormat.string)
             case datatype:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     @staticmethod
     def _get_write_widget(attribute: AttrW) -> WriteWidgetUnion:
-        match attribute.allowed_values:
-            case allowed_values if allowed_values is not None:
-                return ComboBox(choices=allowed_values)
-            case _:
-                pass
-
         match attribute.datatype:
             case Bool():
                 return ToggleButton()
@@ -68,6 +66,18 @@ class EpicsGUI:
                 return TextWrite()
             case String():
                 return TextWrite(format=TextFormat.string)
+            case Enum(enum_cls=enum_cls):
+                match enum_cls:
+                    case enum_cls if issubclass(enum_cls, enum.Enum):
+                        return ComboBox(
+                            choices=[
+                                member.name for member in attribute.datatype.members
+                            ]
+                        )
+                    case _:
+                        raise FastCSException(
+                            f"Unsupported Enum type {type(enum_cls)}: {enum_cls}"
+                        )
             case datatype:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 

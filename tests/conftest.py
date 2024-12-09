@@ -1,4 +1,5 @@
 import copy
+import enum
 import os
 import random
 import string
@@ -14,7 +15,7 @@ from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
 from fastcs.controller import Controller, SubController
-from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.datatypes import Bool, Enum, Float, Int, String
 from fastcs.wrappers import command, scan
 
 DATA_PATH = Path(__file__).parent / "data"
@@ -78,10 +79,12 @@ class TestController(Controller):
     read_write_float: AttrRW = AttrRW(Float())
     read_bool: AttrR = AttrR(Bool())
     write_bool: AttrW = AttrW(Bool(), handler=TestSender())
-    string_enum: AttrRW = AttrRW(String(), allowed_values=["red", "green", "blue"])
+    read_string: AttrRW = AttrRW(String())
+    enum: AttrRW = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
     big_enum: AttrR = AttrR(
-        Int(),
-        allowed_values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+        Int(
+            allowed_values=list(range(17)),
+        ),
     )
 
     initialised = False
