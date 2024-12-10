@@ -41,6 +41,19 @@ class Handler(Sender, Updater, Protocol):
     pass
 
 
+class SimpleHandler(Handler):
+    """Handler for internal parameters"""
+
+    async def put(self, controller: Any, attr: AttrW, value: Any):
+        await attr.update_display_without_process(value)
+
+        if isinstance(attr, AttrRW):
+            await attr.set(value)
+
+    async def update(self, controller: Any, attr: AttrR):
+        raise RuntimeError("SimpleHandler cannot update")
+
+
 class Attribute(Generic[T]):
     """Base FastCS attribute.
 
@@ -171,7 +184,11 @@ class AttrW(Attribute[T]):
         )
         self._process_callback: AttrCallback[T] | None = None
         self._write_display_callback: AttrCallback[T] | None = None
-        self._sender = handler
+
+        if handler is not None:
+            self._sender = handler
+        else:
+            self._sender = SimpleHandler()
 
     async def process(self, value: T) -> None:
         await self.process_without_display_update(value)
@@ -195,7 +212,7 @@ class AttrW(Attribute[T]):
         self._write_display_callback = callback
 
     @property
-    def sender(self) -> Sender | None:
+    def sender(self) -> Sender:
         return self._sender
 
 
