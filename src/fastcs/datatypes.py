@@ -3,11 +3,11 @@ from __future__ import annotations
 import enum
 from abc import abstractmethod
 from collections.abc import Awaitable, Callable
-from dataclasses import MISSING, dataclass, field
+from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Generic, TypeVar
 
-T = TypeVar("T", int, float, bool, str, enum.Enum)
+T = TypeVar("T", int, float, bool, str, enum.IntEnum)
 
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
@@ -115,35 +115,31 @@ class String(DataType[str]):
         return str
 
 
-T_Enum = TypeVar("T_Enum", bound=enum.Enum)
+T_Enum = TypeVar("T_Enum", bound=enum.IntEnum)
 
 
 @dataclass(frozen=True)
-class Enum(DataType[enum.Enum]):
-    enum_cls: type[enum.Enum]
+class Enum(DataType[enum.IntEnum]):
+    enum_cls: type[enum.IntEnum]
 
     @cached_property
     def is_string_enum(self) -> bool:
         return all(isinstance(member.value, str) for member in self.members)
 
-    @cached_property
-    def is_int_enum(self) -> bool:
-        return all(isinstance(member.value, int) for member in self.members)
-
     def __post_init__(self):
-        if not issubclass(self.enum_cls, enum.Enum):
-            raise ValueError("Enum class has to take an enum.")
-        if not (self.is_string_enum or self.is_int_enum):
-            raise ValueError("All enum values must be of type str or int.")
+        if not issubclass(self.enum_cls, enum.IntEnum):
+            raise ValueError("Enum class has to take an IntEnum.")
+        if {member.value for member in self.members} != set(range(len(self.members))):
+            raise ValueError("Enum values must be contiguous.")
 
     @cached_property
-    def members(self) -> list[enum.Enum]:
+    def members(self) -> list[enum.IntEnum]:
         return list(self.enum_cls)
 
     @property
-    def dtype(self) -> type[enum.Enum]:
+    def dtype(self) -> type[enum.IntEnum]:
         return self.enum_cls
 
     @property
-    def initial_value(self) -> enum.Enum:
+    def initial_value(self) -> enum.IntEnum:
         return self.members[0]

@@ -22,8 +22,8 @@ from fastcs.transport.epics.ioc import (
 )
 from fastcs.transport.epics.util import (
     MBB_STATE_FIELDS,
-    get_record_metadata_from_datatype,
     get_record_metadata_from_attribute,
+    get_record_metadata_from_datatype,
 )
 
 DEVICE = "DEVICE"
@@ -31,14 +31,14 @@ DEVICE = "DEVICE"
 SEVENTEEN_VALUES = [str(i) for i in range(1, 18)]
 
 
-class OnOffStates(enum.Enum):
-    DISABLED = "disabled"
-    ENABLED = "enabled"
+class OnOffStates(enum.IntEnum):
+    DISABLED = 0
+    ENABLED = 1
 
 
-def record_input_from_enum(enum_cls: type[enum.Enum]) -> dict[str, str]:
+def record_input_from_enum(enum_cls: type[enum.IntEnum]) -> dict[str, str]:
     return dict(
-        zip(MBB_STATE_FIELDS, [member.value for member in enum_cls], strict=False)
+        zip(MBB_STATE_FIELDS, [member.name for member in enum_cls], strict=False)
     )
 
 
@@ -64,10 +64,10 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
     record.set.assert_called_once_with(1)
 
 
-class StringEnum(enum.Enum):
-    RED = "RED"
-    GREEN = "GREEN"
-    BLUE = "BLUE"
+class ColourEnum(enum.IntEnum):
+    RED = 0
+    GREEN = 1
+    BLUE = 2
 
 
 @pytest.mark.parametrize(
@@ -75,17 +75,17 @@ class StringEnum(enum.Enum):
     (
         (AttrR(String()), "longStringIn", {}),
         (
-            AttrR(String(allowed_values=[member.value for member in StringEnum])),
+            AttrR(String(allowed_values=[member.name for member in list(ColourEnum)])),
             "longStringIn",
             {},
         ),
         (
-            AttrR(Enum(StringEnum)),
+            AttrR(Enum(ColourEnum)),
             "mbbIn",
             {"ZRST": "RED", "ONST": "GREEN", "TWST": "BLUE"},
         ),
         (
-            AttrR(Enum(enum.Enum("ONOFF_STATES", {"DISABLED": 0, "ENABLED": 1}))),
+            AttrR(Enum(enum.IntEnum("ONOFF_STATES", {"DISABLED": 0, "ENABLED": 1}))),
             "mbbIn",
             {"ZRST": "DISABLED", "ONST": "ENABLED"},
         ),
@@ -151,7 +151,7 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
     "attribute,record_type,kwargs",
     (
         (
-            AttrR(Enum(enum.Enum("ONOFF_STATES", {"DISABLED": 0, "ENABLED": 1}))),
+            AttrR(Enum(enum.IntEnum("ONOFF_STATES", {"DISABLED": 0, "ENABLED": 1}))),
             "mbbOut",
             {"ZRST": "DISABLED", "ONST": "ENABLED"},
         ),

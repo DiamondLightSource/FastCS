@@ -10,14 +10,17 @@ from fastcs.controller import BaseController
 from fastcs.datatypes import Float
 
 from .options import TangoDSROptions
+from .util import get_cast_method_from_tango_type, get_cast_method_to_tango_type
 
 
 def _wrap_updater_fget(
     attr_name: str, attribute: AttrR, controller: BaseController
 ) -> Callable[[Any], Any]:
+    cast_method = get_cast_method_to_tango_type(attribute.datatype)
+
     async def fget(tango_device: Device):
         tango_device.info_stream(f"called fget method: {attr_name}")
-        return attribute.get()
+        return cast_method(attribute.get())
 
     return fget
 
@@ -33,9 +36,11 @@ def _tango_display_format(attribute: Attribute) -> str:
 def _wrap_updater_fset(
     attr_name: str, attribute: AttrW, controller: BaseController
 ) -> Callable[[Any, Any], Any]:
+    cast_method = get_cast_method_from_tango_type(attribute.datatype)
+
     async def fset(tango_device: Device, val):
         tango_device.info_stream(f"called fset method: {attr_name}")
-        await attribute.process(val)
+        await attribute.process(cast_method(val))
 
     return fset
 
@@ -179,10 +184,7 @@ class TangoDSR:
 
 def register_dev(dev_name: str, dev_class: str, dsr_instance: str) -> None:
     dsr_name = f"{dev_class}/{dsr_instance}"
-    dev_info = DbDevInfo()
-    dev_info.name = dev_name
-    dev_info._class = dev_class  # noqa
-    dev_info.server = dsr_name
+    dev_info = DbDevInfo(dev_name, dev_class, dsr_name)
 
     db = Database()
     db.delete_device(dev_name)  # Remove existing device entry
