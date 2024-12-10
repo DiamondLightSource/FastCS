@@ -1,8 +1,8 @@
 from collections.abc import Callable
 
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, WaveForm, T
 
-TANGO_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String)
+TANGO_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, WaveForm)
 
 
 def get_cast_method_to_tango_type(datatype: DataType[T]) -> Callable[[T], object]:
