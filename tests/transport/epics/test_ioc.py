@@ -1,13 +1,14 @@
 import enum
 from typing import Any
 
+import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Enum, Int, String
+from fastcs.datatypes import Enum, Int, String, WaveForm
 from fastcs.exceptions import FastCSException
 from fastcs.transport.epics.ioc import (
     EPICS_MAX_NAME_LENGTH,
@@ -89,6 +90,8 @@ class ColourEnum(enum.IntEnum):
             "mbbIn",
             {"ZRST": "DISABLED", "ONST": "ENABLED"},
         ),
+        (AttrR(WaveForm(np.int32, (10,))), "WaveformIn", {}),
+        (AttrR(WaveForm(np.int32, (10, 10))), "WaveformIn", {}),
     ),
 )
 def test_get_input_record(

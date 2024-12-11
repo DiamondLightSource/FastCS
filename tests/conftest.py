@@ -9,13 +9,14 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Literal
 
+import numpy as np
 import pytest
 from aioca import purge_channel_caches
 from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
 from fastcs.controller import Controller, SubController
-from fastcs.datatypes import Bool, Enum, Float, Int, String
+from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
 from fastcs.wrappers import command, scan
 
 DATA_PATH = Path(__file__).parent / "data"
@@ -81,6 +82,8 @@ class TestController(Controller):
     write_bool: AttrW = AttrW(Bool(), handler=TestSender())
     read_string: AttrRW = AttrRW(String())
     enum: AttrRW = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
+    one_d_waveform: AttrRW = AttrRW(WaveForm(np.int32, (10,)))
+    two_d_waveform: AttrRW = AttrRW(WaveForm(np.int32, (10, 10)))
     big_enum: AttrR = AttrR(
         Int(
             allowed_values=list(range(17)),
@@ -147,7 +150,9 @@ class AssertableController(TestController):
         initial = spy.call_count
         try:
             yield  # Enter context
-        finally:  # Exit context
+        except Exception as e:
+            raise e
+        else:  # Exit context
             final = spy.call_count
             assert final == initial + 1, (
                 f"Expected {'.'.join(path + [method] if method else path)} "
