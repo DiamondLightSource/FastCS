@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
@@ -74,6 +75,43 @@ class TestRestServer:
             response = client.get("/big-enum")
         assert response.status_code == 200
         assert response.json()["value"] == expect
+
+    def test_1d_waveform(self, assertable_controller, client):
+        attribute = assertable_controller.attributes["one_d_waveform"]
+        expect = np.zeros((10,), dtype=np.int32)
+        assert np.array_equal(attribute.get(), expect)
+        assert isinstance(attribute.get(), np.ndarray)
+
+        with assertable_controller.assert_read_here(["one_d_waveform"]):
+            response = client.get("one-d-waveform")
+        assert np.array_equal(response.json()["value"], expect)
+        new = [1, 2, 3]
+        with assertable_controller.assert_write_here(["one_d_waveform"]):
+            client.put("/one-d-waveform", json={"value": new})
+        assert np.array_equal(client.get("/one-d-waveform").json()["value"], new)
+
+        result = client.get("/one-d-waveform")
+        assert np.array_equal(result.json()["value"], new)
+        assert np.array_equal(attribute.get(), new)
+        assert isinstance(attribute.get(), np.ndarray)
+
+    def test_2d_waveform(self, assertable_controller, client):
+        attribute = assertable_controller.attributes["two_d_waveform"]
+        expect = np.zeros((10, 10), dtype=np.int32)
+        assert np.array_equal(attribute.get(), expect)
+        assert isinstance(attribute.get(), np.ndarray)
+
+        with assertable_controller.assert_read_here(["two_d_waveform"]):
+            result = client.get("/two-d-waveform")
+        assert np.array_equal(result.json()["value"], expect)
+        new = [[1, 2, 3], [4, 5, 6]]
+        with assertable_controller.assert_write_here(["two_d_waveform"]):
+            client.put("/two-d-waveform", json={"value": new})
+
+        result = client.get("/two-d-waveform")
+        assert np.array_equal(result.json()["value"], new)
+        assert np.array_equal(attribute.get(), new)
+        assert isinstance(attribute.get(), np.ndarray)
 
     def test_go(self, assertable_controller, client):
         with assertable_controller.assert_execute_here(["go"]):

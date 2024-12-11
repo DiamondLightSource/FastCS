@@ -9,6 +9,11 @@ from fastcs.attributes import AttrR, AttrRW, AttrW, T
 from fastcs.controller import BaseController, Controller
 
 from .options import RestServerOptions
+from .util import (
+    convert_datatype,
+    get_cast_method_from_rest_type,
+    get_cast_method_to_rest_type,
+)
 
 
 class RestServer:
@@ -41,19 +46,22 @@ def _put_request_body(attribute: AttrW[T]):
     Creates a pydantic model for each datatype which defines the schema
     of the PUT request body
     """
+    converted_datatype = convert_datatype(attribute.datatype)
     type_name = str(attribute.datatype.dtype.__name__).title()
     # key=(type, ...) to declare a field without default value
     return create_model(
         f"Put{type_name}Value",
-        value=(attribute.datatype.dtype, ...),
+        value=(converted_datatype, ...),
     )
 
 
 def _wrap_attr_put(
     attribute: AttrW[T],
 ) -> Callable[[T], Coroutine[Any, Any, None]]:
+    cast_method = get_cast_method_from_rest_type(attribute.datatype)
+
     async def attr_set(request):
-        await attribute.process(request.value)
+        await attribute.process(cast_method(request.value))
 
     # Fast api uses type annotations for validation, schema, conversions
     attr_set.__annotations__["request"] = _put_request_body(attribute)
@@ -66,20 +74,23 @@ def _get_response_body(attribute: AttrR[T]):
     Creates a pydantic model for each datatype which defines the schema
     of the GET request body
     """
-    type_name = str(attribute.datatype.dtype.__name__).title()
+    converted_datatype = convert_datatype(attribute.datatype)
+    type_name = str(converted_datatype.__name__).title()
     # key=(type, ...) to declare a field without default value
     return create_model(
         f"Get{type_name}Value",
-        value=(attribute.datatype.dtype, ...),
+        value=(converted_datatype, ...),
     )
 
 
 def _wrap_attr_get(
     attribute: AttrR[T],
 ) -> Callable[[], Coroutine[Any, Any, Any]]:
+    cast_method = get_cast_method_to_rest_type(attribute.datatype)
+
     async def attr_get() -> Any:  # Must be any as response_model is set
         value = attribute.get()  # type: ignore
-        return {"value": value}
+        return {"value": cast_method(value)}
 
     return attr_get
 

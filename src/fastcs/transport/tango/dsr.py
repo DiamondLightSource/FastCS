@@ -6,12 +6,16 @@ import tango
 from tango import AttrWriteType, Database, DbDevInfo, DevState, server
 from tango.server import Device
 
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController
-from fastcs.datatypes import Float
 
 from .options import TangoDSROptions
-from .util import get_cast_method_from_tango_type, get_cast_method_to_tango_type
+from .util import (
+    get_cast_method_from_tango_type,
+    get_cast_method_to_tango_type,
+    get_server_metadata_from_attribute,
+    get_server_metadata_from_datatype,
+)
 
 
 def _wrap_updater_fget(
@@ -78,7 +82,6 @@ def _collect_dev_attributes(
                 case AttrRW():
                     collection[d_attr_name] = server.attribute(
                         label=d_attr_name,
-                        dtype=attribute.datatype.dtype,
                         fget=_wrap_updater_fget(
                             attr_name, attribute, single_mapping.controller
                         ),
@@ -86,27 +89,28 @@ def _collect_dev_attributes(
                             attr_name, attribute, single_mapping.controller, loop
                         ),
                         access=AttrWriteType.READ_WRITE,
-                        format=_tango_display_format(attribute),
+                        **get_server_metadata_from_attribute(attribute),
+                        **get_server_metadata_from_datatype(attribute.datatype),
                     )
                 case AttrR():
                     collection[d_attr_name] = server.attribute(
                         label=d_attr_name,
-                        dtype=attribute.datatype.dtype,
                         access=AttrWriteType.READ,
                         fget=_wrap_updater_fget(
                             attr_name, attribute, single_mapping.controller
                         ),
-                        format=_tango_display_format(attribute),
+                        **get_server_metadata_from_attribute(attribute),
+                        **get_server_metadata_from_datatype(attribute.datatype),
                     )
                 case AttrW():
                     collection[d_attr_name] = server.attribute(
                         label=d_attr_name,
-                        dtype=attribute.datatype.dtype,
                         access=AttrWriteType.WRITE,
                         fset=_wrap_updater_fset(
                             attr_name, attribute, single_mapping.controller, loop
                         ),
-                        format=_tango_display_format(attribute),
+                        **get_server_metadata_from_attribute(attribute),
+                        **get_server_metadata_from_datatype(attribute.datatype),
                     )
 
     return collection

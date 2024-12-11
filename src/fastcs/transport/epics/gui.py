@@ -1,4 +1,3 @@
-import enum
 
 from pvi._format.dls import DLSFormatter
 from pvi.device import (
@@ -27,7 +26,7 @@ from pydantic import ValidationError
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SingleMapping, _get_single_mapping
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Bool, Enum, Float, Int, String
+from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
 from fastcs.exceptions import FastCSException
 from fastcs.util import snake_to_pascal
 
@@ -44,7 +43,7 @@ class EpicsGUI:
         return f"{attr_prefix}:{name.title().replace('_', '')}"
 
     @staticmethod
-    def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion:
+    def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion | None:
         match attribute.datatype:
             case Bool():
                 return LED()
@@ -54,11 +53,13 @@ class EpicsGUI:
                 return TextRead(format=TextFormat.string)
             case Enum():
                 return TextRead(format=TextFormat.string)
+            case WaveForm():
+                return None
             case datatype:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     @staticmethod
-    def _get_write_widget(attribute: AttrW) -> WriteWidgetUnion:
+    def _get_write_widget(attribute: AttrW) -> WriteWidgetUnion | None:
         match attribute.datatype:
             case Bool():
                 return ToggleButton()
@@ -66,24 +67,18 @@ class EpicsGUI:
                 return TextWrite()
             case String():
                 return TextWrite(format=TextFormat.string)
-            case Enum(enum_cls=enum_cls):
-                match enum_cls:
-                    case enum_cls if issubclass(enum_cls, enum.Enum):
-                        return ComboBox(
-                            choices=[
-                                member.name for member in attribute.datatype.members
-                            ]
-                        )
-                    case _:
-                        raise FastCSException(
-                            f"Unsupported Enum type {type(enum_cls)}: {enum_cls}"
-                        )
+            case Enum():
+                return ComboBox(
+                    choices=[member.name for member in attribute.datatype.members]
+                )
+            case WaveForm():
+                return None
             case datatype:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
     def _get_attribute_component(
         self, attr_path: list[str], name: str, attribute: Attribute
-    ) -> SignalR | SignalW | SignalRW:
+    ) -> SignalR | SignalW | SignalRW | None:
         pv = self._get_pv(attr_path, name)
         name = name.title().replace("_", "")
 
@@ -91,6 +86,8 @@ class EpicsGUI:
             case AttrRW():
                 read_widget = self._get_read_widget(attribute)
                 write_widget = self._get_write_widget(attribute)
+                if write_widget is None or write_widget is None:
+                    return None
                 return SignalRW(
                     name=name,
                     write_pv=pv,
@@ -100,9 +97,13 @@ class EpicsGUI:
                 )
             case AttrR():
                 read_widget = self._get_read_widget(attribute)
+                if read_widget is None:
+                    return None
                 return SignalR(name=name, read_pv=pv, read_widget=read_widget)
             case AttrW():
                 write_widget = self._get_write_widget(attribute)
+                if write_widget is None:
+                    return None
                 return SignalW(name=name, write_pv=pv, write_widget=write_widget)
             case _:
                 raise FastCSException(f"Unsupported attribute type: {type(attribute)}")
@@ -160,6 +161,9 @@ class EpicsGUI:
                 )
             except ValidationError as e:
                 print(f"Invalid name:\n{e}")
+                continue
+
+            if signal is None:
                 continue
 
             match attribute:

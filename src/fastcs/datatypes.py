@@ -7,7 +7,9 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Generic, TypeVar
 
-T = TypeVar("T", int, float, bool, str, enum.IntEnum)
+import numpy as np
+
+T = TypeVar("T", int, float, bool, str, enum.IntEnum, np.ndarray)
 
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
@@ -44,8 +46,9 @@ class DataType(Generic[T]):
         return value
 
     @property
+    @abstractmethod
     def initial_value(self) -> T:
-        return self.dtype()
+        pass
 
 
 T_Numerical = TypeVar("T_Numerical", int, float)
@@ -66,6 +69,10 @@ class _Numerical(DataType[T_Numerical]):
         if self.max is not None and value > self.max:
             raise ValueError(f"Value {value} is greater than maximum {self.max}")
         return value
+
+    @property
+    def initial_value(self) -> T_Numerical:
+        return self.dtype(0)
 
 
 @dataclass(frozen=True)
@@ -103,6 +110,10 @@ class Bool(DataType[bool]):
     def dtype(self) -> type[bool]:
         return bool
 
+    @property
+    def initial_value(self) -> bool:
+        return False
+
 
 @dataclass(frozen=True)
 class String(DataType[str]):
@@ -113,6 +124,10 @@ class String(DataType[str]):
     @property
     def dtype(self) -> type[str]:
         return str
+
+    @property
+    def initial_value(self) -> str:
+        return ""
 
 
 T_Enum = TypeVar("T_Enum", bound=enum.IntEnum)
@@ -143,3 +158,34 @@ class Enum(DataType[enum.IntEnum]):
     @property
     def initial_value(self) -> enum.IntEnum:
         return self.members[0]
+
+
+@dataclass(frozen=True)
+class WaveForm(DataType[np.ndarray]):
+    array_dtype: np.typing.DTypeLike
+    shape: tuple[int, ...] = (2000,)
+
+    @property
+    def dtype(self) -> type[np.ndarray]:
+        return np.ndarray
+
+    @property
+    def initial_value(self) -> np.ndarray:
+        return np.zeros(self.shape, dtype=self.array_dtype)
+
+    def validate(self, value: np.ndarray) -> np.ndarray:
+        super().validate(value)
+        if self.array_dtype != value.dtype:
+            raise ValueError(
+                f"Value dtype {value.dtype} is not the same as the array dtype "
+                f"{self.array_dtype}"
+            )
+        if len(self.shape) != len(value.shape) or any(
+            shape1 > shape2
+            for shape1, shape2 in zip(value.shape, self.shape, strict=True)
+        ):
+            raise ValueError(
+                f"Value shape {value.shape} exceeeds the shape maximum shape "
+                f"{self.shape}"
+            )
+        return value

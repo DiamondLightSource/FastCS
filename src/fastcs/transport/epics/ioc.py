@@ -10,7 +10,7 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController, Controller
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, WaveForm
 from fastcs.exceptions import FastCSException
 from fastcs.transport.epics.util import (
     MBB_MAX_CHOICES,
@@ -195,41 +195,30 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
             )
         case Enum():
             if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                if attribute.datatype.is_string_enum:
-                    replacement_record, replacement_str = (
-                        builder.longStringIn,
-                        "longStringIn",
-                    )
-                else:
-                    replacement_record, replacement_str = builder.longIn, "longIn"
-
-                warnings.warn(
-                    f"Received an enum datatype on attribute {attribute} "
+                raise RuntimeError(
+                    f"Received an `Enum` datatype on attribute {attribute} "
                     f"with more elements than the epics limit `{MBB_MAX_CHOICES}` "
-                    f"for mbbIn, will use a {replacement_str} record instead. "
-                    "To stop with warning use a different datatype with "
-                    "`allowed_values`",
-                    stacklevel=1,
+                    f"for `mbbIn`. Use an `Int or `String with `allowed_values`."
                 )
-                record = replacement_record(
-                    pv,
-                    **get_record_metadata_from_datatype(attribute.datatype),
-                    **get_record_metadata_from_attribute(attribute),
+            state_keys = dict(
+                zip(
+                    MBB_STATE_FIELDS,
+                    [member.name for member in attribute.datatype.members],
+                    strict=False,
                 )
-            else:
-                state_keys = dict(
-                    zip(
-                        MBB_STATE_FIELDS,
-                        [member.name for member in attribute.datatype.members],
-                        strict=False,
-                    )
-                )
-                record = builder.mbbIn(
-                    pv,
-                    **state_keys,
-                    **get_record_metadata_from_datatype(attribute.datatype),
-                    **get_record_metadata_from_attribute(attribute),
-                )
+            )
+            record = builder.mbbIn(
+                pv,
+                **state_keys,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
+            )
+        case WaveForm():
+            record = builder.WaveformIn(
+                pv,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
+            )
         case _:
             raise FastCSException(
                 f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
@@ -297,48 +286,37 @@ def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
                 **get_record_metadata_from_datatype(attribute.datatype),
                 **get_record_metadata_from_attribute(attribute),
             )
-        case Enum(enum_cls=enum_cls):
-            members = list(enum_cls)
-            if len(members) > MBB_MAX_CHOICES:
-                if attribute.datatype.is_string_enum:
-                    replacement_record, replacement_str = (
-                        builder.longStringOut,
-                        "longStringOut",
-                    )
-                else:
-                    replacement_record, replacement_str = builder.longOut, "longOut"
-
-                warnings.warn(
-                    f"Received an enum datatype on attribute {attribute} "
+        case Enum():
+            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
+                raise RuntimeError(
+                    f"Received an `Enum` datatype on attribute {attribute} "
                     f"with more elements than the epics limit `{MBB_MAX_CHOICES}` "
-                    f"for mbbOut, will use a {replacement_str} record instead. "
-                    "To stop with warning use a different datatype with "
-                    "`allowed_values`",
-                    stacklevel=1,
+                    f"for `mbbOut`. Use an `Int or `String with `allowed_values`."
                 )
-                record = replacement_record(
-                    pv,
-                    always_update=True,
-                    on_update=on_update,
-                    **get_record_metadata_from_datatype(attribute.datatype),
-                    **get_record_metadata_from_attribute(attribute),
+
+            state_keys = dict(
+                zip(
+                    MBB_STATE_FIELDS,
+                    [member.name for member in attribute.datatype.members],
+                    strict=False,
                 )
-            else:
-                state_keys = dict(
-                    zip(
-                        MBB_STATE_FIELDS,
-                        [member.name for member in members],
-                        strict=False,
-                    )
-                )
-                record = builder.mbbOut(
-                    pv,
-                    **state_keys,
-                    always_update=True,
-                    on_update=on_update,
-                    **get_record_metadata_from_datatype(attribute.datatype),
-                    **get_record_metadata_from_attribute(attribute),
-                )
+            )
+            record = builder.mbbOut(
+                pv,
+                **state_keys,
+                always_update=True,
+                on_update=on_update,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
+            )
+        case WaveForm():
+            record = builder.WaveformOut(
+                pv,
+                always_update=True,
+                on_update=on_update,
+                **get_record_metadata_from_datatype(attribute.datatype),
+                **get_record_metadata_from_attribute(attribute),
+            )
 
         case _:
             raise FastCSException(

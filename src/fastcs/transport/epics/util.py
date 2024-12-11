@@ -2,7 +2,7 @@ from collections.abc import Callable
 from dataclasses import asdict
 
 from fastcs.attributes import Attribute
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, WaveForm
 
 _MBB_FIELD_PREFIXES = (
     "ZR",
@@ -28,7 +28,7 @@ MBB_VALUE_FIELDS = tuple(f"{p}VL" for p in _MBB_FIELD_PREFIXES)
 MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
-EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String)
+EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, WaveForm)
 
 DATATYPE_FIELD_TO_RECORD_FIELD = {
     "prec": "PREC",
@@ -39,6 +39,7 @@ DATATYPE_FIELD_TO_RECORD_FIELD = {
     "max_alarm": "HOPR",
     "znam": "ZNAM",
     "onam": "ONAM",
+    "shape": "length",
 }
 
 
