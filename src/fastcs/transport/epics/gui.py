@@ -1,4 +1,3 @@
-
 from pvi._format.dls import DLSFormatter
 from pvi.device import (
     LED,

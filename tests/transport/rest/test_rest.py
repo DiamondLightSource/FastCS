@@ -1,8 +1,41 @@
+import enum
+
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
+from pytest_mock import MockerFixture
+from tests.assertable_controller import (
+    AssertableController,
+    TestHandler,
+    TestSender,
+    TestUpdater,
+)
 
+from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
 from fastcs.transport.rest.adapter import RestTransport
+
+
+class RestAssertableController(AssertableController):
+    read_int = AttrR(Int(), handler=TestUpdater())
+    read_write_int = AttrRW(Int(), handler=TestHandler())
+    read_write_float = AttrRW(Float())
+    read_bool = AttrR(Bool())
+    write_bool = AttrW(Bool(), handler=TestSender())
+    read_string = AttrRW(String())
+    enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
+    one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
+    two_d_waveform = AttrRW(WaveForm(np.int32, (10, 10)))
+    big_enum = AttrR(
+        Int(
+            allowed_values=list(range(17)),
+        ),
+    )
+
+
+@pytest.fixture(scope="class")
+def assertable_controller(class_mocker: MockerFixture):
+    return RestAssertableController(class_mocker)
 
 
 class TestRestServer:
@@ -11,13 +44,6 @@ class TestRestServer:
         app = RestTransport(assertable_controller)._server._app
         with TestClient(app) as client:
             yield client
-
-    def test_read_int(self, assertable_controller, client):
-        expect = 0
-        with assertable_controller.assert_read_here(["read_int"]):
-            response = client.get("/read-int")
-        assert response.status_code == 200
-        assert response.json()["value"] == expect
 
     def test_read_write_int(self, assertable_controller, client):
         expect = 0
@@ -29,6 +55,13 @@ class TestRestServer:
         with assertable_controller.assert_write_here(["read_write_int"]):
             response = client.put("/read-write-int", json={"value": new})
         assert client.get("/read-write-int").json()["value"] == new
+
+    def test_read_int(self, assertable_controller, client):
+        expect = 0
+        with assertable_controller.assert_read_here(["read_int"]):
+            response = client.get("/read-int")
+        assert response.status_code == 200
+        assert response.json()["value"] == expect
 
     def test_read_write_float(self, assertable_controller, client):
         expect = 0

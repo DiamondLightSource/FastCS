@@ -4,11 +4,17 @@ from typing import Any
 import numpy as np
 import pytest
 from pytest_mock import MockerFixture
+from tests.assertable_controller import (
+    AssertableController,
+    TestHandler,
+    TestSender,
+    TestUpdater,
+)
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Enum, Int, String, WaveForm
+from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
 from fastcs.exceptions import FastCSException
 from fastcs.transport.epics.ioc import (
     EPICS_MAX_NAME_LENGTH,
@@ -91,7 +97,6 @@ class ColourEnum(enum.IntEnum):
             {"ZRST": "DISABLED", "ONST": "ENABLED"},
         ),
         (AttrR(WaveForm(np.int32, (10,))), "WaveformIn", {}),
-        (AttrR(WaveForm(np.int32, (10, 10))), "WaveformIn", {}),
     ),
 )
 def test_get_input_record(
@@ -187,6 +192,27 @@ def test_get_output_record_raises(mocker: MockerFixture):
     # Pass a mock as attribute to provoke the fallback case matching on datatype
     with pytest.raises(FastCSException):
         _get_output_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
+
+
+class EpicsAssertableController(AssertableController):
+    read_int = AttrR(Int(), handler=TestUpdater())
+    read_write_int = AttrRW(Int(), handler=TestHandler())
+    read_write_float = AttrRW(Float())
+    read_bool = AttrR(Bool())
+    write_bool = AttrW(Bool(), handler=TestSender())
+    read_string = AttrRW(String())
+    enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
+    one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
+    big_enum = AttrR(
+        Int(
+            allowed_values=list(range(17)),
+        ),
+    )
+
+
+@pytest.fixture()
+def controller(class_mocker: MockerFixture):
+    return EpicsAssertableController(class_mocker)
 
 
 def test_ioc(mocker: MockerFixture, controller: Controller):
