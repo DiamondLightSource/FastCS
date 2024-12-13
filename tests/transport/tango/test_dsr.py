@@ -1,9 +1,42 @@
+import enum
+
 import numpy as np
 import pytest
+from pytest_mock import MockerFixture
 from tango import DevState
 from tango.test_context import DeviceTestContext
+from tests.assertable_controller import (
+    AssertableController,
+    TestHandler,
+    TestSender,
+    TestUpdater,
+)
 
+from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
 from fastcs.transport.tango.adapter import TangoTransport
+
+
+class TangoAssertableController(AssertableController):
+    read_int = AttrR(Int(), handler=TestUpdater())
+    read_write_int = AttrRW(Int(), handler=TestHandler())
+    read_write_float = AttrRW(Float())
+    read_bool = AttrR(Bool())
+    write_bool = AttrW(Bool(), handler=TestSender())
+    read_string = AttrRW(String())
+    enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
+    one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
+    two_d_waveform = AttrRW(WaveForm(np.int32, (10, 10)))
+    big_enum = AttrR(
+        Int(
+            allowed_values=list(range(17)),
+        ),
+    )
+
+
+@pytest.fixture(scope="class")
+def assertable_controller(class_mocker: MockerFixture):
+    return TangoAssertableController(class_mocker)
 
 
 class TestTangoContext:

@@ -1,14 +1,12 @@
 from pvi.device import (
     LED,
     ButtonPanel,
-    ComboBox,
     Group,
     SignalR,
     SignalRW,
     SignalW,
     SignalX,
     SubScreen,
-    TextFormat,
     TextRead,
     TextWrite,
     ToggleButton,
@@ -47,19 +45,12 @@ def test_get_components(controller):
             children=[
                 SignalR(
                     name="ReadInt",
-                    read_pv="DEVICE:SubController01:ReadInt",
+                    read_pv="DEVICE:SubController02:ReadInt",
                     read_widget=TextRead(),
                 )
             ],
         ),
         SignalR(name="BigEnum", read_pv="DEVICE:BigEnum", read_widget=TextRead()),
-        SignalRW(
-            name="Enum",
-            read_pv="DEVICE:Enum_RBV",
-            read_widget=TextRead(format=TextFormat.string),
-            write_pv="DEVICE:Enum",
-            write_widget=ComboBox(choices=["RED", "GREEN", "BLUE"]),
-        ),
         SignalR(name="ReadBool", read_pv="DEVICE:ReadBool", read_widget=LED()),
         SignalR(
             name="ReadInt",

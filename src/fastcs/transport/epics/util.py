@@ -39,7 +39,6 @@ DATATYPE_FIELD_TO_RECORD_FIELD = {
     "max_alarm": "HOPR",
     "znam": "ZNAM",
     "onam": "ONAM",
-    "shape": "length",
 }
 
 
@@ -50,11 +49,22 @@ def get_record_metadata_from_attribute(
 
 
 def get_record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
-    return {
+    arguments = {
         DATATYPE_FIELD_TO_RECORD_FIELD[field]: value
         for field, value in asdict(datatype).items()
         if field in DATATYPE_FIELD_TO_RECORD_FIELD
     }
+
+    match datatype:
+        case WaveForm():
+            if len(datatype.shape) != 1:
+                raise TypeError(
+                    f"Unsupported shape {datatype.shape}, the EPICS backend only "
+                    "supports to 1D arrays"
+                )
+            arguments["length"] = datatype.shape[0]
+
+    return arguments
 
 
 def get_cast_method_to_epics_type(datatype: DataType[T]) -> Callable[[T], object]:
