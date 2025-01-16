@@ -24,11 +24,6 @@ class RestAssertableController(AssertableController):
     read_bool = AttrR(Bool())
     write_bool = AttrW(Bool(), handler=TestSender())
     read_string = AttrRW(String())
-    big_enum = AttrR(
-        Int(
-            allowed_values=list(range(17)),
-        ),
-    )
 
 
 @pytest.fixture(scope="class")
@@ -135,15 +130,6 @@ class TestGraphQLServer:
             response = client.post("/graphql", json={"query": mutation})
         assert response.status_code == 200
         assert response.json()["data"] == nest_responce(path, value)
-
-    def test_big_enum(self, client, assertable_controller):
-        expect = 0
-        path = ["bigEnum"]
-        query = f"query {{ {nest_query(path)} }}"
-        with assertable_controller.assert_read_here(["big_enum"]):
-            response = client.post("/graphql", json={"query": query})
-        assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, expect)
 
     def test_go(self, client, assertable_controller):
         path = ["go"]

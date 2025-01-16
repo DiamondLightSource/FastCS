@@ -66,7 +66,7 @@ def get_cast_method_to_tango_type(datatype: DataType[T]) -> Callable[[T], object
         case Enum():
 
             def cast_to_tango_type(value) -> int:
-                return datatype.validate(value).value
+                return datatype.index_of(datatype.validate(value))
         case datatype if issubclass(type(datatype), TANGO_ALLOWED_DATATYPES):
 
             def cast_to_tango_type(value) -> object:
@@ -78,10 +78,10 @@ def get_cast_method_to_tango_type(datatype: DataType[T]) -> Callable[[T], object
 
 def get_cast_method_from_tango_type(datatype: DataType[T]) -> Callable[[object], T]:
     match datatype:
-        case Enum(enum_cls):
+        case Enum():
 
             def cast_from_tango_type(value: object) -> T:
-                return datatype.validate(enum_cls(value))
+                return datatype.validate(datatype.members[value])
 
         case datatype if issubclass(type(datatype), TANGO_ALLOWED_DATATYPES):
 

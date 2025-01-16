@@ -50,7 +50,6 @@ def test_get_components(controller):
                 )
             ],
         ),
-        SignalR(name="BigEnum", read_pv="DEVICE:BigEnum", read_widget=TextRead()),
         SignalR(name="ReadBool", read_pv="DEVICE:ReadBool", read_widget=LED()),
         SignalR(
             name="ReadInt",

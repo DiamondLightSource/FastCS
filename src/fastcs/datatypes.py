@@ -3,13 +3,13 @@ from __future__ import annotations
 import enum
 from abc import abstractmethod
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import cached_property
 from typing import Generic, TypeVar
 
 import numpy as np
 
-T = TypeVar("T", int, float, bool, str, enum.IntEnum, np.ndarray)
+T = TypeVar("T", int, float, bool, str, enum.Enum, np.ndarray)
 
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
@@ -21,10 +21,6 @@ AttrCallback = Callable[[T], Awaitable[None]]
 class DataType(Generic[T]):
     """Generic datatype mapping to a python type, with additional metadata."""
 
-    # We move this to each datatype so that we can have positional
-    # args in subclasses.
-    allowed_values: list[T] | None = field(init=False, default=None)
-
     @property
     @abstractmethod
     def dtype(self) -> type[T]:  # Using property due to lack of Generic ClassVars
@@ -34,15 +30,7 @@ class DataType(Generic[T]):
         """Validate a value against fields in the datatype."""
         if not isinstance(value, self.dtype):
             raise ValueError(f"Value {value} is not of type {self.dtype}")
-        if (
-            hasattr(self, "allowed_values")
-            and self.allowed_values is not None
-            and value not in self.allowed_values
-        ):
-            raise ValueError(
-                f"Value {value} is not in the allowed values for this "
-                f"datatype {self.allowed_values}."
-            )
+
         return value
 
     @property
@@ -79,8 +67,6 @@ class _Numerical(DataType[T_Numerical]):
 class Int(_Numerical[int]):
     """`DataType` mapping to builtin ``int``."""
 
-    allowed_values: list[int] | None = None
-
     @property
     def dtype(self) -> type[int]:
         return int
@@ -91,7 +77,6 @@ class Float(_Numerical[float]):
     """`DataType` mapping to builtin ``float``."""
 
     prec: int = 2
-    allowed_values: list[float] | None = None
 
     @property
     def dtype(self) -> type[float]:
@@ -101,10 +86,6 @@ class Float(_Numerical[float]):
 @dataclass(frozen=True)
 class Bool(DataType[bool]):
     """`DataType` mapping to builtin ``bool``."""
-
-    znam: str = "OFF"
-    onam: str = "ON"
-    allowed_values: list[bool] | None = None
 
     @property
     def dtype(self) -> type[bool]:
@@ -119,8 +100,6 @@ class Bool(DataType[bool]):
 class String(DataType[str]):
     """`DataType` mapping to builtin ``str``."""
 
-    allowed_values: list[str] | None = None
-
     @property
     def dtype(self) -> type[str]:
         return str
@@ -130,33 +109,30 @@ class String(DataType[str]):
         return ""
 
 
-T_Enum = TypeVar("T_Enum", bound=enum.IntEnum)
+T_Enum = TypeVar("T_Enum", bound=enum.Enum)
 
 
 @dataclass(frozen=True)
-class Enum(DataType[enum.IntEnum]):
-    enum_cls: type[enum.IntEnum]
-
-    @cached_property
-    def is_string_enum(self) -> bool:
-        return all(isinstance(member.value, str) for member in self.members)
+class Enum(Generic[T_Enum], DataType[T_Enum]):
+    enum_cls: type[T_Enum]
 
     def __post_init__(self):
-        if not issubclass(self.enum_cls, enum.IntEnum):
-            raise ValueError("Enum class has to take an IntEnum.")
-        if {member.value for member in self.members} != set(range(len(self.members))):
-            raise ValueError("Enum values must be contiguous.")
+        if not issubclass(self.enum_cls, enum.Enum):
+            raise ValueError("Enum class has to take an Enum.")
+
+    def index_of(self, value: T_Enum) -> int:
+        return self.members.index(value)
 
     @cached_property
-    def members(self) -> list[enum.IntEnum]:
+    def members(self) -> list[T_Enum]:
         return list(self.enum_cls)
 
     @property
-    def dtype(self) -> type[enum.IntEnum]:
+    def dtype(self) -> type[T_Enum]:
         return self.enum_cls
 
     @property
-    def initial_value(self) -> enum.IntEnum:
+    def initial_value(self) -> T_Enum:
         return self.members[0]
 
 

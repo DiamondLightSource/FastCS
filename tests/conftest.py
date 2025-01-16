@@ -35,11 +35,6 @@ class BackendTestController(TestController):
     read_bool: AttrR = AttrR(Bool())
     write_bool: AttrW = AttrW(Bool(), handler=TestSender())
     read_string: AttrRW = AttrRW(String())
-    big_enum: AttrR = AttrR(
-        Int(
-            allowed_values=list(range(17)),
-        ),
-    )
 
 
 @pytest.fixture

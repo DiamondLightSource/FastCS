@@ -10,15 +10,13 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController, Controller
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, WaveForm
-from fastcs.exceptions import FastCSException
+from fastcs.datatypes import DataType, T
 from fastcs.transport.epics.util import (
-    MBB_MAX_CHOICES,
-    MBB_STATE_FIELDS,
-    get_cast_method_from_epics_type,
-    get_cast_method_to_epics_type,
-    get_record_metadata_from_attribute,
-    get_record_metadata_from_datatype,
+    builder_callable_from_attribute,
+    get_callable_from_epics_type,
+    get_callable_to_epics_type,
+    record_metadata_from_attribute,
+    record_metadata_from_datatype,
 )
 
 from .options import EpicsIOCOptions
@@ -156,76 +154,34 @@ def _create_and_link_attribute_pvs(pv_prefix: str, controller: Controller) -> No
 def _create_and_link_read_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
 ) -> None:
-    cast_method = get_cast_method_to_epics_type(attribute.datatype)
+    cast_to_epics_type = get_callable_to_epics_type(attribute.datatype)
 
     async def async_record_set(value: T):
-        record.set(cast_method(value))
+        record.set(cast_to_epics_type(value))
 
-    record = _get_input_record(f"{pv_prefix}:{pv_name}", attribute)
+    record = _make_record(f"{pv_prefix}:{pv_name}", attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
     attribute.set_update_callback(async_record_set)
 
 
-def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
-    match attribute.datatype:
-        case Bool():
-            record = builder.boolIn(
-                pv,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case Int():
-            record = builder.longIn(
-                pv,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case Float():
-            record = builder.aIn(
-                pv,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case String():
-            record = builder.longStringIn(
-                pv,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case Enum():
-            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                raise RuntimeError(
-                    f"Received an `Enum` datatype on attribute {attribute} "
-                    f"with more elements than the epics limit `{MBB_MAX_CHOICES}` "
-                    f"for `mbbIn`. Use an `Int or `String with `allowed_values`."
-                )
-            state_keys = dict(
-                zip(
-                    MBB_STATE_FIELDS,
-                    [member.name for member in attribute.datatype.members],
-                    strict=False,
-                )
-            )
-            record = builder.mbbIn(
-                pv,
-                **state_keys,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case WaveForm():
-            record = builder.WaveformIn(
-                pv,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case _:
-            raise FastCSException(
-                f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
-            )
+def _make_record(
+    pv: str,
+    attribute: AttrR | AttrW | AttrRW,
+    on_update: Callable | None = None,
+) -> RecordWrapper:
+    builder_callable = builder_callable_from_attribute(attribute, on_update is None)
+    datatype_record_metadata = record_metadata_from_datatype(attribute.datatype)
+    attribute_record_metadata = record_metadata_from_attribute(attribute)
+
+    update = {"always_update": True, "on_update": on_update} if on_update else {}
+
+    record = builder_callable(
+        pv, **update, **datatype_record_metadata, **attribute_record_metadata
+    )
 
     def datatype_updater(datatype: DataType):
-        for name, value in get_record_metadata_from_datatype(datatype).items():
+        for name, value in record_metadata_from_datatype(datatype).items():
             record.set_field(name, value)
 
     attribute.add_update_datatype_callback(datatype_updater)
@@ -235,100 +191,20 @@ def _get_input_record(pv: str, attribute: AttrR) -> RecordWrapper:
 def _create_and_link_write_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW[T]
 ) -> None:
-    cast_method = get_cast_method_from_epics_type(attribute.datatype)
+    cast_from_epics_type = get_callable_from_epics_type(attribute.datatype)
+    cast_to_epics_type = get_callable_to_epics_type(attribute.datatype)
 
     async def on_update(value):
-        await attribute.process_without_display_update(cast_method(value))
+        await attribute.process_without_display_update(cast_from_epics_type(value))
 
     async def async_write_display(value: T):
-        record.set(cast_method(value), process=False)
+        record.set(cast_to_epics_type(value), process=False)
 
-    record = _get_output_record(
-        f"{pv_prefix}:{pv_name}", attribute, on_update=on_update
-    )
+    record = _make_record(f"{pv_prefix}:{pv_name}", attribute, on_update=on_update)
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
     attribute.set_write_display_callback(async_write_display)
-
-
-def _get_output_record(pv: str, attribute: AttrW, on_update: Callable) -> Any:
-    match attribute.datatype:
-        case Bool():
-            record = builder.boolOut(
-                pv,
-                always_update=True,
-                on_update=on_update,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case Int():
-            record = builder.longOut(
-                pv,
-                always_update=True,
-                on_update=on_update,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case Float():
-            record = builder.aOut(
-                pv,
-                always_update=True,
-                on_update=on_update,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case String():
-            record = builder.longStringOut(
-                pv,
-                always_update=True,
-                on_update=on_update,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case Enum():
-            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                raise RuntimeError(
-                    f"Received an `Enum` datatype on attribute {attribute} "
-                    f"with more elements than the epics limit `{MBB_MAX_CHOICES}` "
-                    f"for `mbbOut`. Use an `Int or `String with `allowed_values`."
-                )
-
-            state_keys = dict(
-                zip(
-                    MBB_STATE_FIELDS,
-                    [member.name for member in attribute.datatype.members],
-                    strict=False,
-                )
-            )
-            record = builder.mbbOut(
-                pv,
-                **state_keys,
-                always_update=True,
-                on_update=on_update,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-        case WaveForm():
-            record = builder.WaveformOut(
-                pv,
-                always_update=True,
-                on_update=on_update,
-                **get_record_metadata_from_datatype(attribute.datatype),
-                **get_record_metadata_from_attribute(attribute),
-            )
-
-        case _:
-            raise FastCSException(
-                f"Unsupported type {type(attribute.datatype)}: {attribute.datatype}"
-            )
-
-    def datatype_updater(datatype: DataType):
-        for name, value in get_record_metadata_from_datatype(datatype).items():
-            record.set_field(name, value)
-
-    attribute.add_update_datatype_callback(datatype_updater)
-    return record
 
 
 def _create_and_link_command_pvs(pv_prefix: str, controller: Controller) -> None:

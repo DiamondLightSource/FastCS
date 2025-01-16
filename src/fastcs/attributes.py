@@ -68,9 +68,10 @@ class Attribute(Generic[T]):
         handler: Any = None,
         description: str | None = None,
     ) -> None:
-        assert issubclass(
-            datatype.dtype, ATTRIBUTE_TYPES
-        ), f"Attr type must be one of {ATTRIBUTE_TYPES}, received type {datatype.dtype}"
+        assert issubclass(datatype.dtype, ATTRIBUTE_TYPES), (
+            f"Attr type must be one of {ATTRIBUTE_TYPES}, "
+            "received type {datatype.dtype}"
+        )
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
         self._group = group

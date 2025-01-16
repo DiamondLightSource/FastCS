@@ -24,13 +24,12 @@ from fastcs.transport.epics.ioc import (
     _add_sub_controller_pvi_info,
     _create_and_link_read_pv,
     _create_and_link_write_pv,
-    _get_input_record,
-    _get_output_record,
+    _make_record,
 )
 from fastcs.transport.epics.util import (
     MBB_STATE_FIELDS,
-    get_record_metadata_from_attribute,
-    get_record_metadata_from_datatype,
+    record_metadata_from_attribute,
+    record_metadata_from_datatype,
 )
 
 DEVICE = "DEVICE"
@@ -51,16 +50,16 @@ def record_input_from_enum(enum_cls: type[enum.IntEnum]) -> dict[str, str]:
 
 @pytest.mark.asyncio
 async def test_create_and_link_read_pv(mocker: MockerFixture):
-    get_input_record = mocker.patch("fastcs.transport.epics.ioc._get_input_record")
+    make_record = mocker.patch("fastcs.transport.epics.ioc._make_record")
     add_attr_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_attr_pvi_info")
-    record = get_input_record.return_value
+    record = make_record.return_value
 
     attribute = AttrR(Int())
     attribute.set_update_callback = mocker.MagicMock()
 
     _create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
 
-    get_input_record.assert_called_once_with("PREFIX:PV", attribute)
+    make_record.assert_called_once_with("PREFIX:PV", attribute)
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "r")
 
     # Extract the callback generated and set in the function and call it
@@ -82,11 +81,6 @@ class ColourEnum(enum.IntEnum):
     (
         (AttrR(String()), "longStringIn", {}),
         (
-            AttrR(String(allowed_values=[member.name for member in list(ColourEnum)])),
-            "longStringIn",
-            {},
-        ),
-        (
             AttrR(Enum(ColourEnum)),
             "mbbIn",
             {"ZRST": "RED", "ONST": "GREEN", "TWST": "BLUE"},
@@ -99,36 +93,36 @@ class ColourEnum(enum.IntEnum):
         (AttrR(WaveForm(np.int32, (10,))), "WaveformIn", {}),
     ),
 )
-def test_get_input_record(
+def test_make_input_record(
     attribute: AttrR,
     record_type: str,
     kwargs: dict[str, Any],
     mocker: MockerFixture,
 ):
-    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.util.builder")
 
     pv = "PV"
-    _get_input_record(pv, attribute)
+    _make_record(pv, attribute)
+    kwargs.update(record_metadata_from_datatype(attribute.datatype))
+    kwargs.update(record_metadata_from_attribute(attribute))
 
     getattr(builder, record_type).assert_called_once_with(
         pv,
-        **get_record_metadata_from_attribute(attribute),
-        **get_record_metadata_from_datatype(attribute.datatype),
         **kwargs,
     )
 
 
-def test_get_input_record_raises(mocker: MockerFixture):
+def test_make_record_raises(mocker: MockerFixture):
     # Pass a mock as attribute to provoke the fallback case matching on datatype
     with pytest.raises(FastCSException):
-        _get_input_record("PV", mocker.MagicMock())
+        _make_record("PV", mocker.MagicMock())
 
 
 @pytest.mark.asyncio
 async def test_create_and_link_write_pv(mocker: MockerFixture):
-    get_output_record = mocker.patch("fastcs.transport.epics.ioc._get_output_record")
+    make_record = mocker.patch("fastcs.transport.epics.ioc._make_record")
     add_attr_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_attr_pvi_info")
-    record = get_output_record.return_value
+    record = make_record.return_value
 
     attribute = AttrW(Int())
     attribute.process_without_display_update = mocker.AsyncMock()
@@ -136,9 +130,7 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
 
     _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
 
-    get_output_record.assert_called_once_with(
-        "PREFIX:PV", attribute, on_update=mocker.ANY
-    )
+    make_record.assert_called_once_with("PREFIX:PV", attribute, on_update=mocker.ANY)
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "w")
 
     # Extract the write update callback generated and set in the function and call it
@@ -149,7 +141,7 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
     record.set.assert_called_once_with(1, process=False)
 
     # Extract the on update callback generated and set in the function and call it
-    on_update_callback = get_output_record.call_args[1]["on_update"]
+    on_update_callback = make_record.call_args[1]["on_update"]
     await on_update_callback(1)
 
     attribute.process_without_display_update.assert_called_once_with(1)
@@ -159,31 +151,30 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
     "attribute,record_type,kwargs",
     (
         (
-            AttrR(Enum(enum.IntEnum("ONOFF_STATES", {"DISABLED": 0, "ENABLED": 1}))),
+            AttrW(Enum(enum.IntEnum("ONOFF_STATES", {"DISABLED": 0, "ENABLED": 1}))),
             "mbbOut",
             {"ZRST": "DISABLED", "ONST": "ENABLED"},
         ),
-        (AttrR(String(allowed_values=SEVENTEEN_VALUES)), "longStringOut", {}),
     ),
 )
-def test_get_output_record(
+def test_make_output_record(
     attribute: AttrW,
     record_type: str,
     kwargs: dict[str, Any],
     mocker: MockerFixture,
 ):
-    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.util.builder")
     update = mocker.MagicMock()
 
     pv = "PV"
-    _get_output_record(pv, attribute, on_update=update)
+    _make_record(pv, attribute, on_update=update)
+
+    kwargs.update(record_metadata_from_datatype(attribute.datatype))
+    kwargs.update(record_metadata_from_attribute(attribute))
+    kwargs.update({"always_update": True, "on_update": update})
 
     getattr(builder, record_type).assert_called_once_with(
         pv,
-        always_update=True,
-        on_update=update,
-        **get_record_metadata_from_attribute(attribute),
-        **get_record_metadata_from_datatype(attribute.datatype),
         **kwargs,
     )
 
@@ -191,7 +182,7 @@ def test_get_output_record(
 def test_get_output_record_raises(mocker: MockerFixture):
     # Pass a mock as attribute to provoke the fallback case matching on datatype
     with pytest.raises(FastCSException):
-        _get_output_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
+        _make_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
 
 
 class EpicsAssertableController(AssertableController):
@@ -203,11 +194,6 @@ class EpicsAssertableController(AssertableController):
     read_string = AttrRW(String())
     enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
     one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
-    big_enum = AttrR(
-        Int(
-            allowed_values=list(range(17)),
-        ),
-    )
 
 
 @pytest.fixture()
@@ -216,7 +202,8 @@ def controller(class_mocker: MockerFixture):
 
 
 def test_ioc(mocker: MockerFixture, controller: Controller):
-    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
+    ioc_builder = mocker.patch("fastcs.transport.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.util.builder")
     add_pvi_info = mocker.patch("fastcs.transport.epics.ioc._add_pvi_info")
     add_sub_controller_pvi_info = mocker.patch(
         "fastcs.transport.epics.ioc._add_sub_controller_pvi_info"
@@ -227,20 +214,18 @@ def test_ioc(mocker: MockerFixture, controller: Controller):
     # Check records are created
     builder.boolIn.assert_called_once_with(
         f"{DEVICE}:ReadBool",
-        **get_record_metadata_from_attribute(controller.attributes["read_bool"]),
-        **get_record_metadata_from_datatype(
-            controller.attributes["read_bool"].datatype
-        ),
+        **record_metadata_from_attribute(controller.attributes["read_bool"]),
+        **record_metadata_from_datatype(controller.attributes["read_bool"].datatype),
     )
     builder.longIn.assert_any_call(
         f"{DEVICE}:ReadInt",
-        **get_record_metadata_from_attribute(controller.attributes["read_int"]),
-        **get_record_metadata_from_datatype(controller.attributes["read_int"].datatype),
+        **record_metadata_from_attribute(controller.attributes["read_int"]),
+        **record_metadata_from_datatype(controller.attributes["read_int"].datatype),
     )
     builder.aIn.assert_called_once_with(
         f"{DEVICE}:ReadWriteFloat_RBV",
-        **get_record_metadata_from_attribute(controller.attributes["read_write_float"]),
-        **get_record_metadata_from_datatype(
+        **record_metadata_from_attribute(controller.attributes["read_write_float"]),
+        **record_metadata_from_datatype(
             controller.attributes["read_write_float"].datatype
         ),
     )
@@ -248,20 +233,15 @@ def test_ioc(mocker: MockerFixture, controller: Controller):
         f"{DEVICE}:ReadWriteFloat",
         always_update=True,
         on_update=mocker.ANY,
-        **get_record_metadata_from_attribute(controller.attributes["read_write_float"]),
-        **get_record_metadata_from_datatype(
+        **record_metadata_from_attribute(controller.attributes["read_write_float"]),
+        **record_metadata_from_datatype(
             controller.attributes["read_write_float"].datatype
         ),
     )
     builder.longIn.assert_any_call(
-        f"{DEVICE}:BigEnum",
-        **get_record_metadata_from_attribute(controller.attributes["big_enum"]),
-        **get_record_metadata_from_datatype(controller.attributes["big_enum"].datatype),
-    )
-    builder.longIn.assert_any_call(
         f"{DEVICE}:ReadWriteInt_RBV",
-        **get_record_metadata_from_attribute(controller.attributes["read_write_int"]),
-        **get_record_metadata_from_datatype(
+        **record_metadata_from_attribute(controller.attributes["read_write_int"]),
+        **record_metadata_from_datatype(
             controller.attributes["read_write_int"].datatype
         ),
     )
@@ -269,39 +249,31 @@ def test_ioc(mocker: MockerFixture, controller: Controller):
         f"{DEVICE}:ReadWriteInt",
         always_update=True,
         on_update=mocker.ANY,
-        **get_record_metadata_from_attribute(controller.attributes["read_write_int"]),
-        **get_record_metadata_from_datatype(
+        **record_metadata_from_attribute(controller.attributes["read_write_int"]),
+        **record_metadata_from_datatype(
             controller.attributes["read_write_int"].datatype
         ),
     )
     builder.mbbIn.assert_called_once_with(
         f"{DEVICE}:Enum_RBV",
-        ZRST="RED",
-        ONST="GREEN",
-        TWST="BLUE",
-        **get_record_metadata_from_attribute(controller.attributes["enum"]),
-        **get_record_metadata_from_datatype(controller.attributes["enum"].datatype),
+        **record_metadata_from_attribute(controller.attributes["enum"]),
+        **record_metadata_from_datatype(controller.attributes["enum"].datatype),
     )
     builder.mbbOut.assert_called_once_with(
         f"{DEVICE}:Enum",
-        ZRST="RED",
-        ONST="GREEN",
-        TWST="BLUE",
-        **get_record_metadata_from_attribute(controller.attributes["enum"]),
-        **get_record_metadata_from_datatype(controller.attributes["enum"].datatype),
         always_update=True,
         on_update=mocker.ANY,
+        **record_metadata_from_attribute(controller.attributes["enum"]),
+        **record_metadata_from_datatype(controller.attributes["enum"].datatype),
     )
     builder.boolOut.assert_called_once_with(
         f"{DEVICE}:WriteBool",
         always_update=True,
         on_update=mocker.ANY,
-        **get_record_metadata_from_attribute(controller.attributes["write_bool"]),
-        **get_record_metadata_from_datatype(
-            controller.attributes["write_bool"].datatype
-        ),
+        **record_metadata_from_attribute(controller.attributes["write_bool"]),
+        **record_metadata_from_datatype(controller.attributes["write_bool"].datatype),
     )
-    builder.Action.assert_any_call(f"{DEVICE}:Go", on_update=mocker.ANY)
+    ioc_builder.Action.assert_any_call(f"{DEVICE}:Go", on_update=mocker.ANY)
 
     # Check info tags are added
     add_pvi_info.assert_called_once_with(f"{DEVICE}:PVI")
@@ -423,7 +395,8 @@ class ControllerLongNames(Controller):
 
 
 def test_long_pv_names_discarded(mocker: MockerFixture):
-    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
+    ioc_builder = mocker.patch("fastcs.transport.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.util.builder")
     long_name_controller = ControllerLongNames()
     long_attr_name = "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
     long_rw_name = "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
@@ -438,17 +411,17 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
         f"{DEVICE}:{short_pv_name}",
         always_update=True,
         on_update=mocker.ANY,
-        **get_record_metadata_from_datatype(
+        **record_metadata_from_datatype(
             long_name_controller.attr_rw_short_name.datatype
         ),
-        **get_record_metadata_from_attribute(long_name_controller.attr_rw_short_name),
+        **record_metadata_from_attribute(long_name_controller.attr_rw_short_name),
     )
     builder.longIn.assert_called_once_with(
         f"{DEVICE}:{short_pv_name}_RBV",
-        **get_record_metadata_from_datatype(
+        **record_metadata_from_datatype(
             long_name_controller.attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV.datatype
         ),
-        **get_record_metadata_from_attribute(
+        **record_metadata_from_attribute(
             long_name_controller.attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV
         ),
     )
@@ -482,7 +455,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     assert not getattr(long_name_controller, long_command_name).fastcs_method.enabled
 
     short_command_pv_name = "command_short_name".title().replace("_", "")
-    builder.Action.assert_called_once_with(
+    ioc_builder.Action.assert_called_once_with(
         f"{DEVICE}:{short_command_pv_name}",
         on_update=mocker.ANY,
     )
@@ -497,17 +470,17 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
 
 
 def test_update_datatype(mocker: MockerFixture):
-    builder = mocker.patch("fastcs.transport.epics.ioc.builder")
+    builder = mocker.patch("fastcs.transport.epics.util.builder")
 
     pv_name = f"{DEVICE}:Attr"
 
     attr_r = AttrR(Int())
-    record_r = _get_input_record(pv_name, attr_r)
+    record_r = _make_record(pv_name, attr_r)
 
     builder.longIn.assert_called_once_with(
         pv_name,
-        **get_record_metadata_from_attribute(attr_r),
-        **get_record_metadata_from_datatype(attr_r.datatype),
+        **record_metadata_from_attribute(attr_r),
+        **record_metadata_from_datatype(attr_r.datatype),
     )
     record_r.set_field.assert_not_called()
     attr_r.update_datatype(Int(units="m", min=-3))
@@ -521,12 +494,12 @@ def test_update_datatype(mocker: MockerFixture):
         attr_r.update_datatype(String())  # type: ignore
 
     attr_w = AttrW(Int())
-    record_w = _get_output_record(pv_name, attr_w, on_update=mocker.ANY)
+    record_w = _make_record(pv_name, attr_w, on_update=mocker.ANY)
 
     builder.longIn.assert_called_once_with(
         pv_name,
-        **get_record_metadata_from_attribute(attr_w),
-        **get_record_metadata_from_datatype(attr_w.datatype),
+        **record_metadata_from_attribute(attr_w),
+        **record_metadata_from_datatype(attr_w.datatype),
     )
     record_w.set_field.assert_not_called()
     attr_w.update_datatype(Int(units="m", min=-3))

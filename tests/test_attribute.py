@@ -1,11 +1,11 @@
 from functools import partial
 
+import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-import numpy as np
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.datatypes import Int, String, Float, Enum, WaveForm
+from fastcs.datatypes import Enum, Float, Int, String, WaveForm
 
 
 @pytest.mark.asyncio

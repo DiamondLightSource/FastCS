@@ -22,6 +22,16 @@ from fastcs.transport.tango.adapter import TangoTransport
 
 async def patch_run_threadsafe_blocking(coro, loop):
     await coro
+class TangoAssertableController(AssertableController):
+    read_int = AttrR(Int(), handler=TestUpdater())
+    read_write_int = AttrRW(Int(), handler=TestHandler())
+    read_write_float = AttrRW(Float())
+    read_bool = AttrR(Bool())
+    write_bool = AttrW(Bool(), handler=TestSender())
+    read_string = AttrRW(String())
+    enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
+    one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
+    two_d_waveform = AttrRW(WaveForm(np.int32, (10, 10)))
 
 
 class TestTangoDevice:
@@ -40,7 +50,6 @@ class TestTangoDevice:
 
     def test_list_attributes(self, tango_context):
         assert list(tango_context.get_attribute_list()) == [
-            "BigEnum",
             "Enum",
             "OneDWaveform",
             "ReadBool",
@@ -122,12 +131,6 @@ class TestTangoDevice:
         assert tango_context.read_attribute("Enum").value == new
         assert isinstance(enum_attr.get(), enum_cls)
         assert enum_attr.get() == enum_cls(1)
-
-    def test_big_enum(self, assertable_controller, tango_context):
-        expect = 0
-        with assertable_controller.assert_read_here(["big_enum"]):
-            result = tango_context.read_attribute("BigEnum").value
-        assert result == expect
 
     def test_1d_waveform(self, assertable_controller, tango_context):
         expect = np.zeros((10,), dtype=np.int32)

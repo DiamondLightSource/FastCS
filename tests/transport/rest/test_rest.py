@@ -26,11 +26,6 @@ class RestAssertableController(AssertableController):
     enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
     one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
     two_d_waveform = AttrRW(WaveForm(np.int32, (10, 10)))
-    big_enum = AttrR(
-        Int(
-            allowed_values=list(range(17)),
-        ),
-    )
 
 
 @pytest.fixture(scope="class")
@@ -101,13 +96,6 @@ class TestRestServer:
         assert client.get("/enum").json()["value"] == new
         assert isinstance(enum_attr.get(), enum_cls)
         assert enum_attr.get() == enum_cls(2)
-
-    def test_big_enum(self, assertable_controller, client):
-        expect = 0
-        with assertable_controller.assert_read_here(["big_enum"]):
-            response = client.get("/big-enum")
-        assert response.status_code == 200
-        assert response.json()["value"] == expect
 
     def test_1d_waveform(self, assertable_controller, client):
         attribute = assertable_controller.attributes["one_d_waveform"]
