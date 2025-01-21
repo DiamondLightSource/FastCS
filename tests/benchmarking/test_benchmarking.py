@@ -101,28 +101,28 @@ def test_rest_put(benchmark, test_controller):
 
 
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
-@pytest.mark.benchmark(group="test-ca")
-def test_ca_get(benchmark, test_controller):
+@pytest.mark.benchmark(group="test-epics")
+def test_epics_get(benchmark, test_controller):
     benchmark(ca_get)
 
 
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
-@pytest.mark.benchmark(group="test-ca")
-def test_ca_get_loaded_request(benchmark, test_controller):
+@pytest.mark.benchmark(group="test-epics")
+def test_epics_get_loaded_request(benchmark, test_controller):
     with background_traffic(GET_ENDPOINT):
         benchmark(ca_get)
 
 
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
-@pytest.mark.benchmark(group="test-ca")
-def test_ca_get_loaded_baseline(benchmark, test_controller):
+@pytest.mark.benchmark(group="test-epics")
+def test_epics_get_loaded_baseline(benchmark, test_controller):
     with background_traffic(None):
         benchmark(ca_get)
 
 
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
-@pytest.mark.benchmark(group="test-ca")
-def test_ca_put(benchmark, test_controller):
+@pytest.mark.benchmark(group="test-epics")
+def test_epics_put(benchmark, test_controller):
     benchmark(ca_put)
 
 
