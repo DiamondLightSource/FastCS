@@ -5,7 +5,7 @@ from pathlib import Path
 
 @dataclass
 class EpicsDocsOptions:
-    path: Path = Path.cwd()
+    path: Path = Path(".")
     depth: int | None = None
 
 
@@ -16,7 +16,7 @@ class EpicsGUIFormat(Enum):
 
 @dataclass
 class EpicsGUIOptions:
-    output_path: Path = Path.cwd() / "output.bob"
+    output_path: Path = Path(".") / "output.bob"
     file_format: EpicsGUIFormat = EpicsGUIFormat.bob
     title: str = "Simple Device"
 
