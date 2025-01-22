@@ -36,9 +36,9 @@ def attr_is_enum(attribute: Attribute) -> bool:
 
     """
     match attribute:
-        case Attribute(
-            datatype=String(), allowed_values=allowed_values
-        ) if allowed_values is not None and len(allowed_values) <= MBB_MAX_CHOICES:
+        case Attribute(datatype=String(), allowed_values=allowed_values) if (
+            allowed_values is not None and len(allowed_values) <= MBB_MAX_CHOICES
+        ):
             return True
         case _:
             return False
