@@ -436,7 +436,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
 
     assert long_name_controller.command_short_name.fastcs_method.enabled
     long_command_name = (
-        "command_with_" "reallyreallyreallyreallyreallyreallyreally_long_name"
+        "command_with_reallyreallyreallyreallyreallyreallyreally_long_name"
     )
     assert not getattr(long_name_controller, long_command_name).fastcs_method.enabled
 

@@ -83,9 +83,9 @@ def _link_attribute_sender_class(single_mapping: SingleMapping) -> None:
     for attr_name, attribute in single_mapping.attributes.items():
         match attribute:
             case AttrW(sender=Sender()):
-                assert (
-                    not attribute.has_process_callback()
-                ), f"Cannot assign both put method and Sender object to {attr_name}"
+                assert not attribute.has_process_callback(), (
+                    f"Cannot assign both put method and Sender object to {attr_name}"
+                )
 
                 callback = _create_sender_callback(attribute, single_mapping.controller)
                 attribute.set_process_callback(callback)
@@ -154,9 +154,13 @@ def _get_periodic_scan_coros(scan_dict: dict[float, list[Callable]]) -> list[Cal
 
 
 def _create_periodic_scan_coro(period, methods: list[Callable]) -> Callable:
+    async def _sleep():
+        await asyncio.sleep(period)
+
+    methods.append(_sleep)  # Create periodic behavior
+
     async def scan_coro() -> None:
         while True:
             await asyncio.gather(*[method() for method in methods])
-            await asyncio.sleep(period)
 
     return scan_coro

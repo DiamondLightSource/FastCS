@@ -102,7 +102,7 @@ def test_over_defined_schema():
 
 def test_version():
     impl_version = "0.0.1"
-    expected = f"SingleArg: {impl_version}\n" f"FastCS: {__version__}\n"
+    expected = f"SingleArg: {impl_version}\nFastCS: {__version__}\n"
     app = _launch(SingleArg, version=impl_version)
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0
