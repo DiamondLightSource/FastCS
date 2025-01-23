@@ -32,10 +32,10 @@ class Backend:
         self._stop_scan_tasks()
 
     async def serve(self):
-        await self._run_initial_tasks()
+        await self._run_initial_coros()
         await self._start_scan_tasks()
 
-    async def _run_initial_tasks(self):
+    async def _run_initial_coros(self):
         for coro in self._initial_coros:
             await coro()
 
