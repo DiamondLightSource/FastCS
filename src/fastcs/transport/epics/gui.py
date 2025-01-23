@@ -122,7 +122,7 @@ class EpicsGUI:
         device = Device(label=options.title, children=components)
 
         formatter = DLSFormatter()
-        formatter.format(device, options.output_path)
+        formatter.format(device, options.output_path.resolve())
 
     def extract_mapping_components(self, mapping: SingleMapping) -> Tree:
         components: Tree = []
