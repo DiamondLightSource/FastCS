@@ -69,9 +69,9 @@ class Attribute(Generic[T]):
         allowed_values: list[T] | None = None,
         description: str | None = None,
     ) -> None:
-        assert (
-            datatype.dtype in ATTRIBUTE_TYPES
-        ), f"Attr type must be one of {ATTRIBUTE_TYPES}, received type {datatype.dtype}"
+        assert datatype.dtype in ATTRIBUTE_TYPES, (
+            f"Attr type must be one of {ATTRIBUTE_TYPES}, received type {datatype.dtype}"
+        )
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
         self._group = group
