@@ -70,7 +70,8 @@ class Attribute(Generic[T]):
         description: str | None = None,
     ) -> None:
         assert datatype.dtype in ATTRIBUTE_TYPES, (
-            f"Attr type must be one of {ATTRIBUTE_TYPES}, received type {datatype.dtype}"
+            f"Attr type must be one of {ATTRIBUTE_TYPES}"
+            f", received type {datatype.dtype}"
         )
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
