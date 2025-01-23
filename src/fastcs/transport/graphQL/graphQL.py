@@ -33,7 +33,7 @@ class GraphQLServer:
 
     async def serve(self, options: GraphQLServerOptions | None = None) -> None:
         options = options or GraphQLServerOptions()
-        self._serv = uvicorn.Server(
+        self._server = uvicorn.Server(
             uvicorn.Config(
                 app=self._app,
                 host=options.host,
@@ -41,7 +41,7 @@ class GraphQLServer:
                 log_level=options.log_level,
             )
         )
-        await self._serv.serve()
+        await self._server.serve()
 
 
 class GraphQLAPI:

@@ -25,7 +25,7 @@ class RestServer:
 
     async def serve(self, options: RestServerOptions | None):
         options = options or RestServerOptions()
-        self._serv = uvicorn.Server(
+        self._server = uvicorn.Server(
             uvicorn.Config(
                 app=self._app,
                 host=options.host,
@@ -33,7 +33,7 @@ class RestServer:
                 log_level=options.log_level,
             )
         )
-        await self._serv.serve()
+        await self._server.serve()
 
 
 def _put_request_body(attribute: AttrW[T]):
