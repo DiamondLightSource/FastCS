@@ -30,11 +30,11 @@ def rest_put():
 ctx = Context("pva")
 
 
-def ca_get():
+def epics_get():
     ctx.get(GET_PV)
 
 
-def ca_put():
+def epics_put():
     ctx.put(PUT_PV, 0)
 
 
@@ -103,27 +103,27 @@ def test_rest_put(benchmark, test_controller):
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
 @pytest.mark.benchmark(group="test-epics")
 def test_epics_get(benchmark, test_controller):
-    benchmark(ca_get)
+    benchmark(epics_get)
 
 
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
 @pytest.mark.benchmark(group="test-epics")
 def test_epics_get_loaded_request(benchmark, test_controller):
     with background_traffic(GET_ENDPOINT):
-        benchmark(ca_get)
+        benchmark(epics_get)
 
 
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
 @pytest.mark.benchmark(group="test-epics")
 def test_epics_get_loaded_baseline(benchmark, test_controller):
     with background_traffic(None):
-        benchmark(ca_get)
+        benchmark(epics_get)
 
 
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
 @pytest.mark.benchmark(group="test-epics")
 def test_epics_put(benchmark, test_controller):
-    benchmark(ca_put)
+    benchmark(epics_put)
 
 
 @pytest.mark.skipif(not FASTCS_BENCHMARKING, reason="export FASTCS_BENCHMARKING=true")
