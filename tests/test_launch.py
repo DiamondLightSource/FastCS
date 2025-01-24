@@ -108,7 +108,7 @@ def test_version():
     impl_version = "0.0.1"
     expected = f"SingleArg: {impl_version}\nFastCS: {__version__}\n"
     app = _launch(SingleArg, version=impl_version)
-    result = runner.invoke(app, ["version"])
+    result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
     assert result.stdout == expected
 
@@ -116,7 +116,7 @@ def test_version():
 def test_no_version():
     expected = f"FastCS: {__version__}\n"
     app = _launch(SingleArg)
-    result = runner.invoke(app, ["version"])
+    result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
     assert result.stdout == expected
 

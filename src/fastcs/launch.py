@@ -2,7 +2,7 @@ import asyncio
 import inspect
 import json
 from pathlib import Path
-from typing import Annotated, TypeAlias, get_type_hints
+from typing import Annotated, Optional, TypeAlias, get_type_hints
 
 import typer
 from pydantic import BaseModel, create_model
@@ -134,8 +134,24 @@ def _launch(
             self.controller_class = controller_class
             self.fastcs_options = fastcs_options
 
+    def version_callback(value: bool):
+        if value:
+            if version:
+                print(f"{controller_class.__name__}: {version}")
+            print(f"FastCS: {__version__}")
+            raise typer.Exit()
+
     @launch_typer.callback()
-    def create_context(ctx: typer.Context):
+    def main(
+        ctx: typer.Context,
+        version: Optional[bool] = typer.Option(  # noqa (Optional required for typer)
+            None,
+            "--version",
+            callback=version_callback,
+            is_eager=True,
+            help=f"Display the {controller_class.__name__} version.",
+        ),
+    ):
         ctx.obj = LaunchContext(
             controller_class,
             fastcs_options,
@@ -179,12 +195,6 @@ def _launch(
         instance.create_gui()
         instance.create_docs()
         instance.run()
-
-    @launch_typer.command(name="version", help=f"{controller_class.__name__} version")
-    def version_command():
-        if version:
-            print(f"{controller_class.__name__}: {version}")
-        print(f"FastCS: {__version__}")
 
     return launch_typer
 
