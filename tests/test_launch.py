@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import pytest
 from pydantic import create_model
 from pytest_mock import MockerFixture
+from ruamel.yaml import YAML
 from typer.testing import CliRunner
 
 from fastcs.__main__ import __version__
@@ -11,7 +12,7 @@ from fastcs.attributes import AttrR
 from fastcs.controller import Controller
 from fastcs.datatypes import Int
 from fastcs.exceptions import LaunchError
-from fastcs.launch import TransportOptions, _launch, launch
+from fastcs.launch import TransportOptions, _launch, get_controller_schema, launch
 
 
 @dataclass
@@ -133,3 +134,9 @@ def test_launch(mocker: MockerFixture, data):
     run.assert_called_once()
     gui.assert_called_once()
     docs.assert_called_once()
+
+
+def test_get_schema(data):
+    ref_schema = YAML(typ="safe").load(data / "schema.json")
+    target_schema = get_controller_schema(IsHinted)
+    assert target_schema == ref_schema

@@ -3,7 +3,7 @@
     "EpicsDocsOptions": {
       "properties": {
         "path": {
-          "default": "/home/esq51579/WIP/FastCS",
+          "default": ".",
           "format": "path",
           "title": "Path",
           "type": "string"
@@ -35,7 +35,7 @@
     "EpicsGUIOptions": {
       "properties": {
         "output_path": {
-          "default": "/home/esq51579/WIP/FastCS/output.bob",
+          "default": "output.bob",
           "format": "path",
           "title": "Output Path",
           "type": "string"
