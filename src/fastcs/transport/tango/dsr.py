@@ -1,4 +1,5 @@
-from collections.abc import Awaitable, Callable
+import asyncio
+from collections.abc import Awaitable, Callable, Coroutine
 from typing import Any
 
 import tango
@@ -13,7 +14,9 @@ from .options import TangoDSROptions
 
 
 def _wrap_updater_fget(
-    attr_name: str, attribute: AttrR, controller: BaseController
+    attr_name: str,
+    attribute: AttrR,
+    controller: BaseController,
 ) -> Callable[[Any], Any]:
     async def fget(tango_device: Device):
         tango_device.info_stream(f"called fget method: {attr_name}")
@@ -30,17 +33,34 @@ def _tango_display_format(attribute: Attribute) -> str:
     return "6.2f"  # `tango.server.attribute` default for `format`
 
 
+async def _run_threadsafe_blocking(
+    coro: Coroutine[Any, Any, Any], loop: asyncio.AbstractEventLoop
+) -> None:
+    """
+    Wraps a concurrent.futures.Future object as an
+    asyncio.Future to make it awaitable and then awaits it
+    """
+    future = asyncio.run_coroutine_threadsafe(coro, loop)
+    await asyncio.wrap_future(future)
+
+
 def _wrap_updater_fset(
-    attr_name: str, attribute: AttrW, controller: BaseController
+    attr_name: str,
+    attribute: AttrW,
+    controller: BaseController,
+    loop: asyncio.AbstractEventLoop,
 ) -> Callable[[Any, Any], Any]:
     async def fset(tango_device: Device, val):
         tango_device.info_stream(f"called fset method: {attr_name}")
-        await attribute.process(val)
+        coro = attribute.process(val)
+        await _run_threadsafe_blocking(coro, loop)
 
     return fset
 
 
-def _collect_dev_attributes(controller: BaseController) -> dict[str, Any]:
+def _collect_dev_attributes(
+    controller: BaseController, loop: asyncio.AbstractEventLoop
+) -> dict[str, Any]:
     collection: dict[str, Any] = {}
     for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
@@ -58,7 +78,7 @@ def _collect_dev_attributes(controller: BaseController) -> dict[str, Any]:
                             attr_name, attribute, single_mapping.controller
                         ),
                         fset=_wrap_updater_fset(
-                            attr_name, attribute, single_mapping.controller
+                            attr_name, attribute, single_mapping.controller, loop
                         ),
                         access=AttrWriteType.READ_WRITE,
                         format=_tango_display_format(attribute),
@@ -79,7 +99,7 @@ def _collect_dev_attributes(controller: BaseController) -> dict[str, Any]:
                         dtype=attribute.datatype.dtype,
                         access=AttrWriteType.WRITE,
                         fset=_wrap_updater_fset(
-                            attr_name, attribute, single_mapping.controller
+                            attr_name, attribute, single_mapping.controller, loop
                         ),
                         format=_tango_display_format(attribute),
                     )
@@ -88,19 +108,26 @@ def _collect_dev_attributes(controller: BaseController) -> dict[str, Any]:
 
 
 def _wrap_command_f(
-    method_name: str, method: Callable, controller: BaseController
+    method_name: str,
+    method: Callable,
+    controller: BaseController,
+    loop: asyncio.AbstractEventLoop,
 ) -> Callable[..., Awaitable[None]]:
     async def _dynamic_f(tango_device: Device) -> None:
         tango_device.info_stream(
             f"called {'_'.join(controller.path)} f method: {method_name}"
         )
-        return await getattr(controller, method.__name__)()
+        coro = getattr(controller, method.__name__)()
+        await _run_threadsafe_blocking(coro, loop)
 
     _dynamic_f.__name__ = method_name
     return _dynamic_f
 
 
-def _collect_dev_commands(controller: BaseController) -> dict[str, Any]:
+def _collect_dev_commands(
+    controller: BaseController,
+    loop: asyncio.AbstractEventLoop,
+) -> dict[str, Any]:
     collection: dict[str, Any] = {}
     for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
@@ -109,7 +136,9 @@ def _collect_dev_commands(controller: BaseController) -> dict[str, Any]:
             cmd_name = name.title().replace("_", "")
             d_cmd_name = f"{'_'.join(path)}_{cmd_name}" if path else cmd_name
             collection[d_cmd_name] = server.command(
-                f=_wrap_command_f(d_cmd_name, method.fn, single_mapping.controller)
+                f=_wrap_command_f(
+                    d_cmd_name, method.fn, single_mapping.controller, loop
+                )
             )
 
     return collection
@@ -146,15 +175,20 @@ def _collect_dsr_args(options: TangoDSROptions) -> list[str]:
 
 
 class TangoDSR:
-    def __init__(self, controller: BaseController):
+    def __init__(
+        self,
+        controller: BaseController,
+        loop: asyncio.AbstractEventLoop,
+    ):
         self._controller = controller
+        self._loop = loop
         self.dev_class = self._controller.__class__.__name__
         self._device = self._create_device()
 
     def _create_device(self):
         class_dict: dict = {
-            **_collect_dev_attributes(self._controller),
-            **_collect_dev_commands(self._controller),
+            **_collect_dev_attributes(self._controller, self._loop),
+            **_collect_dev_commands(self._controller, self._loop),
             **_collect_dev_properties(self._controller),
             **_collect_dev_init(self._controller),
             **_collect_dev_flags(self._controller),

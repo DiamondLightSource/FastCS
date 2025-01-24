@@ -1,3 +1,6 @@
+import asyncio
+from unittest import mock
+
 import pytest
 from tango import DevState
 from tango.test_context import DeviceTestContext
@@ -5,13 +8,23 @@ from tango.test_context import DeviceTestContext
 from fastcs.transport.tango.adapter import TangoTransport
 
 
+async def patch_run_threadsafe_blocking(coro, loop):
+    await coro
+
+
 class TestTangoDevice:
     @pytest.fixture(scope="class")
     def tango_context(self, assertable_controller):
-        # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
-        device = TangoTransport(assertable_controller)._dsr._device
-        with DeviceTestContext(device, debug=0) as proxy:
-            yield proxy
+        with mock.patch(
+            "fastcs.transport.tango.dsr._run_threadsafe_blocking",
+            patch_run_threadsafe_blocking,
+        ):
+            device = TangoTransport(
+                assertable_controller, asyncio.AbstractEventLoop()
+            )._dsr._device
+            # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
+            with DeviceTestContext(device, debug=0) as proxy:
+                yield proxy
 
     def test_list_attributes(self, tango_context):
         assert list(tango_context.get_attribute_list()) == [

@@ -1,9 +1,15 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class TransportAdapter(ABC):
+    @property
     @abstractmethod
-    def run(self) -> None:
+    def options(self) -> Any:
+        pass
+
+    @abstractmethod
+    async def serve(self) -> None:
         pass
 
     @abstractmethod

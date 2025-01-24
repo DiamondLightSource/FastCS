@@ -23,7 +23,6 @@ class EpicsGUIOptions:
 
 @dataclass
 class EpicsIOCOptions:
-    terminal: bool = True
     pv_prefix: str = "MY-DEVICE-PREFIX"
 
 

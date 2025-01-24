@@ -1,0 +1,218 @@
+{
+  "$defs": {
+    "EpicsDocsOptions": {
+      "properties": {
+        "path": {
+          "default": "/home/esq51579/WIP/FastCS",
+          "format": "path",
+          "title": "Path",
+          "type": "string"
+        },
+        "depth": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Depth"
+        }
+      },
+      "title": "EpicsDocsOptions",
+      "type": "object"
+    },
+    "EpicsGUIFormat": {
+      "enum": [
+        ".bob",
+        ".edl"
+      ],
+      "title": "EpicsGUIFormat",
+      "type": "string"
+    },
+    "EpicsGUIOptions": {
+      "properties": {
+        "output_path": {
+          "default": "/home/esq51579/WIP/FastCS/output.bob",
+          "format": "path",
+          "title": "Output Path",
+          "type": "string"
+        },
+        "file_format": {
+          "$ref": "#/$defs/EpicsGUIFormat",
+          "default": ".bob"
+        },
+        "title": {
+          "default": "Simple Device",
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "title": "EpicsGUIOptions",
+      "type": "object"
+    },
+    "EpicsIOCOptions": {
+      "properties": {
+        "pv_prefix": {
+          "default": "MY-DEVICE-PREFIX",
+          "title": "Pv Prefix",
+          "type": "string"
+        }
+      },
+      "title": "EpicsIOCOptions",
+      "type": "object"
+    },
+    "EpicsOptions": {
+      "properties": {
+        "docs": {
+          "$ref": "#/$defs/EpicsDocsOptions"
+        },
+        "gui": {
+          "$ref": "#/$defs/EpicsGUIOptions"
+        },
+        "ioc": {
+          "$ref": "#/$defs/EpicsIOCOptions"
+        }
+      },
+      "title": "EpicsOptions",
+      "type": "object"
+    },
+    "GraphQLOptions": {
+      "properties": {
+        "gql": {
+          "$ref": "#/$defs/GraphQLServerOptions"
+        }
+      },
+      "title": "GraphQLOptions",
+      "type": "object"
+    },
+    "GraphQLServerOptions": {
+      "properties": {
+        "host": {
+          "default": "localhost",
+          "title": "Host",
+          "type": "string"
+        },
+        "port": {
+          "default": 8080,
+          "title": "Port",
+          "type": "integer"
+        },
+        "log_level": {
+          "default": "info",
+          "title": "Log Level",
+          "type": "string"
+        }
+      },
+      "title": "GraphQLServerOptions",
+      "type": "object"
+    },
+    "RestOptions": {
+      "properties": {
+        "rest": {
+          "$ref": "#/$defs/RestServerOptions"
+        }
+      },
+      "title": "RestOptions",
+      "type": "object"
+    },
+    "RestServerOptions": {
+      "properties": {
+        "host": {
+          "default": "localhost",
+          "title": "Host",
+          "type": "string"
+        },
+        "port": {
+          "default": 8080,
+          "title": "Port",
+          "type": "integer"
+        },
+        "log_level": {
+          "default": "info",
+          "title": "Log Level",
+          "type": "string"
+        }
+      },
+      "title": "RestServerOptions",
+      "type": "object"
+    },
+    "SomeConfig": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "SomeConfig",
+      "type": "object"
+    },
+    "TangoDSROptions": {
+      "properties": {
+        "dev_name": {
+          "default": "MY/DEVICE/NAME",
+          "title": "Dev Name",
+          "type": "string"
+        },
+        "dsr_instance": {
+          "default": "MY_SERVER_INSTANCE",
+          "title": "Dsr Instance",
+          "type": "string"
+        },
+        "debug": {
+          "default": false,
+          "title": "Debug",
+          "type": "boolean"
+        }
+      },
+      "title": "TangoDSROptions",
+      "type": "object"
+    },
+    "TangoOptions": {
+      "properties": {
+        "dsr": {
+          "$ref": "#/$defs/TangoDSROptions"
+        }
+      },
+      "title": "TangoOptions",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "controller": {
+      "$ref": "#/$defs/SomeConfig"
+    },
+    "transport": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/EpicsOptions"
+          },
+          {
+            "$ref": "#/$defs/TangoOptions"
+          },
+          {
+            "$ref": "#/$defs/RestOptions"
+          },
+          {
+            "$ref": "#/$defs/GraphQLOptions"
+          }
+        ]
+      },
+      "title": "Transport",
+      "type": "array"
+    }
+  },
+  "required": [
+    "controller",
+    "transport"
+  ],
+  "title": "IsHinted",
+  "type": "object"
+}

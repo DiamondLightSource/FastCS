@@ -7,7 +7,9 @@ from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from fastcs.__main__ import __version__
+from fastcs.attributes import AttrR
 from fastcs.controller import Controller
+from fastcs.datatypes import Int
 from fastcs.exceptions import LaunchError
 from fastcs.launch import TransportOptions, _launch, launch
 
@@ -28,6 +30,8 @@ class NotHinted(Controller):
 
 
 class IsHinted(Controller):
+    read = AttrR(Int())
+
     def __init__(self, arg: SomeConfig) -> None:
         super().__init__()
 
@@ -117,27 +121,13 @@ def test_no_version():
     assert result.stdout == expected
 
 
-def test_launch_minimal(mocker: MockerFixture, data):
-    run = mocker.patch("fastcs.launch.FastCS.run")
-    gui = mocker.patch("fastcs.launch.FastCS.create_gui")
-    docs = mocker.patch("fastcs.launch.FastCS.create_docs")
-
-    app = _launch(SingleArg)
-    result = runner.invoke(app, ["run", str(data / "config_minimal.yaml")])
-    assert result.exit_code == 0
-
-    run.assert_called_once()
-    gui.assert_not_called()
-    docs.assert_not_called()
-
-
-def test_launch_full(mocker: MockerFixture, data):
+def test_launch(mocker: MockerFixture, data):
     run = mocker.patch("fastcs.launch.FastCS.run")
     gui = mocker.patch("fastcs.launch.FastCS.create_gui")
     docs = mocker.patch("fastcs.launch.FastCS.create_docs")
 
     app = _launch(IsHinted)
-    result = runner.invoke(app, ["run", str(data / "config_full.yaml")])
+    result = runner.invoke(app, ["run", str(data / "config.yaml")])
     assert result.exit_code == 0
 
     run.assert_called_once()

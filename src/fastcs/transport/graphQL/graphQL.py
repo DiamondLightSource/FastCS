@@ -31,16 +31,17 @@ class GraphQLServer:
 
         return app
 
-    def run(self, options: GraphQLServerOptions | None = None) -> None:
-        if options is None:
-            options = GraphQLServerOptions()
-
-        uvicorn.run(
-            self._app,
-            host=options.host,
-            port=options.port,
-            log_level=options.log_level,
+    async def serve(self, options: GraphQLServerOptions | None = None) -> None:
+        options = options or GraphQLServerOptions()
+        self._server = uvicorn.Server(
+            uvicorn.Config(
+                app=self._app,
+                host=options.host,
+                port=options.port,
+                log_level=options.log_level,
+            )
         )
+        await self._server.serve()
 
 
 class GraphQLAPI:

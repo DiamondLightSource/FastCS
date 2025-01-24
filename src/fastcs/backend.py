@@ -1,10 +1,7 @@
 import asyncio
 from collections import defaultdict
 from collections.abc import Callable
-from concurrent.futures import Future
 from types import MethodType
-
-from softioc.asyncio_dispatcher import AsyncioDispatcher
 
 from .attributes import AttrR, AttrW, Sender, Updater
 from .controller import Controller, SingleMapping
@@ -15,19 +12,15 @@ class Backend:
     def __init__(
         self,
         controller: Controller,
-        loop: asyncio.AbstractEventLoop | None = None,
+        loop: asyncio.AbstractEventLoop,
     ):
-        self.dispatcher = AsyncioDispatcher(loop)
-        self._loop = self.dispatcher.loop
+        self._loop = loop
         self._controller = controller
 
         self._initial_coros = [controller.connect]
-        self._scan_futures: set[Future] = set()
+        self._scan_tasks: set[asyncio.Task] = set()
 
-        asyncio.run_coroutine_threadsafe(
-            self._controller.initialise(), self._loop
-        ).result()
-
+        loop.run_until_complete(self._controller.initialise())
         self._link_process_tasks()
 
     def _link_process_tasks(self):
@@ -36,28 +29,26 @@ class Backend:
             _link_attribute_sender_class(single_mapping)
 
     def __del__(self):
-        self.stop_scan_futures()
+        self._stop_scan_tasks()
 
-    def run(self):
-        self._run_initial_futures()
-        self.start_scan_futures()
+    async def serve(self):
+        await self._run_initial_coros()
+        await self._start_scan_tasks()
 
-    def _run_initial_futures(self):
+    async def _run_initial_coros(self):
         for coro in self._initial_coros:
-            future = asyncio.run_coroutine_threadsafe(coro(), self._loop)
-            future.result()
+            await coro()
 
-    def start_scan_futures(self):
-        self._scan_futures = {
-            asyncio.run_coroutine_threadsafe(coro(), self._loop)
-            for coro in _get_scan_coros(self._controller)
+    async def _start_scan_tasks(self):
+        self._scan_tasks = {
+            self._loop.create_task(coro()) for coro in _get_scan_coros(self._controller)
         }
 
-    def stop_scan_futures(self):
-        for future in self._scan_futures:
-            if not future.done():
+    def _stop_scan_tasks(self):
+        for task in self._scan_tasks:
+            if not task.done():
                 try:
-                    future.cancel()
+                    task.cancel()
                 except asyncio.CancelledError:
                     pass
 

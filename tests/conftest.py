@@ -1,6 +1,7 @@
 import copy
 import os
 import random
+import signal
 import string
 import subprocess
 import time
@@ -15,6 +16,7 @@ from pytest_mock import MockerFixture
 from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.transport.tango.dsr import register_dev
 from fastcs.wrappers import command, scan
 
 DATA_PATH = Path(__file__).parent / "data"
@@ -168,6 +170,7 @@ HERE = Path(os.path.dirname(os.path.abspath(__file__)))
 
 @pytest.fixture(scope="module")
 def ioc():
+    TIMEOUT = 10
     process = subprocess.Popen(
         ["python", HERE / "ioc.py"],
         stdin=subprocess.PIPE,
@@ -180,15 +183,84 @@ def ioc():
     while "iocRun: All initialization complete" not in (
         process.stdout.readline().strip()  # type: ignore
     ):
-        if time.monotonic() - start_time > 10:
+        if time.monotonic() - start_time > TIMEOUT:
             raise TimeoutError("IOC did not start in time")
 
     yield
 
     # close backend caches before the event loop
     purge_channel_caches()
-    try:
-        print(process.communicate("exit")[0])
-    except ValueError:
-        # Someone else already called communicate
-        pass
+
+    # Close open files
+    for f in [process.stdin, process.stdout, process.stderr]:
+        if f:
+            f.close()
+    process.send_signal(signal.SIGINT)
+    process.wait(TIMEOUT)
+
+
+@pytest.fixture(scope="session")
+def tango_system():
+    subprocess.run(
+        ["podman", "compose", "-f", HERE / "benchmarking" / "compose.yaml", "up", "-d"],
+        check=True,
+    )
+    yield
+    subprocess.run(
+        ["podman", "compose", "-f", HERE / "benchmarking" / "compose.yaml", "down"],
+        check=True,
+    )
+
+
+@pytest.fixture(scope="session")
+def register_device():
+    ATTEMPTS = 10
+    SLEEP = 1
+
+    if not os.getenv("TANGO_HOST"):
+        raise RuntimeError("TANGO_HOST not defined")
+
+    for attempt in range(1, ATTEMPTS + 1):
+        try:
+            register_dev(
+                dev_name="MY/BENCHMARK/DEVICE",
+                dev_class="TestController",
+                dsr_instance="MY_SERVER_INSTANCE",
+            )
+            break
+        except Exception:
+            time.sleep(SLEEP)
+        if attempt == ATTEMPTS:
+            raise TimeoutError("Tango device could not be registered")
+
+
+@pytest.fixture(scope="session")
+def test_controller(tango_system, register_device):
+    TIMEOUT = 10
+    process = subprocess.Popen(
+        ["python", HERE / "benchmarking" / "controller.py"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True,
+    )
+
+    start_time = time.monotonic()
+    while "Uvicorn running" not in (
+        process.stdout.readline().strip()  # type: ignore
+    ):
+        if time.monotonic() - start_time > TIMEOUT:
+            raise TimeoutError("Controller did not start in time")
+
+    # close backend caches before the event loop
+    purge_channel_caches()
+
+    # Stop buffer from getting full and blocking the subprocess
+    for f in [process.stdin, process.stdout, process.stderr]:
+        if f:
+            f.close()
+
+    yield process
+
+    process.send_signal(signal.SIGINT)
+    process.wait(TIMEOUT)
