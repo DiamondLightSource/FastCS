@@ -1,5 +1,5 @@
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Coroutine
 from typing import Any
 
 import tango
@@ -33,29 +33,33 @@ def _tango_display_format(attribute: Attribute) -> str:
     return "6.2f"  # `tango.server.attribute` default for `format`
 
 
+async def _run_threadsafe_blocking(
+    coro: Coroutine[Any, Any, Any], loop: asyncio.AbstractEventLoop
+) -> None:
+    """
+    Wraps a concurrent.futures.Future object as an
+    asyncio.Future to make it awaitable and then awaits it
+    """
+    future = asyncio.run_coroutine_threadsafe(coro, loop)
+    await asyncio.wrap_future(future)
+
+
 def _wrap_updater_fset(
     attr_name: str,
     attribute: AttrW,
     controller: BaseController,
-    loop: asyncio.AbstractEventLoop | None = None,
+    loop: asyncio.AbstractEventLoop,
 ) -> Callable[[Any, Any], Any]:
-    if loop:
-
-        async def fset(tango_device: Device, val):
-            tango_device.info_stream(f"called fset method: {attr_name}")
-            future = asyncio.run_coroutine_threadsafe(attribute.process(val), loop)
-            await asyncio.wrap_future(future)
-    else:
-
-        async def fset(tango_device: Device, val):
-            tango_device.info_stream(f"called fset method: {attr_name}")
-            await attribute.process(val)
+    async def fset(tango_device: Device, val):
+        tango_device.info_stream(f"called fset method: {attr_name}")
+        coro = attribute.process(val)
+        await _run_threadsafe_blocking(coro, loop)
 
     return fset
 
 
 def _collect_dev_attributes(
-    controller: BaseController, loop: asyncio.AbstractEventLoop | None = None
+    controller: BaseController, loop: asyncio.AbstractEventLoop
 ) -> dict[str, Any]:
     collection: dict[str, Any] = {}
     for single_mapping in controller.get_controller_mappings():
@@ -107,26 +111,14 @@ def _wrap_command_f(
     method_name: str,
     method: Callable,
     controller: BaseController,
-    loop: asyncio.AbstractEventLoop | None = None,
+    loop: asyncio.AbstractEventLoop,
 ) -> Callable[..., Awaitable[None]]:
-    if loop:
-
-        async def _dynamic_f(tango_device: Device) -> None:
-            tango_device.info_stream(
-                f"called {'_'.join(controller.path)} f method: {method_name}"
-            )
-            coro = getattr(controller, method.__name__)()
-            future = asyncio.run_coroutine_threadsafe(coro, loop)
-            await asyncio.wrap_future(future)
-
-    else:
-
-        async def _dynamic_f(tango_device: Device) -> None:
-            tango_device.info_stream(
-                f"called {'_'.join(controller.path)} f method: {method_name}"
-            )
-            coro = getattr(controller, method.__name__)()
-            await coro
+    async def _dynamic_f(tango_device: Device) -> None:
+        tango_device.info_stream(
+            f"called {'_'.join(controller.path)} f method: {method_name}"
+        )
+        coro = getattr(controller, method.__name__)()
+        await _run_threadsafe_blocking(coro, loop)
 
     _dynamic_f.__name__ = method_name
     return _dynamic_f
@@ -134,7 +126,7 @@ def _wrap_command_f(
 
 def _collect_dev_commands(
     controller: BaseController,
-    loop: asyncio.AbstractEventLoop | None = None,
+    loop: asyncio.AbstractEventLoop,
 ) -> dict[str, Any]:
     collection: dict[str, Any] = {}
     for single_mapping in controller.get_controller_mappings():
@@ -186,7 +178,7 @@ class TangoDSR:
     def __init__(
         self,
         controller: BaseController,
-        loop: asyncio.AbstractEventLoop | None = None,
+        loop: asyncio.AbstractEventLoop,
     ):
         self._controller = controller
         self._loop = loop

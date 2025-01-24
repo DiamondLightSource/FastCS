@@ -11,7 +11,7 @@ class TangoTransport(TransportAdapter):
     def __init__(
         self,
         controller: Controller,
-        loop: asyncio.AbstractEventLoop | None = None,
+        loop: asyncio.AbstractEventLoop,
         options: TangoOptions | None = None,
     ):
         self._options = options or TangoOptions()
