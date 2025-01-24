@@ -1,15 +1,10 @@
 import asyncio
-from collections.abc import Awaitable, Callable
-from typing import Any
 from unittest import mock
 
 import pytest
 from tango import DevState
-from tango.server import Device
 from tango.test_context import DeviceTestContext
 
-from fastcs.attributes import AttrW
-from fastcs.controller import BaseController
 from fastcs.transport.tango.adapter import TangoTransport
 
 
