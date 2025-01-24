@@ -2,7 +2,7 @@ import asyncio
 import inspect
 import json
 from pathlib import Path
-from typing import Annotated, Optional, TypeAlias, get_type_hints
+from typing import Annotated, Any, Optional, TypeAlias, get_type_hints
 
 import typer
 from pydantic import BaseModel, create_model
@@ -231,3 +231,9 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
             f".__init__' but received {len(args)} as `{sig}`"
         )
     return fastcs_options
+
+
+def get_controller_schema(target: type[Controller]) -> dict[str, Any]:
+    options_model = _extract_options_model(target)
+    target_schema = options_model.model_json_schema()
+    return target_schema
