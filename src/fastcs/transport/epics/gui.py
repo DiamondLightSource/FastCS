@@ -116,6 +116,7 @@ class EpicsGUI:
             raise FastCSException("FastCS does not support .edl screens.")
 
         assert options.output_path.suffix == options.file_format.value
+        options.output_path.parent.mkdir(parents=True, exist_ok=True)
 
         controller_mapping = self._controller.get_controller_mappings()[0]
         components = self.extract_mapping_components(controller_mapping)
