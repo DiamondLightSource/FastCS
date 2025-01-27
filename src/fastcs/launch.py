@@ -77,7 +77,7 @@ class FastCS:
     def create_gui(self) -> None:
         for transport in self._transports:
             if hasattr(transport.options, "gui"):
-                transport.create_docs()
+                transport.create_gui()
 
     def run(self):
         self._loop.run_until_complete(
