@@ -1,7 +1,6 @@
 import asyncio
-from unittest import mock
-
 import enum
+from unittest import mock
 
 import numpy as np
 import pytest
@@ -22,6 +21,8 @@ from fastcs.transport.tango.adapter import TangoTransport
 
 async def patch_run_threadsafe_blocking(coro, loop):
     await coro
+
+
 class TangoAssertableController(AssertableController):
     read_int = AttrR(Int(), handler=TestUpdater())
     read_write_int = AttrRW(Int(), handler=TestHandler())
@@ -32,6 +33,11 @@ class TangoAssertableController(AssertableController):
     enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
     one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
     two_d_waveform = AttrRW(WaveForm(np.int32, (10, 10)))
+
+
+@pytest.fixture(scope="class")
+def assertable_controller(class_mocker: MockerFixture):
+    return TangoAssertableController(class_mocker)
 
 
 class TestTangoDevice:

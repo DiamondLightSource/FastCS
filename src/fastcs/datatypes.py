@@ -8,6 +8,7 @@ from functools import cached_property
 from typing import Generic, TypeVar
 
 import numpy as np
+from numpy.typing import DTypeLike
 
 T = TypeVar("T", int, float, bool, str, enum.Enum, np.ndarray)
 
@@ -138,7 +139,7 @@ class Enum(Generic[T_Enum], DataType[T_Enum]):
 
 @dataclass(frozen=True)
 class WaveForm(DataType[np.ndarray]):
-    array_dtype: np.typing.DTypeLike
+    array_dtype: DTypeLike
     shape: tuple[int, ...] = (2000,)
 
     @property

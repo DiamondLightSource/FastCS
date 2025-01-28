@@ -10,9 +10,9 @@ from fastcs.controller import BaseController, Controller
 
 from .options import RestServerOptions
 from .util import (
+    cast_from_rest_type,
+    cast_to_rest_type,
     convert_datatype,
-    get_cast_method_from_rest_type,
-    get_cast_method_to_rest_type,
 )
 
 
@@ -58,10 +58,8 @@ def _put_request_body(attribute: AttrW[T]):
 def _wrap_attr_put(
     attribute: AttrW[T],
 ) -> Callable[[T], Coroutine[Any, Any, None]]:
-    cast_method = get_cast_method_from_rest_type(attribute.datatype)
-
     async def attr_set(request):
-        await attribute.process(cast_method(request.value))
+        await attribute.process(cast_from_rest_type(attribute.datatype, request.value))
 
     # Fast api uses type annotations for validation, schema, conversions
     attr_set.__annotations__["request"] = _put_request_body(attribute)
@@ -86,11 +84,9 @@ def _get_response_body(attribute: AttrR[T]):
 def _wrap_attr_get(
     attribute: AttrR[T],
 ) -> Callable[[], Coroutine[Any, Any, Any]]:
-    cast_method = get_cast_method_to_rest_type(attribute.datatype)
-
     async def attr_get() -> Any:  # Must be any as response_model is set
         value = attribute.get()  # type: ignore
-        return {"value": cast_method(value)}
+        return {"value": cast_to_rest_type(attribute.datatype, value)}
 
     return attr_get
 

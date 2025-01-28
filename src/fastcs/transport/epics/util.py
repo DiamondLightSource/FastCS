@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from dataclasses import asdict
 
 from softioc import builder
@@ -78,35 +77,24 @@ def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
     return arguments
 
 
-def get_callable_from_epics_type(datatype: DataType[T]) -> Callable[[object], T]:
+def cast_from_epics_type(datatype: DataType[T], value: object) -> T:
     match datatype:
         case Enum():
-
-            def cast_from_epics_type(value: object) -> T:
-                return datatype.validate(datatype.members[value])
-
+            return datatype.validate(datatype.members[value])
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
-
-            def cast_from_epics_type(value) -> T:
-                return datatype.validate(value)
+            return datatype.validate(value)  # type: ignore
         case _:
             raise ValueError(f"Unsupported datatype {datatype}")
-    return cast_from_epics_type
 
 
-def get_callable_to_epics_type(datatype: DataType[T]) -> Callable[[T], object]:
+def cast_to_epics_type(datatype: DataType[T], value: T) -> object:
     match datatype:
         case Enum():
-
-            def cast_to_epics_type(value) -> object:
-                return datatype.index_of(datatype.validate(value))
+            return datatype.index_of(datatype.validate(value))
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
-
-            def cast_to_epics_type(value) -> object:
-                return datatype.validate(value)
+            return datatype.validate(value)
         case _:
             raise ValueError(f"Unsupported datatype {datatype}")
-    return cast_to_epics_type
 
 
 def builder_callable_from_attribute(

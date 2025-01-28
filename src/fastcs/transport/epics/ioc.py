@@ -1,5 +1,4 @@
 import asyncio
-import warnings
 from collections.abc import Callable
 from types import MethodType
 from typing import Any, Literal
@@ -13,8 +12,8 @@ from fastcs.controller import BaseController, Controller
 from fastcs.datatypes import DataType, T
 from fastcs.transport.epics.util import (
     builder_callable_from_attribute,
-    get_callable_from_epics_type,
-    get_callable_to_epics_type,
+    cast_from_epics_type,
+    cast_to_epics_type,
     record_metadata_from_attribute,
     record_metadata_from_datatype,
 )
@@ -154,10 +153,8 @@ def _create_and_link_attribute_pvs(pv_prefix: str, controller: Controller) -> No
 def _create_and_link_read_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
 ) -> None:
-    cast_to_epics_type = get_callable_to_epics_type(attribute.datatype)
-
     async def async_record_set(value: T):
-        record.set(cast_to_epics_type(value))
+        record.set(cast_to_epics_type(attribute.datatype, value))
 
     record = _make_record(f"{pv_prefix}:{pv_name}", attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
@@ -191,14 +188,13 @@ def _make_record(
 def _create_and_link_write_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW[T]
 ) -> None:
-    cast_from_epics_type = get_callable_from_epics_type(attribute.datatype)
-    cast_to_epics_type = get_callable_to_epics_type(attribute.datatype)
-
     async def on_update(value):
-        await attribute.process_without_display_update(cast_from_epics_type(value))
+        await attribute.process_without_display_update(
+            cast_from_epics_type(attribute.datatype, value)
+        )
 
     async def async_write_display(value: T):
-        record.set(cast_to_epics_type(value), process=False)
+        record.set(cast_to_epics_type(attribute.datatype, value), process=False)
 
     record = _make_record(f"{pv_prefix}:{pv_name}", attribute, on_update=on_update)
 

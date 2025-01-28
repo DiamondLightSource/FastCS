@@ -11,8 +11,8 @@ from fastcs.controller import BaseController
 
 from .options import TangoDSROptions
 from .util import (
-    get_cast_method_from_tango_type,
-    get_cast_method_to_tango_type,
+    cast_from_tango_type,
+    cast_to_tango_type,
     get_server_metadata_from_attribute,
     get_server_metadata_from_datatype,
 )
@@ -23,21 +23,11 @@ def _wrap_updater_fget(
     attribute: AttrR,
     controller: BaseController,
 ) -> Callable[[Any], Any]:
-    cast_method = get_cast_method_to_tango_type(attribute.datatype)
-
     async def fget(tango_device: Device):
         tango_device.info_stream(f"called fget method: {attr_name}")
-        return cast_method(attribute.get())
+        return cast_to_tango_type(attribute.datatype, attribute.get())
 
     return fget
-
-
-def _tango_display_format(attribute: Attribute) -> str:
-    match attribute.datatype:
-        case Float(prec):
-            return f"%.{prec}"
-
-    return "6.2f"  # `tango.server.attribute` default for `format`
 
 
 async def _run_threadsafe_blocking(
@@ -57,11 +47,9 @@ def _wrap_updater_fset(
     controller: BaseController,
     loop: asyncio.AbstractEventLoop,
 ) -> Callable[[Any, Any], Any]:
-    cast_method = get_cast_method_from_tango_type(attribute.datatype)
-
-    async def fset(tango_device: Device, val):
+    async def fset(tango_device: Device, value):
         tango_device.info_stream(f"called fset method: {attr_name}")
-        coro = attribute.process(val)
+        coro = attribute.process(cast_from_tango_type(attribute.datatype, value))
         await _run_threadsafe_blocking(coro, loop)
 
     return fset

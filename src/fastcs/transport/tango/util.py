@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from dataclasses import asdict
 from typing import Any
 
@@ -61,33 +60,21 @@ def get_server_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
     return arguments
 
 
-def get_cast_method_to_tango_type(datatype: DataType[T]) -> Callable[[T], object]:
+def cast_to_tango_type(datatype: DataType[T], value: T) -> object:
     match datatype:
         case Enum():
-
-            def cast_to_tango_type(value) -> int:
-                return datatype.index_of(datatype.validate(value))
+            return datatype.index_of(datatype.validate(value))
         case datatype if issubclass(type(datatype), TANGO_ALLOWED_DATATYPES):
-
-            def cast_to_tango_type(value) -> object:
-                return datatype.validate(value)
-        case _:
-            raise ValueError(f"Unsupported datatype {datatype}")
-    return cast_to_tango_type
-
-
-def get_cast_method_from_tango_type(datatype: DataType[T]) -> Callable[[object], T]:
-    match datatype:
-        case Enum():
-
-            def cast_from_tango_type(value: object) -> T:
-                return datatype.validate(datatype.members[value])
-
-        case datatype if issubclass(type(datatype), TANGO_ALLOWED_DATATYPES):
-
-            def cast_from_tango_type(value) -> T:
-                return datatype.validate(value)
+            return datatype.validate(value)
         case _:
             raise ValueError(f"Unsupported datatype {datatype}")
 
-    return cast_from_tango_type
+
+def cast_from_tango_type(datatype: DataType[T], value: object) -> T:
+    match datatype:
+        case Enum():
+            return datatype.validate(datatype.members[value])
+        case datatype if issubclass(type(datatype), TANGO_ALLOWED_DATATYPES):
+            return datatype.validate(value)  # type: ignore
+        case _:
+            raise ValueError(f"Unsupported datatype {datatype}")

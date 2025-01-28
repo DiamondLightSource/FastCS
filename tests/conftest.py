@@ -10,14 +10,9 @@ from typing import Any
 import pytest
 from aioca import purge_channel_caches
 
-from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
-from fastcs.controller import Controller, SubController
-from fastcs.datatypes import Bool, Float, Int, String
-from fastcs.transport.tango.dsr import register_dev
-from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
-from fastcs.wrappers import command, scan
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.transport.tango.dsr import register_dev
 from tests.assertable_controller import (
     TestController,
     TestHandler,

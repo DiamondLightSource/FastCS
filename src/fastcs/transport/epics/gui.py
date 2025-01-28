@@ -85,7 +85,7 @@ class EpicsGUI:
             case AttrRW():
                 read_widget = self._get_read_widget(attribute)
                 write_widget = self._get_write_widget(attribute)
-                if write_widget is None or write_widget is None:
+                if write_widget is None or read_widget is None:
                     return None
                 return SignalRW(
                     name=name,
