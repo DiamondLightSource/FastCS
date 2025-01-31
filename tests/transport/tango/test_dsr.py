@@ -1,15 +1,43 @@
 import asyncio
+import enum
 from unittest import mock
 
+import numpy as np
 import pytest
+from pytest_mock import MockerFixture
 from tango import DevState
 from tango.test_context import DeviceTestContext
+from tests.assertable_controller import (
+    AssertableController,
+    TestHandler,
+    TestSender,
+    TestUpdater,
+)
 
+from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.transport.tango.adapter import TangoTransport
 
 
 async def patch_run_threadsafe_blocking(coro, loop):
     await coro
+
+
+class TangoAssertableController(AssertableController):
+    read_int = AttrR(Int(), handler=TestUpdater())
+    read_write_int = AttrRW(Int(), handler=TestHandler())
+    read_write_float = AttrRW(Float())
+    read_bool = AttrR(Bool())
+    write_bool = AttrW(Bool(), handler=TestSender())
+    read_string = AttrRW(String())
+    enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
+    one_d_waveform = AttrRW(Waveform(np.int32, (10,)))
+    two_d_waveform = AttrRW(Waveform(np.int32, (10, 10)))
+
+
+@pytest.fixture(scope="class")
+def assertable_controller(class_mocker: MockerFixture):
+    return TangoAssertableController(class_mocker)
 
 
 class TestTangoDevice:
@@ -28,12 +56,14 @@ class TestTangoDevice:
 
     def test_list_attributes(self, tango_context):
         assert list(tango_context.get_attribute_list()) == [
-            "BigEnum",
+            "Enum",
+            "OneDWaveform",
             "ReadBool",
             "ReadInt",
+            "ReadString",
             "ReadWriteFloat",
             "ReadWriteInt",
-            "StringEnum",
+            "TwoDWaveform",
             "WriteBool",
             "SubController01_ReadInt",
             "SubController02_ReadInt",
@@ -92,21 +122,41 @@ class TestTangoDevice:
         with assertable_controller.assert_write_here(["write_bool"]):
             tango_context.write_attribute("WriteBool", True)
 
-    def test_string_enum(self, assertable_controller, tango_context):
-        expect = ""
-        with assertable_controller.assert_read_here(["string_enum"]):
-            result = tango_context.read_attribute("StringEnum").value
-        assert result == expect
-        new = "new"
-        with assertable_controller.assert_write_here(["string_enum"]):
-            tango_context.write_attribute("StringEnum", new)
-        assert tango_context.read_attribute("StringEnum").value == new
-
-    def test_big_enum(self, assertable_controller, tango_context):
+    def test_enum(self, assertable_controller, tango_context):
+        enum_attr = assertable_controller.attributes["enum"]
+        enum_cls = enum_attr.datatype.dtype
+        assert isinstance(enum_attr.get(), enum_cls)
+        assert enum_attr.get() == enum_cls(0)
         expect = 0
-        with assertable_controller.assert_read_here(["big_enum"]):
-            result = tango_context.read_attribute("BigEnum").value
+        with assertable_controller.assert_read_here(["enum"]):
+            result = tango_context.read_attribute("Enum").value
         assert result == expect
+        new = 1
+        with assertable_controller.assert_write_here(["enum"]):
+            tango_context.write_attribute("Enum", new)
+        assert tango_context.read_attribute("Enum").value == new
+        assert isinstance(enum_attr.get(), enum_cls)
+        assert enum_attr.get() == enum_cls(1)
+
+    def test_1d_waveform(self, assertable_controller, tango_context):
+        expect = np.zeros((10,), dtype=np.int32)
+        with assertable_controller.assert_read_here(["one_d_waveform"]):
+            result = tango_context.read_attribute("OneDWaveform").value
+        assert np.array_equal(result, expect)
+        new = np.array([1, 2, 3], dtype=np.int32)
+        with assertable_controller.assert_write_here(["one_d_waveform"]):
+            tango_context.write_attribute("OneDWaveform", new)
+        assert np.array_equal(tango_context.read_attribute("OneDWaveform").value, new)
+
+    def test_2d_waveform(self, assertable_controller, tango_context):
+        expect = np.zeros((10, 10), dtype=np.int32)
+        with assertable_controller.assert_read_here(["two_d_waveform"]):
+            result = tango_context.read_attribute("TwoDWaveform").value
+        assert np.array_equal(result, expect)
+        new = np.array([[1, 2, 3]], dtype=np.int32)
+        with assertable_controller.assert_write_here(["two_d_waveform"]):
+            tango_context.write_attribute("TwoDWaveform", new)
+        assert np.array_equal(tango_context.read_attribute("TwoDWaveform").value, new)
 
     def test_go(self, assertable_controller, tango_context):
         with assertable_controller.assert_execute_here(["go"]):

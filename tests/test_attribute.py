@@ -1,10 +1,11 @@
 from functools import partial
 
+import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.datatypes import Int, String
+from fastcs.datatypes import Enum, Float, Int, String, Waveform
 
 
 @pytest.mark.asyncio
@@ -57,3 +58,22 @@ async def test_simple_handler_rw(mocker: MockerFixture):
     update_display_mock.assert_called_once_with(1)
     # The Sender of the attribute should just set the value on the attribute
     set_mock.assert_awaited_once_with(1)
+
+
+@pytest.mark.parametrize(
+    ["datatype", "init_args", "value"],
+    [
+        (Int, {"min": 1}, 0),
+        (Int, {"max": -1}, 0),
+        (Float, {"min": 1}, 0.0),
+        (Float, {"max": -1}, 0.0),
+        (Float, {}, 0),
+        (String, {}, 0),
+        (Enum, {"enum_cls": int}, 0),
+        (Waveform, {"array_dtype": "U64", "shape": (1,)}, np.ndarray([1])),
+        (Waveform, {"array_dtype": "float64", "shape": (1, 1)}, np.ndarray([1])),
+    ],
+)
+def test_validate(datatype, init_args, value):
+    with pytest.raises(ValueError):
+        datatype(**init_args).validate(value)

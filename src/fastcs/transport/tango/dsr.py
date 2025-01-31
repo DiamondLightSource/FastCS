@@ -6,11 +6,16 @@ import tango
 from tango import AttrWriteType, Database, DbDevInfo, DevState, server
 from tango.server import Device
 
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController
-from fastcs.datatypes import Float
 
 from .options import TangoDSROptions
+from .util import (
+    cast_from_tango_type,
+    cast_to_tango_type,
+    get_server_metadata_from_attribute,
+    get_server_metadata_from_datatype,
+)
 
 
 def _wrap_updater_fget(
@@ -20,17 +25,9 @@ def _wrap_updater_fget(
 ) -> Callable[[Any], Any]:
     async def fget(tango_device: Device):
         tango_device.info_stream(f"called fget method: {attr_name}")
-        return attribute.get()
+        return cast_to_tango_type(attribute.datatype, attribute.get())
 
     return fget
-
-
-def _tango_display_format(attribute: Attribute) -> str:
-    match attribute.datatype:
-        case Float(prec):
-            return f"%.{prec}"
-
-    return "6.2f"  # `tango.server.attribute` default for `format`
 
 
 async def _run_threadsafe_blocking(
@@ -50,9 +47,9 @@ def _wrap_updater_fset(
     controller: BaseController,
     loop: asyncio.AbstractEventLoop,
 ) -> Callable[[Any, Any], Any]:
-    async def fset(tango_device: Device, val):
+    async def fset(tango_device: Device, value):
         tango_device.info_stream(f"called fset method: {attr_name}")
-        coro = attribute.process(val)
+        coro = attribute.process(cast_from_tango_type(attribute.datatype, value))
         await _run_threadsafe_blocking(coro, loop)
 
     return fset
@@ -73,7 +70,6 @@ def _collect_dev_attributes(
                 case AttrRW():
                     collection[d_attr_name] = server.attribute(
                         label=d_attr_name,
-                        dtype=attribute.datatype.dtype,
                         fget=_wrap_updater_fget(
                             attr_name, attribute, single_mapping.controller
                         ),
@@ -81,27 +77,28 @@ def _collect_dev_attributes(
                             attr_name, attribute, single_mapping.controller, loop
                         ),
                         access=AttrWriteType.READ_WRITE,
-                        format=_tango_display_format(attribute),
+                        **get_server_metadata_from_attribute(attribute),
+                        **get_server_metadata_from_datatype(attribute.datatype),
                     )
                 case AttrR():
                     collection[d_attr_name] = server.attribute(
                         label=d_attr_name,
-                        dtype=attribute.datatype.dtype,
                         access=AttrWriteType.READ,
                         fget=_wrap_updater_fget(
                             attr_name, attribute, single_mapping.controller
                         ),
-                        format=_tango_display_format(attribute),
+                        **get_server_metadata_from_attribute(attribute),
+                        **get_server_metadata_from_datatype(attribute.datatype),
                     )
                 case AttrW():
                     collection[d_attr_name] = server.attribute(
                         label=d_attr_name,
-                        dtype=attribute.datatype.dtype,
                         access=AttrWriteType.WRITE,
                         fset=_wrap_updater_fset(
                             attr_name, attribute, single_mapping.controller, loop
                         ),
-                        format=_tango_display_format(attribute),
+                        **get_server_metadata_from_attribute(attribute),
+                        **get_server_metadata_from_datatype(attribute.datatype),
                     )
 
     return collection
@@ -213,10 +210,7 @@ class TangoDSR:
 
 def register_dev(dev_name: str, dev_class: str, dsr_instance: str) -> None:
     dsr_name = f"{dev_class}/{dsr_instance}"
-    dev_info = DbDevInfo()
-    dev_info.name = dev_name
-    dev_info._class = dev_class  # noqa
-    dev_info.server = dsr_name
+    dev_info = DbDevInfo(dev_name, dev_class, dsr_name)
 
     db = Database()
     db.delete_device(dev_name)  # Remove existing device entry

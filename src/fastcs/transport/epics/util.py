@@ -1,5 +1,10 @@
-from fastcs.attributes import Attribute
-from fastcs.datatypes import String, T
+from dataclasses import asdict
+
+from softioc import builder
+
+from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, Waveform
+from fastcs.exceptions import FastCSException
 
 _MBB_FIELD_PREFIXES = (
     "ZR",
@@ -25,75 +30,93 @@ MBB_VALUE_FIELDS = tuple(f"{p}VL" for p in _MBB_FIELD_PREFIXES)
 MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
-def attr_is_enum(attribute: Attribute) -> bool:
-    """Check if the `Attribute` has a `String` datatype and has `allowed_values` set.
+EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, Waveform)
 
-    Args:
-        attribute: The `Attribute` to check
+DATATYPE_FIELD_TO_RECORD_FIELD = {
+    "prec": "PREC",
+    "units": "EGU",
+    "min": "DRVL",
+    "max": "DRVH",
+    "min_alarm": "LOPR",
+    "max_alarm": "HOPR",
+}
 
-    Returns:
-        `True` if `Attribute` is an enum, else `False`
 
-    """
-    match attribute:
-        case Attribute(datatype=String(), allowed_values=allowed_values) if (
-            allowed_values is not None and len(allowed_values) <= MBB_MAX_CHOICES
-        ):
-            return True
+def record_metadata_from_attribute(
+    attribute: Attribute[T],
+) -> dict[str, str | None]:
+    return {"DESC": attribute.description}
+
+
+def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
+    arguments = {
+        DATATYPE_FIELD_TO_RECORD_FIELD[field]: value
+        for field, value in asdict(datatype).items()
+        if field in DATATYPE_FIELD_TO_RECORD_FIELD
+    }
+
+    match datatype:
+        case Waveform():
+            if len(datatype.shape) != 1:
+                raise TypeError(
+                    f"Unsupported shape {datatype.shape}, the EPICS backend only "
+                    "supports to 1D arrays"
+                )
+            arguments["length"] = datatype.shape[0]
+        case Enum():
+            if len(datatype.members) <= MBB_MAX_CHOICES:
+                state_keys = dict(
+                    zip(
+                        MBB_STATE_FIELDS,
+                        [member.name for member in datatype.members],
+                        strict=False,
+                    )
+                )
+                arguments.update(state_keys)
+
+    return arguments
+
+
+def cast_from_epics_type(datatype: DataType[T], value: object) -> T:
+    match datatype:
+        case Enum():
+            return datatype.validate(datatype.members[value])
+        case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
+            return datatype.validate(value)  # type: ignore
         case _:
-            return False
+            raise ValueError(f"Unsupported datatype {datatype}")
 
 
-def enum_value_to_index(attribute: Attribute[T], value: T) -> int:
-    """Convert the given value to the index within the allowed_values of the Attribute
-
-    Args:
-        `attribute`: The attribute
-        `value`: The value to convert
-
-    Returns:
-        The index of the `value`
-
-    Raises:
-        ValueError: If `attribute` has no allowed values or `value` is not a valid
-            option
-
-    """
-    if attribute.allowed_values is None:
-        raise ValueError(
-            "Cannot convert value to index for Attribute without allowed values"
-        )
-
-    try:
-        return attribute.allowed_values.index(value)
-    except ValueError:
-        raise ValueError(
-            f"{value} not in allowed values of {attribute}: {attribute.allowed_values}"
-        ) from None
+def cast_to_epics_type(datatype: DataType[T], value: T) -> object:
+    match datatype:
+        case Enum():
+            return datatype.index_of(datatype.validate(value))
+        case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
+            return datatype.validate(value)
+        case _:
+            raise ValueError(f"Unsupported datatype {datatype}")
 
 
-def enum_index_to_value(attribute: Attribute[T], index: int) -> T:
-    """Lookup the value from the allowed_values of an attribute at the given index.
-
-    Parameters:
-        attribute: The `Attribute` to lookup the index from
-        index: The index of the value to retrieve
-
-    Returns:
-        The value at the specified index in the allowed values list.
-
-    Raises:
-        IndexError: If the index is out of bounds
-
-    """
-    if attribute.allowed_values is None:
-        raise ValueError(
-            "Cannot lookup value by index for Attribute without allowed values"
-        )
-
-    try:
-        return attribute.allowed_values[index]
-    except IndexError:
-        raise IndexError(
-            f"Invalid index {index} into allowed values: {attribute.allowed_values}"
-        ) from None
+def builder_callable_from_attribute(
+    attribute: AttrR | AttrW | AttrRW, make_in_record: bool
+):
+    match attribute.datatype:
+        case Bool():
+            return builder.boolIn if make_in_record else builder.boolOut
+        case Int():
+            return builder.longIn if make_in_record else builder.longOut
+        case Float():
+            return builder.aIn if make_in_record else builder.aOut
+        case String():
+            return builder.longStringIn if make_in_record else builder.longStringOut
+        case Enum():
+            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
+                return builder.longIn if make_in_record else builder.longOut
+            else:
+                return builder.mbbIn if make_in_record else builder.mbbOut
+        case Waveform():
+            return builder.WaveformIn if make_in_record else builder.WaveformOut
+        case _:
+            raise FastCSException(
+                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
+            )

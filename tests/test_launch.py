@@ -97,7 +97,7 @@ def test_over_defined_schema():
     error = (
         ""
         "Expected no more than 2 arguments for 'ManyArgs.__init__' "
-        "but received 3 as `(self, arg: test_launch.SomeConfig, too_many)`"
+        "but received 3 as `(self, arg: tests.test_launch.SomeConfig, too_many)`"
     )
 
     with pytest.raises(LaunchError) as exc_info:
