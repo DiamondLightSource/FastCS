@@ -1,17 +1,25 @@
+import numpy as np
+import pytest
 from pvi.device import (
     LED,
     ButtonPanel,
+    ComboBox,
     Group,
     SignalR,
     SignalRW,
     SignalW,
     SignalX,
     SubScreen,
+    TextFormat,
     TextRead,
     TextWrite,
     ToggleButton,
 )
+from tests.util import ColourEnum
 
+from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controller import Controller
+from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.transport.epics.gui import EpicsGUI
 
 
@@ -21,6 +29,61 @@ def test_get_pv(controller):
     assert gui._get_pv([], "A") == "DEVICE:A"
     assert gui._get_pv(["B"], "C") == "DEVICE:B:C"
     assert gui._get_pv(["D", "E"], "F") == "DEVICE:D:E:F"
+
+
+@pytest.mark.parametrize(
+    "datatype, widget",
+    [
+        (Bool(), LED()),
+        (Int(), TextRead()),
+        (Float(), TextRead()),
+        (String(), TextRead(format=TextFormat.string)),
+        (Enum(ColourEnum), TextRead(format=TextFormat.string)),
+        # (Waveform(array_dtype=np.int32), None),
+    ],
+)
+def test_get_attribute_component_r(datatype, widget, controller):
+    gui = EpicsGUI(controller, "DEVICE")
+
+    assert gui._get_attribute_component([], "Attr", AttrR(datatype)) == SignalR(
+        name="Attr", read_pv="Attr", read_widget=widget
+    )
+
+
+@pytest.mark.parametrize(
+    "datatype, widget",
+    [
+        (Bool(), ToggleButton()),
+        (Int(), TextWrite()),
+        (Float(), TextWrite()),
+        (String(), TextWrite(format=TextFormat.string)),
+        (Enum(ColourEnum), ComboBox(choices=["RED", "GREEN", "BLUE"])),
+    ],
+)
+def test_get_attribute_component_w(datatype, widget, controller):
+    gui = EpicsGUI(controller, "DEVICE")
+
+    assert gui._get_attribute_component([], "Attr", AttrW(datatype)) == SignalW(
+        name="Attr", write_pv="Attr", write_widget=widget
+    )
+
+
+def test_get_attribute_component_none(mocker, controller):
+    gui = EpicsGUI(controller, "DEVICE")
+
+    mocker.patch.object(gui, "_get_read_widget", return_value=None)
+    mocker.patch.object(gui, "_get_write_widget", return_value=None)
+    assert gui._get_attribute_component([], "Attr", AttrR(Int())) is None
+    assert gui._get_attribute_component([], "Attr", AttrW(Int())) is None
+    assert gui._get_attribute_component([], "Attr", AttrRW(Int())) is None
+
+
+def test_get_read_widget_none():
+    assert EpicsGUI._get_read_widget(AttrR(Waveform(np.int32))) is None
+
+
+def test_get_write_widget_none():
+    assert EpicsGUI._get_write_widget(AttrW(Waveform(np.int32))) is None
 
 
 def test_get_components(controller):
@@ -87,3 +150,18 @@ def test_get_components(controller):
             value="1",
         ),
     ]
+
+
+def test_get_components_none(mocker):
+    """Test that if _get_attribute_component returns none it is skipped"""
+
+    class TestController(Controller):
+        attr = AttrR(Int())
+
+    controller = TestController()
+    gui = EpicsGUI(controller, "DEVICE")
+    mocker.patch.object(gui, "_get_attribute_component", return_value=None)
+
+    components = gui.extract_mapping_components(controller.get_controller_mappings()[0])
+
+    assert components == []

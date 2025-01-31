@@ -10,6 +10,7 @@ from tests.assertable_controller import (
     TestSender,
     TestUpdater,
 )
+from tests.util import ColourEnum
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
@@ -68,12 +69,6 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
     await record_set_callback(1)
 
     record.set.assert_called_once_with(1)
-
-
-class ColourEnum(enum.IntEnum):
-    RED = 0
-    GREEN = 1
-    BLUE = 2
 
 
 @pytest.mark.parametrize(
