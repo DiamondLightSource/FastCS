@@ -3,7 +3,7 @@ from dataclasses import asdict
 from softioc import builder
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, WaveForm
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, Waveform
 from fastcs.exceptions import FastCSException
 
 _MBB_FIELD_PREFIXES = (
@@ -30,7 +30,7 @@ MBB_VALUE_FIELDS = tuple(f"{p}VL" for p in _MBB_FIELD_PREFIXES)
 MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
-EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, WaveForm)
+EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, Waveform)
 
 DATATYPE_FIELD_TO_RECORD_FIELD = {
     "prec": "PREC",
@@ -56,7 +56,7 @@ def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
     }
 
     match datatype:
-        case WaveForm():
+        case Waveform():
             if len(datatype.shape) != 1:
                 raise TypeError(
                     f"Unsupported shape {datatype.shape}, the EPICS backend only "
@@ -114,7 +114,7 @@ def builder_callable_from_attribute(
                 return builder.longIn if make_in_record else builder.longOut
             else:
                 return builder.mbbIn if make_in_record else builder.mbbOut
-        case WaveForm():
+        case Waveform():
             return builder.WaveformIn if make_in_record else builder.WaveformOut
         case _:
             raise FastCSException(

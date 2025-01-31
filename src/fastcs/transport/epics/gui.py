@@ -25,7 +25,7 @@ from pydantic import ValidationError
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SingleMapping, _get_single_mapping
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
+from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSException
 from fastcs.util import snake_to_pascal
 
@@ -52,7 +52,7 @@ class EpicsGUI:
                 return TextRead(format=TextFormat.string)
             case Enum():
                 return TextRead(format=TextFormat.string)
-            case WaveForm():
+            case Waveform():
                 return None
             case datatype:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
@@ -70,7 +70,7 @@ class EpicsGUI:
                 return ComboBox(
                     choices=[member.name for member in attribute.datatype.members]
                 )
-            case WaveForm():
+            case Waveform():
                 return None
             case datatype:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")

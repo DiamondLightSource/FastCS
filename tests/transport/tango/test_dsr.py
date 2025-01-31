@@ -15,7 +15,7 @@ from tests.assertable_controller import (
 )
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
+from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.transport.tango.adapter import TangoTransport
 
 
@@ -31,8 +31,8 @@ class TangoAssertableController(AssertableController):
     write_bool = AttrW(Bool(), handler=TestSender())
     read_string = AttrRW(String())
     enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
-    one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
-    two_d_waveform = AttrRW(WaveForm(np.int32, (10, 10)))
+    one_d_waveform = AttrRW(Waveform(np.int32, (10,)))
+    two_d_waveform = AttrRW(Waveform(np.int32, (10, 10)))
 
 
 @pytest.fixture(scope="class")

@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.datatypes import Enum, Float, Int, String, WaveForm
+from fastcs.datatypes import Enum, Float, Int, String, Waveform
 
 
 @pytest.mark.asyncio
@@ -70,8 +70,8 @@ async def test_simple_handler_rw(mocker: MockerFixture):
         (Float, {}, 0),
         (String, {}, 0),
         (Enum, {"enum_cls": int}, 0),
-        (WaveForm, {"array_dtype": "U64", "shape": (1,)}, np.ndarray([1])),
-        (WaveForm, {"array_dtype": "float64", "shape": (1, 1)}, np.ndarray([1])),
+        (Waveform, {"array_dtype": "U64", "shape": (1,)}, np.ndarray([1])),
+        (Waveform, {"array_dtype": "float64", "shape": (1, 1)}, np.ndarray([1])),
     ],
 )
 def test_validate(datatype, init_args, value):

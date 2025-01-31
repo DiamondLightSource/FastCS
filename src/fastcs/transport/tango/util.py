@@ -4,9 +4,9 @@ from typing import Any
 from tango import AttrDataFormat
 
 from fastcs.attributes import Attribute
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, WaveForm
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, Waveform
 
-TANGO_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, WaveForm)
+TANGO_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, Waveform)
 
 DATATYPE_FIELD_TO_SERVER_FIELD = {
     "units": "unit",
@@ -35,7 +35,7 @@ def get_server_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
     dtype = datatype.dtype
 
     match datatype:
-        case WaveForm():
+        case Waveform():
             dtype = datatype.array_dtype
             match len(datatype.shape):
                 case 1:

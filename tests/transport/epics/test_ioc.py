@@ -14,7 +14,7 @@ from tests.assertable_controller import (
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Bool, Enum, Float, Int, String, WaveForm
+from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSException
 from fastcs.transport.epics.ioc import (
     EPICS_MAX_NAME_LENGTH,
@@ -90,7 +90,7 @@ class ColourEnum(enum.IntEnum):
             "mbbIn",
             {"ZRST": "DISABLED", "ONST": "ENABLED"},
         ),
-        (AttrR(WaveForm(np.int32, (10,))), "WaveformIn", {}),
+        (AttrR(Waveform(np.int32, (10,))), "WaveformIn", {}),
     ),
 )
 def test_make_input_record(
@@ -193,7 +193,7 @@ class EpicsAssertableController(AssertableController):
     write_bool = AttrW(Bool(), handler=TestSender())
     read_string = AttrRW(String())
     enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
-    one_d_waveform = AttrRW(WaveForm(np.int32, (10,)))
+    one_d_waveform = AttrRW(Waveform(np.int32, (10,)))
 
 
 @pytest.fixture()

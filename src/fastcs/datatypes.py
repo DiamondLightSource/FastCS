@@ -138,7 +138,7 @@ class Enum(Generic[T_Enum], DataType[T_Enum]):
 
 
 @dataclass(frozen=True)
-class WaveForm(DataType[np.ndarray]):
+class Waveform(DataType[np.ndarray]):
     array_dtype: DTypeLike
     shape: tuple[int, ...] = (2000,)
 
