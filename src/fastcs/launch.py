@@ -1,6 +1,7 @@
 import asyncio
 import inspect
 import json
+import signal
 from pathlib import Path
 from typing import Annotated, Any, Optional, TypeAlias, get_type_hints
 
@@ -16,12 +17,13 @@ from .exceptions import LaunchError
 from .transport.adapter import TransportAdapter
 from .transport.epics.options import EpicsOptions
 from .transport.graphQL.options import GraphQLOptions
+from .transport.p4p.options import P4POptions
 from .transport.rest.options import RestOptions
 from .transport.tango.options import TangoOptions
 
 # Define a type alias for transport options
 TransportOptions: TypeAlias = list[
-    EpicsOptions | TangoOptions | RestOptions | GraphQLOptions
+    EpicsOptions | TangoOptions | RestOptions | GraphQLOptions | P4POptions
 ]
 
 
@@ -32,6 +34,7 @@ class FastCS:
         transport_options: TransportOptions,
     ):
         self._loop = asyncio.get_event_loop()
+        self._loop.set_debug(True)
         self._backend = Backend(controller, self._loop)
         transport: TransportAdapter
         self._transports: list[TransportAdapter] = []
@@ -67,6 +70,13 @@ class FastCS:
                         controller,
                         option,
                     )
+                case P4POptions():
+                    from .transport.p4p.adapter import P4PTransport
+
+                    transport = P4PTransport(
+                        controller,
+                        option,
+                    )
             self._transports.append(transport)
 
     def create_docs(self) -> None:
@@ -80,14 +90,19 @@ class FastCS:
                 transport.create_gui()
 
     def run(self):
-        self._loop.run_until_complete(
-            self.serve(),
-        )
+        serve = asyncio.ensure_future(self.serve())
+
+        self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
+        self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
+        self._loop.run_until_complete(serve)
 
     async def serve(self) -> None:
         coros = [self._backend.serve()]
         coros.extend([transport.serve() for transport in self._transports])
-        await asyncio.gather(*coros)
+        try:
+            await asyncio.gather(*coros)
+        except asyncio.CancelledError:
+            pass
 
 
 def launch(

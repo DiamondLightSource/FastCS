@@ -109,6 +109,26 @@
       "title": "GraphQLServerOptions",
       "type": "object"
     },
+    "P4PIOCOptions": {
+      "properties": {
+        "pv_prefix": {
+          "default": "MY-DEVICE-PREFIX",
+          "title": "Pv Prefix",
+          "type": "string"
+        }
+      },
+      "title": "P4PIOCOptions",
+      "type": "object"
+    },
+    "P4POptions": {
+      "properties": {
+        "ioc": {
+          "$ref": "#/$defs/P4PIOCOptions"
+        }
+      },
+      "title": "P4POptions",
+      "type": "object"
+    },
     "RestOptions": {
       "properties": {
         "rest": {
@@ -202,6 +222,9 @@
           },
           {
             "$ref": "#/$defs/GraphQLOptions"
+          },
+          {
+            "$ref": "#/$defs/P4POptions"
           }
         ]
       },

@@ -46,10 +46,10 @@ T_Numerical = TypeVar("T_Numerical", int, float)
 @dataclass(frozen=True)
 class _Numerical(DataType[T_Numerical]):
     units: str | None = None
-    min: int | None = None
-    max: int | None = None
-    min_alarm: int | None = None
-    max_alarm: int | None = None
+    min: float | None = None
+    max: float | None = None
+    min_alarm: float | None = None
+    max_alarm: float | None = None
 
     def validate(self, value: T_Numerical) -> T_Numerical:
         super().validate(value)
@@ -82,6 +82,12 @@ class Float(_Numerical[float]):
     @property
     def dtype(self) -> type[float]:
         return float
+
+    def validate(self, value: float) -> float:
+        super().validate(value)
+        if self.prec is not None:
+            value = round(value, self.prec)
+        return value
 
 
 @dataclass(frozen=True)
