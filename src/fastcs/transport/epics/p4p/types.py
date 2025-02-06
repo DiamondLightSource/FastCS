@@ -1,8 +1,9 @@
 import asyncio
+import re
 import time
 from collections.abc import Callable
-from dataclasses import asdict
-from typing import Literal, TypedDict
+from dataclasses import asdict, dataclass
+from typing import Literal
 
 from p4p import Type, Value
 from p4p.nt import NTEnum, NTNDArray, NTScalar
@@ -11,6 +12,7 @@ from p4p.server import ServerOperation, StaticProvider
 from p4p.server.asyncio import SharedPV
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.controller import BaseController
 from fastcs.datatypes import Bool, Enum, Float, Int, String, T, Waveform
 
 P4P_ALLOWED_DATATYPES = (Int, Float, String, Bool, Enum, Waveform)
@@ -205,7 +207,6 @@ def make_shared_pv(attribute: Attribute) -> SharedPV:
 class CommandHandler:
     def __init__(self, command: Callable):
         self._command = command
-        self._last_task: asyncio.Future | None = None
         self._task_started_event = asyncio.Event()
 
     async def _run_command(self, pv: SharedPV):
@@ -232,33 +233,8 @@ class CommandHandler:
         value = op.value()
         raw_value = value.raw.value
 
-        if (
-            raw_value is False
-            and self._last_task is not None
-            and not self._last_task.done()
-        ):
-            self._last_task.cancel()
-            try:
-                await self._last_task
-            except asyncio.CancelledError:
-                pass
-        elif (
-            raw_value is True
-            and self._last_task is not None
-            and not self._last_task.done()
-        ):
-            raise RuntimeError(
-                f"{self._command} is already running, received signal to run it again."
-            )
-
-        elif not isinstance(raw_value, bool):
-            raise ValueError(
-                "Command PVs are `True` while the command is running, `False` once "
-                "it's finished. `False` can be put to stop the running command."
-            )
-
         if raw_value is True:
-            self._last_task = asyncio.create_task(self._run_command(pv))
+            asyncio.create_task(self._run_command(pv))
             await self._task_started_event.wait()
 
         # Flip to true once command task starts
@@ -276,80 +252,179 @@ def make_command_pv(command: Callable) -> SharedPV:
     return shared_pv
 
 
-AccessModeType = Literal["r", "w", "rw", "pvi", "command"]
+AccessModeType = Literal["r", "w", "rw", "d", "x"]
+
+PviName = str
 
 
-class _PviFieldInfo(TypedDict):
+@dataclass
+class _PviFieldInfo:
     pv: str
     access: AccessModeType
 
+    # Controller type to check all pvi "d" in a group are the same type.
+    controller_t: type[BaseController] | None
 
-class _PviBlockDisplay(TypedDict):
-    description: str
+    # Number for the int value on the end of the pv.
+    # We need this so that a pvi group with Child1 and Child3 controllers gives
+    # structure[] child
+    #     structure
+    #         (none)
+    #     structure
+    #         string d P4P_TEST_DEVICE:Child1:PVI
+    #     structure
+    #         (none)
+    #     structure
+    #         string d P4P_TEST_DEVICE:Child3:PVI
+    number: int | None = None
 
 
-class _PviBlockInfo(TypedDict):
-    display: _PviBlockDisplay
-    value: list[_PviFieldInfo]
+@dataclass
+class _PviBlockInfo:
+    field_infos: dict[str, list[_PviFieldInfo]]
+    description: str | None
+
+
+def _pv_to_pvi_field(pv: str) -> tuple[str, int | None]:
+    leaf = pv.rsplit(":", maxsplit=1)[-1].lower()
+    match = re.search(r"(\d+)$", leaf)
+    number = int(match.group(1)) if match else None
+    string_without_number = re.sub(r"\d+$", "", leaf)
+    return string_without_number, number
 
 
 class PviTree:
-    _P4PType = Type(
-        [
-            ("alarm", alarm),
-            ("timeStamp", timeStamp),
-            ("display", ("S", None, [("description", "s")])),
-            (
-                "value",
-                ("aS", None, [("pv", "s"), ("access", "s")]),
-            ),
-        ]
-    )
-
     def __init__(self):
-        self._pvi_info: dict[str, _PviBlockInfo] = {}
+        self._pvi_info: dict[PviName, _PviBlockInfo] = {}
 
-    def add_block(self, block_pv: str, description: str | None = None):
+    def add_block(
+        self,
+        block_pv: str,
+        description: str | None,
+        controller_t: type[BaseController] | None = None,
+    ):
+        pvi_name, number = _pv_to_pvi_field(block_pv)
         if block_pv not in self._pvi_info:
             self._pvi_info[block_pv] = _PviBlockInfo(
-                display=_PviBlockDisplay(description=(description or "")), value=[]
+                field_infos={}, description=description
             )
+
+        parent_block_pv = block_pv.rsplit(":", maxsplit=1)[0]
+
+        if parent_block_pv == block_pv:
+            return
+
+        if pvi_name not in self._pvi_info[parent_block_pv].field_infos:
+            self._pvi_info[parent_block_pv].field_infos[pvi_name] = []
         elif (
-            description is not None
-            and self._pvi_info[block_pv]["display"]["description"] != description
+            controller_t
+            is not (
+                other_field := self._pvi_info[parent_block_pv].field_infos[pvi_name][-1]
+            ).controller_t
         ):
-            # Allows field info to be added before the block info.
-            # Not needed in the case of `controller.get_mappings`,
-            # but still useful.
-            self._pvi_info[block_pv]["display"]["description"] = description
-
-        parent_pv = block_pv.rsplit(":", maxsplit=1)[0]
-        if parent_pv != block_pv:
-            self._pvi_info[parent_pv]["value"].append(
-                _PviFieldInfo(pv=f"{block_pv}:PVI", access="pvi")
+            raise ValueError(
+                f"Can't add `{block_pv}` to pvi group {pvi_name}. "
+                f"It represents a {controller_t}, however {other_field.pv} "
+                f"represents a {other_field.controller_t}."
             )
 
-    def add_field(self, attribute_pv: str, access: AccessModeType):
-        block_pv = attribute_pv.rsplit(":", maxsplit=1)[0]
-        if block_pv not in self._pvi_info:
-            self._pvi_info[block_pv] = _PviBlockInfo(
-                display=_PviBlockDisplay(description=""), value=[]
+        self._pvi_info[parent_block_pv].field_infos[pvi_name].append(
+            _PviFieldInfo(
+                pv=f"{block_pv}:PVI",
+                access="d",
+                controller_t=controller_t,
+                number=number,
             )
-        self._pvi_info[block_pv]["value"].append(
-            _PviFieldInfo(pv=attribute_pv, access=access)
+        )
+
+    def add_field(
+        self,
+        attribute_pv: str,
+        access: AccessModeType,
+    ):
+        pvi_name, _ = _pv_to_pvi_field(attribute_pv)
+        parent_block_pv = attribute_pv.rsplit(":", maxsplit=1)[0]
+
+        if pvi_name not in self._pvi_info[parent_block_pv].field_infos:
+            self._pvi_info[parent_block_pv].field_infos[pvi_name] = []
+
+        self._pvi_info[parent_block_pv].field_infos[pvi_name].append(
+            _PviFieldInfo(pv=attribute_pv, access=access, controller_t=None)
         )
 
     def make_provider(self) -> StaticProvider:
         provider = StaticProvider("PVI")
-        for block_pv, block_pvi_info in self._pvi_info.items():
+
+        for block_pv, block_info in self._pvi_info.items():
             provider.add(
                 f"{block_pv}:PVI",
-                SharedPV(initial=self._p4p_value(block_pvi_info)),
+                SharedPV(initial=self._p4p_value(block_info)),
             )
         return provider
 
-    def _p4p_value(self, block_pvi_info: _PviBlockInfo) -> Value:
+    def _p4p_value(self, block_info: _PviBlockInfo) -> Value:
+        pvi_structure = []
+        for pvi_name, field_infos in block_info.field_infos.items():
+            if len(field_infos) == 1:
+                field_datatype = [(field_infos[0].access, "s")]
+            else:
+                assert all(
+                    field_info.access == field_infos[0].access
+                    for field_info in field_infos
+                )
+                field_datatype = [
+                    (
+                        field_infos[0].access,
+                        (
+                            "S",
+                            None,
+                            [
+                                (f"v{field_info.number}", "s")
+                                for field_info in field_infos
+                            ],
+                        ),
+                    )
+                ]
+
+            substructure = (
+                pvi_name,
+                (
+                    "S",
+                    "structure",
+                    # If there are multiple field_infos then they ar the same type of
+                    # controller.
+                    field_datatype,
+                ),
+            )
+            pvi_structure.append(substructure)
+
+        p4p_type = Type(
+            [
+                ("alarm", alarm),
+                ("timeStamp", timeStamp),
+                ("display", ("S", None, [("description", "s")])),
+                ("value", ("S", "structure", tuple(pvi_structure))),
+            ]
+        )
+
+        value = {}
+        for pvi_name, field_infos in block_info.field_infos.items():
+            if len(field_infos) == 1:
+                value[pvi_name] = {field_infos[0].access: field_infos[0].pv}
+            else:
+                value[pvi_name] = {
+                    field_infos[0].access: {
+                        f"v{field_info.number}": field_info.pv
+                        for field_info in field_infos
+                    }
+                }
+
         return Value(
-            self._P4PType,
-            {**_p4p_alarm_states(), **_p4p_timestamp_now(), **block_pvi_info},
+            p4p_type,
+            {
+                **_p4p_alarm_states(),
+                **_p4p_timestamp_now(),
+                "display": {"description": block_info.description},
+                "value": value,
+            },
         )

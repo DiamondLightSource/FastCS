@@ -24,12 +24,23 @@ async def parse_attributes(
 ) -> list[StaticProvider]:
     providers = []
     pvi_tree = PviTree()
+    pvi_tree.add_block(
+        prefix_root,
+        controller.description,
+        type(controller),
+    )
 
     for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
         pv_prefix = ":".join([prefix_root] + path)
         provider = StaticProvider(pv_prefix)
         providers.append(provider)
+
+        pvi_tree.add_block(
+            pv_prefix,
+            single_mapping.controller.description,
+            type(single_mapping.controller),
+        )
 
         for attr_name, attribute in single_mapping.attributes.items():
             pv_name = get_pv_name(pv_prefix, attr_name)
@@ -43,9 +54,7 @@ async def parse_attributes(
                 MethodType(method.fn, single_mapping.controller)
             )
             provider.add(pv_name, command_pv)
-            pvi_tree.add_field(pv_name, "command")
-
-        pvi_tree.add_block(pv_prefix, description=single_mapping.controller.description)
+            pvi_tree.add_field(pv_name, "x")
 
     providers.append(pvi_tree.make_provider())
     return providers

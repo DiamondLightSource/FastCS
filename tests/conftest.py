@@ -65,10 +65,10 @@ HERE = Path(os.path.dirname(os.path.abspath(__file__)))
 
 
 @pytest.fixture(scope="module")
-def ioc():
+def softioc_subprocess():
     TIMEOUT = 10
     process = subprocess.Popen(
-        ["python", HERE / "ioc.py"],
+        ["python", HERE / "example_softioc.py"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -86,6 +86,30 @@ def ioc():
 
     # close backend caches before the event loop
     purge_channel_caches()
+
+    # Close open files
+    for f in [process.stdin, process.stdout, process.stderr]:
+        if f:
+            f.close()
+    process.send_signal(signal.SIGINT)
+    process.wait(TIMEOUT)
+
+
+@pytest.fixture(scope="module")
+def p4p_subprocess():
+    TIMEOUT = 10
+    process = subprocess.Popen(
+        ["python", HERE / "example_p4p_ioc.py"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True,
+    )
+
+    # close backend caches before the event loop
+    purge_channel_caches()
+
+    yield
 
     # Close open files
     for f in [process.stdin, process.stdout, process.stderr]:

@@ -23,10 +23,13 @@ class BaseController:
     #: Attributes passed from the device at runtime.
     attributes: dict[str, Attribute]
 
+    description: str | None = None
+
     def __init__(
         self, path: list[str] | None = None, description: str | None = None
     ) -> None:
-        self.description = description
+        if self.description is None:
+            self.description = description
 
         if not hasattr(self, "attributes"):
             self.attributes = {}

@@ -2,7 +2,7 @@ from p4p import Value
 from p4p.client.thread import Context
 
 
-def test_ioc(ioc: None):
+def test_ioc(softioc_subprocess: None):
     ctxt = Context("pva")
 
     _parent_pvi = ctxt.get("DEVICE:PVI")

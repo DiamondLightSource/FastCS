@@ -24,6 +24,7 @@ class FEnum(enum.Enum):
 
 
 class ParentController(Controller):
+    description = "some controller"
     a: AttrR = AttrR(Int())
     b: AttrRW = AttrRW(Float(min=-1, min_alarm=-0.5))
 
@@ -56,10 +57,15 @@ class ChildController(SubController):
 
 def run():
     p4p_options = EpicsOptions(
-        ioc=EpicsIOCOptions(pv_prefix="DEVICE"), backend=EpicsBackend.P4P
+        ioc=EpicsIOCOptions(pv_prefix="P4P_TEST_DEVICE"), backend=EpicsBackend.P4P
     )
     controller = ParentController()
-    controller.register_sub_controller("Child", ChildController())
+    controller.register_sub_controller(
+        "Child1", ChildController(description="some sub controller")
+    )
+    controller.register_sub_controller(
+        "Child2", ChildController(description="another sub controller")
+    )
     fastcs = FastCS(controller, [p4p_options])
     fastcs.run()
 
