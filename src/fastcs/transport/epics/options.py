@@ -26,8 +26,14 @@ class EpicsIOCOptions:
     pv_prefix: str = "MY-DEVICE-PREFIX"
 
 
+class EpicsBackend(Enum):
+    SOFT_IOC = "softioc"
+    P4P = "p4p"
+
+
 @dataclass
 class EpicsOptions:
     docs: EpicsDocsOptions = field(default_factory=EpicsDocsOptions)
     gui: EpicsGUIOptions = field(default_factory=EpicsGUIOptions)
     ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
+    backend: EpicsBackend = EpicsBackend.SOFT_IOC

@@ -1,5 +1,13 @@
 {
   "$defs": {
+    "EpicsBackend": {
+      "enum": [
+        "softioc",
+        "p4p"
+      ],
+      "title": "EpicsBackend",
+      "type": "string"
+    },
     "EpicsDocsOptions": {
       "properties": {
         "path": {
@@ -74,6 +82,10 @@
         },
         "ioc": {
           "$ref": "#/$defs/EpicsIOCOptions"
+        },
+        "backend": {
+          "$ref": "#/$defs/EpicsBackend",
+          "default": "softioc"
         }
       },
       "title": "EpicsOptions",
@@ -107,26 +119,6 @@
         }
       },
       "title": "GraphQLServerOptions",
-      "type": "object"
-    },
-    "P4PIOCOptions": {
-      "properties": {
-        "pv_prefix": {
-          "default": "MY-DEVICE-PREFIX",
-          "title": "Pv Prefix",
-          "type": "string"
-        }
-      },
-      "title": "P4PIOCOptions",
-      "type": "object"
-    },
-    "P4POptions": {
-      "properties": {
-        "ioc": {
-          "$ref": "#/$defs/P4PIOCOptions"
-        }
-      },
-      "title": "P4POptions",
       "type": "object"
     },
     "RestOptions": {
@@ -222,9 +214,6 @@
           },
           {
             "$ref": "#/$defs/GraphQLOptions"
-          },
-          {
-            "$ref": "#/$defs/P4POptions"
           }
         ]
       },

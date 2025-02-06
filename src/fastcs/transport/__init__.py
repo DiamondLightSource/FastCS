@@ -1,3 +1,4 @@
+from .epics.options import EpicsBackend as EpicsBackend
 from .epics.options import EpicsDocsOptions as EpicsDocsOptions
 from .epics.options import EpicsGUIOptions as EpicsGUIOptions
 from .epics.options import EpicsIOCOptions as EpicsIOCOptions

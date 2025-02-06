@@ -15,15 +15,14 @@ from .backend import Backend
 from .controller import Controller
 from .exceptions import LaunchError
 from .transport.adapter import TransportAdapter
-from .transport.epics.options import EpicsOptions
+from .transport.epics.options import EpicsBackend, EpicsOptions
 from .transport.graphQL.options import GraphQLOptions
-from .transport.p4p.options import P4POptions
 from .transport.rest.options import RestOptions
 from .transport.tango.options import TangoOptions
 
 # Define a type alias for transport options
 TransportOptions: TypeAlias = list[
-    EpicsOptions | TangoOptions | RestOptions | GraphQLOptions | P4POptions
+    EpicsOptions | TangoOptions | RestOptions | GraphQLOptions
 ]
 
 
@@ -40,14 +39,23 @@ class FastCS:
         self._transports: list[TransportAdapter] = []
         for option in transport_options:
             match option:
-                case EpicsOptions():
-                    from .transport.epics.adapter import EpicsTransport
+                case EpicsOptions(backend=backend):
+                    match backend:
+                        case EpicsBackend.SOFT_IOC:
+                            from .transport.epics.softioc.adapter import EpicsTransport
 
-                    transport = EpicsTransport(
-                        controller,
-                        self._loop,
-                        option,
-                    )
+                            transport = EpicsTransport(
+                                controller,
+                                self._loop,
+                                option,
+                            )
+                        case EpicsBackend.P4P:
+                            from .transport.epics.p4p.adapter import P4PTransport
+
+                            transport = P4PTransport(
+                                controller,
+                                option,
+                            )
                 case TangoOptions():
                     from .transport.tango.adapter import TangoTransport
 
@@ -70,13 +78,7 @@ class FastCS:
                         controller,
                         option,
                     )
-                case P4POptions():
-                    from .transport.p4p.adapter import P4PTransport
 
-                    transport = P4PTransport(
-                        controller,
-                        option,
-                    )
             self._transports.append(transport)
 
     def create_docs(self) -> None:

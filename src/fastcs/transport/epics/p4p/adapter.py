@@ -1,30 +1,32 @@
 from fastcs.controller import Controller
 from fastcs.transport.adapter import TransportAdapter
+from fastcs.transport.epics.docs import EpicsDocs
+from fastcs.transport.epics.gui import EpicsGUI
+from fastcs.transport.epics.options import EpicsOptions
 
 from .ioc import P4PIOC
-from .options import P4POptions
 
 
 class P4PTransport(TransportAdapter):
     def __init__(
         self,
         controller: Controller,
-        options: P4POptions | None = None,
+        options: EpicsOptions | None = None,
     ) -> None:
         self._controller = controller
-        self._options = options or P4POptions()
+        self._options = options or EpicsOptions()
         self._pv_prefix = self.options.ioc.pv_prefix
         self._ioc = P4PIOC(self.options.ioc.pv_prefix, controller)
 
     @property
-    def options(self) -> P4POptions:
+    def options(self) -> EpicsOptions:
         return self._options
 
     async def serve(self) -> None:
         await self._ioc.run()
 
     def create_docs(self) -> None:
-        raise NotImplementedError
+        EpicsDocs(self._controller).create_docs(self.options.docs)
 
     def create_gui(self) -> None:
-        raise NotImplementedError
+        EpicsGUI(self._controller, self._pv_prefix).create_gui(self.options.gui)

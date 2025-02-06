@@ -2,11 +2,10 @@ import asyncio
 
 from fastcs.controller import Controller
 from fastcs.transport.adapter import TransportAdapter
-
-from .docs import EpicsDocs
-from .gui import EpicsGUI
-from .ioc import EpicsIOC
-from .options import EpicsOptions
+from fastcs.transport.epics.docs import EpicsDocs
+from fastcs.transport.epics.gui import EpicsGUI
+from fastcs.transport.epics.options import EpicsOptions
+from fastcs.transport.epics.softioc.ioc import EpicsIOC
 
 
 class EpicsTransport(TransportAdapter):

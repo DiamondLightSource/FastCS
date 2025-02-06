@@ -7,7 +7,11 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Bool, Enum, Float, Int, Waveform
 from fastcs.launch import FastCS
-from fastcs.transport.p4p.options import P4PIOCOptions, P4POptions
+from fastcs.transport.epics.options import (
+    EpicsBackend,
+    EpicsIOCOptions,
+    EpicsOptions,
+)
 from fastcs.wrappers import command, scan
 
 
@@ -51,7 +55,9 @@ class ChildController(SubController):
 
 
 def run():
-    p4p_options = P4POptions(ioc=P4PIOCOptions(pv_prefix="DEVICE"))
+    p4p_options = EpicsOptions(
+        ioc=EpicsIOCOptions(pv_prefix="DEVICE"), backend=EpicsBackend.P4P
+    )
     controller = ParentController()
     controller.register_sub_controller("Child", ChildController())
     fastcs = FastCS(controller, [p4p_options])
