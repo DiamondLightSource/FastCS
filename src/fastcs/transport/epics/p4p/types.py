@@ -5,17 +5,19 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from typing import Literal
 
+import numpy as np
+from numpy.typing import DTypeLike
 from p4p import Type, Value
-from p4p.nt import NTEnum, NTNDArray, NTScalar
+from p4p.nt import NTEnum, NTNDArray, NTScalar, NTTable
 from p4p.nt.common import alarm, timeStamp
 from p4p.server import ServerOperation, StaticProvider
 from p4p.server.asyncio import SharedPV
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController
-from fastcs.datatypes import Bool, Enum, Float, Int, String, T, Waveform
+from fastcs.datatypes import Bool, Enum, Float, Int, String, T, Table, Waveform
 
-P4P_ALLOWED_DATATYPES = (Int, Float, String, Bool, Enum, Waveform)
+P4P_ALLOWED_DATATYPES = (Int, Float, String, Bool, Enum, Waveform, Table)
 
 
 _P4P_EXTRA = [("description", ("u", None, [("defval", "s")]))]
@@ -42,10 +44,31 @@ _NO_ALARM_STATUS = 0
 _MAJOR_ALARM_SEVERITY = 2
 _NO_ALARM_SEVERITY = 0
 
+# https://numpy.org/devdocs/reference/arrays.dtypes.html#arrays-dtypes
+# Some numpy dtypes don't match directly with the p4p ones
+_NUMPY_DTYPE_TO_P4P_DTYPE = {
+    "S": "s",  # Raw bytes to unicode bytes
+    "U": "s",
+}
+
+
+def _table_with_numpy_dtypes_to_p4p_dtypes(numpy_dtypes: list[tuple[str, DTypeLike]]):
+    p4p_dtypes = []
+    for name, numpy_dtype in numpy_dtypes:
+        dtype_char = np.dtype(numpy_dtype).char
+        dtype_char = _NUMPY_DTYPE_TO_P4P_DTYPE.get(dtype_char, dtype_char)
+        if dtype_char in ("e", "h", "H"):
+            raise ValueError(
+                "Table has a 16 bit numpy datatype. "
+                "Not supported in p4p, use 32 or 64 instead."
+            )
+        p4p_dtypes.append((name, dtype_char))
+    return p4p_dtypes
+
 
 def _get_nt_scalar_from_attribute(
     attribute: Attribute,
-) -> NTScalar | NTEnum | NTNDArray:
+) -> NTScalar | NTEnum | NTNDArray | NTTable:
     match attribute.datatype:
         case Int():
             return _P4P_INT
@@ -55,7 +78,7 @@ def _get_nt_scalar_from_attribute(
             return _P4P_STRING
         case Bool():
             return _P4P_BOOL
-        # `NTEnum/NTNDArray.wrap` don't accept extra fields until
+        # `NTEnum/NTNDArray/NTTable.wrap` don't accept extra fields until
         # https://github.com/epics-base/p4p/issues/166
         case Enum():
             return NTEnum()
@@ -68,6 +91,10 @@ def _get_nt_scalar_from_attribute(
             # use an NDArray here even if shape is 1D
 
             return NTNDArray()
+        case Table(structured_dtype):
+            return NTTable(
+                columns=_table_with_numpy_dtypes_to_p4p_dtypes(structured_dtype)
+            )
         case _:
             raise RuntimeError(f"Datatype `{attribute.datatype}` unsupported in P4P.")
 
@@ -137,6 +164,8 @@ def _cast_to_p4p_type(attribute: Attribute[T], value: T) -> object:
             }
         case Waveform():
             return attribute.datatype.validate(value)
+        case Table():
+            return attribute.datatype.validate(value)
 
         case datatype if issubclass(type(datatype), P4P_ALLOWED_DATATYPES):
             record_fields = {"value": datatype.validate(value)}
@@ -168,7 +197,14 @@ class AttrWHandler:
 
     async def put(self, pv: SharedPV, op: ServerOperation):
         value = op.value()
-        raw_value = value.raw.value
+        if isinstance(value, list):
+            assert isinstance(self._attr_w.datatype, Table)
+            raw_value = np.array(
+                [tuple(labelled_row.values()) for labelled_row in value],
+                dtype=self._attr_w.datatype.structured_dtype,
+            )
+        else:
+            raw_value = value.raw.value
 
         cast_value = _cast_from_p4p_type(self._attr_w, raw_value)
         await self._attr_w.process_without_display_update(cast_value)

@@ -5,7 +5,7 @@ import numpy as np
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SubController
-from fastcs.datatypes import Bool, Enum, Float, Int, Waveform
+from fastcs.datatypes import Bool, Enum, Float, Int, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import (
     EpicsBackend,
@@ -27,6 +27,10 @@ class ParentController(Controller):
     description = "some controller"
     a: AttrR = AttrR(Int())
     b: AttrRW = AttrRW(Float(min=-1, min_alarm=-0.5))
+
+    table: AttrRW = AttrRW(
+        Table([("A", np.int32), ("B", "i"), ("C", "?"), ("D", np.float64)])
+    )
 
 
 class ChildController(SubController):

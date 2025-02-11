@@ -10,7 +10,9 @@ from typing import Generic, TypeVar
 import numpy as np
 from numpy.typing import DTypeLike
 
-T = TypeVar("T", int, float, bool, str, enum.Enum, np.ndarray)
+T = TypeVar(
+    "T", int, float, bool, str, enum.Enum, np.ndarray, list[tuple[str, DTypeLike]]
+)
 
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
@@ -170,5 +172,29 @@ class Waveform(DataType[np.ndarray]):
             raise ValueError(
                 f"Value shape {value.shape} exceeeds the shape maximum shape "
                 f"{self.shape}"
+            )
+        return value
+
+
+@dataclass(frozen=True)
+class Table(DataType[np.ndarray]):
+    # https://numpy.org/devdocs/user/basics.rec.html#structured-datatype-creation
+    structured_dtype: list[tuple[str, DTypeLike]]
+
+    @property
+    def dtype(self) -> type[np.ndarray]:
+        return np.ndarray
+
+    @property
+    def initial_value(self) -> np.ndarray:
+        return np.array([], dtype=self.structured_dtype)
+
+    def validate(self, value: np.ndarray) -> np.ndarray:
+        super().validate(value)
+
+        if self.structured_dtype != value.dtype:
+            raise ValueError(
+                f"Value dtype {value.dtype.descr} is not the same as the structured "
+                f"dtype {self.structured_dtype}"
             )
         return value
