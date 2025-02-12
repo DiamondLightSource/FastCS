@@ -19,9 +19,9 @@ class ChildController(SubController):
         pass
 
 
-def run():
+def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
     epics_options = EpicsOptions(
-        ioc=EpicsIOCOptions(pv_prefix="DEVICE"), backend=EpicsBackend.SOFT_IOC
+        ioc=EpicsIOCOptions(pv_prefix=pv_prefix), backend=EpicsBackend.SOFT_IOC
     )
     controller = ParentController()
     controller.register_sub_controller("Child", ChildController())

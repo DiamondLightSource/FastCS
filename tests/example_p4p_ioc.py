@@ -25,8 +25,8 @@ class FEnum(enum.Enum):
 
 class ParentController(Controller):
     description = "some controller"
-    a: AttrR = AttrR(Int())
-    b: AttrRW = AttrRW(Float(min=-1, min_alarm=-0.5))
+    a: AttrRW = AttrRW(Int(max=400_000, max_alarm=40_000))
+    b: AttrW = AttrW(Float(min=-1, min_alarm=-0.5))
 
     table: AttrRW = AttrRW(
         Table([("A", np.int32), ("B", "i"), ("C", "?"), ("D", np.float64)])
@@ -34,12 +34,13 @@ class ParentController(Controller):
 
 
 class ChildController(SubController):
+    fail_on_next_e = True
     c: AttrW = AttrW(Int())
 
     @command()
     async def d(self):
         print("D: RUNNING")
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
         print("D: FINISHED")
 
     e: AttrR = AttrR(Bool())
@@ -55,13 +56,18 @@ class ChildController(SubController):
     @command()
     async def i(self):
         print("I: RUNNING")
-        await asyncio.sleep(1)
-        raise RuntimeError("I: FAILED WITH THIS WEIRD ERROR")
+        await asyncio.sleep(0.1)
+        if self.fail_on_next_e:
+            self.fail_on_next_e = False
+            raise RuntimeError("I: FAILED WITH THIS WEIRD ERROR")
+        else:
+            self.fail_on_next_e = True
+            print("I: FINISHED")
 
 
-def run():
+def run(pv_prefix="P4P_TEST_DEVICE"):
     p4p_options = EpicsOptions(
-        ioc=EpicsIOCOptions(pv_prefix="P4P_TEST_DEVICE"), backend=EpicsBackend.P4P
+        ioc=EpicsIOCOptions(pv_prefix=pv_prefix), backend=EpicsBackend.P4P
     )
     controller = ParentController()
     controller.register_sub_controller(

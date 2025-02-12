@@ -28,7 +28,9 @@ class BaseController:
     def __init__(
         self, path: list[str] | None = None, description: str | None = None
     ) -> None:
-        if self.description is None:
+        if (
+            description is not None
+        ):  # Use the argument over the one class defined description.
             self.description = description
 
         if not hasattr(self, "attributes"):

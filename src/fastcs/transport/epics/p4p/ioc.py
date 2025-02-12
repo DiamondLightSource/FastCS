@@ -6,7 +6,8 @@ from p4p.server import Server, StaticProvider
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 
-from .types import AccessModeType, PviTree, make_command_pv, make_shared_pv
+from .handlers import make_command_pv, make_shared_pv
+from .pvi_tree import AccessModeType, PviTree
 
 _attr_to_access: dict[type[Attribute], AccessModeType] = {
     AttrR: "r",

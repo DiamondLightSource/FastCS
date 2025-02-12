@@ -7,10 +7,11 @@ import string
 import subprocess
 import sys
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from multiprocessing.context import DefaultContext
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 import pytest
 from aioca import purge_channel_caches
@@ -24,9 +25,8 @@ from tests.assertable_controller import (
     TestSender,
     TestUpdater,
 )
-
-from .example_p4p_ioc import run as _run_p4p_ioc
-from .example_softioc import run as _run_softioc
+from tests.example_p4p_ioc import run as _run_p4p_ioc
+from tests.example_softioc import run as _run_softioc
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -72,9 +72,19 @@ PV_PREFIX = "".join(random.choice(string.ascii_lowercase) for _ in range(12))
 HERE = Path(os.path.dirname(os.path.abspath(__file__)))
 
 
-def run_softioc(
-    error_queue: multiprocessing.Queue, stdout_queue: multiprocessing.Queue
+def _run_ioc_as_subprocess(
+    pv_prefix: str,
+    run_ioc: Callable,
+    error_queue: multiprocessing.Queue,
+    stdout_queue: multiprocessing.Queue,
 ):
+    try:
+        from pytest_cov.embed import cleanup_on_sigterm
+    except ImportError:
+        ...
+    else:
+        cleanup_on_sigterm()
+
     class QueueWriter(io.TextIOBase):
         def __init__(self, queue):
             self.queue = queue
@@ -84,39 +94,24 @@ def run_softioc(
 
     try:
         sys.stdout = QueueWriter(stdout_queue)
-        _run_softioc()
+        run_ioc(pv_prefix=pv_prefix)
 
     except Exception as e:
         error_queue.put(e)
 
 
-def run_p4p_ioc(
-    error_queue: multiprocessing.Queue, stdout_queue: multiprocessing.Queue
-):
-    class QueueWriter(io.TextIOBase):
-        def __init__(self, queue):
-            self.queue = queue
-
-        def write(self, s):  # type: ignore
-            self.queue.put(s)
-
-    try:
-        sys.stdout = QueueWriter(stdout_queue)
-        _run_p4p_ioc()
-
-    except Exception as e:
-        error_queue.put(e)
-
-
-def run_ioc_as_subprocess(run_ioc: Callable, ctxt: DefaultContext):
-    TIMEOUT = 10
+def run_ioc_as_subprocess(
+    run_ioc: Callable, ctxt: DefaultContext
+) -> Generator[tuple[str, multiprocessing.Queue], None, None]:
+    IOC_STARTUP_TIMEOUT = 10
     IOC_STARTUP_TIMEOUT_ERROR = TimeoutError("IOC did not start in time")
 
+    pv_prefix = str(uuid4())
     error_queue = ctxt.Queue()
     stdout_queue = ctxt.Queue()
     process = ctxt.Process(
-        target=run_ioc,
-        args=(error_queue, stdout_queue),
+        target=_run_ioc_as_subprocess,
+        args=(pv_prefix, run_ioc, error_queue, stdout_queue),
     )
     process.start()
 
@@ -125,39 +120,42 @@ def run_ioc_as_subprocess(run_ioc: Callable, ctxt: DefaultContext):
         while True:
             try:
                 if "Running FastCS IOC" in (
-                    stdout_queue.get(timeout=TIMEOUT)  # type: ignore
+                    stdout_queue.get(timeout=IOC_STARTUP_TIMEOUT)  # type: ignore
                 ):
+                    stdout_queue.get()  # get the newline
                     break
             except Exception as error:
                 raise IOC_STARTUP_TIMEOUT_ERROR from error
-            if time.monotonic() - start_time > TIMEOUT:
+            if time.monotonic() - start_time > IOC_STARTUP_TIMEOUT:
                 raise IOC_STARTUP_TIMEOUT_ERROR
 
-        yield
+        time.sleep(0.1)
+        yield pv_prefix, stdout_queue
 
+    finally:
         # Propogate errors
         if not error_queue.empty():
             raise error_queue.get()
-    finally:
+
         # close backend caches before the event loop
         purge_channel_caches()
 
         error_queue.close()
         stdout_queue.close()
         process.terminate()
-        process.join(timeout=TIMEOUT)
+        process.join(timeout=IOC_STARTUP_TIMEOUT)
 
 
 @pytest.fixture(scope="module")
 def p4p_subprocess():
     multiprocessing.set_start_method("forkserver", force=True)
-    yield from run_ioc_as_subprocess(run_p4p_ioc, multiprocessing.get_context())
+    yield from run_ioc_as_subprocess(_run_p4p_ioc, multiprocessing.get_context())
 
 
 @pytest.fixture(scope="module")
 def softioc_subprocess():
     multiprocessing.set_start_method("spawn", force=True)
-    yield from run_ioc_as_subprocess(run_softioc, multiprocessing.get_context())
+    yield from run_ioc_as_subprocess(_run_softioc, multiprocessing.get_context())
 
 
 @pytest.fixture(scope="session")
