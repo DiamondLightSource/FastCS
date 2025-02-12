@@ -36,6 +36,7 @@ class EpicsTransport(TransportAdapter):
         EpicsGUI(self._controller, self._pv_prefix).create_gui(self.options.gui)
 
     async def serve(self) -> None:
+        print(f"Running FastCS IOC: {self._pv_prefix}")
         self._ioc.run(self._loop)
         while True:
             await asyncio.sleep(1)

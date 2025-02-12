@@ -1,9 +1,14 @@
+import io
+import multiprocessing
 import os
 import random
 import signal
 import string
 import subprocess
+import sys
 import time
+from collections.abc import Callable
+from multiprocessing.context import DefaultContext
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +24,9 @@ from tests.assertable_controller import (
     TestSender,
     TestUpdater,
 )
+
+from .example_p4p_ioc import run as _run_p4p_ioc
+from .example_softioc import run as _run_softioc
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -64,59 +72,92 @@ PV_PREFIX = "".join(random.choice(string.ascii_lowercase) for _ in range(12))
 HERE = Path(os.path.dirname(os.path.abspath(__file__)))
 
 
-@pytest.fixture(scope="module")
-def softioc_subprocess():
+def run_softioc(
+    error_queue: multiprocessing.Queue, stdout_queue: multiprocessing.Queue
+):
+    class QueueWriter(io.TextIOBase):
+        def __init__(self, queue):
+            self.queue = queue
+
+        def write(self, s):  # type: ignore
+            self.queue.put(s)
+
+    try:
+        sys.stdout = QueueWriter(stdout_queue)
+        _run_softioc()
+
+    except Exception as e:
+        error_queue.put(e)
+
+
+def run_p4p_ioc(
+    error_queue: multiprocessing.Queue, stdout_queue: multiprocessing.Queue
+):
+    class QueueWriter(io.TextIOBase):
+        def __init__(self, queue):
+            self.queue = queue
+
+        def write(self, s):  # type: ignore
+            self.queue.put(s)
+
+    try:
+        sys.stdout = QueueWriter(stdout_queue)
+        _run_p4p_ioc()
+
+    except Exception as e:
+        error_queue.put(e)
+
+
+def run_ioc_as_subprocess(run_ioc: Callable, ctxt: DefaultContext):
     TIMEOUT = 10
-    process = subprocess.Popen(
-        ["python", HERE / "example_softioc.py"],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        universal_newlines=True,
+    IOC_STARTUP_TIMEOUT_ERROR = TimeoutError("IOC did not start in time")
+
+    error_queue = ctxt.Queue()
+    stdout_queue = ctxt.Queue()
+    process = ctxt.Process(
+        target=run_ioc,
+        args=(error_queue, stdout_queue),
     )
+    process.start()
 
-    start_time = time.monotonic()
-    while "iocRun: All initialization complete" not in (
-        process.stdout.readline().strip()  # type: ignore
-    ):
-        if time.monotonic() - start_time > TIMEOUT:
-            raise TimeoutError("IOC did not start in time")
+    try:
+        start_time = time.monotonic()
+        while True:
+            try:
+                if "Running FastCS IOC" in (
+                    stdout_queue.get(timeout=TIMEOUT)  # type: ignore
+                ):
+                    break
+            except Exception as error:
+                raise IOC_STARTUP_TIMEOUT_ERROR from error
+            if time.monotonic() - start_time > TIMEOUT:
+                raise IOC_STARTUP_TIMEOUT_ERROR
 
-    yield
+        yield
 
-    # close backend caches before the event loop
-    purge_channel_caches()
+        # Propogate errors
+        if not error_queue.empty():
+            raise error_queue.get()
+    finally:
+        # close backend caches before the event loop
+        purge_channel_caches()
 
-    # Close open files
-    for f in [process.stdin, process.stdout, process.stderr]:
-        if f:
-            f.close()
-    process.send_signal(signal.SIGINT)
-    process.wait(TIMEOUT)
+        error_queue.close()
+        stdout_queue.close()
+        process.terminate()
+        process.join(timeout=TIMEOUT)
 
 
 @pytest.fixture(scope="module")
 def p4p_subprocess():
-    TIMEOUT = 10
-    process = subprocess.Popen(
-        ["python", HERE / "example_p4p_ioc.py"],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        universal_newlines=True,
-    )
+    multiprocessing.set_start_method("forkserver", force=True)
+    yield from run_ioc_as_subprocess(run_p4p_ioc, multiprocessing.get_context())
 
-    # close backend caches before the event loop
-    purge_channel_caches()
 
-    yield
-
-    # Close open files
-    for f in [process.stdin, process.stdout, process.stderr]:
-        if f:
-            f.close()
-    process.send_signal(signal.SIGINT)
-    process.wait(TIMEOUT)
+@pytest.fixture(scope="module")
+def softioc_subprocess():
+    multiprocessing.set_start_method("spawn", force=True)
+    yield from run_ioc_as_subprocess(run_softioc, multiprocessing.get_context())
 
 
 @pytest.fixture(scope="session")

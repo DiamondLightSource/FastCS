@@ -23,6 +23,7 @@ class P4PTransport(TransportAdapter):
         return self._options
 
     async def serve(self) -> None:
+        print(f"Running FastCS IOC: {self._pv_prefix}")
         await self._ioc.run()
 
     def create_docs(self) -> None:
