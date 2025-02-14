@@ -2,7 +2,8 @@ from fastcs import FastCS
 from fastcs.attributes import AttrR, AttrW
 from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Int
-from fastcs.transport.epics.options import EpicsBackend, EpicsIOCOptions, EpicsOptions
+from fastcs.transport.epics.ca.options import EpicsCAOptions
+from fastcs.transport.epics.options import EpicsIOCOptions
 from fastcs.transport.rest.options import RestOptions, RestServerOptions
 from fastcs.transport.tango.options import TangoDSROptions, TangoOptions
 
@@ -15,9 +16,8 @@ class TestController(Controller):
 def run():
     transport_options = [
         RestOptions(rest=RestServerOptions(port=8090)),
-        EpicsOptions(
+        EpicsCAOptions(
             ioc=EpicsIOCOptions(pv_prefix="BENCHMARK-DEVICE"),
-            backend=EpicsBackend.SOFT_IOC,
         ),
         TangoOptions(dsr=TangoDSROptions(dev_name="MY/BENCHMARK/DEVICE")),
     ]

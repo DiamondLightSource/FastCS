@@ -3,7 +3,8 @@ import time
 from collections.abc import Callable
 
 import numpy as np
-from p4p.nt import NTScalar
+from p4p import Value
+from p4p.nt import NTEnum, NTNDArray, NTScalar, NTTable
 from p4p.server import ServerOperation
 from p4p.server.asyncio import SharedPV
 
@@ -15,25 +16,27 @@ from .types import (
     RECORD_ALARM_STATUS,
     cast_from_p4p_value,
     cast_to_p4p_value,
-    get_p4p_type,
+    make_p4p_type,
     p4p_alarm_states,
 )
 
 
-class AttrWHandler:
+class WritePvHandler:
     def __init__(self, attr_w: AttrW | AttrRW):
         self._attr_w = attr_w
 
     async def put(self, pv: SharedPV, op: ServerOperation):
         value = op.value()
-        if isinstance(value, list):
-            assert isinstance(self._attr_w.datatype, Table)
+        if isinstance(self._attr_w.datatype, Table):
+            assert isinstance(value, list)
             raw_value = np.array(
                 [tuple(labelled_row.values()) for labelled_row in value],
                 dtype=self._attr_w.datatype.structured_dtype,
             )
-        else:
+        elif hasattr(value, "raw"):
             raw_value = value.raw.value
+        else:
+            raw_value = value.todict()["value"]
 
         cast_value = cast_from_p4p_value(self._attr_w, raw_value)
 
@@ -44,7 +47,7 @@ class AttrWHandler:
         op.done()
 
 
-class CommandHandler:
+class CommandPvHandler:
     def __init__(self, command: Callable):
         self._command = command
         self._task_started_event = asyncio.Event()
@@ -88,17 +91,24 @@ def make_shared_pv(attribute: Attribute) -> SharedPV:
         if isinstance(attribute, AttrRW | AttrR)
         else attribute.datatype.initial_value
     )
-    kwargs = {
-        "nt": get_p4p_type(attribute),
-        "initial": cast_to_p4p_value(attribute, initial_value),
-    }
 
-    if isinstance(attribute, (AttrW | AttrRW)):
-        kwargs["handler"] = AttrWHandler(attribute)
+    type_ = make_p4p_type(attribute)
+    kwargs = {"initial": cast_to_p4p_value(attribute, initial_value)}
+    if isinstance(type_, (NTEnum | NTNDArray | NTTable)):
+        kwargs["nt"] = type_
+    else:
+
+        def _wrap(value: dict):
+            return Value(type_, value)
+
+        kwargs["wrap"] = _wrap
+
+    if isinstance(attribute, AttrW):
+        kwargs["handler"] = WritePvHandler(attribute)
 
     shared_pv = SharedPV(**kwargs)
 
-    if isinstance(attribute, (AttrR | AttrRW)):
+    if isinstance(attribute, AttrR):
         shared_pv.post(cast_to_p4p_value(attribute, attribute.get()))
 
         async def on_update(value):
@@ -113,7 +123,7 @@ def make_command_pv(command: Callable) -> SharedPV:
     shared_pv = SharedPV(
         nt=NTScalar("?"),
         initial=False,
-        handler=CommandHandler(command),
+        handler=CommandPvHandler(command),
     )
 
     return shared_pv

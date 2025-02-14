@@ -1,8 +1,8 @@
-from .epics.options import EpicsBackend as EpicsBackend
+from .epics.ca.options import EpicsCAOptions as EpicsCAOptions
 from .epics.options import EpicsDocsOptions as EpicsDocsOptions
 from .epics.options import EpicsGUIOptions as EpicsGUIOptions
 from .epics.options import EpicsIOCOptions as EpicsIOCOptions
-from .epics.options import EpicsOptions as EpicsOptions
+from .epics.pva.options import EpicsPVAOptions as EpicsPVAOptions
 from .graphQL.options import GraphQLOptions as GraphQLOptions
 from .graphQL.options import GraphQLServerOptions as GraphQLServerOptions
 from .rest.options import RestOptions as RestOptions

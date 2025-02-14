@@ -11,7 +11,14 @@ import numpy as np
 from numpy.typing import DTypeLike
 
 T = TypeVar(
-    "T", int, float, bool, str, enum.Enum, np.ndarray, list[tuple[str, DTypeLike]]
+    "T",
+    int,  # Int
+    float,  # Float
+    bool,  # Bool
+    str,  # String
+    enum.Enum,  # Enum
+    np.ndarray,  # Waveform
+    list[tuple[str, DTypeLike]],  # Table
 )
 
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
@@ -48,10 +55,10 @@ T_Numerical = TypeVar("T_Numerical", int, float)
 @dataclass(frozen=True)
 class _Numerical(DataType[T_Numerical]):
     units: str | None = None
-    min: float | None = None
-    max: float | None = None
-    min_alarm: float | None = None
-    max_alarm: float | None = None
+    min: T_Numerical | None = None
+    max: T_Numerical | None = None
+    min_alarm: T_Numerical | None = None
+    max_alarm: T_Numerical | None = None
 
     def validate(self, value: T_Numerical) -> T_Numerical:
         super().validate(value)

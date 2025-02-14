@@ -1,34 +1,15 @@
 import math
 import time
-from dataclasses import asdict
 
 import numpy as np
 from numpy.typing import DTypeLike
+from p4p import Value
 from p4p.nt import NTEnum, NTNDArray, NTScalar, NTTable
 
-from fastcs.attributes import Attribute
+from fastcs.attributes import Attribute, AttrR, AttrW
 from fastcs.datatypes import Bool, Enum, Float, Int, String, T, Table, Waveform
 
 P4P_ALLOWED_DATATYPES = (Int, Float, String, Bool, Enum, Waveform, Table)
-
-
-_P4P_EXTRA = [("description", ("u", None, [("defval", "s")]))]
-_P4P_BOOL = NTScalar("?", extra=_P4P_EXTRA)
-_P4P_STRING = NTScalar("s", extra=_P4P_EXTRA)
-
-
-_P4P_EXTRA_NUMERICAL = [
-    ("units", ("u", None, [("defval", "s")])),
-    ("min", ("u", None, [("defval", "d")])),
-    ("max", ("u", None, [("defval", "d")])),
-    ("min_alarm", ("u", None, [("defval", "d")])),
-    ("max_alarm", ("u", None, [("defval", "d")])),
-]
-_P4P_INT = NTScalar("i", extra=_P4P_EXTRA + _P4P_EXTRA_NUMERICAL)
-
-_P4P_EXTRA_FLOAT = [("prec", ("u", None, [("defval", "i")]))]
-_P4P_FLOAT = NTScalar("d", extra=_P4P_EXTRA + _P4P_EXTRA_NUMERICAL + _P4P_EXTRA_FLOAT)
-
 
 # https://epics-base.github.io/pvxs/nt.html#alarm-t
 RECORD_ALARM_STATUS = 3
@@ -45,31 +26,42 @@ _NUMPY_DTYPE_TO_P4P_DTYPE = {
 
 
 def _table_with_numpy_dtypes_to_p4p_dtypes(numpy_dtypes: list[tuple[str, DTypeLike]]):
+    """
+    Numpy structured datatypes can use the numpy dtype class, e.g `np.int32` or the
+    character, e.g "i". P4P only accepts the character so this method is used to
+    convert.
+
+    https://epics-base.github.io/p4p/values.html#type-definitions
+
+    It also forbids:
+        The numpy dtype for float16, which isn't supported in p4p.
+        String types which should be supported but currently don't function:
+            https://github.com/epics-base/p4p/issues/168
+    """
     p4p_dtypes = []
     for name, numpy_dtype in numpy_dtypes:
         dtype_char = np.dtype(numpy_dtype).char
         dtype_char = _NUMPY_DTYPE_TO_P4P_DTYPE.get(dtype_char, dtype_char)
-        if dtype_char in ("e", "h", "H"):
-            raise ValueError(
-                "Table has a 16 bit numpy datatype. "
-                "Not supported in p4p, use 32 or 64 instead."
-            )
+        if dtype_char in ("e", "U", "S"):
+            raise ValueError(f"`{np.dtype(numpy_dtype)}` is unsupported in p4p.")
         p4p_dtypes.append((name, dtype_char))
     return p4p_dtypes
 
 
-def get_p4p_type(
+def make_p4p_type(
     attribute: Attribute,
 ) -> NTScalar | NTEnum | NTNDArray | NTTable:
+    display = isinstance(attribute, AttrR)
+    control = isinstance(attribute, AttrW)
     match attribute.datatype:
         case Int():
-            return _P4P_INT
+            return NTScalar.buildType("i", display=display, control=control)
         case Float():
-            return _P4P_FLOAT
+            return NTScalar.buildType("d", display=display, control=control, form=True)
         case String():
-            return _P4P_STRING
+            return NTScalar.buildType("s", display=display, control=control)
         case Bool():
-            return _P4P_BOOL
+            return NTScalar.buildType("?", display=display, control=control)
         case Enum():
             return NTEnum()
         case Waveform():
@@ -137,21 +129,45 @@ def p4p_timestamp_now() -> dict:
     }
 
 
-def _p4p_check_numerical_for_alarm_states(
-    min_alarm: float | None, max_alarm: float | None, value: T
-) -> dict:
-    low = None if min_alarm is None else value < min_alarm  # type: ignore
-    high = None if max_alarm is None else value > max_alarm  # type: ignore
+def p4p_display(attribute: Attribute) -> dict:
+    display = {}
+    if attribute.description is not None:
+        display["description"] = attribute.description
+    if isinstance(attribute.datatype, (Float | Int)):
+        if attribute.datatype.max is not None:
+            display["limitHigh"] = attribute.datatype.max
+        if attribute.datatype.min is not None:
+            display["limitLow"] = attribute.datatype.min
+        if attribute.datatype.units is not None:
+            display["units"] = attribute.datatype.units
+    if isinstance(attribute.datatype, Float):
+        if attribute.datatype.prec is not None:
+            display["precision"] = attribute.datatype.prec
+    if display:
+        return {"display": display}
+    return {}
+
+
+def _p4p_check_numerical_for_alarm_states(datatype: Int | Float, value: T) -> dict:
+    low = None if datatype.min_alarm is None else value < datatype.min_alarm  # type: ignore
+    high = None if datatype.max_alarm is None else value > datatype.max_alarm  # type: ignore
     severity = (
         MAJOR_ALARM_SEVERITY
         if high not in (None, False) or low not in (None, False)
         else NO_ALARM_SEVERITY
     )
-    status, message = NO_ALARM_SEVERITY, "No alarm."
+    status, message = NO_ALARM_SEVERITY, "No alarm"
     if low:
-        status, message = RECORD_ALARM_STATUS, "Below minimum."
+        status, message = (
+            RECORD_ALARM_STATUS,
+            f"Below minimum alarm limit: {datatype.min_alarm}",
+        )
     if high:
-        status, message = RECORD_ALARM_STATUS, "Above maximum."
+        status, message = (
+            RECORD_ALARM_STATUS,
+            f"Above maximum alarm limit: {datatype.max_alarm}",
+        )
+
     return p4p_alarm_states(severity, status, message)
 
 
@@ -168,24 +184,22 @@ def cast_to_p4p_value(attribute: Attribute[T], value: T) -> object:
             return attribute.datatype.validate(value)
 
         case datatype if issubclass(type(datatype), P4P_ALLOWED_DATATYPES):
-            record_fields = {"value": datatype.validate(value)}
-            if attribute.description is not None:
-                record_fields["description"] = attribute.description  # type: ignore
+            record_fields: dict = {"value": datatype.validate(value)}
+            if isinstance(attribute, AttrR):
+                record_fields.update(p4p_display(attribute))
+
             if isinstance(datatype, (Float | Int)):
                 record_fields.update(
                     _p4p_check_numerical_for_alarm_states(
-                        datatype.min_alarm,
-                        datatype.max_alarm,
+                        datatype,
                         value,
                     )
                 )
             else:
                 record_fields.update(p4p_alarm_states())
 
-            record_fields.update(
-                {k: v for k, v in asdict(datatype).items() if v is not None}
-            )
             record_fields.update(p4p_timestamp_now())
-            return get_p4p_type(attribute).wrap(record_fields)  # type: ignore
+
+            return Value(make_p4p_type(attribute), record_fields)
         case _:
             raise ValueError(f"Unsupported datatype {attribute.datatype}")

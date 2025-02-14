@@ -15,14 +15,15 @@ from .backend import Backend
 from .controller import Controller
 from .exceptions import LaunchError
 from .transport.adapter import TransportAdapter
-from .transport.epics.options import EpicsBackend, EpicsOptions
+from .transport.epics.ca.options import EpicsCAOptions
+from .transport.epics.pva.options import EpicsPVAOptions
 from .transport.graphQL.options import GraphQLOptions
 from .transport.rest.options import RestOptions
 from .transport.tango.options import TangoOptions
 
 # Define a type alias for transport options
 TransportOptions: TypeAlias = list[
-    EpicsOptions | TangoOptions | RestOptions | GraphQLOptions
+    EpicsPVAOptions | EpicsCAOptions | TangoOptions | RestOptions | GraphQLOptions
 ]
 
 
@@ -33,29 +34,26 @@ class FastCS:
         transport_options: TransportOptions,
     ):
         self._loop = asyncio.get_event_loop()
-        self._loop.set_debug(True)
         self._backend = Backend(controller, self._loop)
         transport: TransportAdapter
         self._transports: list[TransportAdapter] = []
         for option in transport_options:
             match option:
-                case EpicsOptions(backend=backend):
-                    match backend:
-                        case EpicsBackend.SOFT_IOC:
-                            from .transport.epics.softioc.adapter import EpicsTransport
+                case EpicsPVAOptions():
+                    from .transport.epics.pva.adapter import EpicsPVATransport
 
-                            transport = EpicsTransport(
-                                controller,
-                                self._loop,
-                                option,
-                            )
-                        case EpicsBackend.P4P:
-                            from .transport.epics.p4p.adapter import P4PTransport
+                    transport = EpicsPVATransport(
+                        controller,
+                        option,
+                    )
+                case EpicsCAOptions():
+                    from .transport.epics.ca.adapter import EpicsCATransport
 
-                            transport = P4PTransport(
-                                controller,
-                                option,
-                            )
+                    transport = EpicsCATransport(
+                        controller,
+                        self._loop,
+                        option,
+                    )
                 case TangoOptions():
                     from .transport.tango.adapter import TangoTransport
 

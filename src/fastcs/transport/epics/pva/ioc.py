@@ -1,4 +1,5 @@
 import asyncio
+import re
 from types import MethodType
 
 from p4p.server import Server, StaticProvider
@@ -6,48 +7,56 @@ from p4p.server import Server, StaticProvider
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 
-from .handlers import make_command_pv, make_shared_pv
+from ._pv_handlers import make_command_pv, make_shared_pv
 from .pvi_tree import AccessModeType, PviTree
 
-_attr_to_access: dict[type[Attribute], AccessModeType] = {
-    AttrR: "r",
-    AttrW: "w",
-    AttrRW: "rw",
-}
+
+def _attribute_to_access(attribute: Attribute) -> AccessModeType:
+    match attribute:
+        case AttrRW():
+            return "rw"
+        case AttrR():
+            return "r"
+        case AttrW():
+            return "w"
+        case _:
+            raise ValueError(f"Unknown attribute type {type(attribute)}")
 
 
-def get_pv_name(pv_prefix: str, attribute_name: str) -> str:
-    return f"{pv_prefix}:{attribute_name.title().replace('_', '')}"
+def _snake_to_pascal(name: str) -> str:
+    name = re.sub(
+        r"(?:^|_)([a-z])", lambda match: match.group(1).upper(), name
+    ).replace("_", "")
+    return re.sub(r"_(\d+)$", r"\1", name)
+
+
+def get_pv_name(pv_prefix: str, *attribute_names: str) -> str:
+    pv_formatted = ":".join([_snake_to_pascal(attr) for attr in attribute_names])
+    return f"{pv_prefix}:{pv_formatted}" if pv_formatted else pv_prefix
 
 
 async def parse_attributes(
-    prefix_root: str, controller: Controller
+    root_pv_prefix: str, controller: Controller
 ) -> list[StaticProvider]:
     providers = []
-    pvi_tree = PviTree()
-    pvi_tree.add_block(
-        prefix_root,
-        controller.description,
-        type(controller),
-    )
+    pvi_tree = PviTree(root_pv_prefix)
 
     for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
-        pv_prefix = ":".join([prefix_root] + path)
+        pv_prefix = get_pv_name(root_pv_prefix, *path)
         provider = StaticProvider(pv_prefix)
         providers.append(provider)
 
         pvi_tree.add_block(
             pv_prefix,
             single_mapping.controller.description,
-            type(single_mapping.controller),
         )
 
         for attr_name, attribute in single_mapping.attributes.items():
             pv_name = get_pv_name(pv_prefix, attr_name)
             attribute_pv = make_shared_pv(attribute)
             provider.add(pv_name, attribute_pv)
-            pvi_tree.add_field(pv_name, _attr_to_access[type(attribute)])
+            pvi_tree.add_field(pv_name, _attribute_to_access(attribute))
 
         for attr_name, method in single_mapping.command_methods.items():
             pv_name = get_pv_name(pv_prefix, attr_name)

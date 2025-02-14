@@ -2,7 +2,8 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Int
 from fastcs.launch import FastCS
-from fastcs.transport.epics.options import EpicsBackend, EpicsIOCOptions, EpicsOptions
+from fastcs.transport.epics.ca.options import EpicsCAOptions
+from fastcs.transport.epics.options import EpicsIOCOptions
 from fastcs.wrappers import command
 
 
@@ -20,9 +21,7 @@ class ChildController(SubController):
 
 
 def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
-    epics_options = EpicsOptions(
-        ioc=EpicsIOCOptions(pv_prefix=pv_prefix), backend=EpicsBackend.SOFT_IOC
-    )
+    epics_options = EpicsCAOptions(ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     controller = ParentController()
     controller.register_sub_controller("Child", ChildController())
     fastcs = FastCS(controller, [epics_options])
