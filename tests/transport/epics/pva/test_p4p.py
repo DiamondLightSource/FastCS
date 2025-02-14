@@ -16,7 +16,8 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table, Waveform
 from fastcs.launch import FastCS
-from fastcs.transport.epics.options import EpicsBackend, EpicsIOCOptions, EpicsOptions
+from fastcs.transport.epics.options import EpicsIOCOptions
+from fastcs.transport.epics.pva.options import EpicsPVAOptions
 
 
 @pytest.mark.asyncio
@@ -181,13 +182,13 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
         assert value["value"] == 0
         assert isinstance(value["value"], int)
         assert value["alarm"]["severity"] == 0
-        assert value["alarm"]["message"] == "No alarm."
+        assert value["alarm"]["message"] == "No alarm"
 
         value = (await b_values.get()).raw
         assert value["value"] == 0
         assert isinstance(value["value"], float)
         assert value["alarm"]["severity"] == 0
-        assert value["alarm"]["message"] == "No alarm."
+        assert value["alarm"]["message"] == "No alarm"
 
         await ctxt.put(f"{pv_prefix}:A", 40_001)
         await ctxt.put(f"{pv_prefix}:B", -0.6)
@@ -196,13 +197,13 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
         assert value["value"] == 40_001
         assert isinstance(value["value"], int)
         assert value["alarm"]["severity"] == 2
-        assert value["alarm"]["message"] == "Above maximum."
+        assert value["alarm"]["message"] == "Above maximum alarm limit: 40000"
 
         value = (await b_values.get()).raw
         assert value["value"] == -0.6
         assert isinstance(value["value"], float)
         assert value["alarm"]["severity"] == 2
-        assert value["alarm"]["message"] == "Below minimum."
+        assert value["alarm"]["message"] == "Below minimum alarm limit: -0.5"
 
         await ctxt.put(f"{pv_prefix}:A", 40_000)
         await ctxt.put(f"{pv_prefix}:B", -0.5)
@@ -211,13 +212,13 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
         assert value["value"] == 40_000
         assert isinstance(value["value"], int)
         assert value["alarm"]["severity"] == 0
-        assert value["alarm"]["message"] == "No alarm."
+        assert value["alarm"]["message"] == "No alarm"
 
         value = (await b_values.get()).raw
         assert value["value"] == -0.5
         assert isinstance(value["value"], float)
         assert value["alarm"]["severity"] == 0
-        assert value["alarm"]["message"] == "No alarm."
+        assert value["alarm"]["message"] == "No alarm"
 
         assert a_values.empty()
         assert b_values.empty()
@@ -228,9 +229,7 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
 
 
 def make_fastcs(pv_prefix: str, controller: Controller) -> FastCS:
-    epics_options = EpicsOptions(
-        ioc=EpicsIOCOptions(pv_prefix=pv_prefix), backend=EpicsBackend.P4P
-    )
+    epics_options = EpicsPVAOptions(ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     return FastCS(controller, [epics_options])
 
 
@@ -276,17 +275,21 @@ def test_read_signal_set():
 
 def test_pvi_grouping():
     class ChildChildController(SubController):
-        attr_d: AttrR = AttrR(String())
+        attr_e: AttrRW = AttrRW(Int())
+        attr_f: AttrR = AttrR(String())
 
     class ChildController(SubController):
         attr_c: AttrW = AttrW(Bool(), description="Some bool")
+        attr_d: AttrW = AttrW(String())
 
     class SomeController(Controller):
+        description = "some controller"
         attr_1: AttrRW = AttrRW(Int(max=400_000, max_alarm=40_000))
         attr_1: AttrRW = AttrRW(Float(min=-1, min_alarm=-0.5, prec=2))
         another_attr_0: AttrRW = AttrRW(Int())
         another_attr_1000: AttrRW = AttrRW(Int())
         a_third_attr: AttrW = AttrW(Int())
+        child_attribute_same_name: AttrR = AttrR(Int())
 
     controller = SomeController()
 
@@ -305,6 +308,8 @@ def test_pvi_grouping():
     sub_controller = ChildController()
     controller.register_sub_controller("AdditionalChild", sub_controller)
     sub_controller.register_sub_controller("ChildChild", ChildChildController())
+    sub_controller = ChildController()
+    controller.register_sub_controller("child_attribute_same_name", sub_controller)
 
     pv_prefix = str(uuid4())
     fastcs = make_fastcs(pv_prefix, controller)
@@ -336,7 +341,7 @@ def test_pvi_grouping():
         assert len(controller_pvi) == 1
         assert controller_pvi[0].todict() == {
             "alarm": {"message": "", "severity": 0, "status": 0},
-            "display": {"description": ""},
+            "display": {"description": "some controller"},
             "timeStamp": {
                 "nanoseconds": ANY,
                 "secondsPastEpoch": ANY,
@@ -344,7 +349,7 @@ def test_pvi_grouping():
             },
             "value": {
                 "additional_child": {"d": f"{pv_prefix}:AdditionalChild:PVI"},
-                "another_child": {"d": f"{pv_prefix}:another_child:PVI"},
+                "another_child": {"d": f"{pv_prefix}:AnotherChild:PVI"},
                 "another_attr": {
                     "rw": {
                         "v0": f"{pv_prefix}:AnotherAttr0",
@@ -352,13 +357,17 @@ def test_pvi_grouping():
                     }
                 },
                 "a_third_attr": {"w": f"{pv_prefix}:AThirdAttr"},
-                "attr": {"rw": f"{pv_prefix}:Attr1"},
+                "attr": {"rw": {"v1": f"{pv_prefix}:Attr1"}},
                 "child": {
                     "d": {
                         "v0": f"{pv_prefix}:Child0:PVI",
                         "v1": f"{pv_prefix}:Child1:PVI",
                         "v2": f"{pv_prefix}:Child2:PVI",
                     }
+                },
+                "child_attribute_same_name": {
+                    "d": f"{pv_prefix}:ChildAttributeSameName:PVI",
+                    "r": f"{pv_prefix}:ChildAttributeSameName",
                 },
             },
         }
@@ -373,6 +382,9 @@ def test_pvi_grouping():
             },
             "value": {
                 "attr_c": {"w": f"{pv_prefix}:Child0:AttrC"},
+                "attr_d": {
+                    "w": f"{pv_prefix}:Child0:AttrD",
+                },
                 "child_child": {"d": f"{pv_prefix}:Child0:ChildChild:PVI"},
             },
         }
@@ -385,7 +397,10 @@ def test_pvi_grouping():
                 "secondsPastEpoch": ANY,
                 "userTag": 0,
             },
-            "value": {"attr_d": {"r": f"{pv_prefix}:Child0:ChildChild:AttrD"}},
+            "value": {
+                "attr_e": {"rw": f"{pv_prefix}:Child0:ChildChild:AttrE"},
+                "attr_f": {"r": f"{pv_prefix}:Child0:ChildChild:AttrF"},
+            },
         }
 
 
@@ -395,6 +410,7 @@ def test_more_exotic_dataypes():
         ("B", "i"),
         ("C", "?"),
         ("D", "f"),
+        ("E", "h"),
     ]
 
     class AnEnum(enum.Enum):
@@ -411,7 +427,7 @@ def test_more_exotic_dataypes():
     pv_prefix = str(uuid4())
     fastcs = make_fastcs(pv_prefix, controller)
 
-    ctxt = ThreadContext("pva")
+    ctxt = ThreadContext("pva", nt=False)
 
     initial_waveform_value = np.zeros((10, 10), dtype=np.int64)
     initial_table_value = np.array([], dtype=table_columns)
@@ -419,24 +435,26 @@ def test_more_exotic_dataypes():
 
     server_set_waveform_value = np.copy(initial_waveform_value)
     server_set_waveform_value[0] = np.arange(10)
-    server_set_table_value = np.array([(1, 2, False, 3.14)], dtype=table_columns)
+    server_set_table_value = np.array([(1, 2, False, 3.14, 1)], dtype=table_columns)
     server_set_enum_value = AnEnum.B
 
     client_put_waveform_value = np.copy(server_set_waveform_value)
     client_put_waveform_value[1] = np.arange(10)
     client_put_table_value = NTTable(columns=table_columns).wrap(
         [
-            {"A": 1, "B": 2, "C": False, "D": 3.14},
-            {"A": 5, "B": 2, "C": True, "D": 6.28},
+            {"A": 1, "B": 2, "C": False, "D": 3.14, "E": 1},
+            {"A": 5, "B": 2, "C": True, "D": 6.28, "E": 2},
         ]
     )
     client_put_enum_value = "C"
 
     async def _wait_and_set_attrs():
         await asyncio.sleep(0.1)
-        await controller.some_waveform.set(server_set_waveform_value)
-        await controller.some_table.set(server_set_table_value)
-        await controller.some_enum.set(server_set_enum_value)
+        await asyncio.gather(
+            controller.some_waveform.set(server_set_waveform_value),
+            controller.some_table.set(server_set_table_value),
+            controller.some_enum.set(server_set_enum_value),
+        )
 
     async def _wait_and_put_pvs():
         await asyncio.sleep(0.3)
@@ -460,7 +478,8 @@ def test_more_exotic_dataypes():
     try:
         asyncio.get_event_loop().run_until_complete(
             asyncio.wait_for(
-                asyncio.gather(serve, wait_and_set_attrs, wait_and_put_pvs), timeout=0.6
+                asyncio.gather(serve, wait_and_set_attrs, wait_and_put_pvs),
+                timeout=0.6,
             )
         )
     except TimeoutError:
@@ -483,7 +502,7 @@ def test_more_exotic_dataypes():
             expected_waveform_gets, waveform_values, strict=True
         ):
             np.testing.assert_array_equal(
-                expected_waveform, actual_waveform.raw.value.reshape(10, 10)
+                expected_waveform, actual_waveform.todict()["value"].reshape(10, 10)
             )
 
         expected_table_gets = [
@@ -513,4 +532,9 @@ def test_more_exotic_dataypes():
         for expected_enum, actual_enum in zip(
             expected_enum_gets, enum_values, strict=True
         ):
-            assert expected_enum == controller.some_enum.datatype.members[actual_enum]  # type: ignore
+            assert (
+                expected_enum
+                == controller.some_enum.datatype.members[  # type: ignore
+                    actual_enum.todict()["value"]["index"]
+                ]
+            )

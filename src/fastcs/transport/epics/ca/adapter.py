@@ -2,22 +2,22 @@ import asyncio
 
 from fastcs.controller import Controller
 from fastcs.transport.adapter import TransportAdapter
+from fastcs.transport.epics.ca.ioc import EpicsIOC
+from fastcs.transport.epics.ca.options import EpicsCAOptions
 from fastcs.transport.epics.docs import EpicsDocs
 from fastcs.transport.epics.gui import EpicsGUI
-from fastcs.transport.epics.options import EpicsOptions
-from fastcs.transport.epics.softioc.ioc import EpicsIOC
 
 
-class EpicsTransport(TransportAdapter):
+class EpicsCATransport(TransportAdapter):
     def __init__(
         self,
         controller: Controller,
         loop: asyncio.AbstractEventLoop,
-        options: EpicsOptions | None = None,
+        options: EpicsCAOptions | None = None,
     ) -> None:
         self._controller = controller
         self._loop = loop
-        self._options = options or EpicsOptions()
+        self._options = options or EpicsCAOptions()
         self._pv_prefix = self.options.ioc.pv_prefix
         self._ioc = EpicsIOC(
             self.options.ioc.pv_prefix,
@@ -26,7 +26,7 @@ class EpicsTransport(TransportAdapter):
         )
 
     @property
-    def options(self) -> EpicsOptions:
+    def options(self) -> EpicsCAOptions:
         return self._options
 
     def create_docs(self) -> None:
