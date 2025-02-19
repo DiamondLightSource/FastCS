@@ -1,5 +1,20 @@
 {
   "$defs": {
+    "EpicsCAOptions": {
+      "properties": {
+        "docs": {
+          "$ref": "#/$defs/EpicsDocsOptions"
+        },
+        "gui": {
+          "$ref": "#/$defs/EpicsGUIOptions"
+        },
+        "ioc": {
+          "$ref": "#/$defs/EpicsIOCOptions"
+        }
+      },
+      "title": "EpicsCAOptions",
+      "type": "object"
+    },
     "EpicsDocsOptions": {
       "properties": {
         "path": {
@@ -64,7 +79,7 @@
       "title": "EpicsIOCOptions",
       "type": "object"
     },
-    "EpicsOptions": {
+    "EpicsPVAOptions": {
       "properties": {
         "docs": {
           "$ref": "#/$defs/EpicsDocsOptions"
@@ -76,7 +91,7 @@
           "$ref": "#/$defs/EpicsIOCOptions"
         }
       },
-      "title": "EpicsOptions",
+      "title": "EpicsPVAOptions",
       "type": "object"
     },
     "GraphQLOptions": {
@@ -192,7 +207,10 @@
       "items": {
         "anyOf": [
           {
-            "$ref": "#/$defs/EpicsOptions"
+            "$ref": "#/$defs/EpicsPVAOptions"
+          },
+          {
+            "$ref": "#/$defs/EpicsCAOptions"
           },
           {
             "$ref": "#/$defs/TangoOptions"

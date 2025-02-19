@@ -1,6 +1,7 @@
 import asyncio
 import inspect
 import json
+import signal
 from pathlib import Path
 from typing import Annotated, Any, Optional, TypeAlias, get_type_hints
 
@@ -14,14 +15,15 @@ from .backend import Backend
 from .controller import Controller
 from .exceptions import LaunchError
 from .transport.adapter import TransportAdapter
-from .transport.epics.options import EpicsOptions
+from .transport.epics.ca.options import EpicsCAOptions
+from .transport.epics.pva.options import EpicsPVAOptions
 from .transport.graphQL.options import GraphQLOptions
 from .transport.rest.options import RestOptions
 from .transport.tango.options import TangoOptions
 
 # Define a type alias for transport options
 TransportOptions: TypeAlias = list[
-    EpicsOptions | TangoOptions | RestOptions | GraphQLOptions
+    EpicsPVAOptions | EpicsCAOptions | TangoOptions | RestOptions | GraphQLOptions
 ]
 
 
@@ -32,15 +34,23 @@ class FastCS:
         transport_options: TransportOptions,
     ):
         self._loop = asyncio.get_event_loop()
+        self._loop.set_debug(True)
         self._backend = Backend(controller, self._loop)
         transport: TransportAdapter
         self._transports: list[TransportAdapter] = []
         for option in transport_options:
             match option:
-                case EpicsOptions():
-                    from .transport.epics.adapter import EpicsTransport
+                case EpicsPVAOptions():
+                    from .transport.epics.pva.adapter import EpicsPVATransport
 
-                    transport = EpicsTransport(
+                    transport = EpicsPVATransport(
+                        controller,
+                        option,
+                    )
+                case EpicsCAOptions():
+                    from .transport.epics.ca.adapter import EpicsCATransport
+
+                    transport = EpicsCATransport(
                         controller,
                         self._loop,
                         option,
@@ -67,6 +77,7 @@ class FastCS:
                         controller,
                         option,
                     )
+
             self._transports.append(transport)
 
     def create_docs(self) -> None:
@@ -80,14 +91,19 @@ class FastCS:
                 transport.create_gui()
 
     def run(self):
-        self._loop.run_until_complete(
-            self.serve(),
-        )
+        serve = asyncio.ensure_future(self.serve())
+
+        self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
+        self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
+        self._loop.run_until_complete(serve)
 
     async def serve(self) -> None:
         coros = [self._backend.serve()]
         coros.extend([transport.serve() for transport in self._transports])
-        await asyncio.gather(*coros)
+        try:
+            await asyncio.gather(*coros)
+        except asyncio.CancelledError:
+            pass
 
 
 def launch(

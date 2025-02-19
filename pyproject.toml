@@ -19,6 +19,7 @@ dependencies = [
     "pytango",
     "softioc>=4.5.0",
     "strawberry-graphql",
+    "p4p"
 ]
 dynamic = ["version"]
 license.file = "LICENSE"
@@ -79,6 +80,8 @@ testpaths = "docs src tests"
 
 [tool.coverage.run]
 data_file = "/tmp/fastcs.coverage"
+concurrency = ["thread", "multiprocessing"]
+omit = ["tests/*"]
 
 [tool.coverage.paths]
 # Tests are run from installed location, map back to the src directory

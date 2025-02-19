@@ -10,7 +10,16 @@ from typing import Generic, TypeVar
 import numpy as np
 from numpy.typing import DTypeLike
 
-T = TypeVar("T", int, float, bool, str, enum.Enum, np.ndarray)
+T = TypeVar(
+    "T",
+    int,  # Int
+    float,  # Float
+    bool,  # Bool
+    str,  # String
+    enum.Enum,  # Enum
+    np.ndarray,  # Waveform
+    list[tuple[str, DTypeLike]],  # Table
+)
 
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
@@ -46,10 +55,10 @@ T_Numerical = TypeVar("T_Numerical", int, float)
 @dataclass(frozen=True)
 class _Numerical(DataType[T_Numerical]):
     units: str | None = None
-    min: int | None = None
-    max: int | None = None
-    min_alarm: int | None = None
-    max_alarm: int | None = None
+    min: T_Numerical | None = None
+    max: T_Numerical | None = None
+    min_alarm: T_Numerical | None = None
+    max_alarm: T_Numerical | None = None
 
     def validate(self, value: T_Numerical) -> T_Numerical:
         super().validate(value)
@@ -82,6 +91,12 @@ class Float(_Numerical[float]):
     @property
     def dtype(self) -> type[float]:
         return float
+
+    def validate(self, value: float) -> float:
+        super().validate(value)
+        if self.prec is not None:
+            value = round(value, self.prec)
+        return value
 
 
 @dataclass(frozen=True)
@@ -164,5 +179,29 @@ class Waveform(DataType[np.ndarray]):
             raise ValueError(
                 f"Value shape {value.shape} exceeeds the shape maximum shape "
                 f"{self.shape}"
+            )
+        return value
+
+
+@dataclass(frozen=True)
+class Table(DataType[np.ndarray]):
+    # https://numpy.org/devdocs/user/basics.rec.html#structured-datatype-creation
+    structured_dtype: list[tuple[str, DTypeLike]]
+
+    @property
+    def dtype(self) -> type[np.ndarray]:
+        return np.ndarray
+
+    @property
+    def initial_value(self) -> np.ndarray:
+        return np.array([], dtype=self.structured_dtype)
+
+    def validate(self, value: np.ndarray) -> np.ndarray:
+        super().validate(value)
+
+        if self.structured_dtype != value.dtype:
+            raise ValueError(
+                f"Value dtype {value.dtype.descr} is not the same as the structured "
+                f"dtype {self.structured_dtype}"
             )
         return value
