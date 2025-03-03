@@ -1,10 +1,10 @@
-import asyncio
-import time
 from collections.abc import Callable
 
 import numpy as np
 from p4p import Value
 from p4p.nt import NTEnum, NTNDArray, NTScalar, NTTable
+from p4p.nt.enum import ntenum
+from p4p.nt.ndarray import ntndarray
 from p4p.server import ServerOperation
 from p4p.server.asyncio import SharedPV
 
@@ -18,6 +18,7 @@ from .types import (
     cast_to_p4p_value,
     make_p4p_type,
     p4p_alarm_states,
+    p4p_timestamp_now,
 )
 
 
@@ -33,10 +34,13 @@ class WritePvHandler:
                 [tuple(labelled_row.values()) for labelled_row in value],
                 dtype=self._attr_w.datatype.structured_dtype,
             )
-        elif hasattr(value, "raw"):
-            raw_value = value.raw.value
-        else:
+        elif isinstance(value, Value):
             raw_value = value.todict()["value"]
+        else:
+            # Unfortunately these types don't have a `todict`,
+            # while our `buildType` fields don't have a `.raw`.
+            assert isinstance(value, ntenum | ntndarray)
+            raw_value = value.raw.value  # type:ignore
 
         cast_value = cast_from_p4p_value(self._attr_w, raw_value)
 
@@ -50,45 +54,47 @@ class WritePvHandler:
 class CommandPvHandler:
     def __init__(self, command: Callable):
         self._command = command
-        self._task_started_event = asyncio.Event()
+        self._task_in_progress = False
 
-    async def _run_command(self, pv: SharedPV):
-        self._task_started_event.set()
-        self._task_started_event.clear()
+    async def _run_command(self) -> dict:
+        self._task_in_progress = True
 
-        kwargs = {}
         try:
             await self._command()
         except Exception as e:
-            kwargs.update(
-                p4p_alarm_states(MAJOR_ALARM_SEVERITY, RECORD_ALARM_STATUS, str(e))
+            alarm_states = p4p_alarm_states(
+                MAJOR_ALARM_SEVERITY, RECORD_ALARM_STATUS, str(e)
             )
         else:
-            kwargs.update(p4p_alarm_states())
+            alarm_states = p4p_alarm_states()
 
-        value = NTScalar("?").wrap({"value": False, **kwargs})
-        timestamp = time.time()
-        pv.close()
-        pv.open(value, timestamp=timestamp)
-        pv.post(value, timestamp=timestamp)
+        self._task_in_progress = False
+        return alarm_states
 
     async def put(self, pv: SharedPV, op: ServerOperation):
         value = op.value()
-        raw_value = value.raw.value
+        raw_value = value["value"]
 
         if raw_value is True:
-            asyncio.create_task(self._run_command(pv))
-            await self._task_started_event.wait()
+            if self._task_in_progress:
+                raise RuntimeError(
+                    "Received request to run command but it is already in progress. "
+                    "Maybe the command should spawn an asyncio task?"
+                )
 
-        # Flip to true once command task starts
-        pv.post(value, timestamp=time.time())
-        op.done()
+            # Flip to true once command task starts
+            pv.post({"value": True, **p4p_timestamp_now(), **p4p_alarm_states()})
+            op.done()
+            alarm_states = await self._run_command()
+            pv.post({"value": False, **p4p_timestamp_now(), **alarm_states})
+        else:
+            raise RuntimeError("Commands should only take the value `True`.")
 
 
 def make_shared_pv(attribute: Attribute) -> SharedPV:
     initial_value = (
         attribute.get()
-        if isinstance(attribute, AttrRW | AttrR)
+        if isinstance(attribute, AttrR)
         else attribute.datatype.initial_value
     )
 
@@ -120,10 +126,17 @@ def make_shared_pv(attribute: Attribute) -> SharedPV:
 
 
 def make_command_pv(command: Callable) -> SharedPV:
+    type_ = NTScalar.buildType("?", display=True, control=True)
+
+    initial = Value(type_, {"value": False, **p4p_alarm_states()})
+
+    def _wrap(value: dict):
+        return Value(type_, value)
+
     shared_pv = SharedPV(
-        nt=NTScalar("?"),
-        initial=False,
+        initial=initial,
         handler=CommandPvHandler(command),
+        wrap=_wrap,
     )
 
     return shared_pv

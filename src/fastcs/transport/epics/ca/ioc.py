@@ -22,7 +22,7 @@ from fastcs.transport.epics.options import EpicsIOCOptions
 EPICS_MAX_NAME_LENGTH = 60
 
 
-class EpicsIOC:
+class EpicsCAIOC:
     def __init__(
         self,
         pv_prefix: str,

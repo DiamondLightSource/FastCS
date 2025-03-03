@@ -38,16 +38,14 @@ def get_pv_name(pv_prefix: str, *attribute_names: str) -> str:
 async def parse_attributes(
     root_pv_prefix: str, controller: Controller
 ) -> list[StaticProvider]:
-    providers = []
     pvi_tree = PviTree(root_pv_prefix)
+    provider = StaticProvider(root_pv_prefix)
 
     for single_mapping in controller.get_controller_mappings():
         path = single_mapping.controller.path
         pv_prefix = get_pv_name(root_pv_prefix, *path)
-        provider = StaticProvider(pv_prefix)
-        providers.append(provider)
 
-        pvi_tree.add_block(
+        pvi_tree.add_sub_device(
             pv_prefix,
             single_mapping.controller.description,
         )
@@ -56,7 +54,7 @@ async def parse_attributes(
             pv_name = get_pv_name(pv_prefix, attr_name)
             attribute_pv = make_shared_pv(attribute)
             provider.add(pv_name, attribute_pv)
-            pvi_tree.add_field(pv_name, _attribute_to_access(attribute))
+            pvi_tree.add_signal(pv_name, _attribute_to_access(attribute))
 
         for attr_name, method in single_mapping.command_methods.items():
             pv_name = get_pv_name(pv_prefix, attr_name)
@@ -64,10 +62,9 @@ async def parse_attributes(
                 MethodType(method.fn, single_mapping.controller)
             )
             provider.add(pv_name, command_pv)
-            pvi_tree.add_field(pv_name, "x")
+            pvi_tree.add_signal(pv_name, "x")
 
-    providers.append(pvi_tree.make_provider())
-    return providers
+    return [provider, pvi_tree.make_provider()]
 
 
 class P4PIOC:

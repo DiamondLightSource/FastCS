@@ -1,5 +1,6 @@
 import asyncio
 import enum
+from datetime import datetime
 from multiprocessing import Queue
 from unittest.mock import ANY
 from uuid import uuid4
@@ -18,6 +19,7 @@ from fastcs.datatypes import Bool, Enum, Float, Int, String, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import EpicsIOCOptions
 from fastcs.transport.epics.pva.options import EpicsPVAOptions
+from fastcs.wrappers import command
 
 
 @pytest.mark.asyncio
@@ -538,3 +540,90 @@ def test_more_exotic_dataypes():
                     actual_enum.todict()["value"]["index"]
                 ]
             )
+
+
+def test_command_method_put_twice(caplog):
+    class SomeController(Controller):
+        command_runs_for_a_while_times = []
+        command_spawns_a_task_times = []
+        command_task_times = []
+
+        @command()
+        async def command_runs_for_a_while(self):
+            start_time = datetime.now()
+            await asyncio.sleep(0.1)
+            self.command_runs_for_a_while_times.append((start_time, datetime.now()))
+
+        @command()
+        async def command_spawns_a_task(self):
+            start_time = datetime.now()
+
+            async def some_task():
+                task_start_time = datetime.now()
+                await asyncio.sleep(0.1)
+                self.command_task_times.append((task_start_time, datetime.now()))
+
+            self.command_spawns_a_task_times.append((start_time, datetime.now()))
+
+            asyncio.create_task(some_task())
+
+    controller = SomeController()
+    pv_prefix = str(uuid4())
+    fastcs = make_fastcs(pv_prefix, controller)
+    expected_error_string = (
+        "RuntimeError: Received request to run command but it is "
+        "already in progress. Maybe the command should spawn an asyncio task?"
+    )
+
+    async def put_pvs():
+        await asyncio.sleep(0.1)
+        ctxt = Context("pva")
+        await ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True)
+        await ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True)
+        await ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True)
+        assert expected_error_string not in caplog.text
+        await ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True)
+        assert expected_error_string in caplog.text
+
+    serve = asyncio.ensure_future(fastcs.serve())
+    try:
+        asyncio.get_event_loop().run_until_complete(
+            asyncio.wait_for(
+                asyncio.gather(serve, put_pvs()),
+                timeout=3,
+            )
+        )
+    except TimeoutError:
+        ...
+    serve.cancel()
+
+    assert (
+        len(controller.command_task_times)
+        == len(controller.command_spawns_a_task_times)
+        == 2
+    )
+    for (task_start_time, task_end_time), (
+        task_spawn_start_time,
+        task_spawn_end_time,
+    ) in zip(
+        controller.command_task_times,
+        controller.command_spawns_a_task_times,
+        strict=True,
+    ):
+        assert (
+            pytest.approx(
+                (task_spawn_end_time - task_spawn_start_time).total_seconds(), abs=0.05
+            )
+            == 0
+        )
+        assert (
+            pytest.approx((task_end_time - task_start_time).total_seconds(), abs=0.05)
+            == 0.1
+        )
+
+    assert len(controller.command_runs_for_a_while_times) == 1
+    coro_start_time, coro_end_time = controller.command_runs_for_a_while_times[0]
+    assert (
+        pytest.approx((coro_end_time - coro_start_time).total_seconds(), abs=0.05)
+        == 0.1
+    )

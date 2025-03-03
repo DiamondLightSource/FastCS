@@ -2,7 +2,7 @@ import asyncio
 
 from fastcs.controller import Controller
 from fastcs.transport.adapter import TransportAdapter
-from fastcs.transport.epics.ca.ioc import EpicsIOC
+from fastcs.transport.epics.ca.ioc import EpicsCAIOC
 from fastcs.transport.epics.ca.options import EpicsCAOptions
 from fastcs.transport.epics.docs import EpicsDocs
 from fastcs.transport.epics.gui import EpicsGUI
@@ -19,7 +19,7 @@ class EpicsCATransport(TransportAdapter):
         self._loop = loop
         self._options = options or EpicsCAOptions()
         self._pv_prefix = self.options.ioc.pv_prefix
-        self._ioc = EpicsIOC(
+        self._ioc = EpicsCAIOC(
             self.options.ioc.pv_prefix,
             controller,
             self._options.ioc,

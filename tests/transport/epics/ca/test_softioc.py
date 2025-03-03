@@ -19,7 +19,7 @@ from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSException
 from fastcs.transport.epics.ca.ioc import (
     EPICS_MAX_NAME_LENGTH,
-    EpicsIOC,
+    EpicsCAIOC,
     _add_attr_pvi_info,
     _add_pvi_info,
     _add_sub_controller_pvi_info,
@@ -204,7 +204,7 @@ def test_ioc(mocker: MockerFixture, controller: Controller):
         "fastcs.transport.epics.ca.ioc._add_sub_controller_pvi_info"
     )
 
-    EpicsIOC(DEVICE, controller)
+    EpicsCAIOC(DEVICE, controller)
 
     # Check records are created
     builder.boolIn.assert_called_once_with(
@@ -397,7 +397,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     long_rw_name = "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
     assert long_name_controller.attr_rw_short_name.enabled
     assert getattr(long_name_controller, long_attr_name).enabled
-    EpicsIOC(DEVICE, long_name_controller)
+    EpicsCAIOC(DEVICE, long_name_controller)
     assert long_name_controller.attr_rw_short_name.enabled
     assert not getattr(long_name_controller, long_attr_name).enabled
 
