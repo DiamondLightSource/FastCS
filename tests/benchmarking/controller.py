@@ -8,7 +8,7 @@ from fastcs.transport.rest.options import RestOptions, RestServerOptions
 from fastcs.transport.tango.options import TangoDSROptions, TangoOptions
 
 
-class TestController(Controller):
+class MyTestController(Controller):
     read_int: AttrR = AttrR(Int(), initial_value=0)
     write_bool: AttrW = AttrW(Bool())
 
@@ -22,7 +22,7 @@ def run():
         TangoOptions(dsr=TangoDSROptions(dev_name="MY/BENCHMARK/DEVICE")),
     ]
     instance = FastCS(
-        TestController(),
+        MyTestController(),
         transport_options,
     )
     instance.run()

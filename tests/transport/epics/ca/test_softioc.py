@@ -5,7 +5,8 @@ import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 from tests.assertable_controller import (
-    AssertableController,
+    AssertableControllerAPI,
+    MyTestController,
     TestHandler,
     TestSender,
     TestUpdater,
@@ -14,6 +15,7 @@ from tests.util import ColourEnum
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
+from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSException
@@ -180,7 +182,7 @@ def test_get_output_record_raises(mocker: MockerFixture):
         _make_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
 
 
-class EpicsAssertableController(AssertableController):
+class EpicsController(MyTestController):
     read_int = AttrR(Int(), handler=TestUpdater())
     read_write_int = AttrRW(Int(), handler=TestHandler())
     read_write_float = AttrRW(Float())
@@ -192,11 +194,11 @@ class EpicsAssertableController(AssertableController):
 
 
 @pytest.fixture()
-def controller(class_mocker: MockerFixture):
-    return EpicsAssertableController(class_mocker)
+def epics_controller_api(class_mocker: MockerFixture):
+    return AssertableControllerAPI(EpicsController(), class_mocker)
 
 
-def test_ioc(mocker: MockerFixture, controller: Controller):
+def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     ioc_builder = mocker.patch("fastcs.transport.epics.ca.ioc.builder")
     builder = mocker.patch("fastcs.transport.epics.ca.util.builder")
     add_pvi_info = mocker.patch("fastcs.transport.epics.ca.ioc._add_pvi_info")
@@ -204,75 +206,93 @@ def test_ioc(mocker: MockerFixture, controller: Controller):
         "fastcs.transport.epics.ca.ioc._add_sub_controller_pvi_info"
     )
 
-    EpicsCAIOC(DEVICE, controller)
+    EpicsCAIOC(DEVICE, epics_controller_api)
 
     # Check records are created
     builder.boolIn.assert_called_once_with(
         f"{DEVICE}:ReadBool",
-        **record_metadata_from_attribute(controller.attributes["read_bool"]),
-        **record_metadata_from_datatype(controller.attributes["read_bool"].datatype),
+        **record_metadata_from_attribute(epics_controller_api.attributes["read_bool"]),
+        **record_metadata_from_datatype(
+            epics_controller_api.attributes["read_bool"].datatype
+        ),
     )
     builder.longIn.assert_any_call(
         f"{DEVICE}:ReadInt",
-        **record_metadata_from_attribute(controller.attributes["read_int"]),
-        **record_metadata_from_datatype(controller.attributes["read_int"].datatype),
+        **record_metadata_from_attribute(epics_controller_api.attributes["read_int"]),
+        **record_metadata_from_datatype(
+            epics_controller_api.attributes["read_int"].datatype
+        ),
     )
     builder.aIn.assert_called_once_with(
         f"{DEVICE}:ReadWriteFloat_RBV",
-        **record_metadata_from_attribute(controller.attributes["read_write_float"]),
+        **record_metadata_from_attribute(
+            epics_controller_api.attributes["read_write_float"]
+        ),
         **record_metadata_from_datatype(
-            controller.attributes["read_write_float"].datatype
+            epics_controller_api.attributes["read_write_float"].datatype
         ),
     )
     builder.aOut.assert_any_call(
         f"{DEVICE}:ReadWriteFloat",
         always_update=True,
         on_update=mocker.ANY,
-        **record_metadata_from_attribute(controller.attributes["read_write_float"]),
+        **record_metadata_from_attribute(
+            epics_controller_api.attributes["read_write_float"]
+        ),
         **record_metadata_from_datatype(
-            controller.attributes["read_write_float"].datatype
+            epics_controller_api.attributes["read_write_float"].datatype
         ),
     )
     builder.longIn.assert_any_call(
         f"{DEVICE}:ReadWriteInt_RBV",
-        **record_metadata_from_attribute(controller.attributes["read_write_int"]),
+        **record_metadata_from_attribute(
+            epics_controller_api.attributes["read_write_int"]
+        ),
         **record_metadata_from_datatype(
-            controller.attributes["read_write_int"].datatype
+            epics_controller_api.attributes["read_write_int"].datatype
         ),
     )
     builder.longOut.assert_called_with(
         f"{DEVICE}:ReadWriteInt",
         always_update=True,
         on_update=mocker.ANY,
-        **record_metadata_from_attribute(controller.attributes["read_write_int"]),
+        **record_metadata_from_attribute(
+            epics_controller_api.attributes["read_write_int"]
+        ),
         **record_metadata_from_datatype(
-            controller.attributes["read_write_int"].datatype
+            epics_controller_api.attributes["read_write_int"].datatype
         ),
     )
     builder.mbbIn.assert_called_once_with(
         f"{DEVICE}:Enum_RBV",
-        **record_metadata_from_attribute(controller.attributes["enum"]),
-        **record_metadata_from_datatype(controller.attributes["enum"].datatype),
+        **record_metadata_from_attribute(epics_controller_api.attributes["enum"]),
+        **record_metadata_from_datatype(
+            epics_controller_api.attributes["enum"].datatype
+        ),
     )
     builder.mbbOut.assert_called_once_with(
         f"{DEVICE}:Enum",
         always_update=True,
         on_update=mocker.ANY,
-        **record_metadata_from_attribute(controller.attributes["enum"]),
-        **record_metadata_from_datatype(controller.attributes["enum"].datatype),
+        **record_metadata_from_attribute(epics_controller_api.attributes["enum"]),
+        **record_metadata_from_datatype(
+            epics_controller_api.attributes["enum"].datatype
+        ),
     )
     builder.boolOut.assert_called_once_with(
         f"{DEVICE}:WriteBool",
         always_update=True,
         on_update=mocker.ANY,
-        **record_metadata_from_attribute(controller.attributes["write_bool"]),
-        **record_metadata_from_datatype(controller.attributes["write_bool"].datatype),
+        **record_metadata_from_attribute(epics_controller_api.attributes["write_bool"]),
+        **record_metadata_from_datatype(
+            epics_controller_api.attributes["write_bool"].datatype
+        ),
     )
     ioc_builder.Action.assert_any_call(f"{DEVICE}:Go", on_update=mocker.ANY)
 
     # Check info tags are added
     add_pvi_info.assert_called_once_with(f"{DEVICE}:PVI")
-    add_sub_controller_pvi_info.assert_called_once_with(DEVICE, controller)
+    add_sub_controller_pvi_info.assert_called_once_with(DEVICE, epics_controller_api)
 
 
 def test_add_pvi_info(mocker: MockerFixture):
@@ -341,13 +361,13 @@ def test_add_pvi_info_with_parent(mocker: MockerFixture):
 
 def test_add_sub_controller_pvi_info(mocker: MockerFixture):
     add_pvi_info = mocker.patch("fastcs.transport.epics.ca.ioc._add_pvi_info")
-    controller = mocker.MagicMock()
-    controller.path = []
-    child = mocker.MagicMock()
-    child.path = ["Child"]
-    controller.get_sub_controllers.return_value = {"d": child}
+    parent_api = mocker.MagicMock()
+    parent_api.path = []
+    child_api = mocker.MagicMock()
+    child_api.path = ["Child"]
+    parent_api.sub_apis = {"d": child_api}
 
-    _add_sub_controller_pvi_info(DEVICE, controller)
+    _add_sub_controller_pvi_info(DEVICE, parent_api)
 
     add_pvi_info.assert_called_once_with(
         f"{DEVICE}:Child:PVI", f"{DEVICE}:PVI", "child"
@@ -373,33 +393,30 @@ def test_add_attr_pvi_info(mocker: MockerFixture):
     )
 
 
-async def do_nothing(arg): ...
-
-
-class NothingCommand:
-    def __init__(self):  # make fastcs_method instance variable
-        self.fastcs_method = Command(do_nothing)
+async def do_nothing(): ...
 
 
 class ControllerLongNames(Controller):
     attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name = AttrR(Int())
     attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV = AttrRW(Int())
     attr_rw_short_name = AttrRW(Int())
-    command_with_reallyreallyreallyreallyreallyreallyreally_long_name = NothingCommand()
-    command_short_name = NothingCommand()
+    command_with_reallyreallyreallyreallyreallyreallyreally_long_name = Command(
+        do_nothing
+    )
+    command_short_name = Command(do_nothing)
 
 
 def test_long_pv_names_discarded(mocker: MockerFixture):
     ioc_builder = mocker.patch("fastcs.transport.epics.ca.ioc.builder")
     builder = mocker.patch("fastcs.transport.epics.ca.util.builder")
-    long_name_controller = ControllerLongNames()
+    long_name_controller_api = AssertableControllerAPI(ControllerLongNames(), mocker)
     long_attr_name = "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
     long_rw_name = "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
-    assert long_name_controller.attr_rw_short_name.enabled
-    assert getattr(long_name_controller, long_attr_name).enabled
-    EpicsCAIOC(DEVICE, long_name_controller)
-    assert long_name_controller.attr_rw_short_name.enabled
-    assert not getattr(long_name_controller, long_attr_name).enabled
+    assert long_name_controller_api.attributes["attr_rw_short_name"].enabled
+    assert long_name_controller_api.attributes[long_attr_name].enabled
+    EpicsCAIOC(DEVICE, long_name_controller_api)
+    assert long_name_controller_api.attributes["attr_rw_short_name"].enabled
+    assert not long_name_controller_api.attributes[long_attr_name].enabled
 
     short_pv_name = "attr_rw_short_name".title().replace("_", "")
     builder.longOut.assert_called_once_with(
@@ -407,17 +424,23 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
         always_update=True,
         on_update=mocker.ANY,
         **record_metadata_from_datatype(
-            long_name_controller.attr_rw_short_name.datatype
+            long_name_controller_api.attributes["attr_rw_short_name"].datatype
         ),
-        **record_metadata_from_attribute(long_name_controller.attr_rw_short_name),
+        **record_metadata_from_attribute(
+            long_name_controller_api.attributes["attr_rw_short_name"]
+        ),
     )
     builder.longIn.assert_called_once_with(
         f"{DEVICE}:{short_pv_name}_RBV",
         **record_metadata_from_datatype(
-            long_name_controller.attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV.datatype
+            long_name_controller_api.attributes[
+                "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
+            ].datatype
         ),
         **record_metadata_from_attribute(
-            long_name_controller.attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV
+            long_name_controller_api.attributes[
+                "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
+            ]
         ),
     )
 
@@ -443,11 +466,11 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     with pytest.raises(AssertionError):
         builder.longIn.assert_called_once_with(f"{DEVICE}:{long_rw_pv_name}_RBV")
 
-    assert long_name_controller.command_short_name.fastcs_method.enabled
+    assert long_name_controller_api.command_methods["command_short_name"].enabled
     long_command_name = (
         "command_with_reallyreallyreallyreallyreallyreallyreally_long_name"
     )
-    assert not getattr(long_name_controller, long_command_name).fastcs_method.enabled
+    assert not long_name_controller_api.command_methods[long_command_name].enabled
 
     short_command_pv_name = "command_short_name".title().replace("_", "")
     ioc_builder.Action.assert_called_once_with(

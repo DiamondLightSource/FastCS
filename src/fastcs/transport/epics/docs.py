@@ -1,11 +1,11 @@
-from fastcs.controller import Controller
+from fastcs.controller_api import ControllerAPI
 
 from .options import EpicsDocsOptions
 
 
 class EpicsDocs:
-    def __init__(self, controller: Controller) -> None:
-        self._controller = controller
+    def __init__(self, controller_apis: ControllerAPI) -> None:
+        self._controller_apis = controller_apis
 
     def create_docs(self, options: EpicsDocsOptions | None = None) -> None:
         if options is None:

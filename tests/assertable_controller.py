@@ -2,10 +2,12 @@ import copy
 from contextlib import contextmanager
 from typing import Literal
 
-from pytest_mock import MockerFixture
+from pytest_mock import MockerFixture, MockType
 
 from fastcs.attributes import AttrR, Handler, Sender, Updater
+from fastcs.backend import build_controller_api
 from fastcs.controller import Controller, SubController
+from fastcs.controller_api import ControllerAPI
 from fastcs.datatypes import Int
 from fastcs.wrappers import command, scan
 
@@ -30,7 +32,7 @@ class TestSubController(SubController):
     read_int: AttrR = AttrR(Int(), handler=TestUpdater())
 
 
-class TestController(Controller):
+class MyTestController(Controller):
     def __init__(self) -> None:
         super().__init__()
 
@@ -59,10 +61,27 @@ class TestController(Controller):
         self.count += 1
 
 
-class AssertableController(TestController):
-    def __init__(self, mocker: MockerFixture) -> None:
-        self.mocker = mocker
+class AssertableControllerAPI(ControllerAPI):
+    def __init__(self, controller: Controller, mocker: MockerFixture) -> None:
         super().__init__()
+
+        self.mocker = mocker
+        self.command_method_spys: dict[str, MockType] = {}
+
+        # Build a ControllerAPI from the given Controller
+        controller_api = build_controller_api(controller)
+        # Copy its fields
+        self.attributes = controller_api.attributes
+        self.command_methods = controller_api.command_methods
+        self.put_methods = controller_api.put_methods
+        self.scan_methods = controller_api.scan_methods
+        self.sub_apis = controller_api.sub_apis
+
+        # Create spys for command methods before they are passed to the transport
+        for command_name in self.command_methods.keys():
+            self.command_method_spys[command_name] = mocker.spy(
+                self.command_methods[command_name], "_fn"
+            )
 
     @contextmanager
     def assert_read_here(self, path: list[str]):
@@ -85,20 +104,20 @@ class AssertableController(TestController):
         queue = copy.deepcopy(path)
 
         # Navigate to subcontroller
-        controller = self
+        controller_api = self
         item_name = queue.pop(-1)
         for item in queue:
-            controllers = controller.get_sub_controllers()
-            controller = controllers[item]
+            controller_api = controller_api.sub_apis[item]
 
-        # create probe
+        # Get spy
         if method:
-            attr = getattr(controller, item_name)
+            attr = controller_api.attributes[item_name]
             spy = self.mocker.spy(attr, method)
         else:
-            spy = self.mocker.spy(controller, item_name)
-        initial = spy.call_count
+            # Lookup pre-defined spy for method
+            spy = self.command_method_spys[item_name]
 
+        initial = spy.call_count
         try:
             yield  # Enter context
         except Exception as e:

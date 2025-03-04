@@ -1,6 +1,6 @@
 import asyncio
 
-from fastcs.controller import Controller
+from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
 
 from .dsr import TangoDSR
@@ -10,12 +10,12 @@ from .options import TangoOptions
 class TangoTransport(TransportAdapter):
     def __init__(
         self,
-        controller: Controller,
+        controller_api: ControllerAPI,
         loop: asyncio.AbstractEventLoop,
         options: TangoOptions | None = None,
     ):
         self._options = options or TangoOptions()
-        self._dsr = TangoDSR(controller, loop)
+        self._dsr = TangoDSR(controller_api, loop)
 
     @property
     def options(self) -> TangoOptions:

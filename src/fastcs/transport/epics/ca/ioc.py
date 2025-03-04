@@ -1,6 +1,5 @@
 import asyncio
 from collections.abc import Callable
-from types import MethodType
 from typing import Any, Literal
 
 from softioc import builder, softioc
@@ -8,7 +7,7 @@ from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import BaseController, Controller
+from fastcs.controller_api import ControllerAPI
 from fastcs.datatypes import DataType, T
 from fastcs.transport.epics.ca.util import (
     builder_callable_from_attribute,
@@ -26,16 +25,16 @@ class EpicsCAIOC:
     def __init__(
         self,
         pv_prefix: str,
-        controller: Controller,
+        controller_api: ControllerAPI,
         options: EpicsIOCOptions | None = None,
     ):
         self._options = options or EpicsIOCOptions()
-        self._controller = controller
+        self._controller_api = controller_api
         _add_pvi_info(f"{pv_prefix}:PVI")
-        _add_sub_controller_pvi_info(pv_prefix, controller)
+        _add_sub_controller_pvi_info(pv_prefix, controller_api)
 
-        _create_and_link_attribute_pvs(pv_prefix, controller)
-        _create_and_link_command_pvs(pv_prefix, controller)
+        _create_and_link_attribute_pvs(pv_prefix, controller_api)
+        _create_and_link_command_pvs(pv_prefix, controller_api)
 
     def run(
         self,
@@ -91,7 +90,7 @@ def _add_pvi_info(
     record.add_info("Q:group", q_group)
 
 
-def _add_sub_controller_pvi_info(pv_prefix: str, parent: BaseController):
+def _add_sub_controller_pvi_info(pv_prefix: str, parent: ControllerAPI):
     """Add PVI references from controller to its sub controllers, recursively.
 
     Args:
@@ -101,7 +100,7 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: BaseController):
     """
     parent_pvi = ":".join([pv_prefix] + parent.path + ["PVI"])
 
-    for child in parent.get_sub_controllers().values():
+    for child in parent.sub_apis.values():
         child_pvi = ":".join([pv_prefix] + child.path + ["PVI"])
         child_name = child.path[-1].lower()
 
@@ -110,10 +109,12 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: BaseController):
         _add_sub_controller_pvi_info(pv_prefix, child)
 
 
-def _create_and_link_attribute_pvs(pv_prefix: str, controller: Controller) -> None:
-    for single_mapping in controller.get_controller_mappings():
-        path = single_mapping.controller.path
-        for attr_name, attribute in single_mapping.attributes.items():
+def _create_and_link_attribute_pvs(
+    pv_prefix: str, root_controller_api: ControllerAPI
+) -> None:
+    for controller_api in root_controller_api.walk_api():
+        path = controller_api.path
+        for attr_name, attribute in controller_api.attributes.items():
             pv_name = attr_name.title().replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
             full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
@@ -122,7 +123,7 @@ def _create_and_link_attribute_pvs(pv_prefix: str, controller: Controller) -> No
                 attribute.enabled = False
                 print(
                     f"Not creating PV for {attr_name} for controller"
-                    f" {single_mapping.controller.path} as full name would exceed"
+                    f" {controller_api.path} as full name would exceed"
                     f" {EPICS_MAX_NAME_LENGTH} characters"
                 )
                 continue
@@ -202,10 +203,12 @@ def _create_and_link_write_pv(
     attribute.set_write_display_callback(async_write_display)
 
 
-def _create_and_link_command_pvs(pv_prefix: str, controller: Controller) -> None:
-    for single_mapping in controller.get_controller_mappings():
-        path = single_mapping.controller.path
-        for attr_name, method in single_mapping.command_methods.items():
+def _create_and_link_command_pvs(
+    pv_prefix: str, root_controller_api: ControllerAPI
+) -> None:
+    for controller_api in root_controller_api.walk_api():
+        path = controller_api.path
+        for attr_name, method in controller_api.command_methods.items():
             pv_name = attr_name.title().replace("_", "")
             _pv_prefix = ":".join([pv_prefix] + path)
             if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
@@ -219,7 +222,7 @@ def _create_and_link_command_pvs(pv_prefix: str, controller: Controller) -> None
                     _pv_prefix,
                     pv_name,
                     attr_name,
-                    MethodType(method.fn, single_mapping.controller),
+                    method.fn,
                 )
 
 

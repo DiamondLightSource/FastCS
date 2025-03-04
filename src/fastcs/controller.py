@@ -1,22 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 from copy import copy
-from dataclasses import dataclass
 from typing import get_type_hints
 
-from .attributes import Attribute
-from .cs_methods import Command, Put, Scan
-from .wrappers import WrappedMethod
-
-
-@dataclass
-class SingleMapping:
-    controller: BaseController
-    scan_methods: dict[str, Scan]
-    put_methods: dict[str, Put]
-    command_methods: dict[str, Command]
-    attributes: dict[str, Attribute]
+from fastcs.attributes import Attribute
 
 
 class BaseController:
@@ -52,9 +39,26 @@ class BaseController:
         self._path = path
 
     def _bind_attrs(self) -> None:
+        """Search for `Attributes` and `Methods` to bind them to this instance.
+
+        This method will search the attributes of this controller class to bind them to
+        this specific instance. For `Attribute`s, this is just a case of copying and
+        re-assigning to `self` to make it unique across multiple instances of this
+        controller class. For `Method`s, this requires creating a bound method from a
+        class method and a controller instance, so that it can be called from any
+        context with the controller instance passed as the `self` argument.
+
+        """
+        # Lazy import to avoid circular references
+        from fastcs.cs_methods import UnboundCommand, UnboundPut, UnboundScan
+
         # Using a dictionary instead of a set to maintain order.
-        class_dir = {key: None for key in dir(type(self))}
-        class_type_hints = get_type_hints(type(self))
+        class_dir = {key: None for key in dir(type(self)) if not key.startswith("_")}
+        class_type_hints = {
+            key: value
+            for key, value in get_type_hints(type(self)).items()
+            if not key.startswith("_")
+        }
 
         for attr_name in {**class_dir, **class_type_hints}:
             if attr_name == "root_attribute":
@@ -73,6 +77,8 @@ class BaseController:
                 new_attribute = copy(attr)
                 setattr(self, attr_name, new_attribute)
                 self.attributes[attr_name] = new_attribute
+            elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
+                setattr(self, attr_name, attr.bind(self))
 
     def register_sub_controller(self, name: str, sub_controller: SubController):
         if name in self.__sub_controller_tree.keys():
@@ -94,40 +100,6 @@ class BaseController:
 
     def get_sub_controllers(self) -> dict[str, SubController]:
         return self.__sub_controller_tree
-
-    def get_controller_mappings(self) -> list[SingleMapping]:
-        return list(_walk_mappings(self))
-
-
-def _walk_mappings(controller: BaseController) -> Iterator[SingleMapping]:
-    yield _get_single_mapping(controller)
-    for sub_controller in controller.get_sub_controllers().values():
-        yield from _walk_mappings(sub_controller)
-
-
-def _get_single_mapping(controller: BaseController) -> SingleMapping:
-    scan_methods: dict[str, Scan] = {}
-    put_methods: dict[str, Put] = {}
-    command_methods: dict[str, Command] = {}
-    for attr_name in dir(controller):
-        attr = getattr(controller, attr_name)
-        match attr:
-            case WrappedMethod(fastcs_method=Put(enabled=True) as put_method):
-                put_methods[attr_name] = put_method
-            case WrappedMethod(fastcs_method=Scan(enabled=True) as scan_method):
-                scan_methods[attr_name] = scan_method
-            case WrappedMethod(fastcs_method=Command(enabled=True) as command_method):
-                command_methods[attr_name] = command_method
-
-    enabled_attributes = {
-        name: attribute
-        for name, attribute in controller.attributes.items()
-        if attribute.enabled
-    }
-
-    return SingleMapping(
-        controller, scan_methods, put_methods, command_methods, enabled_attributes
-    )
 
 
 class Controller(BaseController):
