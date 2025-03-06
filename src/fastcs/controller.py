@@ -23,7 +23,16 @@ class BaseController:
     #: Attributes passed from the device at runtime.
     attributes: dict[str, Attribute]
 
-    def __init__(self, path: list[str] | None = None) -> None:
+    description: str | None = None
+
+    def __init__(
+        self, path: list[str] | None = None, description: str | None = None
+    ) -> None:
+        if (
+            description is not None
+        ):  # Use the argument over the one class defined description.
+            self.description = description
+
         if not hasattr(self, "attributes"):
             self.attributes = {}
         self._path: list[str] = path or []
@@ -130,8 +139,8 @@ class Controller(BaseController):
     generating a UI or creating parameters for a control system.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, description: str | None = None) -> None:
+        super().__init__(description=description)
 
     async def initialise(self) -> None:
         pass
@@ -149,5 +158,5 @@ class SubController(BaseController):
 
     root_attribute: Attribute | None = None
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, description: str | None = None) -> None:
+        super().__init__(description=description)

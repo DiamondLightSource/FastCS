@@ -10,20 +10,19 @@ from softioc.pythonSoftIoc import RecordWrapper
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import BaseController, Controller
 from fastcs.datatypes import DataType, T
-from fastcs.transport.epics.util import (
+from fastcs.transport.epics.ca.util import (
     builder_callable_from_attribute,
     cast_from_epics_type,
     cast_to_epics_type,
     record_metadata_from_attribute,
     record_metadata_from_datatype,
 )
-
-from .options import EpicsIOCOptions
+from fastcs.transport.epics.options import EpicsIOCOptions
 
 EPICS_MAX_NAME_LENGTH = 60
 
 
-class EpicsIOC:
+class EpicsCAIOC:
     def __init__(
         self,
         pv_prefix: str,
