@@ -1,4 +1,4 @@
-from fastcs.controller import Controller
+from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
 
 from .options import RestOptions
@@ -8,11 +8,11 @@ from .rest import RestServer
 class RestTransport(TransportAdapter):
     def __init__(
         self,
-        controller: Controller,
+        controller_api: ControllerAPI,
         options: RestOptions | None = None,
     ):
         self._options = options or RestOptions()
-        self._server = RestServer(controller)
+        self._server = RestServer(controller_api)
 
     @property
     def options(self) -> RestOptions:

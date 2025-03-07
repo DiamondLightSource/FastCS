@@ -1,11 +1,10 @@
 import asyncio
 import re
-from types import MethodType
 
 from p4p.server import Server, StaticProvider
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.controller import Controller
+from fastcs.controller_api import ControllerAPI
 
 from ._pv_handlers import make_command_pv, make_shared_pv
 from .pvi_tree import AccessModeType, PviTree
@@ -36,31 +35,25 @@ def get_pv_name(pv_prefix: str, *attribute_names: str) -> str:
 
 
 async def parse_attributes(
-    root_pv_prefix: str, controller: Controller
+    root_pv_prefix: str, root_controller_api: ControllerAPI
 ) -> list[StaticProvider]:
     pvi_tree = PviTree(root_pv_prefix)
     provider = StaticProvider(root_pv_prefix)
 
-    for single_mapping in controller.get_controller_mappings():
-        path = single_mapping.controller.path
-        pv_prefix = get_pv_name(root_pv_prefix, *path)
+    for controller_api in root_controller_api.walk_api():
+        pv_prefix = get_pv_name(root_pv_prefix, *controller_api.path)
 
-        pvi_tree.add_sub_device(
-            pv_prefix,
-            single_mapping.controller.description,
-        )
+        pvi_tree.add_sub_device(pv_prefix, controller_api.description)
 
-        for attr_name, attribute in single_mapping.attributes.items():
+        for attr_name, attribute in controller_api.attributes.items():
             pv_name = get_pv_name(pv_prefix, attr_name)
             attribute_pv = make_shared_pv(attribute)
             provider.add(pv_name, attribute_pv)
             pvi_tree.add_signal(pv_name, _attribute_to_access(attribute))
 
-        for attr_name, method in single_mapping.command_methods.items():
+        for attr_name, method in controller_api.command_methods.items():
             pv_name = get_pv_name(pv_prefix, attr_name)
-            command_pv = make_command_pv(
-                MethodType(method.fn, single_mapping.controller)
-            )
+            command_pv = make_command_pv(method.fn)
             provider.add(pv_name, command_pv)
             pvi_tree.add_signal(pv_name, "x")
 
@@ -68,16 +61,12 @@ async def parse_attributes(
 
 
 class P4PIOC:
-    def __init__(
-        self,
-        pv_prefix: str,
-        controller: Controller,
-    ):
+    def __init__(self, pv_prefix: str, controller_api: ControllerAPI):
         self.pv_prefix = pv_prefix
-        self.controller = controller
+        self.controller_api = controller_api
 
     async def run(self):
-        providers = await parse_attributes(self.pv_prefix, self.controller)
+        providers = await parse_attributes(self.pv_prefix, self.controller_api)
 
         endless_event = asyncio.Event()
         with Server(providers):

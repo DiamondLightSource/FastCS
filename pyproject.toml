@@ -8,6 +8,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 description = "Control system agnostic framework for building Device support in Python that will work for both EPICS and Tango"
 dependencies = [

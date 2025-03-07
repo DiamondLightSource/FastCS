@@ -43,14 +43,14 @@ class FastCS:
                     from .transport.epics.pva.adapter import EpicsPVATransport
 
                     transport = EpicsPVATransport(
-                        controller,
+                        self._backend.controller_api,
                         option,
                     )
                 case EpicsCAOptions():
                     from .transport.epics.ca.adapter import EpicsCATransport
 
                     transport = EpicsCATransport(
-                        controller,
+                        self._backend.controller_api,
                         self._loop,
                         option,
                     )
@@ -58,7 +58,7 @@ class FastCS:
                     from .transport.tango.adapter import TangoTransport
 
                     transport = TangoTransport(
-                        controller,
+                        self._backend.controller_api,
                         self._loop,
                         option,
                     )
@@ -66,14 +66,14 @@ class FastCS:
                     from .transport.rest.adapter import RestTransport
 
                     transport = RestTransport(
-                        controller,
+                        self._backend.controller_api,
                         option,
                     )
                 case GraphQLOptions():
                     from .transport.graphQL.adapter import GraphQLTransport
 
                     transport = GraphQLTransport(
-                        controller,
+                        self._backend.controller_api,
                         option,
                     )
 

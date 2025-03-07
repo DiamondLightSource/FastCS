@@ -17,10 +17,11 @@ import pytest
 from aioca import purge_channel_caches
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.backend import build_controller_api
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.transport.tango.dsr import register_dev
 from tests.assertable_controller import (
-    TestController,
+    MyTestController,
     TestHandler,
     TestSender,
     TestUpdater,
@@ -31,7 +32,7 @@ from tests.example_softioc import run as _run_softioc
 DATA_PATH = Path(__file__).parent / "data"
 
 
-class BackendTestController(TestController):
+class BackendTestController(MyTestController):
     read_int: AttrR = AttrR(Int(), handler=TestUpdater())
     read_write_int: AttrRW = AttrRW(Int(), handler=TestHandler())
     read_write_float: AttrRW = AttrRW(Float())
@@ -43,6 +44,11 @@ class BackendTestController(TestController):
 @pytest.fixture
 def controller():
     return BackendTestController()
+
+
+@pytest.fixture
+def controller_api(controller):
+    return build_controller_api(controller)
 
 
 @pytest.fixture

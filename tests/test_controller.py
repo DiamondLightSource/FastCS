@@ -1,12 +1,7 @@
 import pytest
 
 from fastcs.attributes import AttrR
-from fastcs.controller import (
-    Controller,
-    SubController,
-    _get_single_mapping,
-    _walk_mappings,
-)
+from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Int
 
 
@@ -20,11 +15,8 @@ def test_controller_nesting():
 
     assert sub_controller.path == ["a"]
     assert sub_sub_controller.path == ["a", "b"]
-    assert list(_walk_mappings(controller)) == [
-        _get_single_mapping(controller),
-        _get_single_mapping(sub_controller),
-        _get_single_mapping(sub_sub_controller),
-    ]
+    assert controller.get_sub_controllers() == {"a": sub_controller}
+    assert sub_controller.get_sub_controllers() == {"b": sub_sub_controller}
 
     with pytest.raises(
         ValueError, match=r"Controller .* already has a SubController registered as .*"
@@ -69,10 +61,7 @@ def test_attribute_parsing():
     sub_controller = SomeSubController()
     controller = SomeController(sub_controller)
 
-    mapping_walk = _walk_mappings(controller)
-
-    controller_mapping = next(mapping_walk)
-    assert set(controller_mapping.attributes.keys()) == {
+    assert set(controller.attributes.keys()) == {
         "_attributes_attr",
         "annotated_attr",
         "_attributes_attr_equal",
@@ -87,8 +76,7 @@ def test_attribute_parsing():
         is not controller.annotated_and_equal_attr
     )
 
-    sub_controller_mapping = next(mapping_walk)
-    assert sub_controller_mapping.attributes == {
+    assert sub_controller.attributes == {
         "sub_attribute": sub_controller.sub_attribute,
     }
 
@@ -123,4 +111,4 @@ def test_root_attribute():
             "has an attribute of that name."
         ),
     ):
-        next(_walk_mappings(FailingController(SomeSubController())))
+        FailingController(SomeSubController())

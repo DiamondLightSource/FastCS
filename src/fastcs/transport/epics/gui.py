@@ -23,7 +23,7 @@ from pvi.device import (
 from pydantic import ValidationError
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SingleMapping, _get_single_mapping
+from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSException
@@ -33,8 +33,8 @@ from .options import EpicsGUIFormat, EpicsGUIOptions
 
 
 class EpicsGUI:
-    def __init__(self, controller: Controller, pv_prefix: str) -> None:
-        self._controller = controller
+    def __init__(self, controller_api: ControllerAPI, pv_prefix: str) -> None:
+        self._controller_api = controller_api
         self._pv_prefix = pv_prefix
 
     def _get_pv(self, attr_path: list[str], name: str):
@@ -128,33 +128,29 @@ class EpicsGUI:
         assert options.output_path.suffix == options.file_format.value
         options.output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        controller_mapping = self._controller.get_controller_mappings()[0]
-        components = self.extract_mapping_components(controller_mapping)
+        components = self.extract_api_components(self._controller_api)
         device = Device(label=options.title, children=components)
 
         formatter = DLSFormatter()
         formatter.format(device, options.output_path.resolve())
 
-    def extract_mapping_components(self, mapping: SingleMapping) -> Tree:
+    def extract_api_components(self, controller_api: ControllerAPI) -> Tree:
         components: Tree = []
-        attr_path = mapping.controller.path
 
-        for name, sub_controller in mapping.controller.get_sub_controllers().items():
+        for name, api in controller_api.sub_apis.items():
             components.append(
                 Group(
                     name=snake_to_pascal(name),
                     layout=SubScreen(),
-                    children=self.extract_mapping_components(
-                        _get_single_mapping(sub_controller)
-                    ),
+                    children=self.extract_api_components(api),
                 )
             )
 
         groups: dict[str, list[ComponentUnion]] = {}
-        for attr_name, attribute in mapping.attributes.items():
+        for attr_name, attribute in controller_api.attributes.items():
             try:
                 signal = self._get_attribute_component(
-                    attr_path,
+                    controller_api.path,
                     attr_name,
                     attribute,
                 )
@@ -177,8 +173,8 @@ class EpicsGUI:
                 case _:
                     components.append(signal)
 
-        for name, command in mapping.command_methods.items():
-            signal = self._get_command_component(attr_path, name)
+        for name, command in controller_api.command_methods.items():
+            signal = self._get_command_component(controller_api.path, name)
 
             match command:
                 case Command(group=group) if group is not None:

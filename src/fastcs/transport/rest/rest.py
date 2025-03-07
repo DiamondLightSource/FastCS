@@ -1,4 +1,4 @@
-from collections.abc import Awaitable, Callable, Coroutine
+from collections.abc import Callable, Coroutine
 from typing import Any
 
 import uvicorn
@@ -6,7 +6,8 @@ from fastapi import FastAPI
 from pydantic import create_model
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, T
-from fastcs.controller import BaseController, Controller
+from fastcs.controller_api import ControllerAPI
+from fastcs.cs_methods import CommandCallback
 
 from .options import RestServerOptions
 from .util import (
@@ -17,14 +18,14 @@ from .util import (
 
 
 class RestServer:
-    def __init__(self, controller: Controller):
-        self._controller = controller
+    def __init__(self, controller_api: ControllerAPI):
+        self._controller_api = controller_api
         self._app = self._create_app()
 
     def _create_app(self):
         app = FastAPI()
-        _add_attribute_api_routes(app, self._controller)
-        _add_command_api_routes(app, self._controller)
+        _add_attribute_api_routes(app, self._controller_api)
+        _add_command_api_routes(app, self._controller_api)
 
         return app
 
@@ -91,11 +92,11 @@ def _wrap_attr_get(
     return attr_get
 
 
-def _add_attribute_api_routes(app: FastAPI, controller: Controller) -> None:
-    for single_mapping in controller.get_controller_mappings():
-        path = single_mapping.controller.path
+def _add_attribute_api_routes(app: FastAPI, root_controller_api: ControllerAPI) -> None:
+    for controller_api in root_controller_api.walk_api():
+        path = controller_api.path
 
-        for attr_name, attribute in single_mapping.attributes.items():
+        for attr_name, attribute in controller_api.attributes.items():
             attr_name = attr_name.replace("_", "-")
             route = f"{'/'.join(path)}/{attr_name}" if path else attr_name
 
@@ -133,27 +134,24 @@ def _add_attribute_api_routes(app: FastAPI, controller: Controller) -> None:
 
 
 def _wrap_command(
-    method: Callable, controller: BaseController
-) -> Callable[..., Awaitable[None]]:
+    method: CommandCallback,
+) -> Callable[..., Coroutine[None, None, None]]:
     async def command() -> None:
-        await getattr(controller, method.__name__)()
+        await method()
 
     return command
 
 
-def _add_command_api_routes(app: FastAPI, controller: Controller) -> None:
-    for single_mapping in controller.get_controller_mappings():
-        path = single_mapping.controller.path
+def _add_command_api_routes(app: FastAPI, root_controller_api: ControllerAPI) -> None:
+    for controller_api in root_controller_api.walk_api():
+        path = controller_api.path
 
-        for name, method in single_mapping.command_methods.items():
+        for name, method in root_controller_api.command_methods.items():
             cmd_name = name.replace("_", "-")
             route = f"/{'/'.join(path)}/{cmd_name}" if path else cmd_name
             app.add_api_route(
                 f"/{route}",
-                _wrap_command(
-                    method.fn,
-                    single_mapping.controller,
-                ),
+                _wrap_command(method.fn),
                 methods=["PUT"],
                 status_code=204,
             )

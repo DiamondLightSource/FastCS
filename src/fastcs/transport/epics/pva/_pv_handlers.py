@@ -1,5 +1,3 @@
-from collections.abc import Callable
-
 import numpy as np
 from p4p import Value
 from p4p.nt import NTEnum, NTNDArray, NTScalar, NTTable
@@ -9,6 +7,7 @@ from p4p.server import ServerOperation
 from p4p.server.asyncio import SharedPV
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.cs_methods import CommandCallback
 from fastcs.datatypes import Table
 
 from .types import (
@@ -52,7 +51,7 @@ class WritePvHandler:
 
 
 class CommandPvHandler:
-    def __init__(self, command: Callable):
+    def __init__(self, command: CommandCallback):
         self._command = command
         self._task_in_progress = False
 
@@ -125,7 +124,7 @@ def make_shared_pv(attribute: Attribute) -> SharedPV:
     return shared_pv
 
 
-def make_command_pv(command: Callable) -> SharedPV:
+def make_command_pv(command: CommandCallback) -> SharedPV:
     type_ = NTScalar.buildType("?", display=True, control=True)
 
     initial = Value(type_, {"value": False, **p4p_alarm_states()})
