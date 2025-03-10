@@ -159,7 +159,7 @@ def _create_and_link_read_pv(
     record = _make_record(f"{pv_prefix}:{pv_name}", attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
-    attribute.set_update_callback(async_record_set)
+    attribute.add_update_callback(async_record_set)
 
 
 def _make_record(
@@ -200,7 +200,7 @@ def _create_and_link_write_pv(
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
-    attribute.set_write_display_callback(async_write_display)
+    attribute.add_write_display_callback(async_write_display)
 
 
 def _create_and_link_command_pvs(

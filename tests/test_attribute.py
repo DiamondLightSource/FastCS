@@ -23,13 +23,13 @@ async def test_attributes():
         device["number"] += 1
 
     attr_r = AttrR(String())
-    attr_r.set_update_callback(partial(update_ui, key="state"))
+    attr_r.add_update_callback(partial(update_ui, key="state"))
     await attr_r.set(device["state"])
     assert ui["state"] == "Idle"
 
     attr_rw = AttrRW(Int())
-    attr_rw.set_process_callback(partial(send, key="number"))
-    attr_rw.set_write_display_callback(partial(update_ui, key="number"))
+    attr_rw.add_process_callback(partial(send, key="number"))
+    attr_rw.add_write_display_callback(partial(update_ui, key="number"))
     await attr_rw.process(2)
     assert device["number"] == 2
     assert ui["number"] == 2
