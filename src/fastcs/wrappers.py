@@ -1,41 +1,46 @@
-from typing import Any, Protocol, runtime_checkable
+from collections.abc import Callable
 
-from .cs_methods import Command, Method, Put, Scan
+from .cs_methods import (
+    Controller_T,
+    UnboundCommand,
+    UnboundCommandCallback,
+    UnboundPut,
+    UnboundPutCallback,
+    UnboundScan,
+    UnboundScanCallback,
+)
 from .exceptions import FastCSException
 
 
-@runtime_checkable
-class WrappedMethod(Protocol):
-    fastcs_method: Method
-
-
-# TODO: Consider type hints with the use of typing.Protocol
-def scan(period: float) -> Any:
+def scan(
+    period: float,
+) -> Callable[[UnboundScanCallback[Controller_T]], UnboundScan[Controller_T]]:
     if period <= 0:
         raise FastCSException("Scan method must have a positive scan period")
 
-    def wrapper(fn):
-        fn.fastcs_method = Scan(fn, period)
-        return fn
+    def wrapper(fn: UnboundScanCallback[Controller_T]) -> UnboundScan[Controller_T]:
+        return UnboundScan(fn, period)
 
     return wrapper
 
 
-def put(fn) -> Any:
-    fn.fastcs_method = Put(fn)
-    return fn
+def put(fn: UnboundPutCallback[Controller_T]) -> UnboundPut[Controller_T]:
+    return UnboundPut(fn)
 
 
-def command(*, group: str | None = None) -> Any:
-    """Decorator to map a `Controller` method into a `Command`.
+def command(
+    *, group: str | None = None
+) -> Callable[[UnboundCommandCallback[Controller_T]], UnboundCommand[Controller_T]]:
+    """Decorator to tag a `Controller` method to be turned into a `Command`.
 
     Args:
-        group: Group to display the widget for this command in on the UI
+        group: Group to display this command under in the transport layer
 
     """
 
-    def wrapper(fn):
-        fn.fastcs_method = Command(fn, group=group)
-        return fn
+    def wrapper(
+        fn: UnboundCommandCallback[Controller_T],
+    ) -> UnboundCommand[Controller_T]:
+        return UnboundCommand(fn, group=group)
 
     return wrapper

@@ -6,7 +6,8 @@ import pytest
 from fastapi.testclient import TestClient
 from pytest_mock import MockerFixture
 from tests.assertable_controller import (
-    AssertableController,
+    AssertableControllerAPI,
+    MyTestController,
     TestHandler,
     TestSender,
     TestUpdater,
@@ -17,7 +18,7 @@ from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.transport.graphQL.adapter import GraphQLTransport
 
 
-class RestAssertableController(AssertableController):
+class GraphQLController(MyTestController):
     read_int = AttrR(Int(), handler=TestUpdater())
     read_write_int = AttrRW(Int(), handler=TestHandler())
     read_write_float = AttrRW(Float())
@@ -27,8 +28,8 @@ class RestAssertableController(AssertableController):
 
 
 @pytest.fixture(scope="class")
-def assertable_controller(class_mocker: MockerFixture):
-    return RestAssertableController(class_mocker)
+def gql_controller_api(class_mocker: MockerFixture):
+    return AssertableControllerAPI(GraphQLController(), class_mocker)
 
 
 def nest_query(path: list[str]) -> str:
@@ -53,106 +54,124 @@ def nest_mutation(path: list[str], value: Any) -> str:
         return f"{field}(value: {json.dumps(value)})"
 
 
-def nest_responce(path: list[str], value: Any) -> dict:
+def nest_response(path: list[str], value: Any) -> dict:
     queue = copy.deepcopy(path)
     field = queue.pop(0)
 
     if queue:
-        nesting = nest_responce(queue, value)
+        nesting = nest_response(queue, value)
         return {field: nesting}
     else:
         return {field: value}
 
 
+def create_test_client(gql_controller_api: AssertableControllerAPI) -> TestClient:
+    return TestClient(GraphQLTransport(gql_controller_api)._server._app)
+
+
 class TestGraphQLServer:
     @pytest.fixture(scope="class")
-    def client(self, assertable_controller):
-        app = GraphQLTransport(
-            assertable_controller,
-        )._server._app
-        return TestClient(app)
+    def test_client(self, gql_controller_api) -> TestClient:
+        return create_test_client(gql_controller_api)
 
-    def test_read_int(self, client, assertable_controller):
+    def test_read_int(
+        self, gql_controller_api: AssertableControllerAPI, test_client: TestClient
+    ):
         expect = 0
         path = ["readInt"]
         query = f"query {{ {nest_query(path)} }}"
-        with assertable_controller.assert_read_here(["read_int"]):
-            response = client.post("/graphql", json={"query": query})
+        with gql_controller_api.assert_read_here(["read_int"]):
+            response = test_client.post("/graphql", json={"query": query})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, expect)
+        assert response.json()["data"] == nest_response(path, expect)
 
-    def test_read_write_int(self, client, assertable_controller):
+    def test_read_write_int(
+        self, gql_controller_api: AssertableControllerAPI, test_client: TestClient
+    ):
         expect = 0
         path = ["readWriteInt"]
         query = f"query {{ {nest_query(path)} }}"
-        with assertable_controller.assert_read_here(["read_write_int"]):
-            response = client.post("/graphql", json={"query": query})
+        with gql_controller_api.assert_read_here(["read_write_int"]):
+            response = test_client.post("/graphql", json={"query": query})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, expect)
+        assert response.json()["data"] == nest_response(path, expect)
 
         new = 9
         mutation = f"mutation {{ {nest_mutation(path, new)} }}"
-        with assertable_controller.assert_write_here(["read_write_int"]):
-            response = client.post("/graphql", json={"query": mutation})
+        with gql_controller_api.assert_write_here(["read_write_int"]):
+            response = test_client.post("/graphql", json={"query": mutation})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, new)
+        assert response.json()["data"] == nest_response(path, new)
 
-    def test_read_write_float(self, client, assertable_controller):
+    def test_read_write_float(
+        self, gql_controller_api: AssertableControllerAPI, test_client: TestClient
+    ):
         expect = 0
         path = ["readWriteFloat"]
         query = f"query {{ {nest_query(path)} }}"
-        with assertable_controller.assert_read_here(["read_write_float"]):
-            response = client.post("/graphql", json={"query": query})
+        with gql_controller_api.assert_read_here(["read_write_float"]):
+            response = test_client.post("/graphql", json={"query": query})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, expect)
+        assert response.json()["data"] == nest_response(path, expect)
 
         new = 0.5
         mutation = f"mutation {{ {nest_mutation(path, new)} }}"
-        with assertable_controller.assert_write_here(["read_write_float"]):
-            response = client.post("/graphql", json={"query": mutation})
+        with gql_controller_api.assert_write_here(["read_write_float"]):
+            response = test_client.post("/graphql", json={"query": mutation})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, new)
+        assert response.json()["data"] == nest_response(path, new)
 
-    def test_read_bool(self, client, assertable_controller):
+    def test_read_bool(
+        self, gql_controller_api: AssertableControllerAPI, test_client: TestClient
+    ):
         expect = False
         path = ["readBool"]
         query = f"query {{ {nest_query(path)} }}"
-        with assertable_controller.assert_read_here(["read_bool"]):
-            response = client.post("/graphql", json={"query": query})
+        with gql_controller_api.assert_read_here(["read_bool"]):
+            response = test_client.post("/graphql", json={"query": query})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, expect)
+        assert response.json()["data"] == nest_response(path, expect)
 
-    def test_write_bool(self, client, assertable_controller):
+    def test_write_bool(
+        self, gql_controller_api: AssertableControllerAPI, test_client: TestClient
+    ):
         value = True
         path = ["writeBool"]
         mutation = f"mutation {{ {nest_mutation(path, value)} }}"
-        with assertable_controller.assert_write_here(["write_bool"]):
-            response = client.post("/graphql", json={"query": mutation})
+        with gql_controller_api.assert_write_here(["write_bool"]):
+            response = test_client.post("/graphql", json={"query": mutation})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, value)
+        assert response.json()["data"] == nest_response(path, value)
 
-    def test_go(self, client, assertable_controller):
+    def test_go(
+        self, gql_controller_api: AssertableControllerAPI, test_client: TestClient
+    ):
+        test_client = create_test_client(gql_controller_api)
+
         path = ["go"]
         mutation = f"mutation {{ {nest_query(path)} }}"
-        with assertable_controller.assert_execute_here(path):
-            response = client.post("/graphql", json={"query": mutation})
+        with gql_controller_api.assert_execute_here(["go"]):
+            response = test_client.post("/graphql", json={"query": mutation})
+
         assert response.status_code == 200
         assert response.json()["data"] == {path[-1]: True}
 
-    def test_read_child1(self, client, assertable_controller):
+    def test_read_child1(
+        self, gql_controller_api: AssertableControllerAPI, test_client: TestClient
+    ):
         expect = 0
         path = ["SubController01", "readInt"]
         query = f"query {{ {nest_query(path)} }}"
-        with assertable_controller.assert_read_here(["SubController01", "read_int"]):
-            response = client.post("/graphql", json={"query": query})
+        with gql_controller_api.assert_read_here(["SubController01", "read_int"]):
+            response = test_client.post("/graphql", json={"query": query})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, expect)
+        assert response.json()["data"] == nest_response(path, expect)
 
-    def test_read_child2(self, client, assertable_controller):
+    def test_read_child2(self, gql_controller_api, test_client: TestClient):
         expect = 0
         path = ["SubController02", "readInt"]
         query = f"query {{ {nest_query(path)} }}"
-        with assertable_controller.assert_read_here(["SubController02", "read_int"]):
-            response = client.post("/graphql", json={"query": query})
+        with gql_controller_api.assert_read_here(["SubController02", "read_int"]):
+            response = test_client.post("/graphql", json={"query": query})
         assert response.status_code == 200
-        assert response.json()["data"] == nest_responce(path, expect)
+        assert response.json()["data"] == nest_response(path, expect)

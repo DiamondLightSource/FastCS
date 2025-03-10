@@ -1,4 +1,4 @@
-from fastcs.controller import Controller
+from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
 from fastcs.transport.epics.docs import EpicsDocs
 from fastcs.transport.epics.gui import EpicsGUI
@@ -10,13 +10,13 @@ from .ioc import P4PIOC
 class EpicsPVATransport(TransportAdapter):
     def __init__(
         self,
-        controller: Controller,
+        controller_api: ControllerAPI,
         options: EpicsPVAOptions | None = None,
     ) -> None:
-        self._controller = controller
+        self._controller_api = controller_api
         self._options = options or EpicsPVAOptions()
         self._pv_prefix = self.options.ioc.pv_prefix
-        self._ioc = P4PIOC(self.options.ioc.pv_prefix, controller)
+        self._ioc = P4PIOC(self.options.ioc.pv_prefix, controller_api)
 
     @property
     def options(self) -> EpicsPVAOptions:
@@ -27,7 +27,7 @@ class EpicsPVATransport(TransportAdapter):
         await self._ioc.run()
 
     def create_docs(self) -> None:
-        EpicsDocs(self._controller).create_docs(self.options.docs)
+        EpicsDocs(self._controller_api).create_docs(self.options.docs)
 
     def create_gui(self) -> None:
-        EpicsGUI(self._controller, self._pv_prefix).create_gui(self.options.gui)
+        EpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.options.gui)

@@ -8,24 +8,19 @@ from strawberry.tools import create_type
 from strawberry.types.field import StrawberryField
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, T
-from fastcs.controller import (
-    BaseController,
-    Controller,
-    SingleMapping,
-    _get_single_mapping,
-)
+from fastcs.controller_api import ControllerAPI
 from fastcs.exceptions import FastCSException
 
 from .options import GraphQLServerOptions
 
 
 class GraphQLServer:
-    def __init__(self, controller: Controller):
-        self._controller = controller
+    def __init__(self, controller_api: ControllerAPI):
+        self._controller_api = controller_api
         self._app = self._create_app()
 
     def _create_app(self) -> GraphQL:
-        api = GraphQLAPI(self._controller)
+        api = GraphQLAPI(self._controller_api)
         schema = api.create_schema()
         app = GraphQL(schema)
 
@@ -45,19 +40,17 @@ class GraphQLServer:
 
 
 class GraphQLAPI:
-    """A Strawberry API built dynamically from a Controller"""
+    """A Strawberry API built dynamically from a `ControllerAPI`"""
 
-    def __init__(self, controller: BaseController):
+    def __init__(self, controller_api: ControllerAPI):
         self.queries: list[StrawberryField] = []
         self.mutations: list[StrawberryField] = []
 
-        api = _get_single_mapping(controller)
+        self._process_attributes(controller_api)
+        self._process_commands(controller_api)
+        self._process_sub_apis(controller_api)
 
-        self._process_attributes(api)
-        self._process_commands(api)
-        self._process_sub_controllers(api)
-
-    def _process_attributes(self, api: SingleMapping):
+    def _process_attributes(self, api: ControllerAPI):
         """Create queries and mutations from api attributes."""
         for attr_name, attribute in api.attributes.items():
             match attribute:
@@ -78,18 +71,16 @@ class GraphQLAPI:
                         strawberry.mutation(_wrap_attr_set(attr_name, attribute))
                     )
 
-    def _process_commands(self, api: SingleMapping):
+    def _process_commands(self, controller_api: ControllerAPI):
         """Create mutations from api commands"""
-        for cmd_name, method in api.command_methods.items():
-            self.mutations.append(
-                strawberry.mutation(_wrap_command(cmd_name, method.fn, api.controller))
-            )
+        for name, method in controller_api.command_methods.items():
+            self.mutations.append(strawberry.mutation(_wrap_command(name, method.fn)))
 
-    def _process_sub_controllers(self, api: SingleMapping):
-        """Recursively add fields from the queries and mutations of sub controllers"""
-        for sub_controller in api.controller.get_sub_controllers().values():
-            name = "".join(sub_controller.path)
-            child_tree = GraphQLAPI(sub_controller)
+    def _process_sub_apis(self, root_controller_api: ControllerAPI):
+        """Recursively add fields from the queries and mutations of sub apis"""
+        for controller_api in root_controller_api.sub_apis.values():
+            name = "".join(controller_api.path)
+            child_tree = GraphQLAPI(controller_api)
             if child_tree.queries:
                 self.queries.append(
                     _wrap_as_field(
@@ -107,7 +98,8 @@ class GraphQLAPI:
         """Create a Strawberry Schema to load into a GraphQL application."""
         if not self.queries:
             raise FastCSException(
-                "Can't create GraphQL transport from Controller with no read attributes"
+                "Can't create GraphQL transport from ControllerAPI with no read "
+                "attributes"
             )
 
         query = create_type("Query", self.queries)
@@ -159,13 +151,11 @@ def _wrap_as_field(field_name: str, operation: type) -> StrawberryField:
     return strawberry.field(_dynamic_field)
 
 
-def _wrap_command(
-    method_name: str, method: Callable, controller: BaseController
-) -> Callable[..., Awaitable[bool]]:
+def _wrap_command(method_name: str, method: Callable) -> Callable[..., Awaitable[bool]]:
     """Wrap a command in a function with annotations for strawberry"""
 
     async def _dynamic_f() -> bool:
-        await getattr(controller, method.__name__)()
+        await method()
         return True
 
     _dynamic_f.__name__ = method_name
