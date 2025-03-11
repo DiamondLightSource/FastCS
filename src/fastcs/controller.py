@@ -4,6 +4,7 @@ from copy import copy
 from typing import get_type_hints
 
 from fastcs.attributes import Attribute
+from fastcs.exceptions import FastCSException
 
 
 class BaseController:
@@ -100,6 +101,19 @@ class BaseController:
 
     def get_sub_controllers(self) -> dict[str, SubController]:
         return self.__sub_controller_tree
+
+    def __getitem__(self, key: str) -> SubController:
+        if key not in self.__sub_controller_tree:
+            raise FastCSException(f"Controller {self} has no sub controller '{key}'")
+
+        return self.__sub_controller_tree[key]
+
+    def get_controller_by_path(self, path: list[str]) -> BaseController:
+        if path:
+            sub_controller, remaining_path = self[path[0]], path[1:]
+            return sub_controller.get_controller_by_path(remaining_path)
+
+        return self
 
 
 class Controller(BaseController):

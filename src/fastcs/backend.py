@@ -30,7 +30,10 @@ class Backend:
     def _link_process_tasks(self):
         for controller_api in self.controller_api.walk_api():
             _link_put_tasks(controller_api)
-            _link_attribute_sender_class(controller_api, self._controller)
+            _link_attribute_sender_class(
+                controller_api,
+                self._controller.get_controller_by_path(controller_api.path),
+            )
 
     def __del__(self):
         self._stop_scan_tasks()
@@ -74,7 +77,7 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
 
 
 def _link_attribute_sender_class(
-    controller_api: ControllerAPI, controller: Controller
+    controller_api: ControllerAPI, controller: BaseController
 ) -> None:
     for attr_name, attribute in controller_api.attributes.items():
         match attribute:
