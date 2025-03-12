@@ -61,6 +61,8 @@ def create_test_context(tango_controller_api: AssertableControllerAPI):
         yield proxy
 
 
+# Tango introduces an unclosed socket warning in its test context.
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 class TestTangoDevice:
     @pytest.fixture(scope="class")
     def tango_context(
