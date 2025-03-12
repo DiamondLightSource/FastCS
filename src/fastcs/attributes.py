@@ -22,9 +22,16 @@ class AttrMode(Enum):
 class Sender(Protocol):
     """Protocol for setting the value of an ``Attribute``."""
 
+<<<<<<< HEAD
     async def put(
         self, controller: fastcs.controller.BaseController, attr: AttrW, value: Any
     ) -> None:
+=======
+    async def initialise(self, controller: Any):
+        pass
+
+    async def put(self, controller: Any, attr: AttrW, value: Any) -> None:
+>>>>>>> 43721ff (Added default initialise methods to Sender and Updater base classes. Added initialise method to Attribute, checks for handler and calls the method. Moved initialise into BaseController class, loops over attributes calling initialise with a reference to self. Added unit test for Attribute class.)
         pass
 
 
@@ -35,9 +42,16 @@ class Updater(Protocol):
     # If update period is None then the attribute will not be updated as a task.
     update_period: float | None = None
 
+<<<<<<< HEAD
     async def update(
         self, controller: fastcs.controller.BaseController, attr: AttrR
     ) -> None:
+=======
+    async def initialise(self, controller: Any):
+        pass
+
+    async def update(self, controller: Any, attr: AttrR) -> None:
+>>>>>>> 43721ff (Added default initialise methods to Sender and Updater base classes. Added initialise method to Attribute, checks for handler and calls the method. Moved initialise into BaseController class, loops over attributes calling initialise with a reference to self. Added unit test for Attribute class.)
         pass
 
 
@@ -84,6 +98,7 @@ class Attribute(Generic[T]):
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
         self._group = group
+        self._handler = handler
         self.enabled = True
         self.description = description
 
@@ -106,6 +121,10 @@ class Attribute(Generic[T]):
     @property
     def group(self) -> str | None:
         return self._group
+
+    async def initialise(self, controller: Any) -> None:
+        if self._handler is not None:
+            await self._handler.initialise(controller)
 
     def add_update_datatype_callback(
         self, callback: Callable[[DataType[T]], None]
