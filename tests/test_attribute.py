@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrR, AttrRW, AttrW, SimpleHandler
 from fastcs.datatypes import Enum, Float, Int, String, Waveform
 
 
@@ -58,6 +58,18 @@ async def test_simple_handler_rw(mocker: MockerFixture):
     update_display_mock.assert_called_once_with(1)
     # The Sender of the attribute should just set the value on the attribute
     set_mock.assert_awaited_once_with(1)
+
+
+@pytest.mark.asyncio
+async def test_handler_initialise(mocker: MockerFixture):
+    handler = SimpleHandler()
+    handler_mock = mocker.patch.object(handler, "initialise")
+    attr = AttrR(Int(), handler=handler)
+
+    await attr.initialise(mocker.ANY)
+
+    # The handler initialise method should be called from the attribute
+    handler_mock.assert_called_once_with(1)
 
 
 @pytest.mark.parametrize(

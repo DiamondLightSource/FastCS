@@ -29,6 +29,11 @@ class BaseController:
 
         self._bind_attrs()
 
+    async def initialise(self) -> None:
+        # Loop over attributes and initialise any registered handlers
+        for attr in self.attributes.values():
+            await attr.initialise(self)
+
     @property
     def path(self) -> list[str]:
         """Path prefix of attributes, recursively including parent Controllers."""
@@ -115,9 +120,6 @@ class Controller(BaseController):
 
     def __init__(self, description: str | None = None) -> None:
         super().__init__(description=description)
-
-    async def initialise(self) -> None:
-        pass
 
     async def connect(self) -> None:
         pass
