@@ -23,9 +23,9 @@ async def patch_run_threadsafe_blocking(coro, loop):
     await coro
 
 
-@pytest.fixture(scope="module")
-def mock_run_threadsafe_blocking(module_mocker: MockerFixture):
-    m = module_mocker.patch(
+@pytest.fixture(scope="session", autouse=True)
+def mock_run_threadsafe_blocking(session_mocker: MockerFixture):
+    m = session_mocker.patch(
         "fastcs.transport.tango.dsr._run_threadsafe_blocking",
         patch_run_threadsafe_blocking,
     )
@@ -67,7 +67,6 @@ class TestTangoDevice:
     @pytest.fixture(scope="class")
     def tango_context(
         self,
-        mock_run_threadsafe_blocking,
         tango_controller_api: AssertableControllerAPI,
     ):
         yield from create_test_context(tango_controller_api)
