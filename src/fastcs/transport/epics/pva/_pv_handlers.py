@@ -114,12 +114,11 @@ def make_shared_pv(attribute: Attribute) -> SharedPV:
     shared_pv = SharedPV(**kwargs)
 
     if isinstance(attribute, AttrR):
-        shared_pv.post(cast_to_p4p_value(attribute, attribute.get()))
 
         async def on_update(value):
             shared_pv.post(cast_to_p4p_value(attribute, value))
 
-        attribute.set_update_callback(on_update)
+        attribute.add_update_callback(on_update)
 
     return shared_pv
 

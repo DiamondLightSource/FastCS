@@ -65,7 +65,7 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
         attribute = controller_api.attributes[name]
         match attribute:
             case AttrW():
-                attribute.set_process_callback(method.fn)
+                attribute.add_process_callback(method.fn)
             case _:
                 raise FastCSException(
                     f"Mode {attribute.access_mode} does not "
@@ -84,7 +84,7 @@ def _link_attribute_sender_class(
                 )
 
                 callback = _create_sender_callback(attribute, controller)
-                attribute.set_process_callback(callback)
+                attribute.add_process_callback(callback)
 
 
 def _create_sender_callback(attribute, controller):

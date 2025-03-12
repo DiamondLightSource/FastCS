@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 from enum import Enum
 from typing import Any, Generic, Protocol, runtime_checkable
@@ -135,7 +136,7 @@ class AttrR(Attribute[T]):
         self._value: T = (
             datatype.initial_value if initial_value is None else initial_value
         )
-        self._update_callback: AttrCallback[T] | None = None
+        self._update_callbacks: list[AttrCallback[T]] | None = None
         self._updater = handler
 
     def get(self) -> T:
@@ -144,11 +145,13 @@ class AttrR(Attribute[T]):
     async def set(self, value: T) -> None:
         self._value = self._datatype.validate(value)
 
-        if self._update_callback is not None:
-            await self._update_callback(self._value)
+        if self._update_callbacks is not None:
+            await asyncio.gather(*[cb(self._value) for cb in self._update_callbacks])
 
-    def set_update_callback(self, callback: AttrCallback[T] | None) -> None:
-        self._update_callback = callback
+    def add_update_callback(self, callback: AttrCallback[T]) -> None:
+        if self._update_callbacks is None:
+            self._update_callbacks = []
+        self._update_callbacks.append(callback)
 
     @property
     def updater(self) -> Updater | None:
@@ -173,8 +176,8 @@ class AttrW(Attribute[T]):
             handler,
             description=description,
         )
-        self._process_callback: AttrCallback[T] | None = None
-        self._write_display_callback: AttrCallback[T] | None = None
+        self._process_callbacks: list[AttrCallback[T]] | None = None
+        self._write_display_callbacks: list[AttrCallback[T]] | None = None
 
         if handler is not None:
             self._sender = handler
@@ -186,21 +189,27 @@ class AttrW(Attribute[T]):
         await self.update_display_without_process(value)
 
     async def process_without_display_update(self, value: T) -> None:
-        if self._process_callback is not None:
-            await self._process_callback(self._datatype.validate(value))
+        value = self._datatype.validate(value)
+        if self._process_callbacks:
+            await asyncio.gather(*[cb(value) for cb in self._process_callbacks])
 
     async def update_display_without_process(self, value: T) -> None:
-        if self._write_display_callback is not None:
-            await self._write_display_callback(self._datatype.validate(value))
+        value = self._datatype.validate(value)
+        if self._write_display_callbacks:
+            await asyncio.gather(*[cb(value) for cb in self._write_display_callbacks])
 
-    def set_process_callback(self, callback: AttrCallback[T] | None) -> None:
-        self._process_callback = callback
+    def add_process_callback(self, callback: AttrCallback[T]) -> None:
+        if self._process_callbacks is None:
+            self._process_callbacks = []
+        self._process_callbacks.append(callback)
 
     def has_process_callback(self) -> bool:
-        return self._process_callback is not None
+        return bool(self._process_callbacks)
 
-    def set_write_display_callback(self, callback: AttrCallback[T] | None) -> None:
-        self._write_display_callback = callback
+    def add_write_display_callback(self, callback: AttrCallback[T]) -> None:
+        if self._write_display_callbacks is None:
+            self._write_display_callbacks = []
+        self._write_display_callbacks.append(callback)
 
     @property
     def sender(self) -> Sender:
