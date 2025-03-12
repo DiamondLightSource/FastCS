@@ -1,5 +1,6 @@
 import asyncio
 import enum
+import unittest
 
 import numpy as np
 import pytest
@@ -21,15 +22,6 @@ from fastcs.transport.tango.adapter import TangoTransport
 
 async def patch_run_threadsafe_blocking(coro, loop):
     await coro
-
-
-@pytest.fixture(scope="session", autouse=True)
-def mock_run_threadsafe_blocking(session_mocker: MockerFixture):
-    m = session_mocker.patch(
-        "fastcs.transport.tango.dsr._run_threadsafe_blocking",
-        patch_run_threadsafe_blocking,
-    )
-    yield m
 
 
 class TangoController(MyTestController):
@@ -61,6 +53,9 @@ def create_test_context(tango_controller_api: AssertableControllerAPI):
         yield proxy
 
 
+@unittest.mock.patch(
+    "fastcs.transport.tango.dsr._run_threadsafe_blocking", patch_run_threadsafe_blocking
+)
 class TestTangoDevice:
     @pytest.fixture(scope="class")
     def tango_context(
