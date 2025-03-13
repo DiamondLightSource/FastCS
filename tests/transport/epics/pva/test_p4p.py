@@ -352,14 +352,10 @@ def test_pvi_grouping():
             "value": {
                 "additional_child": {"d": f"{pv_prefix}:AdditionalChild:PVI"},
                 "another_child": {"d": f"{pv_prefix}:AnotherChild:PVI"},
-                "another_attr": {
-                    "rw": {
-                        "v0": f"{pv_prefix}:AnotherAttr0",
-                        "v1000": f"{pv_prefix}:AnotherAttr1000",
-                    }
-                },
+                "another_attr0": {"rw": f"{pv_prefix}:AnotherAttr0"},
+                "another_attr1000": {"rw": f"{pv_prefix}:AnotherAttr1000"},
                 "a_third_attr": {"w": f"{pv_prefix}:AThirdAttr"},
-                "attr": {"rw": {"v1": f"{pv_prefix}:Attr1"}},
+                "attr1": {"rw": f"{pv_prefix}:Attr1"},
                 "child": {
                     "d": {
                         "v0": f"{pv_prefix}:Child0:PVI",
