@@ -76,15 +76,20 @@ class PviDevice(dict[str, "PviDevice"]):
     def _make_p4p_raw_value(self) -> dict:
         p4p_raw_value = defaultdict(dict)
         for pv_leaf, signal_info in self._get_signal_infos().items():
-            pvi_name, number = _pv_to_pvi_name(pv_leaf.rstrip(":PVI") or pv_leaf)
-            if number is not None:
+            stripped_leaf = pv_leaf.rstrip(":PVI")
+            is_controller = stripped_leaf != pv_leaf
+            pvi_name, number = _pv_to_pvi_name(stripped_leaf or pv_leaf)
+            if is_controller and number is not None:
                 if signal_info.access not in p4p_raw_value[pvi_name]:
                     p4p_raw_value[pvi_name][signal_info.access] = {}
                 p4p_raw_value[pvi_name][signal_info.access][f"v{number}"] = (
                     signal_info.pv
                 )
-            else:
+            elif is_controller:
                 p4p_raw_value[pvi_name][signal_info.access] = signal_info.pv
+            else:
+                attr_pvi_name = f"{pvi_name}{'' if number is None else number}"
+                p4p_raw_value[attr_pvi_name][signal_info.access] = signal_info.pv
 
         return p4p_raw_value
 
