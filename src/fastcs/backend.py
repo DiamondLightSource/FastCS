@@ -49,7 +49,10 @@ class Backend:
     async def _start_scan_tasks(self):
         self._scan_tasks = {
             self._loop.create_task(coro())
-            for coro in _get_scan_coros(self.controller_api, self._controller)
+            for coro in _get_scan_coros(
+                self.controller_api,
+                self._controller.get_controller_by_path(self.controller_api.path),
+            )
         }
 
     def _stop_scan_tasks(self):
@@ -98,7 +101,7 @@ def _create_sender_callback(attribute, controller):
 
 
 def _get_scan_coros(
-    root_controller_api: ControllerAPI, controller: Controller
+    root_controller_api: ControllerAPI, controller: BaseController
 ) -> list[Callable]:
     scan_dict: dict[float, list[Callable]] = defaultdict(list)
 
@@ -120,7 +123,7 @@ def _add_scan_method_tasks(
 def _add_attribute_updater_tasks(
     scan_dict: dict[float, list[Callable]],
     controller_api: ControllerAPI,
-    controller: Controller,
+    controller: BaseController,
 ):
     for attribute in controller_api.attributes.values():
         match attribute:
