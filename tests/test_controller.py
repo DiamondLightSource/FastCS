@@ -3,6 +3,7 @@ import pytest
 from fastcs.attributes import AttrR
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Int
+from fastcs.exceptions import FastCSException
 
 
 def test_controller_nesting():
@@ -16,7 +17,9 @@ def test_controller_nesting():
     assert sub_controller.path == ["a"]
     assert sub_sub_controller.path == ["a", "b"]
     assert controller.get_sub_controllers() == {"a": sub_controller}
+    assert controller["a"] == sub_controller
     assert sub_controller.get_sub_controllers() == {"b": sub_sub_controller}
+    assert controller["a"]["b"] == sub_sub_controller
 
     with pytest.raises(
         ValueError, match=r"Controller .* already has a SubController registered as .*"
@@ -112,3 +115,12 @@ def test_root_attribute():
         ),
     ):
         FailingController(SomeSubController())
+
+
+def test_controller_getitem(controller):
+    assert controller["SubController01"] == controller.get_sub_controllers().get(
+        "SubController01"
+    )
+
+    with pytest.raises(FastCSException, match=r"Controller .* has no sub controller.*"):
+        controller["DoesNotExist"]
