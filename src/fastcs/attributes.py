@@ -22,16 +22,20 @@ class AttrMode(Enum):
 class Sender(Protocol):
     """Protocol for setting the value of an ``Attribute``."""
 
-<<<<<<< HEAD
-    async def put(
-        self, controller: fastcs.controller.BaseController, attr: AttrW, value: Any
-    ) -> None:
-=======
-    async def initialise(self, controller: Any):
+    # Record the controller that owns this attribute handler
+    controller: Any = None
+
+    async def initialise(self, controller: Any) -> None:
+        # Register the controller
+        self.controller = controller
+
+        # Continue with initialisation
+        await self._initialise()
+
+    async def _initialise(self) -> None:
         pass
 
-    async def put(self, controller: Any, attr: AttrW, value: Any) -> None:
->>>>>>> 43721ff (Added default initialise methods to Sender and Updater base classes. Added initialise method to Attribute, checks for handler and calls the method. Moved initialise into BaseController class, loops over attributes calling initialise with a reference to self. Added unit test for Attribute class.)
+    async def put(self, attr: AttrW, value: Any) -> None:
         pass
 
 
@@ -39,19 +43,25 @@ class Sender(Protocol):
 class Updater(Protocol):
     """Protocol for updating the cached readback value of an ``Attribute``."""
 
+    # Record the controller that owns this attribute handler
+    controller: Any = None
+
     # If update period is None then the attribute will not be updated as a task.
     update_period: float | None = None
 
-<<<<<<< HEAD
-    async def update(
-        self, controller: fastcs.controller.BaseController, attr: AttrR
-    ) -> None:
-=======
-    async def initialise(self, controller: Any):
+    async def initialise(self, controller: Any) -> None:
         pass
 
-    async def update(self, controller: Any, attr: AttrR) -> None:
->>>>>>> 43721ff (Added default initialise methods to Sender and Updater base classes. Added initialise method to Attribute, checks for handler and calls the method. Moved initialise into BaseController class, loops over attributes calling initialise with a reference to self. Added unit test for Attribute class.)
+        # Register the controller
+        self.controller = controller
+
+        # Continue with initialisation
+        await self._initialise()
+
+    async def _initialise(self) -> None:
+        pass
+
+    async def update(self, attr: AttrR) -> None:
         pass
 
 
@@ -65,15 +75,13 @@ class Handler(Sender, Updater, Protocol):
 class SimpleHandler(Handler):
     """Handler for internal parameters"""
 
-    async def put(
-        self, controller: fastcs.controller.BaseController, attr: AttrW, value: Any
-    ):
+    async def put(self, attr: AttrW, value: Any):
         await attr.update_display_without_process(value)
 
         if isinstance(attr, AttrRW):
             await attr.set(value)
 
-    async def update(self, controller: Any, attr: AttrR):
+    async def update(self, attr: AttrR):
         raise RuntimeError("SimpleHandler cannot update")
 
 
