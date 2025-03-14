@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from copy import copy
 from typing import get_type_hints
 
@@ -30,9 +31,12 @@ class BaseController:
         self._bind_attrs()
 
     async def initialise(self) -> None:
-        # Loop over attributes and initialise any registered handlers
-        for attr in self.attributes.values():
-            await attr.initialise(self)
+        # Initialise any registered handlers for attributes
+        coros = [attr.initialise(self) for attr in self.attributes.values()]
+        try:
+            await asyncio.gather(*coros)
+        except asyncio.CancelledError:
+            pass
 
     @property
     def path(self) -> list[str]:
