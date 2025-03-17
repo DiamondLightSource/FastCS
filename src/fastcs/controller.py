@@ -120,6 +120,22 @@ class Controller(BaseController):
     async def connect(self) -> None:
         pass
 
+    def walk_attributes(self, access_mode: type[Attribute]):
+        return {
+            attr: values
+            for attr, values in self.attributes.items()
+            if isinstance(values, access_mode)
+        }
+
+    def walk_methods(self, access_mode: type[Attribute]):
+        return list(
+            filter(
+                lambda func: not func.startswith("__")
+                and callable(getattr(access_mode, func)),
+                dir(access_mode),
+            )
+        )
+
 
 class SubController(BaseController):
     """A subordinate to a ``Controller`` for managing a subset of a device.

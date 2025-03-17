@@ -1,6 +1,6 @@
 import pytest
 
-from fastcs.attributes import AttrR
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Int
 
@@ -43,6 +43,8 @@ class SomeController(Controller):
     annotated_attr_not_defined_in_init: AttrR[int]
     equal_attr = AttrR(Int())
     annotated_and_equal_attr: AttrR[int] = AttrR(Int())
+    read_write_attr = AttrRW(Int())
+    write_only_attr = AttrW(Int())
 
     def __init__(self, sub_controller: SubController):
         self.attributes = {}
@@ -67,6 +69,8 @@ def test_attribute_parsing():
         "_attributes_attr_equal",
         "annotated_and_equal_attr",
         "equal_attr",
+        "read_write_attr",
+        "write_only_attr",
         "sub_controller",
     }
 
@@ -112,3 +116,63 @@ def test_root_attribute():
         ),
     ):
         FailingController(SomeSubController())
+
+
+def test_walk_attributes_for_type():
+    sub_controller = SomeSubController()
+    controller = SomeController(sub_controller)
+
+    assert set(controller.walk_attributes(access_mode=AttrR).keys()) == {
+        "_attributes_attr",
+        "annotated_attr",
+        "_attributes_attr_equal",
+        "annotated_and_equal_attr",
+        "equal_attr",
+        "read_write_attr",
+        "sub_controller",
+    }
+
+    assert set(controller.walk_attributes(access_mode=AttrW).keys()) == {
+        "write_only_attr",
+        "read_write_attr",
+    }
+
+    pass
+
+
+def test_walk_methods_for_type():
+    sub_controller = SomeSubController()
+    controller = SomeController(sub_controller)
+
+    assert set(controller.walk_methods(access_mode=AttrR)) == {
+        "add_update_callback",
+        "add_update_datatype_callback",
+        "get",
+        "set",
+        "update_datatype",
+    }
+
+    assert set(controller.walk_methods(access_mode=AttrRW)) == {
+        "add_process_callback",
+        "add_update_callback",
+        "add_update_datatype_callback",
+        "add_write_display_callback",
+        "get",
+        "has_process_callback",
+        "process",
+        "process_without_display_update",
+        "set",
+        "update_datatype",
+        "update_display_without_process",
+    }
+
+    assert set(controller.walk_methods(access_mode=AttrW)) == {
+        "add_process_callback",
+        "add_update_datatype_callback",
+        "add_write_display_callback",
+        "has_process_callback",
+        "process",
+        "process_without_display_update",
+        "update_datatype",
+        "update_display_without_process",
+    }
