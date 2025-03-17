@@ -1,9 +1,35 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Coroutine
 from copy import copy
-from typing import get_type_hints
+from inspect import Parameter
+from types import MappingProxyType
+from typing import Any, Protocol, TypeVar, get_type_hints
 
 from fastcs.attributes import Attribute
+
+
+class MethodProtocol(Protocol):
+    """Protocol for FastCS Controller methods"""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None: ...
+
+    def _validate(self, fn: Callable[..., Coroutine[Any, Any, None]]) -> None: ...
+
+    @property
+    def return_type(self) -> Any: ...
+
+    @property
+    def parameters(self) -> MappingProxyType[str, Parameter]: ...
+
+    @property
+    def docstring(self) -> str | None: ...
+
+    @property
+    def fn(self) -> Callable[..., Coroutine[Any, Any, None]]: ...
+
+    @property
+    def group(self) -> str | None: ...
 
 
 class BaseController:
@@ -102,6 +128,10 @@ class BaseController:
         return self.__sub_controller_tree
 
 
+Attribute_T = TypeVar("Attribute_T", bound=Attribute)
+Method_T = TypeVar("Method_T", bound=MethodProtocol)
+
+
 class Controller(BaseController):
     """Top-level controller for a device.
 
@@ -120,21 +150,21 @@ class Controller(BaseController):
     async def connect(self) -> None:
         pass
 
-    def walk_attributes(self, access_mode: type[Attribute]):
+    def walk_attributes(
+        self, access_mode: type[Attribute_T] = Attribute
+    ) -> dict[str, Attribute_T]:
         return {
-            attr: values
-            for attr, values in self.attributes.items()
-            if isinstance(values, access_mode)
+            name: attribute
+            for name, attribute in self.attributes.items()
+            if isinstance(attribute, access_mode)
         }
 
-    def walk_methods(self, access_mode: type[Attribute]):
-        return list(
-            filter(
-                lambda func: not func.startswith("__")
-                and callable(getattr(access_mode, func)),
-                dir(access_mode),
-            )
-        )
+    def walk_methods(self, method: type[Method_T]) -> dict[str, Method_T]:
+        return {
+            attribute: getattr(self, attribute)
+            for attribute in dir(self)
+            if isinstance(getattr(self, attribute), method)
+        }
 
 
 class SubController(BaseController):

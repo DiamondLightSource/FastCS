@@ -2,7 +2,9 @@ import pytest
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SubController
+from fastcs.cs_methods import Command, Put, Scan
 from fastcs.datatypes import Int
+from fastcs.wrappers import command, put, scan
 
 
 def test_controller_nesting():
@@ -57,6 +59,18 @@ class SomeController(Controller):
 
         super().__init__()
         self.register_sub_controller("sub_controller", sub_controller)
+
+    @command()
+    async def test_command(self):
+        pass
+
+    @scan(period=1.0)
+    async def test_scan(self):
+        pass
+
+    @put
+    async def test_put(self, fn):
+        pass
 
 
 def test_attribute_parsing():
@@ -118,7 +132,7 @@ def test_root_attribute():
         FailingController(SomeSubController())
 
 
-def test_walk_attributes_for_type():
+def test_walk_attributes_from_type():
     sub_controller = SomeSubController()
     controller = SomeController(sub_controller)
 
@@ -140,39 +154,20 @@ def test_walk_attributes_for_type():
     pass
 
 
-def test_walk_methods_for_type():
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "method_type, expected_methods",
+    [
+        (Command, {"test_command"}),
+        (Scan, {"test_scan"}),
+        (Put, {"test_put"}),
+    ],
+)
+async def test_walk_methods_from_type(method_type, expected_methods):
     sub_controller = SomeSubController()
     controller = SomeController(sub_controller)
 
-    assert set(controller.walk_methods(access_mode=AttrR)) == {
-        "add_update_callback",
-        "add_update_datatype_callback",
-        "get",
-        "set",
-        "update_datatype",
-    }
-
-    assert set(controller.walk_methods(access_mode=AttrRW)) == {
-        "add_process_callback",
-        "add_update_callback",
-        "add_update_datatype_callback",
-        "add_write_display_callback",
-        "get",
-        "has_process_callback",
-        "process",
-        "process_without_display_update",
-        "set",
-        "update_datatype",
-        "update_display_without_process",
-    }
-
-    assert set(controller.walk_methods(access_mode=AttrW)) == {
-        "add_process_callback",
-        "add_update_datatype_callback",
-        "add_write_display_callback",
-        "has_process_callback",
-        "process",
-        "process_without_display_update",
-        "update_datatype",
-        "update_display_without_process",
-    }
+    methods = set(controller.walk_methods(method_type))
+    assert len(methods) == len(expected_methods)
+    assert methods == expected_methods
+    methods = set(controller.walk_methods(Command))
