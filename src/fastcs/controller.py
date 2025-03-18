@@ -161,9 +161,9 @@ class Controller(BaseController):
 
     def walk_methods(self, method: type[Method_T]) -> dict[str, Method_T]:
         return {
-            attribute: getattr(self, attribute)
-            for attribute in dir(self)
-            if isinstance(getattr(self, attribute), method)
+            attr: value
+            for attr in dir(self)
+            if isinstance(value := getattr(self, attr), method)
         }
 
 
