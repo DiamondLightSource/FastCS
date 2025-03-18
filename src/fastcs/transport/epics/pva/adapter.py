@@ -8,6 +8,8 @@ from .ioc import P4PIOC
 
 
 class EpicsPVATransport(TransportAdapter):
+    """PV access transport."""
+
     def __init__(
         self,
         controller_api: ControllerAPI,

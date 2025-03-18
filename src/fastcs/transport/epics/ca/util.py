@@ -45,10 +45,15 @@ DATATYPE_FIELD_TO_RECORD_FIELD = {
 def record_metadata_from_attribute(
     attribute: Attribute[T],
 ) -> dict[str, str | None]:
+    """Converts attributes on the `Attribute` to the
+    field name/value in the record metadata."""
     return {"DESC": attribute.description}
 
 
 def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
+    """Converts attributes on the `DataType` to the
+    field name/value in the record metadata."""
+
     arguments = {
         DATATYPE_FIELD_TO_RECORD_FIELD[field]: value
         for field, value in asdict(datatype).items()
@@ -78,6 +83,7 @@ def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
 
 
 def cast_from_epics_type(datatype: DataType[T], value: object) -> T:
+    """Casts from an EPICS datatype to a FastCS datatype."""
     match datatype:
         case Enum():
             return datatype.validate(datatype.members[value])
@@ -88,6 +94,7 @@ def cast_from_epics_type(datatype: DataType[T], value: object) -> T:
 
 
 def cast_to_epics_type(datatype: DataType[T], value: T) -> object:
+    """Casts from an attribute's datatype to an EPICS datatype."""
     match datatype:
         case Enum():
             return datatype.index_of(datatype.validate(value))
@@ -100,6 +107,7 @@ def cast_to_epics_type(datatype: DataType[T], value: T) -> object:
 def builder_callable_from_attribute(
     attribute: AttrR | AttrW | AttrRW, make_in_record: bool
 ):
+    """Returns a callable to make the softioc record from an attribute instance."""
     match attribute.datatype:
         case Bool():
             return builder.boolIn if make_in_record else builder.boolOut

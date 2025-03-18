@@ -17,6 +17,8 @@ PviName = str
 
 @dataclass
 class _PviSignalInfo:
+    """For storing a pv and it's access in pvi parsing."""
+
     pv: str
     access: AccessModeType
 
@@ -35,6 +37,8 @@ def _pv_to_pvi_name(pv: str) -> tuple[str, int | None]:
 
 
 class PviDevice(dict[str, "PviDevice"]):
+    """For creating a pvi structure in pva."""
+
     pv_prefix: str
     description: str | None
     device_signal_info: _PviSignalInfo | None
@@ -166,6 +170,8 @@ class PviDevice(dict[str, "PviDevice"]):
 
 # TODO: This can be dramatically cleaned up after https://github.com/DiamondLightSource/FastCS/issues/122
 class PviTree:
+    """For storing pvi structures."""
+
     def __init__(self, pv_prefix: str):
         self._pvi_tree_root: PviDevice = PviDevice(pv_prefix)
 

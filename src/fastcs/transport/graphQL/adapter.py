@@ -6,6 +6,8 @@ from .options import GraphQLOptions
 
 
 class GraphQLTransport(TransportAdapter):
+    """GraphQL transport."""
+
     def __init__(
         self,
         controller_api: ControllerAPI,

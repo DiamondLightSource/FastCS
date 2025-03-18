@@ -30,6 +30,7 @@ def _snake_to_pascal(name: str) -> str:
 
 
 def get_pv_name(pv_prefix: str, *attribute_names: str) -> str:
+    """Converts from an attribute name to a pv name."""
     pv_formatted = ":".join([_snake_to_pascal(attr) for attr in attribute_names])
     return f"{pv_prefix}:{pv_formatted}" if pv_formatted else pv_prefix
 
@@ -37,6 +38,7 @@ def get_pv_name(pv_prefix: str, *attribute_names: str) -> str:
 async def parse_attributes(
     root_pv_prefix: str, root_controller_api: ControllerAPI
 ) -> list[StaticProvider]:
+    """Parses `Attribute` s into p4p signals in handlers."""
     pvi_tree = PviTree(root_pv_prefix)
     provider = StaticProvider(root_pv_prefix)
 
@@ -61,6 +63,11 @@ async def parse_attributes(
 
 
 class P4PIOC:
+    """A P4P IOC which handles a controller.
+
+    Avoid running directly, instead use `fastcs.launch.FastCS`.
+    """
+
     def __init__(self, pv_prefix: str, controller_api: ControllerAPI):
         self.pv_prefix = pv_prefix
         self.controller_api = controller_api

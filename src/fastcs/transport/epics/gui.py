@@ -33,6 +33,8 @@ from .options import EpicsGUIFormat, EpicsGUIOptions
 
 
 class EpicsGUI:
+    """For creating gui in the EPICS transports."""
+
     def __init__(self, controller_api: ControllerAPI, pv_prefix: str) -> None:
         self._controller_api = controller_api
         self._pv_prefix = pv_prefix

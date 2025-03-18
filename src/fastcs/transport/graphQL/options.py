@@ -10,4 +10,6 @@ class GraphQLServerOptions:
 
 @dataclass
 class GraphQLOptions:
+    """Options for the GraphQL transport."""
+
     gql: GraphQLServerOptions = field(default_factory=GraphQLServerOptions)

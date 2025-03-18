@@ -10,4 +10,6 @@ class RestServerOptions:
 
 @dataclass
 class RestOptions:
+    """Options for the Rest transport."""
+
     rest: RestServerOptions = field(default_factory=RestServerOptions)

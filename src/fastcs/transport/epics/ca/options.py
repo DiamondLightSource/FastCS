@@ -9,6 +9,8 @@ from ..options import (
 
 @dataclass
 class EpicsCAOptions:
+    """Options for the EPICS CA transport."""
+
     docs: EpicsDocsOptions = field(default_factory=EpicsDocsOptions)
     gui: EpicsGUIOptions = field(default_factory=EpicsGUIOptions)
     ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)

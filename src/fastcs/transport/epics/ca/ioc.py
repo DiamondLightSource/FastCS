@@ -22,6 +22,11 @@ EPICS_MAX_NAME_LENGTH = 60
 
 
 class EpicsCAIOC:
+    """A softioc which handles a controller.
+
+    Avoid running directly, instead use `fastcs.launch.FastCS`.
+    """
+
     def __init__(
         self,
         pv_prefix: str,

@@ -15,6 +15,8 @@ from .exceptions import FastCSException
 def scan(
     period: float,
 ) -> Callable[[UnboundScanCallback[Controller_T]], UnboundScan[Controller_T]]:
+    """Sets up a scan over the wrapped method."""
+
     if period <= 0:
         raise FastCSException("Scan method must have a positive scan period")
 
@@ -25,6 +27,7 @@ def scan(
 
 
 def put(fn: UnboundPutCallback[Controller_T]) -> UnboundPut[Controller_T]:
+    """Sets up a put over the wrapped method."""
     return UnboundPut(fn)
 
 

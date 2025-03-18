@@ -11,6 +11,8 @@ from .exceptions import FastCSException
 
 
 class Backend:
+    """For keeping track of tasks during FastCS serving."""
+
     def __init__(
         self,
         controller: Controller,
@@ -163,6 +165,7 @@ def _create_periodic_scan_coro(period, methods: list[Callable]) -> Callable:
 
 
 def build_controller_api(controller: Controller) -> ControllerAPI:
+    """Build a `ControllerAPI` for a `BaseController` and its sub controllers"""
     return _build_controller_api(controller, [])
 
 

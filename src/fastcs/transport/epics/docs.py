@@ -4,6 +4,8 @@ from .options import EpicsDocsOptions
 
 
 class EpicsDocs:
+    """For creating docs in the EPICS transports."""
+
     def __init__(self, controller_apis: ControllerAPI) -> None:
         self._controller_apis = controller_apis
 

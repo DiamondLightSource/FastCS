@@ -71,10 +71,27 @@ nitpick_ignore = [
     ("py:class", "'object'"),
     ("py:class", "'id'"),
     ("py:class", "typing_extensions.Literal"),
+    # Doesn't work even with asyncio intersphinx mapping
+    ("py:class", "asyncio.events.AbstractEventLoop"),
+    ("py:class", "asyncio.streams.StreamReader"),
+    ("py:class", "asyncio.streams.StreamWriter"),
+    # Annoying error:
+    #     docstring of collections.abc.Callable:1: WARNING:
+    #     'any' reference target not found: self [ref.any]
+    ("any", "self"),
+    # p4p doesn't have intersphinx mapping
+    ("py:class", "p4p.server.StaticProvider"),
+    ("py:class", "p4p.nt.scalar.NTScalar"),
+    ("py:class", "p4p.nt.enum.NTEnum"),
+    ("py:class", "p4p.nt.ndarray.NTNDArray"),
+    ("py:class", "p4p.nt.NTTable"),
+    # Problems in FastCS itself
+    ("py:class", "fastcs.transport.epics.pva.pvi_tree._PviSignalInfo"),
+    # TypeVar without docstrings still give warnings
+    ("py:class", "fastcs.datatypes.T_Numerical"),
+    ("py:class", "strawberry.schema.schema.Schema"),
 ]
-nitpick_ignore_regex = [
-    ("py:class", "fastcs.*.T"),
-]
+nitpick_ignore_regex = [("py:class", "fastcs.*.T")]
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
 # inserted into the main body of the autoclass directive
@@ -112,7 +129,9 @@ pygments_style = "sphinx"
 
 # This means you can link things like `str` and `asyncio` to the relevant
 # docs in the python documentation.
-intersphinx_mapping = {"python": ("https://docs.python.org/3/", None)}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+}
 
 # A dictionary of graphviz graph attributes for inheritance diagrams.
 inheritance_graph_attrs = {"rankdir": "TB"}

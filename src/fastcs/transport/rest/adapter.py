@@ -6,6 +6,8 @@ from .rest import RestServer
 
 
 class RestTransport(TransportAdapter):
+    """Rest Transport Adapter."""
+
     def __init__(
         self,
         controller_api: ControllerAPI,

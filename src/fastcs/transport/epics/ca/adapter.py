@@ -9,6 +9,8 @@ from fastcs.transport.epics.gui import EpicsGUI
 
 
 class EpicsCATransport(TransportAdapter):
+    """Channel access transport."""
+
     def __init__(
         self,
         controller_api: ControllerAPI,
