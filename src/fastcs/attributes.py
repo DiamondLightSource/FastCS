@@ -5,6 +5,8 @@ from collections.abc import Callable
 from enum import Enum
 from typing import Any, Generic, Protocol, runtime_checkable
 
+import fastcs
+
 from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
 
 
@@ -20,7 +22,9 @@ class AttrMode(Enum):
 class Sender(Protocol):
     """Protocol for setting the value of an ``Attribute``."""
 
-    async def put(self, controller: Any, attr: AttrW, value: Any) -> None:
+    async def put(
+        self, controller: fastcs.controller.BaseController, attr: AttrW, value: Any
+    ) -> None:
         pass
 
 
@@ -31,7 +35,9 @@ class Updater(Protocol):
     # If update period is None then the attribute will not be updated as a task.
     update_period: float | None = None
 
-    async def update(self, controller: Any, attr: AttrR) -> None:
+    async def update(
+        self, controller: fastcs.controller.BaseController, attr: AttrR
+    ) -> None:
         pass
 
 
@@ -45,7 +51,9 @@ class Handler(Sender, Updater, Protocol):
 class SimpleHandler(Handler):
     """Handler for internal parameters"""
 
-    async def put(self, controller: Any, attr: AttrW, value: Any):
+    async def put(
+        self, controller: fastcs.controller.BaseController, attr: AttrW, value: Any
+    ):
         await attr.update_display_without_process(value)
 
         if isinstance(attr, AttrRW):
