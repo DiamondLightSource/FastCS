@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 
 class DisconnectedError(Exception):
+    """Raised if the ip connection is disconnected."""
+
     pass
 
 
@@ -14,6 +16,8 @@ class IPConnectionSettings:
 
 @dataclass
 class StreamConnection:
+    """For reading and writing to a stream."""
+
     reader: asyncio.StreamReader
     writer: asyncio.StreamWriter
 
@@ -41,6 +45,8 @@ class StreamConnection:
 
 
 class IPConnection:
+    """For connecting to an ip using a `StreamConnection`."""
+
     def __init__(self):
         self.__connection = None
 

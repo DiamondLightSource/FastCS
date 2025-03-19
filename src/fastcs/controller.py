@@ -7,6 +7,8 @@ from fastcs.attributes import Attribute
 
 
 class BaseController:
+    """Base class for controller."""
+
     #: Attributes passed from the device at runtime.
     attributes: dict[str, Attribute]
 
@@ -29,7 +31,7 @@ class BaseController:
 
     @property
     def path(self) -> list[str]:
-        """Path prefix of attributes, recursively including parent ``Controller``s."""
+        """Path prefix of attributes, recursively including parent Controllers."""
         return self._path
 
     def set_path(self, path: list[str]):

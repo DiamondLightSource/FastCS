@@ -20,12 +20,14 @@ DATATYPE_FIELD_TO_SERVER_FIELD = {
 def get_server_metadata_from_attribute(
     attribute: Attribute[T],
 ) -> dict[str, Any]:
+    """Gets the metadata for a Tango field from an attribute."""
     arguments = {}
     arguments["doc"] = attribute.description if attribute.description else ""
     return arguments
 
 
 def get_server_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
+    """Gets the metadata for a Tango field from a FastCS datatype."""
     arguments = {
         DATATYPE_FIELD_TO_SERVER_FIELD[field]: value
         for field, value in asdict(datatype).items()
@@ -61,6 +63,7 @@ def get_server_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
 
 
 def cast_to_tango_type(datatype: DataType[T], value: T) -> object:
+    """Casts a value from FastCS to tango datatype."""
     match datatype:
         case Enum():
             return datatype.index_of(datatype.validate(value))
@@ -71,6 +74,7 @@ def cast_to_tango_type(datatype: DataType[T], value: T) -> object:
 
 
 def cast_from_tango_type(datatype: DataType[T], value: object) -> T:
+    """Casts a value from tango to FastCS datatype."""
     match datatype:
         case Enum():
             return datatype.validate(datatype.members[value])

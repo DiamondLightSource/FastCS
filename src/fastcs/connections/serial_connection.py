@@ -5,6 +5,8 @@ import aioserial
 
 
 class NotOpenedError(Exception):
+    """If the serial stream is not opened."""
+
     pass
 
 
@@ -15,6 +17,8 @@ class SerialConnectionSettings:
 
 
 class SerialConnection:
+    """A serial connection."""
+
     def __init__(self):
         self.stream = None
         self._lock = asyncio.Lock()

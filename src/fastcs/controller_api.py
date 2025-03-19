@@ -20,10 +20,10 @@ class ControllerAPI:
     description: str | None = None
 
     def walk_api(self) -> Iterator["ControllerAPI"]:
-        """Walk through all the nested `ControllerAPIs` of this `ControllerAPI`
+        """Walk through all the nested `ControllerAPI` s of this `ControllerAPI`.
 
-        yields: `ControllerAPI`s from a depth-first traversal of the tree, including
-        self.
+        Yields the `ControllerAPI` s from a depth-first traversal of the tree,
+        including self.
 
         """
         yield self

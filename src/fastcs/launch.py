@@ -28,6 +28,8 @@ TransportOptions: TypeAlias = list[
 
 
 class FastCS:
+    """For launching a controller with given transport(s)."""
+
     def __init__(
         self,
         controller: Controller,
@@ -249,6 +251,7 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
 
 
 def get_controller_schema(target: type[Controller]) -> dict[str, Any]:
+    """Gets schema for a give controller for serialisation."""
     options_model = _extract_options_model(target)
     target_schema = options_model.model_json_schema()
     return target_schema

@@ -8,6 +8,8 @@ from .options import TangoOptions
 
 
 class TangoTransport(TransportAdapter):
+    """Tango transport."""
+
     def __init__(
         self,
         controller_api: ControllerAPI,

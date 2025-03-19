@@ -123,6 +123,8 @@ class Scan(Method[BaseController]):
 
 
 class Put(Method[BaseController]):
+    """Why don't know what this is for."""
+
     def __init__(self, fn: PutCallback):
         super().__init__(fn)
 
@@ -142,7 +144,7 @@ class UnboundCommand(Method[Controller_T]):
     This generic class stores an unbound `Controller` method - effectively a function
     that takes an instance of a specific `Controller` type (`Controller_T`). Instances
     of this class can be added at `Controller` definition, either manually or with use
-    of the `@command` wrapper, to register the method to be included in the API of the
+    of the `command` wrapper, to register the method to be included in the API of the
     `Controller`. When the `Controller` is instantiated, these instances will be bound
     to the instance, creating a `Command` instance.
     """
@@ -171,7 +173,7 @@ class UnboundScan(Method[Controller_T]):
     This generic class stores an unbound `Controller` method - effectively a function
     that takes an instance of a specific `Controller` type (`Controller_T`). Instances
     of this class can be added at `Controller` definition, either manually or with use
-    of the `@scan` wrapper, to register the method to be included in the API of the
+    of the `scan` wrapper, to register the method to be included in the API of the
     `Controller`. When the `Controller` is instantiated, these instances will be bound
     to the instance, creating a `Scan` instance.
     """
@@ -199,6 +201,8 @@ class UnboundScan(Method[Controller_T]):
 
 
 class UnboundPut(Method[Controller_T]):
+    """Unbound version of `Put`."""
+
     def __init__(self, fn: UnboundPutCallback[Controller_T]) -> None:
         super().__init__(fn)
 

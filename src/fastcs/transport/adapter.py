@@ -3,6 +3,9 @@ from typing import Any
 
 
 class TransportAdapter(ABC):
+    """A base class for adapting a transport's implementation to
+    so it can be used in FastCS."""
+
     @property
     @abstractmethod
     def options(self) -> Any:

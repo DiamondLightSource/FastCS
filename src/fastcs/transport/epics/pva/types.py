@@ -51,6 +51,7 @@ def _table_with_numpy_dtypes_to_p4p_dtypes(numpy_dtypes: list[tuple[str, DTypeLi
 def make_p4p_type(
     attribute: Attribute,
 ) -> NTScalar | NTEnum | NTNDArray | NTTable:
+    """Creates a p4p type for a given `Attribute` s `fastcs.datatypes.DataType`."""
     display = isinstance(attribute, AttrR)
     control = isinstance(attribute, AttrW)
     match attribute.datatype:
@@ -81,10 +82,11 @@ def make_p4p_type(
                 columns=_table_with_numpy_dtypes_to_p4p_dtypes(structured_dtype)
             )
         case _:
-            raise RuntimeError(f"Datatype `{attribute.datatype}` unsupported in P4P.")
+            raise RuntimeError(f"DataType `{attribute.datatype}` unsupported in P4P.")
 
 
 def cast_from_p4p_value(attribute: Attribute[T], value: object) -> T:
+    """Converts from a p4p value to a FastCS `Attribute` value."""
     match attribute.datatype:
         case Enum():
             return attribute.datatype.validate(attribute.datatype.members[value.index])
@@ -108,6 +110,7 @@ def p4p_alarm_states(
     status: int = NO_ALARM_STATUS,
     message: str = "",
 ) -> dict:
+    """Returns the p4p alarm structure for a given severity, status, and message."""
     return {
         "alarm": {
             "severity": severity,
@@ -118,6 +121,7 @@ def p4p_alarm_states(
 
 
 def p4p_timestamp_now() -> dict:
+    """The p4p timestamp structure for the current time."""
     now = time.time()
     seconds_past_epoch = int(now)
     nanoseconds = int((now - seconds_past_epoch) * 1e9)
@@ -130,6 +134,7 @@ def p4p_timestamp_now() -> dict:
 
 
 def p4p_display(attribute: Attribute) -> dict:
+    """Gets the p4p display structure for a given attribute."""
     display = {}
     if attribute.description is not None:
         display["description"] = attribute.description
@@ -172,6 +177,8 @@ def _p4p_check_numerical_for_alarm_states(datatype: Int | Float, value: T) -> di
 
 
 def cast_to_p4p_value(attribute: Attribute[T], value: T) -> object:
+    """Converts a FastCS `Attribute` value to a p4p value,
+    including metadata and alarm states."""
     match attribute.datatype:
         case Enum():
             return {

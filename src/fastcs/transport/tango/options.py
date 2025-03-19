@@ -10,4 +10,6 @@ class TangoDSROptions:
 
 @dataclass
 class TangoOptions:
+    """Options for the Tango transport."""
+
     dsr: TangoDSROptions = field(default_factory=TangoDSROptions)

@@ -168,6 +168,11 @@ def _collect_dsr_args(options: TangoDSROptions) -> list[str]:
 
 
 class TangoDSR:
+    """For controlling a controller with tango.
+
+    Avoid running directly, instead use `fastcs.launch.FastCS`.
+    """
+
     def __init__(
         self,
         controller_api: ControllerAPI,
@@ -205,6 +210,7 @@ class TangoDSR:
 
 
 def register_dev(dev_name: str, dev_class: str, dsr_instance: str) -> None:
+    """Register a device instance in the tango server."""
     dsr_name = f"{dev_class}/{dsr_instance}"
     dev_info = DbDevInfo(dev_name, dev_class, dsr_name)
 
