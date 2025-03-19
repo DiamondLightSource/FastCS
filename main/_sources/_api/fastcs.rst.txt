@@ -6,6 +6,26 @@
 
     
     
+    .. rubric:: Submodules
+
+    .. autosummary::
+        :toctree:
+        :template: custom-module-template.rst
+        :recursive:
+    
+        attributes
+        backend
+        connections
+        controller
+        controller_api
+        cs_methods
+        datatypes
+        exceptions
+        launch
+        transport
+        util
+        wrappers
+    
     
 
     
