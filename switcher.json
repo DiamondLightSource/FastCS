@@ -4,10 +4,6 @@
     "url": "https://DiamondLightSource.github.io/FastCS/main/"
   },
   {
-    "version": "0.8.1",
-    "url": "https://DiamondLightSource.github.io/FastCS/0.8.1/"
-  },
-  {
     "version": "0.8.0",
     "url": "https://DiamondLightSource.github.io/FastCS/0.8.0/"
   },
@@ -66,6 +62,10 @@
   {
     "version": "0.4.1",
     "url": "https://DiamondLightSource.github.io/FastCS/0.4.1/"
+  },
+  {
+    "version": "0.8.1",
+    "url": "https://DiamondLightSource.github.io/FastCS/0.8.1/"
   },
   {
     "version": "Add-serial-connection-support",
