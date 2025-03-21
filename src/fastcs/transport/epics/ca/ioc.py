@@ -8,6 +8,7 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
+from fastcs.cs_methods import CommandMode
 from fastcs.datatypes import DataType, T
 from fastcs.transport.epics.ca.util import (
     builder_callable_from_attribute,
@@ -224,21 +225,20 @@ def _create_and_link_command_pvs(
                 method.enabled = False
             else:
                 _create_and_link_command_pv(
-                    _pv_prefix,
-                    pv_name,
-                    attr_name,
-                    method.fn,
+                    _pv_prefix, pv_name, attr_name, method.fn, method.mode
                 )
 
 
 def _create_and_link_command_pv(
-    pv_prefix: str, pv_name: str, attr_name: str, method: Callable
+    pv_prefix: str, pv_name: str, attr_name: str, method: Callable, mode: CommandMode
 ) -> None:
     async def wrapped_method(_: Any):
         await method()
 
     record = builder.Action(
-        f"{pv_prefix}:{pv_name}", on_update=wrapped_method, blocking=True
+        f"{pv_prefix}:{pv_name}",
+        on_update=wrapped_method,
+        blocking=True if mode == CommandMode.HIGH_AFTER_FINISH else False,
     )
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "x")

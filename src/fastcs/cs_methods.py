@@ -1,3 +1,4 @@
+import enum
 from asyncio import iscoroutinefunction
 from collections.abc import Callable, Coroutine
 from inspect import Signature, getdoc, signature
@@ -74,6 +75,16 @@ class Method(Generic[Controller_T]):
         return self._group
 
 
+class CommandMode(enum.Enum):
+    #: Command value becomes `True` in the transport once
+    #: the command starts, becomes `False` after it finishes.
+    HIGH_AFTER_START = "HIGH_AFTER_START"
+
+    #: Command value becomes `True` in the transport only after
+    #: the command has finished. Becomes `False` immediately after.
+    HIGH_AFTER_FINISH = "HIGH_AFTER_FINISH"
+
+
 class Command(Method[BaseController]):
     """A `Controller` `Method` that performs a single action when called.
 
@@ -82,7 +93,14 @@ class Command(Method[BaseController]):
     Calling an instance of this class will call the bound `Controller` method.
     """
 
-    def __init__(self, fn: CommandCallback, *, group: str | None = None):
+    def __init__(
+        self,
+        fn: CommandCallback,
+        *,
+        group: str | None = None,
+        mode: CommandMode = CommandMode.HIGH_AFTER_START,
+    ):
+        self.mode = mode
         super().__init__(fn, group=group)
 
     def _validate(self, fn: CommandCallback) -> None:
@@ -92,7 +110,7 @@ class Command(Method[BaseController]):
             raise FastCSException(f"Command method cannot have arguments: {fn}")
 
     async def __call__(self):
-        return await self._fn()
+        return await self._fn(), self.mode
 
 
 class Scan(Method[BaseController]):

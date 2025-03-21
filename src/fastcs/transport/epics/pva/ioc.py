@@ -55,7 +55,7 @@ async def parse_attributes(
 
         for attr_name, method in controller_api.command_methods.items():
             pv_name = get_pv_name(pv_prefix, attr_name)
-            command_pv = make_command_pv(method.fn)
+            command_pv = make_command_pv(method.fn, method.mode)
             provider.add(pv_name, command_pv)
             pvi_tree.add_signal(pv_name, "x")
 
