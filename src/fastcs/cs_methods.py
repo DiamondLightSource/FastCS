@@ -168,8 +168,13 @@ class UnboundCommand(Method[Controller_T]):
     """
 
     def __init__(
-        self, fn: UnboundCommandCallback[Controller_T], *, group: str | None = None
+        self,
+        fn: UnboundCommandCallback[Controller_T],
+        *,
+        group: str | None = None,
+        mode: CommandMode = CommandMode.HIGH_AFTER_START,
     ) -> None:
+        self.mode = mode
         super().__init__(fn, group=group)
 
     def _validate(self, fn: UnboundCommandCallback[Controller_T]) -> None:
@@ -179,7 +184,7 @@ class UnboundCommand(Method[Controller_T]):
             raise FastCSException("Command method cannot have arguments")
 
     def bind(self, controller: Controller_T) -> Command:
-        return Command(MethodType(self.fn, controller))
+        return Command(MethodType(self.fn, controller), mode=self.mode)
 
     def __call__(self):
         raise method_not_bound_error
