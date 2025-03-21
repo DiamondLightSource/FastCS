@@ -110,7 +110,7 @@ class Command(Method[BaseController]):
             raise FastCSException(f"Command method cannot have arguments: {fn}")
 
     async def __call__(self):
-        return await self._fn(), self.mode
+        return await self._fn()
 
 
 class Scan(Method[BaseController]):
