@@ -83,12 +83,12 @@ class FastCS:
 
     def create_docs(self) -> None:
         for transport in self._transports:
-            if hasattr(transport.options, "docs"):
+            if getattr(transport.options, "docs", None) is not None:
                 transport.create_docs()
 
     def create_gui(self) -> None:
         for transport in self._transports:
-            if hasattr(transport.options, "gui"):
+            if getattr(transport.options, "gui", None) is not None:
                 transport.create_gui()
 
     def run(self):

@@ -11,6 +11,6 @@ from fastcs.transport.epics.options import (
 class EpicsPVAOptions:
     """Options for the EPICS PVA transport."""
 
-    docs: EpicsDocsOptions = field(default_factory=EpicsDocsOptions)
-    gui: EpicsGUIOptions = field(default_factory=EpicsGUIOptions)
+    docs: EpicsDocsOptions | None = None
+    gui: EpicsGUIOptions | None = None
     ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
