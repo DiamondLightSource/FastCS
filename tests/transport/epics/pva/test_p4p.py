@@ -574,11 +574,15 @@ def test_command_method_put_twice(caplog):
     async def put_pvs():
         await asyncio.sleep(0.1)
         ctxt = Context("pva")
-        await ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True)
-        await ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True)
-        await ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True)
+        await asyncio.gather(
+            ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True),
+            ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True),
+        )
         assert expected_error_string not in caplog.text
-        await ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True)
+        await asyncio.gather(
+            ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True),
+            ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True),
+        )
         assert expected_error_string in caplog.text
 
     serve = asyncio.ensure_future(fastcs.serve())
