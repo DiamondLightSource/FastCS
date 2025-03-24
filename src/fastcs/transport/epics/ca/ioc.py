@@ -17,6 +17,7 @@ from fastcs.transport.epics.ca.util import (
     record_metadata_from_datatype,
 )
 from fastcs.transport.epics.options import EpicsIOCOptions
+from fastcs.transport.epics.util import _snake_to_pascal
 
 EPICS_MAX_NAME_LENGTH = 60
 
@@ -120,7 +121,7 @@ def _create_and_link_attribute_pvs(
     for controller_api in root_controller_api.walk_api():
         path = controller_api.path
         for attr_name, attribute in controller_api.attributes.items():
-            pv_name = attr_name.title().replace("_", "")
+            pv_name = _snake_to_pascal(attr_name)
             _pv_prefix = ":".join([pv_prefix] + path)
             full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
 
@@ -219,7 +220,7 @@ def _create_and_link_command_pvs(
     for controller_api in root_controller_api.walk_api():
         path = controller_api.path
         for attr_name, method in controller_api.command_methods.items():
-            pv_name = attr_name.title().replace("_", "")
+            pv_name = _snake_to_pascal(attr_name)
             _pv_prefix = ":".join([pv_prefix] + path)
             if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
                 print(
