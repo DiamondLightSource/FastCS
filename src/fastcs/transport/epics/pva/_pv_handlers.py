@@ -7,7 +7,7 @@ from p4p.server import ServerOperation
 from p4p.server.asyncio import SharedPV
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.cs_methods import CommandCallback, CommandMode
+from fastcs.cs_methods import CommandCallback
 from fastcs.datatypes import Table
 
 from .types import (
@@ -51,9 +51,8 @@ class WritePvHandler:
 
 
 class CommandPvHandler:
-    def __init__(self, command: CommandCallback, mode: CommandMode):
+    def __init__(self, command: CommandCallback):
         self._command = command
-        self._mode = mode
         self._task_in_progress = False
 
     async def _run_command(self) -> dict:
@@ -82,13 +81,11 @@ class CommandPvHandler:
                     "Maybe the command should spawn an asyncio task?"
                 )
 
+            # Flip to true once command task starts
             pv.post({"value": True, **p4p_timestamp_now(), **p4p_alarm_states()})
-            if self._mode == CommandMode.HIGH_AFTER_START:
-                op.done()
+            op.done()
             alarm_states = await self._run_command()
             pv.post({"value": False, **p4p_timestamp_now(), **alarm_states})
-            if self._mode == CommandMode.HIGH_AFTER_FINISH:
-                op.done()
         else:
             raise RuntimeError("Commands should only take the value `True`.")
 
@@ -126,7 +123,7 @@ def make_shared_pv(attribute: Attribute) -> SharedPV:
     return shared_pv
 
 
-def make_command_pv(command: CommandCallback, mode: CommandMode) -> SharedPV:
+def make_command_pv(command: CommandCallback) -> SharedPV:
     type_ = NTScalar.buildType("?", display=True, control=True)
 
     initial = Value(type_, {"value": False, **p4p_alarm_states()})
@@ -136,7 +133,7 @@ def make_command_pv(command: CommandCallback, mode: CommandMode) -> SharedPV:
 
     shared_pv = SharedPV(
         initial=initial,
-        handler=CommandPvHandler(command, mode),
+        handler=CommandPvHandler(command),
         wrap=_wrap,
     )
 

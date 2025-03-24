@@ -1,7 +1,6 @@
 from collections.abc import Callable
 
 from .cs_methods import (
-    CommandMode,
     Controller_T,
     UnboundCommand,
     UnboundCommandCallback,
@@ -33,7 +32,7 @@ def put(fn: UnboundPutCallback[Controller_T]) -> UnboundPut[Controller_T]:
 
 
 def command(
-    *, group: str | None = None, mode: CommandMode = CommandMode.HIGH_AFTER_START
+    *, group: str | None = None
 ) -> Callable[[UnboundCommandCallback[Controller_T]], UnboundCommand[Controller_T]]:
     """Decorator to tag a `Controller` method to be turned into a `Command`.
 
@@ -45,6 +44,6 @@ def command(
     def wrapper(
         fn: UnboundCommandCallback[Controller_T],
     ) -> UnboundCommand[Controller_T]:
-        return UnboundCommand(fn, group=group, mode=mode)
+        return UnboundCommand(fn, group=group)
 
     return wrapper

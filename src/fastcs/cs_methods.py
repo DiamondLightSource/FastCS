@@ -1,4 +1,3 @@
-import enum
 from asyncio import iscoroutinefunction
 from collections.abc import Callable, Coroutine
 from inspect import Signature, getdoc, signature
@@ -75,16 +74,6 @@ class Method(Generic[Controller_T]):
         return self._group
 
 
-class CommandMode(enum.Enum):
-    #: Command value becomes `True` in the transport once
-    #: the command starts, becomes `False` after it finishes.
-    HIGH_AFTER_START = "HIGH_AFTER_START"
-
-    #: Command value becomes `True` in the transport only after
-    #: the command has finished. Becomes `False` immediately after.
-    HIGH_AFTER_FINISH = "HIGH_AFTER_FINISH"
-
-
 class Command(Method[BaseController]):
     """A `Controller` `Method` that performs a single action when called.
 
@@ -93,14 +82,7 @@ class Command(Method[BaseController]):
     Calling an instance of this class will call the bound `Controller` method.
     """
 
-    def __init__(
-        self,
-        fn: CommandCallback,
-        *,
-        group: str | None = None,
-        mode: CommandMode = CommandMode.HIGH_AFTER_START,
-    ):
-        self.mode = mode
+    def __init__(self, fn: CommandCallback, *, group: str | None = None):
         super().__init__(fn, group=group)
 
     def _validate(self, fn: CommandCallback) -> None:
@@ -168,13 +150,8 @@ class UnboundCommand(Method[Controller_T]):
     """
 
     def __init__(
-        self,
-        fn: UnboundCommandCallback[Controller_T],
-        *,
-        group: str | None = None,
-        mode: CommandMode = CommandMode.HIGH_AFTER_START,
+        self, fn: UnboundCommandCallback[Controller_T], *, group: str | None = None
     ) -> None:
-        self.mode = mode
         super().__init__(fn, group=group)
 
     def _validate(self, fn: UnboundCommandCallback[Controller_T]) -> None:
@@ -184,7 +161,7 @@ class UnboundCommand(Method[Controller_T]):
             raise FastCSException("Command method cannot have arguments")
 
     def bind(self, controller: Controller_T) -> Command:
-        return Command(MethodType(self.fn, controller), mode=self.mode)
+        return Command(MethodType(self.fn, controller))
 
     def __call__(self):
         raise method_not_bound_error
