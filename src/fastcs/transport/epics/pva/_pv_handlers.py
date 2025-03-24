@@ -83,9 +83,9 @@ class CommandPvHandler:
 
             # Flip to true once command task starts
             pv.post({"value": True, **p4p_timestamp_now(), **p4p_alarm_states()})
-            op.done()
             alarm_states = await self._run_command()
             pv.post({"value": False, **p4p_timestamp_now(), **alarm_states})
+            op.done()
         else:
             raise RuntimeError("Commands should only take the value `True`.")
 
