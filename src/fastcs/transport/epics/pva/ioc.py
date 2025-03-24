@@ -1,10 +1,10 @@
 import asyncio
-import re
 
 from p4p.server import Server, StaticProvider
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
+from fastcs.transport.epics.util import _snake_to_pascal
 
 from ._pv_handlers import make_command_pv, make_shared_pv
 from .pvi_tree import AccessModeType, PviTree
@@ -20,13 +20,6 @@ def _attribute_to_access(attribute: Attribute) -> AccessModeType:
             return "w"
         case _:
             raise ValueError(f"Unknown attribute type {type(attribute)}")
-
-
-def _snake_to_pascal(name: str) -> str:
-    name = re.sub(
-        r"(?:^|_)([a-z])", lambda match: match.group(1).upper(), name
-    ).replace("_", "")
-    return re.sub(r"_(\d+)$", r"\1", name)
 
 
 def get_pv_name(pv_prefix: str, *attribute_names: str) -> str:
