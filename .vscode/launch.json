@@ -18,6 +18,29 @@
                 // Enable break on exception when debugging tests (see: tests/conftest.py)
                 "PYTEST_RAISE": "1",
             },
+        },
+        {
+            "name": "Temp Controller Sim",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "tickit",
+            "justMyCode": false,
+            "console": "integratedTerminal",
+            "args": [
+                "--log-level",
+                "INFO",
+                "all",
+                "${workspaceFolder:FastCS}/src/fastcs/demo/simulation/temp_controller.yaml"
+            ]
+        },
+        {
+            "name": "Temp Controller FastCS",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "module": "fastcs.demo",
+            "args": ["run", "${workspaceFolder:FastCS}/src/fastcs/demo/controller.yaml"],
+            "console": "integratedTerminal",
         }
     ]
 }
