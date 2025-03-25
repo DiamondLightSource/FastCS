@@ -11,6 +11,6 @@ from ..options import (
 class EpicsCAOptions:
     """Options for the EPICS CA transport."""
 
-    docs: EpicsDocsOptions = field(default_factory=EpicsDocsOptions)
-    gui: EpicsGUIOptions = field(default_factory=EpicsGUIOptions)
+    docs: EpicsDocsOptions | None = None
+    gui: EpicsGUIOptions | None = None
     ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
