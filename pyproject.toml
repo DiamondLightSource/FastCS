@@ -49,6 +49,10 @@ dev = [
     "aioca",
     "p4p",
     "httpx",
+    "tickit~=0.4.3",
+]
+demo = [
+    "tickit~=0.4.3",
 ]
 
 [project.scripts]
@@ -82,7 +86,7 @@ testpaths = "docs src tests"
 [tool.coverage.run]
 data_file = "/tmp/fastcs.coverage"
 concurrency = ["thread", "multiprocessing"]
-omit = ["tests/*"]
+omit = ["tests/*", "src/fastcs/demo/*"]
 
 [tool.coverage.paths]
 # Tests are run from installed location, map back to the src directory
