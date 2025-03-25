@@ -91,7 +91,10 @@ nitpick_ignore = [
     ("py:class", "fastcs.datatypes.T_Numerical"),
     ("py:class", "strawberry.schema.schema.Schema"),
 ]
-nitpick_ignore_regex = [("py:class", "fastcs.*.T")]
+nitpick_ignore_regex = [
+    ("py:class", "fastcs.*.T"),
+    ("py:class", "fastcs.demo.*"),
+]
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
 # inserted into the main body of the autoclass directive
