@@ -30,7 +30,6 @@ from fastcs.exceptions import FastCSException
 from fastcs.util import snake_to_pascal
 
 from .options import EpicsGUIFormat, EpicsGUIOptions
-from .util import _snake_to_pascal
 
 
 class EpicsGUI:
@@ -42,7 +41,7 @@ class EpicsGUI:
 
     def _get_pv(self, attr_path: list[str], name: str):
         attr_prefix = ":".join([self._pv_prefix] + attr_path)
-        return f"{attr_prefix}:{_snake_to_pascal(name)}"
+        return f"{attr_prefix}:{snake_to_pascal(name)}"
 
     @staticmethod
     def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion | None:
@@ -80,7 +79,7 @@ class EpicsGUI:
         self, attr_path: list[str], name: str, attribute: Attribute
     ) -> SignalR | SignalW | SignalRW | None:
         pv = self._get_pv(attr_path, name)
-        name = _snake_to_pascal(name)
+        name = snake_to_pascal(name)
         match attribute:
             case AttrRW():
                 read_widget = self._get_read_widget(attribute)
@@ -109,7 +108,7 @@ class EpicsGUI:
 
     def _get_command_component(self, attr_path: list[str], name: str):
         pv = self._get_pv(attr_path, name)
-        name = _snake_to_pascal(name)
+        name = snake_to_pascal(name)
 
         return SignalX(
             name=name,
