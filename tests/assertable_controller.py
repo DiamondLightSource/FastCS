@@ -15,13 +15,19 @@ from fastcs.wrappers import command, scan
 class TestUpdater(Updater):
     update_period = 1
 
-    async def update(self, controller, attr):
-        print(f"{controller} update {attr}")
+    async def initialise(self, controller) -> None:
+        self.controller = controller
+
+    async def update(self, attr):
+        print(f"{self.controller} update {attr}")
 
 
 class TestSender(Sender):
-    async def put(self, controller, attr, value):
-        print(f"{controller}: {attr} = {value}")
+    async def initialise(self, controller) -> None:
+        self.controller = controller
+
+    async def put(self, attr, value):
+        print(f"{self.controller}: {attr} = {value}")
 
 
 class TestHandler(Handler, TestUpdater, TestSender):
@@ -47,6 +53,7 @@ class MyTestController(Controller):
     count = 0
 
     async def initialise(self) -> None:
+        await super().initialise()
         self.initialised = True
 
     async def connect(self) -> None:
