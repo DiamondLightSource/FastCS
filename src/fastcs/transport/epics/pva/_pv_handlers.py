@@ -73,6 +73,7 @@ class CommandPvHandler:
     async def put(self, pv: SharedPV, op: ServerOperation):
         value = op.value()
         raw_value = value["value"]
+        blocking = False
 
         if raw_value is True:
             if self._task_in_progress:
@@ -81,11 +82,20 @@ class CommandPvHandler:
                     "Maybe the command should spawn an asyncio task?"
                 )
 
+            # Try to retrieve block option from record field
+            requests = op.pvRequest()
+            if requests:
+                record_options = requests.get("record", {}).get("_options", {})
+                blocking = record_options.get("block") == "true"
+
             # Flip to true once command task starts
             pv.post({"value": True, **p4p_timestamp_now(), **p4p_alarm_states()})
+            if not blocking:
+                op.done()
             alarm_states = await self._run_command()
             pv.post({"value": False, **p4p_timestamp_now(), **alarm_states})
-            op.done()
+            if blocking:
+                op.done()
         else:
             raise RuntimeError("Commands should only take the value `True`.")
 
