@@ -32,7 +32,7 @@ class Backend:
     def _link_process_tasks(self):
         for controller_api in self.controller_api.walk_api():
             _link_put_tasks(controller_api)
-            _link_attribute_sender_class(controller_api, self._controller)
+            _link_attribute_sender_class(controller_api)
 
     def __del__(self):
         self._stop_scan_tasks()
@@ -75,9 +75,7 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
                 )
 
 
-def _link_attribute_sender_class(
-    controller_api: ControllerAPI, controller: Controller
-) -> None:
+def _link_attribute_sender_class(controller_api: ControllerAPI) -> None:
     for attr_name, attribute in controller_api.attributes.items():
         match attribute:
             case AttrW(sender=Sender()):
@@ -85,13 +83,13 @@ def _link_attribute_sender_class(
                     f"Cannot assign both put method and Sender object to {attr_name}"
                 )
 
-                callback = _create_sender_callback(attribute, controller)
+                callback = _create_sender_callback(attribute)
                 attribute.add_process_callback(callback)
 
 
-def _create_sender_callback(attribute, controller):
+def _create_sender_callback(attribute):
     async def callback(value):
-        await attribute.sender.put(controller, attribute, value)
+        await attribute.sender.put(attribute, value)
 
     return callback
 
