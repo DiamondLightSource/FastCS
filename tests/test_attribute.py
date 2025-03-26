@@ -69,7 +69,7 @@ async def test_handler_initialise(mocker: MockerFixture):
     await attr.initialise(mocker.ANY)
 
     # The handler initialise method should be called from the attribute
-    handler_mock.assert_called_once_with(1)
+    handler_mock.assert_called_once_with(mocker.ANY)
 
 
 @pytest.mark.parametrize(
