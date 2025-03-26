@@ -22,9 +22,11 @@ class AttrMode(Enum):
 class Sender(Protocol):
     """Protocol for setting the value of an ``Attribute``."""
 
-    async def initialise(self, controller: Any) -> None: ...
+    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
+        pass
 
-    async def put(self, attr: AttrW[T], value: T) -> None: ...
+    async def put(self, attr: AttrW[T], value: T) -> None:
+        pass
 
 
 @runtime_checkable
@@ -34,9 +36,11 @@ class Updater(Protocol):
     # If update period is None then the attribute will not be updated as a task.
     update_period: float | None = None
 
-    async def initialise(self, controller: Any) -> None: ...
+    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
+        pass
 
-    async def update(self, attr: AttrR) -> None: ...
+    async def update(self, attr: AttrR) -> None:
+        pass
 
 
 @runtime_checkable
@@ -48,9 +52,6 @@ class Handler(Sender, Updater, Protocol):
 
 class SimpleHandler(Handler):
     """Handler for internal parameters"""
-
-    async def initialise(self, controller: Any) -> None:
-        pass
 
     async def put(self, attr: AttrW[T], value: T) -> None:
         await attr.update_display_without_process(value)
@@ -107,7 +108,7 @@ class Attribute(Generic[T]):
     def group(self) -> str | None:
         return self._group
 
-    async def initialise(self, controller: Any) -> None:
+    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
         if self._handler is not None:
             await self._handler.initialise(controller)
 
