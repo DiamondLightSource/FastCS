@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-from fastcs.attributes import AttrR, AttrRW, AttrW, SimpleHandler
+from fastcs.attributes import AttrR, AttrRW, AttrW, SimpleHandler, Updater
 from fastcs.datatypes import Enum, Float, Int, String, Waveform
 
 
@@ -60,6 +60,10 @@ async def test_simple_handler_rw(mocker: MockerFixture):
     set_mock.assert_awaited_once_with(1)
 
 
+class SimpleUpdater(Updater):
+    pass
+
+
 @pytest.mark.asyncio
 async def test_handler_initialise(mocker: MockerFixture):
     handler = SimpleHandler()
@@ -75,6 +79,12 @@ async def test_handler_initialise(mocker: MockerFixture):
     attr = AttrW(Int(), handler=handler)
 
     # Assert no error in calling initialise on the SimpleHandler default
+    await attr.initialise(mocker.ANY)
+
+    handler = SimpleUpdater()
+    attr = AttrR(Int(), handler=handler)
+
+    # Assert no error in calling initialise on the TestUpdater handler
     await attr.initialise(mocker.ANY)
 
 
