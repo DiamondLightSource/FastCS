@@ -71,6 +71,12 @@ async def test_handler_initialise(mocker: MockerFixture):
     # The handler initialise method should be called from the attribute
     handler_mock.assert_called_once_with(mocker.ANY)
 
+    handler = SimpleHandler()
+    attr = AttrW(Int(), handler=handler)
+
+    # Assert no error in calling initialise on the SimpleHandler default
+    await attr.initialise(mocker.ANY)
+
 
 @pytest.mark.parametrize(
     ["datatype", "init_args", "value"],
