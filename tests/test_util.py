@@ -12,14 +12,14 @@ def test_snake_to_pascal():
     name4 = "1_2_3-a-b-c"
     name5 = "NameAlreadyInPascalCase"
     name6 = "Name-With_%_Invalid-&-Symbols_£_"
-    name7 = "123A_b-C-d-e_"
-    assert snake_to_pascal(name1) == "ABCDE"
+    name7 = "name_in_lower_case"
+    assert snake_to_pascal(name1) == "A-b-c-d-e"
     assert snake_to_pascal(name2) == "ABCDE"
-    assert snake_to_pascal(name3) == "NameWithDifferentSeparators"
-    assert snake_to_pascal(name4) == "123ABC"
+    assert snake_to_pascal(name3) == "NameWith-differentSeparators"
+    assert snake_to_pascal(name4) == "123-a-b-c"
     assert snake_to_pascal(name5) == "NameAlreadyInPascalCase"
-    assert snake_to_pascal(name6) == "NameWith%Invalid&Symbols£"
-    assert snake_to_pascal(name7) == "123ABCDE"
+    assert snake_to_pascal(name6) == "Name-With%Invalid-&-Symbols£"
+    assert snake_to_pascal(name7) == "NameInLowerCase"
 
 
 def test_pvi__validation_error():
