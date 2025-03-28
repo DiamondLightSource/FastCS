@@ -81,11 +81,21 @@ class CommandPvHandler:
                     "Maybe the command should spawn an asyncio task?"
                 )
 
+            # Check if record block request recieved
+            match op.pvRequest().todict():
+                case {"record": {"_options": {"block": "true"}}}:
+                    blocking = True
+                case _:
+                    blocking = False
+
             # Flip to true once command task starts
             pv.post({"value": True, **p4p_timestamp_now(), **p4p_alarm_states()})
-            op.done()
+            if not blocking:
+                op.done()
             alarm_states = await self._run_command()
             pv.post({"value": False, **p4p_timestamp_now(), **alarm_states})
+            if blocking:
+                op.done()
         else:
             raise RuntimeError("Commands should only take the value `True`.")
 
