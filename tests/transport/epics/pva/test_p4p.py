@@ -627,3 +627,45 @@ def test_command_method_put_twice(caplog):
         pytest.approx((coro_end_time - coro_start_time).total_seconds(), abs=0.05)
         == 0.1
     )
+
+
+def test_block_flag_waits_for_callback_completion():
+    class SomeController(Controller):
+        @command()
+        async def command_runs_for_a_while(self):
+            await asyncio.sleep(0.2)
+
+    controller = SomeController()
+    pv_prefix = str(uuid4())
+    fastcs = make_fastcs(pv_prefix, controller)
+    command_runs_for_a_while_times = []
+
+    async def put_pvs():
+        ctxt = Context("pva")
+        start_time = datetime.now()
+        await ctxt.put(
+            f"{pv_prefix}:CommandRunsForAWhile", True, request="record[block=true]"
+        )
+        command_runs_for_a_while_times.append((start_time, datetime.now()))
+        await ctxt.put(
+            f"{pv_prefix}:CommandRunsForAWhile", True, request="record[block=false]"
+        )
+        command_runs_for_a_while_times.append((start_time, datetime.now()))
+
+    serve = asyncio.ensure_future(fastcs.serve())
+    try:
+        asyncio.get_event_loop().run_until_complete(
+            asyncio.wait_for(
+                asyncio.gather(serve, put_pvs()),
+                timeout=0.5,
+            )
+        )
+    except TimeoutError:
+        ...
+    serve.cancel()
+
+    assert len(command_runs_for_a_while_times) == 2
+
+    for i in range(2):
+        start, end = command_runs_for_a_while_times[i]
+        assert pytest.approx((end - start).total_seconds(), abs=0.05) == 0.2

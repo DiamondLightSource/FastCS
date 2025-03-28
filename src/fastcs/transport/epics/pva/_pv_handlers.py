@@ -73,7 +73,6 @@ class CommandPvHandler:
     async def put(self, pv: SharedPV, op: ServerOperation):
         value = op.value()
         raw_value = value["value"]
-        blocking = False
 
         if raw_value is True:
             if self._task_in_progress:
@@ -82,11 +81,12 @@ class CommandPvHandler:
                     "Maybe the command should spawn an asyncio task?"
                 )
 
-            # Try to retrieve block option from record field
-            requests = op.pvRequest()
-            if requests:
-                record_options = requests.get("record", {}).get("_options", {})
-                blocking = record_options.get("block") == "true"
+            # Check if record block request recieved
+            match op.pvRequest().todict():
+                case {"record": {"_options": {"block": "true"}}}:
+                    blocking = True
+                case _:
+                    blocking = False
 
             # Flip to true once command task starts
             pv.post({"value": True, **p4p_timestamp_now(), **p4p_alarm_states()})
