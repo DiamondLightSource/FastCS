@@ -1,4 +1,4 @@
-from pvi._format.dls import DLSFormatter
+from pvi._format.dls import DLSFormatter  # type: ignore
 from pvi.device import (
     LED,
     ButtonPanel,
