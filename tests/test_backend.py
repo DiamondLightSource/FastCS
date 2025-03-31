@@ -1,10 +1,13 @@
 import asyncio
+from unittest.mock import call
+
+from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttrRW
 from fastcs.backend import Backend, build_controller_api
-from fastcs.controller import Controller
+from fastcs.controller import Controller, SubController
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Int
+from fastcs.datatypes import Float, Int
 from fastcs.wrappers import command, scan
 
 
@@ -34,6 +37,29 @@ def test_backend(controller):
         backend._stop_scan_tasks()
 
     loop.run_until_complete(test_wrapper())
+
+
+def test_backend_link_attribute_sender(mocker: MockerFixture):
+    class MyController(Controller):
+        attr = AttrRW(Float())
+
+    class MySubController(SubController):
+        sub_attr = AttrRW(Int())
+
+    controller = MyController()
+    sub_controller = MySubController()
+    controller.register_sub_controller("sub", sub_controller)
+
+    loop = asyncio.get_event_loop()
+    create_sender_mock = mocker.patch("fastcs.backend._create_sender_callback")
+    Backend(controller, loop)
+
+    create_sender_mock.assert_has_calls(
+        [
+            call(controller.attr, controller),
+            call(sub_controller.sub_attr, sub_controller),
+        ]
+    )
 
 
 def test_controller_api():

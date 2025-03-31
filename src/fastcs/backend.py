@@ -32,7 +32,10 @@ class Backend:
     def _link_process_tasks(self):
         for controller_api in self.controller_api.walk_api():
             _link_put_tasks(controller_api)
-            _link_attribute_sender_class(controller_api, self._controller)
+            _link_attribute_sender_class(
+                controller_api,
+                self._controller.get_controller_by_path(controller_api.path),
+            )
 
     def __del__(self):
         self._stop_scan_tasks()
@@ -48,7 +51,10 @@ class Backend:
     async def _start_scan_tasks(self):
         self._scan_tasks = {
             self._loop.create_task(coro())
-            for coro in _get_scan_coros(self.controller_api, self._controller)
+            for coro in _get_scan_coros(
+                self.controller_api,
+                self._controller.get_controller_by_path(self.controller_api.path),
+            )
         }
 
     def _stop_scan_tasks(self):
@@ -76,7 +82,7 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
 
 
 def _link_attribute_sender_class(
-    controller_api: ControllerAPI, controller: Controller
+    controller_api: ControllerAPI, controller: BaseController
 ) -> None:
     for attr_name, attribute in controller_api.attributes.items():
         match attribute:
@@ -97,13 +103,17 @@ def _create_sender_callback(attribute, controller):
 
 
 def _get_scan_coros(
-    root_controller_api: ControllerAPI, controller: Controller
+    root_controller_api: ControllerAPI, controller: BaseController
 ) -> list[Callable]:
     scan_dict: dict[float, list[Callable]] = defaultdict(list)
 
     for controller_api in root_controller_api.walk_api():
         _add_scan_method_tasks(scan_dict, controller_api)
-        _add_attribute_updater_tasks(scan_dict, controller_api, controller)
+        _add_attribute_updater_tasks(
+            scan_dict,
+            controller_api,
+            controller.get_controller_by_path(controller_api.path),
+        )
 
     scan_coros = _get_periodic_scan_coros(scan_dict)
     return scan_coros
@@ -119,7 +129,7 @@ def _add_scan_method_tasks(
 def _add_attribute_updater_tasks(
     scan_dict: dict[float, list[Callable]],
     controller_api: ControllerAPI,
-    controller: Controller,
+    controller: BaseController,
 ):
     for attribute in controller_api.attributes.values():
         match attribute:
