@@ -93,7 +93,8 @@ nitpick_ignore = [
 ]
 nitpick_ignore_regex = [
     ("py:class", "fastcs.*.T"),
-    ("py:class", "fastcs.demo.*"),
+    (r"py:.*", r"fastcs\.demo.*"),
+    (r"py:.*", r"tickit.*"),
 ]
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
