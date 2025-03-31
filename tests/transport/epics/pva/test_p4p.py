@@ -642,12 +642,12 @@ def test_block_flag_waits_for_callback_completion():
 
     async def put_pvs():
         ctxt = Context("pva")
-        for block in ["true", "false"]:
+        for block in [True, False]:
             start_time = datetime.now()
             await ctxt.put(
                 f"{pv_prefix}:CommandRunsForAWhile",
                 True,
-                request=f"record[block={block}]",
+                wait=block,
             )
             command_runs_for_a_while_times.append((start_time, datetime.now()))
 
