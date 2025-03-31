@@ -642,15 +642,14 @@ def test_block_flag_waits_for_callback_completion():
 
     async def put_pvs():
         ctxt = Context("pva")
-        start_time = datetime.now()
-        await ctxt.put(
-            f"{pv_prefix}:CommandRunsForAWhile", True, request="record[block=true]"
-        )
-        command_runs_for_a_while_times.append((start_time, datetime.now()))
-        await ctxt.put(
-            f"{pv_prefix}:CommandRunsForAWhile", True, request="record[block=false]"
-        )
-        command_runs_for_a_while_times.append((start_time, datetime.now()))
+        for block in ["true", "false"]:
+            start_time = datetime.now()
+            await ctxt.put(
+                f"{pv_prefix}:CommandRunsForAWhile",
+                True,
+                request=f"record[block={block}]",
+            )
+            command_runs_for_a_while_times.append((start_time, datetime.now()))
 
     serve = asyncio.ensure_future(fastcs.serve())
     try:
@@ -666,6 +665,8 @@ def test_block_flag_waits_for_callback_completion():
 
     assert len(command_runs_for_a_while_times) == 2
 
-    for i in range(2):
-        start, end = command_runs_for_a_while_times[i]
-        assert pytest.approx((end - start).total_seconds(), abs=0.05) == 0.2
+    for put_call, expected_duration in enumerate([0.2, 0]):
+        start, end = command_runs_for_a_while_times[put_call]
+        assert (
+            pytest.approx((end - start).total_seconds(), abs=0.05) == expected_duration
+        )
