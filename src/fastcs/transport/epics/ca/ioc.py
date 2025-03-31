@@ -240,6 +240,7 @@ def _create_and_link_command_pv(
     record = builder.Action(
         f"{pv_prefix}:{pv_name}",
         on_update=wrapped_method,
+        blocking=True,
     )
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "x")

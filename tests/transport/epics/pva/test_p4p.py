@@ -574,11 +574,15 @@ def test_command_method_put_twice(caplog):
     async def put_pvs():
         await asyncio.sleep(0.1)
         ctxt = Context("pva")
-        await ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True)
-        await ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True)
-        await ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True)
+        await asyncio.gather(
+            ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True),
+            ctxt.put(f"{pv_prefix}:CommandSpawnsATask", True),
+        )
         assert expected_error_string not in caplog.text
-        await ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True)
+        await asyncio.gather(
+            ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True),
+            ctxt.put(f"{pv_prefix}:CommandRunsForAWhile", True),
+        )
         assert expected_error_string in caplog.text
 
     serve = asyncio.ensure_future(fastcs.serve())
@@ -623,3 +627,46 @@ def test_command_method_put_twice(caplog):
         pytest.approx((coro_end_time - coro_start_time).total_seconds(), abs=0.05)
         == 0.1
     )
+
+
+def test_block_flag_waits_for_callback_completion():
+    class SomeController(Controller):
+        @command()
+        async def command_runs_for_a_while(self):
+            await asyncio.sleep(0.2)
+
+    controller = SomeController()
+    pv_prefix = str(uuid4())
+    fastcs = make_fastcs(pv_prefix, controller)
+    command_runs_for_a_while_times = []
+
+    async def put_pvs():
+        ctxt = Context("pva")
+        for block in [True, False]:
+            start_time = datetime.now()
+            await ctxt.put(
+                f"{pv_prefix}:CommandRunsForAWhile",
+                True,
+                wait=block,
+            )
+            command_runs_for_a_while_times.append((start_time, datetime.now()))
+
+    serve = asyncio.ensure_future(fastcs.serve())
+    try:
+        asyncio.get_event_loop().run_until_complete(
+            asyncio.wait_for(
+                asyncio.gather(serve, put_pvs()),
+                timeout=0.5,
+            )
+        )
+    except TimeoutError:
+        ...
+    serve.cancel()
+
+    assert len(command_runs_for_a_while_times) == 2
+
+    for put_call, expected_duration in enumerate([0.2, 0]):
+        start, end = command_runs_for_a_while_times[put_call]
+        assert (
+            pytest.approx((end - start).total_seconds(), abs=0.05) == expected_duration
+        )
