@@ -30,7 +30,10 @@ class BaseController:
 
         self._bind_attrs()
 
-    async def initialise(self) -> None:
+    async def initialise(self):
+        pass
+
+    async def attribute_initialise(self) -> None:
         # Initialise any registered handlers for attributes
         coros = [attr.initialise(self) for attr in self.attributes.values()]
         try:

@@ -26,6 +26,7 @@ class Backend:
 
         # Initialise controller and then build its APIs
         loop.run_until_complete(controller.initialise())
+        loop.run_until_complete(controller.attribute_initialise())
         self.controller_api = build_controller_api(controller)
         self._link_process_tasks()
 
