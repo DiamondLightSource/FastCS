@@ -70,10 +70,11 @@ async def test_handler_initialise(mocker: MockerFixture):
     handler_mock = mocker.patch.object(handler, "initialise")
     attr = AttrR(Int(), handler=handler)
 
-    await attr.initialise(mocker.ANY)
+    ctrlr = mocker.Mock()
+    await attr.initialise(ctrlr)
 
     # The handler initialise method should be called from the attribute
-    handler_mock.assert_called_once_with(mocker.ANY)
+    handler_mock.assert_called_once_with(ctrlr)
 
     handler = SimpleHandler()
     attr = AttrW(Int(), handler=handler)
