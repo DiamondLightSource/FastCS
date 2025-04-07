@@ -1,0 +1,23 @@
+# Dynamic FastCS Drivers
+
+## Demo Simulation
+
+The demo simulation used in the previous tutorial has a command `C?` to list all of its
+commands. This can be used to introspect the device and create the API dynamically,
+instead of statically defining all of the attributes.
+
+## FastCS Initialisation
+
+Specific `Controller` classes can optionally implement an async `initialise` method to
+perform any start up logic. The intention here is that the `__init__` method should be
+minimal and any long running calls - such as querying an API - should be done in the
+`initialise` method, allowing FastCS to run these concurrently to reduce start times.
+
+Take the driver implementation from the previous tutorial and remove the
+statically defined `Attributes` and creation of sub controllers in `__init__`. Then
+implement an `initialise` method to create these dynamically instead.
+
+TODO: Break the process down
+
+:::{literalinclude} dynamic-driver.py
+:::
