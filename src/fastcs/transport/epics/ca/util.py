@@ -87,11 +87,9 @@ def cast_from_epics_type(datatype: DataType[T], value: object) -> T:
     match datatype:
         case Enum():
             if len(datatype.members) <= MBB_MAX_CHOICES:
-                # epics type is mbb
                 return datatype.validate(datatype.members[value])
             else:  # enum backed by string record
-                # epics type is string
-                return datatype.validate(datatype.enum_cls(value))
+                return datatype.validate(datatype.enum_cls[value])
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
             return datatype.validate(value)  # type: ignore
         case _:
@@ -105,7 +103,7 @@ def cast_to_epics_type(datatype: DataType[T], value: T) -> object:
             if len(datatype.members) <= MBB_MAX_CHOICES:
                 return datatype.index_of(datatype.validate(value))
             else:  # enum backed by string record
-                return datatype.validate(value).value
+                return datatype.validate(value).name
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
             return datatype.validate(value)
         case _:

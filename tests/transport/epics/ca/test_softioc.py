@@ -30,7 +30,6 @@ from fastcs.transport.epics.ca.ioc import (
     _make_record,
 )
 from fastcs.transport.epics.ca.util import (
-    MBB_STATE_FIELDS,
     record_metadata_from_attribute,
     record_metadata_from_datatype,
 )
@@ -43,12 +42,6 @@ SEVENTEEN_VALUES = [str(i) for i in range(1, 18)]
 class OnOffStates(enum.IntEnum):
     DISABLED = 0
     ENABLED = 1
-
-
-def record_input_from_enum(enum_cls: type[enum.IntEnum]) -> dict[str, str]:
-    return dict(
-        zip(MBB_STATE_FIELDS, [member.name for member in enum_cls], strict=False)
-    )
 
 
 @pytest.mark.asyncio
