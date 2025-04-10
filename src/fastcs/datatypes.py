@@ -143,6 +143,10 @@ class Enum(Generic[T_Enum], DataType[T_Enum]):
     def members(self) -> list[T_Enum]:
         return list(self.enum_cls)
 
+    @cached_property
+    def names(self) -> list[str]:
+        return [member.name for member in self.members]
+
     @property
     def dtype(self) -> type[T_Enum]:
         return self.enum_cls

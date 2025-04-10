@@ -75,7 +75,7 @@ def record_metadata_from_datatype(
                 state_keys = dict(
                     zip(
                         MBB_STATE_FIELDS,
-                        [member.name for member in datatype.members],
+                        datatype.names,
                         strict=False,
                     )
                 )
@@ -83,7 +83,7 @@ def record_metadata_from_datatype(
             elif out_record:  # no validators for in type records
 
                 def _verify_in_datatype(_, value):
-                    return value in [member.name for member in datatype.members]
+                    return value in datatype.names
 
                 arguments["validate"] = _verify_in_datatype
 

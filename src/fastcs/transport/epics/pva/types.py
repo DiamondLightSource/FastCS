@@ -183,7 +183,7 @@ def cast_to_p4p_value(attribute: Attribute[T], value: T) -> object:
         case Enum():
             return {
                 "index": attribute.datatype.index_of(value),
-                "choices": [member.name for member in attribute.datatype.members],
+                "choices": attribute.datatype.names,
             }
         case Waveform():
             return attribute.datatype.validate(value)
