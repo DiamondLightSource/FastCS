@@ -171,9 +171,12 @@ def _make_record(
     pv: str,
     attribute: AttrR | AttrW | AttrRW,
     on_update: Callable | None = None,
+    out_record: bool = False,
 ) -> RecordWrapper:
     builder_callable = builder_callable_from_attribute(attribute, on_update is None)
-    datatype_record_metadata = record_metadata_from_datatype(attribute.datatype)
+    datatype_record_metadata = record_metadata_from_datatype(
+        attribute.datatype, out_record
+    )
     attribute_record_metadata = record_metadata_from_attribute(attribute)
 
     update = {"always_update": True, "on_update": on_update} if on_update else {}
@@ -201,7 +204,9 @@ def _create_and_link_write_pv(
     async def async_write_display(value: T):
         record.set(cast_to_epics_type(attribute.datatype, value), process=False)
 
-    record = _make_record(f"{pv_prefix}:{pv_name}", attribute, on_update=on_update)
+    record = _make_record(
+        f"{pv_prefix}:{pv_name}", attribute, on_update=on_update, out_record=True
+    )
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 

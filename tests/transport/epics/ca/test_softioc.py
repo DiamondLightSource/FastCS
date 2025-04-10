@@ -120,7 +120,9 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
 
     _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
 
-    make_record.assert_called_once_with("PREFIX:PV", attribute, on_update=mocker.ANY)
+    make_record.assert_called_once_with(
+        "PREFIX:PV", attribute, on_update=mocker.ANY, out_record=True
+    )
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "w")
 
     # Extract the write update callback generated and set in the function and call it

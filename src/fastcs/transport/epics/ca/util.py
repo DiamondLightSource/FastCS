@@ -50,7 +50,9 @@ def record_metadata_from_attribute(
     return {"DESC": attribute.description}
 
 
-def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
+def record_metadata_from_datatype(
+    datatype: DataType[T], out_record: bool = False
+) -> dict[str, str]:
     """Converts attributes on the `DataType` to the
     field name/value in the record metadata."""
 
@@ -78,6 +80,12 @@ def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
                     )
                 )
                 arguments.update(state_keys)
+            elif out_record:  # no validators for in type records
+
+                def _verify_in_datatype(_, value):
+                    return value in [member.name for member in datatype.members]
+
+                arguments["validate"] = _verify_in_datatype
 
     return arguments
 
