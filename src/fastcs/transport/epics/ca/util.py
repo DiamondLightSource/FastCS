@@ -50,7 +50,9 @@ def record_metadata_from_attribute(
     return {"DESC": attribute.description}
 
 
-def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
+def record_metadata_from_datatype(
+    datatype: DataType[T], out_record: bool = False
+) -> dict[str, str]:
     """Converts attributes on the `DataType` to the
     field name/value in the record metadata."""
 
@@ -73,11 +75,17 @@ def record_metadata_from_datatype(datatype: DataType[T]) -> dict[str, str]:
                 state_keys = dict(
                     zip(
                         MBB_STATE_FIELDS,
-                        [member.name for member in datatype.members],
+                        datatype.names,
                         strict=False,
                     )
                 )
                 arguments.update(state_keys)
+            elif out_record:  # no validators for in type records
+
+                def _verify_in_datatype(_, value):
+                    return value in datatype.names
+
+                arguments["validate"] = _verify_in_datatype
 
     return arguments
 
@@ -86,7 +94,10 @@ def cast_from_epics_type(datatype: DataType[T], value: object) -> T:
     """Casts from an EPICS datatype to a FastCS datatype."""
     match datatype:
         case Enum():
-            return datatype.validate(datatype.members[value])
+            if len(datatype.members) <= MBB_MAX_CHOICES:
+                return datatype.validate(datatype.members[value])
+            else:  # enum backed by string record
+                return datatype.validate(datatype.enum_cls[value])
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
             return datatype.validate(value)  # type: ignore
         case _:
@@ -97,7 +108,10 @@ def cast_to_epics_type(datatype: DataType[T], value: T) -> object:
     """Casts from an attribute's datatype to an EPICS datatype."""
     match datatype:
         case Enum():
-            return datatype.index_of(datatype.validate(value))
+            if len(datatype.members) <= MBB_MAX_CHOICES:
+                return datatype.index_of(datatype.validate(value))
+            else:  # enum backed by string record
+                return datatype.validate(value).name
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
             return datatype.validate(value)
         case _:
@@ -119,7 +133,7 @@ def builder_callable_from_attribute(
             return builder.longStringIn if make_in_record else builder.longStringOut
         case Enum():
             if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                return builder.longIn if make_in_record else builder.longOut
+                return builder.longStringIn if make_in_record else builder.longStringOut
             else:
                 return builder.mbbIn if make_in_record else builder.mbbOut
         case Waveform():

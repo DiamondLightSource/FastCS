@@ -69,9 +69,7 @@ class EpicsGUI:
             case String():
                 return TextWrite(format=TextFormat.string)
             case Enum():
-                return ComboBox(
-                    choices=[member.name for member in attribute.datatype.members]
-                )
+                return ComboBox(choices=attribute.datatype.names)
             case Waveform():
                 return None
             case datatype:

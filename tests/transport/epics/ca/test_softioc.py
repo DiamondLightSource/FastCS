@@ -30,7 +30,6 @@ from fastcs.transport.epics.ca.ioc import (
     _make_record,
 )
 from fastcs.transport.epics.ca.util import (
-    MBB_STATE_FIELDS,
     record_metadata_from_attribute,
     record_metadata_from_datatype,
 )
@@ -43,12 +42,6 @@ SEVENTEEN_VALUES = [str(i) for i in range(1, 18)]
 class OnOffStates(enum.IntEnum):
     DISABLED = 0
     ENABLED = 1
-
-
-def record_input_from_enum(enum_cls: type[enum.IntEnum]) -> dict[str, str]:
-    return dict(
-        zip(MBB_STATE_FIELDS, [member.name for member in enum_cls], strict=False)
-    )
 
 
 @pytest.mark.asyncio
@@ -127,7 +120,9 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
 
     _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
 
-    make_record.assert_called_once_with("PREFIX:PV", attribute, on_update=mocker.ANY)
+    make_record.assert_called_once_with(
+        "PREFIX:PV", attribute, on_update=mocker.ANY, out_record=True
+    )
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "w")
 
     # Extract the write update callback generated and set in the function and call it
@@ -142,6 +137,26 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
     await on_update_callback(1)
 
     attribute.process_without_display_update.assert_called_once_with(1)
+
+
+class LongEnum(enum.Enum):
+    THIS = 0
+    IS = 1
+    AN = 2
+    ENUM = 3
+    WITH = 4
+    ALTOGETHER = 5
+    TOO = 6
+    MANY = 7
+    VALUES = 8
+    TO = 9
+    BE = 10
+    DESCRIBED = 11
+    BY = 12
+    MBB = 14
+    TYPE = 15
+    EPICS = 16
+    RECORDS = 17
 
 
 @pytest.mark.parametrize(
@@ -164,7 +179,7 @@ def test_make_output_record(
     update = mocker.MagicMock()
 
     pv = "PV"
-    _make_record(pv, attribute, on_update=update)
+    _make_record(pv, attribute, on_update=update, out_record=True)
 
     kwargs.update(record_metadata_from_datatype(attribute.datatype))
     kwargs.update(record_metadata_from_attribute(attribute))
@@ -174,6 +189,17 @@ def test_make_output_record(
         pv,
         **kwargs,
     )
+
+
+def test_long_enum_validator(mocker: MockerFixture):
+    builder = mocker.patch("fastcs.transport.epics.ca.util.builder")
+    update = mocker.MagicMock()
+    attribute = AttrRW(Enum(LongEnum))
+    pv = "PV"
+    record = _make_record(pv, attribute, on_update=update, out_record=True)
+    validator = builder.longStringOut.call_args.kwargs["validate"]
+    assert validator(record, "THIS")  # value is one of the Enum names
+    assert not validator(record, "an invalid string value")
 
 
 def test_get_output_record_raises(mocker: MockerFixture):
