@@ -1,3 +1,4 @@
+import json
 import logging
 import traceback
 from os import _exit
@@ -144,6 +145,45 @@ class TempControllerDevice(Device):
         call_at = SimTime(int(time) + int(1e8)) if np.any(self._enabled) else None
         return DeviceUpdate(TempControllerDevice.Outputs(flux=inputs["flux"]), call_at)
 
+    def get_commands(self):
+        return json.dumps(
+            {
+                "Device ID": {"command": "ID", "type": "str", "access_mode": "r"},
+                "Power": {"command": "P", "type": "float", "access_mode": "rw"},
+                "Ramp Rate": {"command": "R", "type": "float", "access_mode": "rw"},
+                "Ramps": [
+                    {
+                        "Start": {
+                            "command": f"S{idx:02d}",
+                            "type": "int",
+                            "access_mode": "rw",
+                        },
+                        "End": {
+                            "command": f"E{idx:02d}",
+                            "type": "int",
+                            "access_mode": "rw",
+                        },
+                        "Enabled": {
+                            "command": f"N{idx:02d}",
+                            "type": "int",
+                            "access_mode": "rw",
+                        },
+                        "Target": {
+                            "command": f"T{idx:02d}",
+                            "type": "float",
+                            "access_mode": "rw",
+                        },
+                        "Actual": {
+                            "command": f"A{idx:02d}",
+                            "type": "float",
+                            "access_mode": "rw",
+                        },
+                    }
+                    for idx in range(1, self._num + 1)
+                ],
+            }
+        )
+
 
 class TempControllerAdapter(CommandAdapter):
     device: TempControllerDevice
@@ -217,6 +257,10 @@ class TempControllerAdapter(CommandAdapter):
     @RegexCommand(r"P\?", False, "utf-8")
     async def get_power(self) -> bytes:
         return str(self.device.get_power()).encode("utf-8")
+
+    @RegexCommand(r"API\?", False, "utf-8")
+    async def get_commands(self) -> bytes:
+        return str(self.device.get_commands()).encode("utf-8")
 
     @RegexCommand(r"\w*", False, "utf-8")
     async def ignore_whitespace(self) -> None:
