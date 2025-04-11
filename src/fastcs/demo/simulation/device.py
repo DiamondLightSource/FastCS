@@ -60,6 +60,8 @@ class TempControllerDevice(Device):
 
         self._ramp_rate: float = 1  # 1 unit/s
 
+        self.initialised = False
+
     def get_target(self, index: int):
         return self._target[index]
 
@@ -123,6 +125,10 @@ class TempControllerDevice(Device):
 
     @handle_exceptions
     def update(self, time: SimTime, inputs: Inputs) -> DeviceUpdate[Outputs]:
+        if not self.initialised:
+            LOGGER.info("Temperature controller running")
+            self.initialised = True
+
         self._start_times[self._start_times == -1] = int(time)
         periods = np.full(self._num, int(time)) - self._start_times
         self.ramp(periods)
