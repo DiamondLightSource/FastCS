@@ -56,7 +56,7 @@ demo = [
 ]
 
 [project.scripts]
-FastCS = "fastcs.__main__:main"
+fastcs-demo = "fastcs.demo.__main__:main"
 
 [project.urls]
 GitHub = "https://github.com/DiamondLightSource/FastCS"
