@@ -22,9 +22,10 @@ class AttrMode(Enum):
 class Sender(Protocol):
     """Protocol for setting the value of an ``Attribute``."""
 
-    async def put(
-        self, controller: fastcs.controller.BaseController, attr: AttrW, value: Any
-    ) -> None:
+    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
+        pass
+
+    async def put(self, attr: AttrW[T], value: T) -> None:
         pass
 
 
@@ -35,9 +36,10 @@ class Updater(Protocol):
     # If update period is None then the attribute will not be updated as a task.
     update_period: float | None = None
 
-    async def update(
-        self, controller: fastcs.controller.BaseController, attr: AttrR
-    ) -> None:
+    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
+        pass
+
+    async def update(self, attr: AttrR) -> None:
         pass
 
 
@@ -51,15 +53,13 @@ class Handler(Sender, Updater, Protocol):
 class SimpleHandler(Handler):
     """Handler for internal parameters"""
 
-    async def put(
-        self, controller: fastcs.controller.BaseController, attr: AttrW, value: Any
-    ):
+    async def put(self, attr: AttrW[T], value: T) -> None:
         await attr.update_display_without_process(value)
 
         if isinstance(attr, AttrRW):
             await attr.set(value)
 
-    async def update(self, controller: Any, attr: AttrR):
+    async def update(self, attr: AttrR) -> None:
         raise RuntimeError("SimpleHandler cannot update")
 
 
@@ -84,6 +84,7 @@ class Attribute(Generic[T]):
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
         self._group = group
+        self._handler = handler
         self.enabled = True
         self.description = description
 
@@ -106,6 +107,10 @@ class Attribute(Generic[T]):
     @property
     def group(self) -> str | None:
         return self._group
+
+    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
+        if self._handler is not None:
+            await self._handler.initialise(controller)
 
     def add_update_datatype_callback(
         self, callback: Callable[[DataType[T]], None]
