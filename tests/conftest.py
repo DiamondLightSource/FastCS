@@ -15,6 +15,7 @@ from uuid import uuid4
 
 import pytest
 from aioca import purge_channel_caches
+from softioc import builder
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backend import build_controller_api
@@ -29,7 +30,10 @@ from tests.assertable_controller import (
 from tests.example_p4p_ioc import run as _run_p4p_ioc
 from tests.example_softioc import run as _run_softioc
 
-DATA_PATH = Path(__file__).parent / "data"
+
+@pytest.fixture(scope="function", autouse=True)
+def clear_softioc_records():
+    builder.ClearRecords()
 
 
 class BackendTestController(MyTestController):
@@ -49,6 +53,9 @@ def controller():
 @pytest.fixture
 def controller_api(controller):
     return build_controller_api(controller)
+
+
+DATA_PATH = Path(__file__).parent / "data"
 
 
 @pytest.fixture
