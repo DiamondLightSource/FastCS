@@ -41,7 +41,7 @@ class EpicsGUI:
 
     def _get_pv(self, attr_path: list[str], name: str):
         attr_prefix = ":".join([self._pv_prefix] + attr_path)
-        return f"{attr_prefix}:{name.title().replace('_', '')}"
+        return f"{attr_prefix}:{snake_to_pascal(name)}"
 
     @staticmethod
     def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion | None:
@@ -79,8 +79,7 @@ class EpicsGUI:
         self, attr_path: list[str], name: str, attribute: Attribute
     ) -> SignalR | SignalW | SignalRW | None:
         pv = self._get_pv(attr_path, name)
-        name = name.title().replace("_", "")
-
+        name = snake_to_pascal(name)
         match attribute:
             case AttrRW():
                 read_widget = self._get_read_widget(attribute)
@@ -109,7 +108,7 @@ class EpicsGUI:
 
     def _get_command_component(self, attr_path: list[str], name: str):
         pv = self._get_pv(attr_path, name)
-        name = name.title().replace("_", "")
+        name = snake_to_pascal(name)
 
         return SignalX(
             name=name,
