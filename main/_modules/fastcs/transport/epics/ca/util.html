@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.ca.util &#8212; FastCS 0.8.1.dev37+g2c546da documentation</title>
+    <title>fastcs.transport.epics.ca.util &#8212; FastCS 0.8.1.dev38+g6a8c649 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=3659a574"></script>
+    <script src="../../../../../_static/documentation_options.js?v=c6da0505"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -499,7 +499,9 @@
 
 <div class="viewcode-block" id="record_metadata_from_datatype">
 <a class="viewcode-back" href="../../../../../_api/fastcs.transport.epics.ca.util.html#fastcs.transport.epics.ca.util.record_metadata_from_datatype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">record_metadata_from_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">record_metadata_from_datatype</span><span class="p">(</span>
+    <span class="n">datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">out_record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts attributes on the `DataType` to the</span>
 <span class="sd">    field name/value in the record metadata.&quot;&quot;&quot;</span>
 
@@ -522,11 +524,17 @@
                 <span class="n">state_keys</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                     <span class="nb">zip</span><span class="p">(</span>
                         <span class="n">MBB_STATE_FIELDS</span><span class="p">,</span>
-                        <span class="p">[</span><span class="n">member</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">],</span>
+                        <span class="n">datatype</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
                         <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">arguments</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state_keys</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">out_record</span><span class="p">:</span>  <span class="c1"># no validators for in type records</span>
+
+                <span class="k">def</span><span class="w"> </span><span class="nf">_verify_in_datatype</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">datatype</span><span class="o">.</span><span class="n">names</span>
+
+                <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;validate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_verify_in_datatype</span>
 
     <span class="k">return</span> <span class="n">arguments</span></div>
 
@@ -538,7 +546,10 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Casts from an EPICS datatype to a FastCS datatype.&quot;&quot;&quot;</span>
     <span class="k">match</span> <span class="n">datatype</span><span class="p">:</span>
         <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">MBB_MAX_CHOICES</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># enum backed by string record</span>
+                <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">enum_cls</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
         <span class="k">case</span> <span class="n">datatype</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">datatype</span><span class="p">),</span> <span class="n">EPICS_ALLOWED_DATATYPES</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
@@ -552,7 +563,10 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Casts from an attribute&#39;s datatype to an EPICS datatype.&quot;&quot;&quot;</span>
     <span class="k">match</span> <span class="n">datatype</span><span class="p">:</span>
         <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">index_of</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">MBB_MAX_CHOICES</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">index_of</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># enum backed by string record</span>
+                <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
         <span class="k">case</span> <span class="n">datatype</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">datatype</span><span class="p">),</span> <span class="n">EPICS_ALLOWED_DATATYPES</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
@@ -577,7 +591,7 @@
             <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringOut</span>
         <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MBB_MAX_CHOICES</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">longIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">longOut</span>
+                <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringOut</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">mbbIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">mbbOut</span>
         <span class="k">case</span> <span class="n">Waveform</span><span class="p">():</span>
