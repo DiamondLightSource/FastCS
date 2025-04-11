@@ -39,7 +39,7 @@ class DataType(Generic[T]):
     def validate(self, value: T) -> T:
         """Validate a value against fields in the datatype."""
         if not isinstance(value, self.dtype):
-            raise ValueError(f"Value {value} is not of type {self.dtype}")
+            raise ValueError(f"Value '{value}' is not of type {self.dtype}")
 
         return value
 
