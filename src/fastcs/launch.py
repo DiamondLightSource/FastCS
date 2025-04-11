@@ -9,7 +9,7 @@ import typer
 from pydantic import BaseModel, create_model
 from ruamel.yaml import YAML
 
-from fastcs.__main__ import __version__
+from fastcs import __version__
 
 from .backend import Backend
 from .controller import Controller
