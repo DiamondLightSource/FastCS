@@ -9,7 +9,7 @@ from tests.assertable_controller import (
     AssertableControllerAPI,
     MyTestController,
     TestHandler,
-    TestSender,
+    TestSetter,
     TestUpdater,
 )
 
@@ -23,7 +23,7 @@ class GraphQLController(MyTestController):
     read_write_int = AttrRW(Int(), handler=TestHandler())
     read_write_float = AttrRW(Float())
     read_bool = AttrR(Bool())
-    write_bool = AttrW(Bool(), handler=TestSender())
+    write_bool = AttrW(Bool(), handler=TestSetter())
     read_string = AttrRW(String())
 
 

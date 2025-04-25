@@ -4,7 +4,7 @@ from typing import Literal
 
 from pytest_mock import MockerFixture, MockType
 
-from fastcs.attributes import AttrR, Handler, Sender, Updater
+from fastcs.attributes import AttrR, Handler, Setter, Updater
 from fastcs.backend import build_controller_api
 from fastcs.controller import Controller, SubController
 from fastcs.controller_api import ControllerAPI
@@ -22,7 +22,7 @@ class TestUpdater(Updater):
         print(f"{self.controller} update {attr}")
 
 
-class TestSender(Sender):
+class TestSetter(Setter):
     async def initialise(self, controller) -> None:
         self.controller = controller
 
@@ -30,7 +30,7 @@ class TestSender(Sender):
         print(f"{self.controller}: {attr} = {value}")
 
 
-class TestHandler(Handler, TestUpdater, TestSender):
+class TestHandler(Handler, TestUpdater, TestSetter):
     pass
 
 
