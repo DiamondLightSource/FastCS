@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from fastcs.cs_methods import Command, Put, Scan
 
-from .attributes import AttrR, AttrW, Sender, Updater
+from .attributes import AttrR, AttrW, Setter, Updater
 from .controller import BaseController, Controller
 from .controller_api import ControllerAPI
 from .exceptions import FastCSException
@@ -79,7 +79,7 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
 def _link_attribute_sender_class(controller_api: ControllerAPI) -> None:
     for attr_name, attribute in controller_api.attributes.items():
         match attribute:
-            case AttrW(sender=Sender()):
+            case AttrW(sender=Setter()):
                 assert not attribute.has_process_callback(), (
                     f"Cannot assign both put method and Sender object to {attr_name}"
                 )

@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from enum import Enum
-from typing import Any, Generic, Protocol, runtime_checkable
+from typing import Any, Generic
 
 import fastcs
 
@@ -18,34 +18,30 @@ class AttrMode(Enum):
     READ_WRITE = 3
 
 
-@runtime_checkable
-class Sender(Protocol):
-    """Protocol for setting the value of an ``Attribute``."""
-
+class _BaseHandler:
     async def initialise(self, controller: fastcs.controller.BaseController) -> None:
         pass
+
+
+class Setter(_BaseHandler):
+    """Protocol for setting the value of an ``Attribute``."""
 
     async def put(self, attr: AttrW[T], value: T) -> None:
         pass
 
 
-@runtime_checkable
-class Updater(Protocol):
+class Updater(_BaseHandler):
     """Protocol for updating the cached readback value of an ``Attribute``."""
 
     # If update period is None then the attribute will not be updated as a task.
     update_period: float | None = None
 
-    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
-        pass
-
     async def update(self, attr: AttrR) -> None:
         pass
 
 
-@runtime_checkable
-class Handler(Sender, Updater, Protocol):
-    """Protocol encapsulating both ``Sender`` and ``Updater``."""
+class Handler(Setter, Updater):
+    """Protocol encapsulating both ``Setter`` and ``Updater``."""
 
     pass
 
@@ -179,7 +175,7 @@ class AttrW(Attribute[T]):
         datatype: DataType[T],
         access_mode=AttrMode.WRITE,
         group: str | None = None,
-        handler: Sender | None = None,
+        handler: Setter | None = None,
         description: str | None = None,
     ) -> None:
         super().__init__(
@@ -193,9 +189,9 @@ class AttrW(Attribute[T]):
         self._write_display_callbacks: list[AttrCallback[T]] | None = None
 
         if handler is not None:
-            self._sender = handler
+            self._setter = handler
         else:
-            self._sender = SimpleHandler()
+            self._setter = SimpleHandler()
 
     async def process(self, value: T) -> None:
         await self.process_without_display_update(value)
@@ -225,8 +221,8 @@ class AttrW(Attribute[T]):
         self._write_display_callbacks.append(callback)
 
     @property
-    def sender(self) -> Sender:
-        return self._sender
+    def sender(self) -> Setter:
+        return self._setter
 
 
 class AttrRW(AttrR[T], AttrW[T]):
