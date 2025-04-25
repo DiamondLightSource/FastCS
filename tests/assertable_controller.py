@@ -4,7 +4,7 @@ from typing import Literal
 
 from pytest_mock import MockerFixture, MockType
 
-from fastcs.attributes import AttrR, Handler, Sender, Updater
+from fastcs.attributes import AttrR, Handler, Setter, Updater
 from fastcs.backend import build_controller_api
 from fastcs.controller import Controller, SubController
 from fastcs.controller_api import ControllerAPI
@@ -15,16 +15,22 @@ from fastcs.wrappers import command, scan
 class TestUpdater(Updater):
     update_period = 1
 
-    async def update(self, controller, attr):
-        print(f"{controller} update {attr}")
+    async def initialise(self, controller) -> None:
+        self.controller = controller
+
+    async def update(self, attr):
+        print(f"{self.controller} update {attr}")
 
 
-class TestSender(Sender):
-    async def put(self, controller, attr, value):
-        print(f"{controller}: {attr} = {value}")
+class TestSetter(Setter):
+    async def initialise(self, controller) -> None:
+        self.controller = controller
+
+    async def put(self, attr, value):
+        print(f"{self.controller}: {attr} = {value}")
 
 
-class TestHandler(Handler, TestUpdater, TestSender):
+class TestHandler(Handler, TestUpdater, TestSetter):
     pass
 
 
@@ -47,6 +53,7 @@ class MyTestController(Controller):
     count = 0
 
     async def initialise(self) -> None:
+        await super().initialise()
         self.initialised = True
 
     async def connect(self) -> None:
