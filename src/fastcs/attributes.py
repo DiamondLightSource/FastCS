@@ -18,19 +18,19 @@ class AttrMode(Enum):
     READ_WRITE = 3
 
 
-class _BaseHandler:
+class _BaseAttrHandler:
     async def initialise(self, controller: fastcs.controller.BaseController) -> None:
         pass
 
 
-class Setter(_BaseHandler):
+class AttrHandlerW(_BaseAttrHandler):
     """Protocol for setting the value of an ``Attribute``."""
 
     async def put(self, attr: AttrW[T], value: T) -> None:
         pass
 
 
-class Updater(_BaseHandler):
+class AttrHandlerR(_BaseAttrHandler):
     """Protocol for updating the cached readback value of an ``Attribute``."""
 
     # If update period is None then the attribute will not be updated as a task.
@@ -40,13 +40,13 @@ class Updater(_BaseHandler):
         pass
 
 
-class Handler(Setter, Updater):
-    """Protocol encapsulating both ``Setter`` and ``Updater``."""
+class AttrHandlerRW(AttrHandlerR, AttrHandlerW):
+    """Protocol encapsulating both ``AttrHandlerR`` and ``AttHandlerW``."""
 
     pass
 
 
-class SimpleHandler(Handler):
+class SimpleAttrHandler(AttrHandlerRW):
     """Handler for internal parameters"""
 
     async def put(self, attr: AttrW[T], value: T) -> None:
@@ -131,7 +131,7 @@ class AttrR(Attribute[T]):
         datatype: DataType[T],
         access_mode=AttrMode.READ,
         group: str | None = None,
-        handler: Updater | None = None,
+        handler: AttrHandlerR | None = None,
         initial_value: T | None = None,
         description: str | None = None,
     ) -> None:
@@ -163,7 +163,7 @@ class AttrR(Attribute[T]):
         self._update_callbacks.append(callback)
 
     @property
-    def updater(self) -> Updater | None:
+    def updater(self) -> AttrHandlerR | None:
         return self._updater
 
 
@@ -175,7 +175,7 @@ class AttrW(Attribute[T]):
         datatype: DataType[T],
         access_mode=AttrMode.WRITE,
         group: str | None = None,
-        handler: Setter | None = None,
+        handler: AttrHandlerW | None = None,
         description: str | None = None,
     ) -> None:
         super().__init__(
@@ -191,7 +191,7 @@ class AttrW(Attribute[T]):
         if handler is not None:
             self._setter = handler
         else:
-            self._setter = SimpleHandler()
+            self._setter = SimpleAttrHandler()
 
     async def process(self, value: T) -> None:
         await self.process_without_display_update(value)
@@ -221,7 +221,7 @@ class AttrW(Attribute[T]):
         self._write_display_callbacks.append(callback)
 
     @property
-    def sender(self) -> Setter:
+    def sender(self) -> AttrHandlerW:
         return self._setter
 
 
@@ -233,7 +233,7 @@ class AttrRW(AttrR[T], AttrW[T]):
         datatype: DataType[T],
         access_mode=AttrMode.READ_WRITE,
         group: str | None = None,
-        handler: Handler | None = None,
+        handler: AttrHandlerRW | None = None,
         initial_value: T | None = None,
         description: str | None = None,
     ) -> None:
