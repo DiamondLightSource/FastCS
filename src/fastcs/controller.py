@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from copy import copy
+from copy import deepcopy
 from typing import get_type_hints
 
 from fastcs.attributes import Attribute
@@ -91,7 +91,8 @@ class BaseController:
                         f"`{type(self).__name__}` has conflicting attribute "
                         f"`{attr_name}` already present in the attributes dict."
                     )
-                new_attribute = copy(attr)
+
+                new_attribute = deepcopy(attr)
                 setattr(self, attr_name, new_attribute)
                 self.attributes[attr_name] = new_attribute
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
