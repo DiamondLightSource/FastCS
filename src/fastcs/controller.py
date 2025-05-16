@@ -41,6 +41,9 @@ class BaseController:
         except asyncio.CancelledError:
             pass
 
+        for controller in self.get_sub_controllers().values():
+            await controller.attribute_initialise()
+
     @property
     def path(self) -> list[str]:
         """Path prefix of attributes, recursively including parent Controllers."""
