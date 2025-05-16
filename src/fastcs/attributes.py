@@ -36,7 +36,7 @@ class AttrHandlerR(_BaseAttrHandler):
     # If update period is None then the attribute will not be updated as a task.
     update_period: float | None = None
 
-    async def update(self, attr: AttrR) -> None:
+    async def update(self, attr: AttrR[T]) -> None:
         pass
 
 
