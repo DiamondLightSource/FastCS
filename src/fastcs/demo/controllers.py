@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrHandlerRW, AttrR, AttrRW, AttrW
 from fastcs.connections import IPConnection, IPConnectionSettings
 from fastcs.controller import BaseController, Controller, SubController
 from fastcs.datatypes import Enum, Float, Int
@@ -25,31 +25,30 @@ class TempControllerSettings:
 
 
 @dataclass
-class TempControllerHandler:
+class TempControllerHandler(AttrHandlerRW):
     name: str
     update_period: float | None = 0.2
+    _controller: TempController | TempRampController | None = None
 
-    async def put(
-        self,
-        controller: BaseController,
-        attr: AttrW,
-        value: Any,
-    ) -> None:
+    async def initialise(self, controller: BaseController):
         assert isinstance(controller, TempController | TempRampController)
+        self._controller = controller
 
-        await controller.conn.send_command(
-            f"{self.name}{controller.suffix}={attr.dtype(value)}\r\n"
+    @property
+    def controller(self) -> TempController | TempRampController:
+        if self._controller is None:
+            raise RuntimeError("Handler not initialised")
+
+        return self._controller
+
+    async def put(self, attr: AttrW, value: Any) -> None:
+        await self.controller.conn.send_command(
+            f"{self.name}{self.controller.suffix}={attr.dtype(value)}\r\n"
         )
 
-    async def update(
-        self,
-        controller: BaseController,
-        attr: AttrR,
-    ) -> None:
-        assert isinstance(controller, TempController | TempRampController)
-
-        response = await controller.conn.send_query(
-            f"{self.name}{controller.suffix}?\r\n"
+    async def update(self, attr: AttrR) -> None:
+        response = await self.controller.conn.send_query(
+            f"{self.name}{self.controller.suffix}?\r\n"
         )
         response = response.strip("\r\n")
 
