@@ -24,14 +24,14 @@
     .. autosummary::
         :nosignatures:
     
+        AttrHandlerR
+        AttrHandlerRW
+        AttrHandlerW
         AttrMode
         AttrR
         AttrRW
         AttrW
         Attribute
-        Handler
-        Sender
-        SimpleHandler
-        Updater
+        SimpleAttrHandler
     
     
