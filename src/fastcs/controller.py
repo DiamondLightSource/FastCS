@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from copy import copy
+import asyncio
+from copy import deepcopy
 from typing import get_type_hints
 
 from fastcs.attributes import Attribute
@@ -28,6 +29,20 @@ class BaseController:
         self.__sub_controller_tree: dict[str, SubController] = {}
 
         self._bind_attrs()
+
+    async def initialise(self):
+        pass
+
+    async def attribute_initialise(self) -> None:
+        # Initialise any registered handlers for attributes
+        coros = [attr.initialise(self) for attr in self.attributes.values()]
+        try:
+            await asyncio.gather(*coros)
+        except asyncio.CancelledError:
+            pass
+
+        for controller in self.get_sub_controllers().values():
+            await controller.attribute_initialise()
 
     @property
     def path(self) -> list[str]:
@@ -76,7 +91,8 @@ class BaseController:
                         f"`{type(self).__name__}` has conflicting attribute "
                         f"`{attr_name}` already present in the attributes dict."
                     )
-                new_attribute = copy(attr)
+
+                new_attribute = deepcopy(attr)
                 setattr(self, attr_name, new_attribute)
                 self.attributes[attr_name] = new_attribute
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
@@ -115,9 +131,6 @@ class Controller(BaseController):
 
     def __init__(self, description: str | None = None) -> None:
         super().__init__(description=description)
-
-    async def initialise(self) -> None:
-        pass
 
     async def connect(self) -> None:
         pass

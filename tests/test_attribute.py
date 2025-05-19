@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrHandlerR, AttrHandlerRW, AttrR, AttrRW, AttrW
 from fastcs.datatypes import Enum, Float, Int, String, Waveform
 
 
@@ -41,7 +41,7 @@ async def test_simple_handler_w(mocker: MockerFixture):
     update_display_mock = mocker.patch.object(attr, "update_display_without_process")
 
     # This is called by the transport when it receives a put
-    await attr.sender.put(mocker.ANY, attr, 1)
+    await attr.sender.put(attr, 1)
 
     # The callback to update the transport display should be called
     update_display_mock.assert_called_once_with(1)
@@ -53,11 +53,40 @@ async def test_simple_handler_rw(mocker: MockerFixture):
     update_display_mock = mocker.patch.object(attr, "update_display_without_process")
     set_mock = mocker.patch.object(attr, "set")
 
-    await attr.sender.put(mocker.ANY, attr, 1)
+    await attr.sender.put(attr, 1)
 
     update_display_mock.assert_called_once_with(1)
     # The Sender of the attribute should just set the value on the attribute
     set_mock.assert_awaited_once_with(1)
+
+
+class SimpleUpdater(AttrHandlerR):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_handler_initialise(mocker: MockerFixture):
+    handler = AttrHandlerRW()
+    handler_mock = mocker.patch.object(handler, "initialise")
+    attr = AttrR(Int(), handler=handler)
+
+    ctrlr = mocker.Mock()
+    await attr.initialise(ctrlr)
+
+    # The handler initialise method should be called from the attribute
+    handler_mock.assert_called_once_with(ctrlr)
+
+    handler = AttrHandlerRW()
+    attr = AttrW(Int(), handler=handler)
+
+    # Assert no error in calling initialise on the SimpleHandler default
+    await attr.initialise(mocker.ANY)
+
+    handler = SimpleUpdater()
+    attr = AttrR(Int(), handler=handler)
+
+    # Assert no error in calling initialise on the TestUpdater handler
+    await attr.initialise(mocker.ANY)
 
 
 @pytest.mark.parametrize(

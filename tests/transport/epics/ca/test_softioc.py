@@ -8,7 +8,7 @@ from tests.assertable_controller import (
     AssertableControllerAPI,
     MyTestController,
     TestHandler,
-    TestSender,
+    TestSetter,
     TestUpdater,
 )
 from tests.util import ColourEnum
@@ -213,7 +213,7 @@ class EpicsController(MyTestController):
     read_write_int = AttrRW(Int(), handler=TestHandler())
     read_write_float = AttrRW(Float())
     read_bool = AttrR(Bool())
-    write_bool = AttrW(Bool(), handler=TestSender())
+    write_bool = AttrW(Bool(), handler=TestSetter())
     read_string = AttrRW(String())
     enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
     one_d_waveform = AttrRW(Waveform(np.int32, (10,)))
