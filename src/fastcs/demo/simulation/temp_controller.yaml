@@ -1,0 +1,21 @@
+- type: tickit.devices.source.Source
+  name: source
+  inputs: {}
+  value: 42.0
+
+- type: fastcs.demo.simulation.device.TempController
+  name: tempcont
+  inputs:
+    flux:
+      component: source
+      port: value
+  num_ramp_controllers: 4
+  default_start: 10
+  default_end: 50
+
+- type: tickit.devices.sink.Sink
+  name: sink
+  inputs:
+    flux:
+      component: tempcont
+      port: flux

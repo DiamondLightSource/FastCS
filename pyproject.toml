@@ -40,19 +40,25 @@ dev = [
     "pytest-cov",
     "pytest-mock",
     "pytest-asyncio",
+    "pytest-markdown-docs",
     "ruff",
     "sphinx-autobuild",
     "sphinx-copybutton",
+    "sphinx-togglebutton",
     "sphinx-design",
     "tox-direct",
     "types-mock",
     "aioca",
     "p4p",
     "httpx",
+    "tickit~=0.4.3",
+]
+demo = [
+    "tickit~=0.4.3",
 ]
 
 [project.scripts]
-FastCS = "fastcs.__main__:main"
+fastcs-demo = "fastcs.demo.__main__:main"
 
 [project.urls]
 GitHub = "https://github.com/DiamondLightSource/FastCS"
@@ -72,7 +78,7 @@ reportMissingImports = false  # Ignore missing stubs in imported modules
 [tool.pytest.ini_options]
 # Run pytest with all our checkers, and don't spam us with massive tracebacks on error
 addopts = """
-    --tb=native -vv --doctest-modules --doctest-glob="*.rst" --benchmark-sort=mean --benchmark-columns="mean, min, max, outliers, ops, rounds"
+    --tb=native -vv --doctest-modules --doctest-glob="*.md" --ignore-glob docs/snippets/*py --benchmark-sort=mean --benchmark-columns="mean, min, max, outliers, ops, rounds"
     """
 # https://iscinumpy.gitlab.io/post/bound-version-constraints/#watch-for-warnings
 filterwarnings = "error"
@@ -82,7 +88,7 @@ testpaths = "docs src tests"
 [tool.coverage.run]
 data_file = "/tmp/fastcs.coverage"
 concurrency = ["thread", "multiprocessing"]
-omit = ["tests/*"]
+omit = ["tests/*", "src/fastcs/demo/*"]
 
 [tool.coverage.paths]
 # Tests are run from installed location, map back to the src directory

@@ -50,6 +50,9 @@ jobs:
           python-version: ${{ inputs.python-version }}
           pip-install: ".[dev]"
 
+      - name: Update setuptools
+        run: pip install --upgrade setuptools
+
       - name: Run tests
         run: tox -e tests
 

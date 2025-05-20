@@ -49,6 +49,8 @@ extensions = [
     "sphinx_design",
     # So we can write markdown files
     "myst_parser",
+    # Collapsible sections
+    "sphinx_togglebutton",
 ]
 
 # So we can use the ::: syntax
@@ -91,7 +93,11 @@ nitpick_ignore = [
     ("py:class", "fastcs.datatypes.T_Numerical"),
     ("py:class", "strawberry.schema.schema.Schema"),
 ]
-nitpick_ignore_regex = [("py:class", "fastcs.*.T")]
+nitpick_ignore_regex = [
+    ("py:class", "fastcs.*.T"),
+    (r"py:.*", r"fastcs\.demo.*"),
+    (r"py:.*", r"tickit.*"),
+]
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
 # inserted into the main body of the autoclass directive
@@ -209,5 +215,9 @@ html_show_sphinx = False
 html_show_copyright = False
 
 # Logo
-html_logo = "images/dls-logo.svg"
+html_logo = "images/fastcs.svg"
 html_favicon = html_logo
+
+# Custom CSS
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]

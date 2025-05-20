@@ -1,0 +1,257 @@
+{
+  "$defs": {
+    "EpicsCAOptions": {
+      "properties": {
+        "docs": {
+          "$ref": "#/$defs/EpicsDocsOptions"
+        },
+        "gui": {
+          "$ref": "#/$defs/EpicsGUIOptions"
+        },
+        "ioc": {
+          "$ref": "#/$defs/EpicsIOCOptions"
+        }
+      },
+      "title": "EpicsCAOptions",
+      "type": "object"
+    },
+    "EpicsDocsOptions": {
+      "properties": {
+        "path": {
+          "default": ".",
+          "format": "path",
+          "title": "Path",
+          "type": "string"
+        },
+        "depth": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Depth"
+        }
+      },
+      "title": "EpicsDocsOptions",
+      "type": "object"
+    },
+    "EpicsGUIFormat": {
+      "description": "The format of an EPICS GUI.",
+      "enum": [
+        ".bob",
+        ".edl"
+      ],
+      "title": "EpicsGUIFormat",
+      "type": "string"
+    },
+    "EpicsGUIOptions": {
+      "properties": {
+        "output_path": {
+          "default": "output.bob",
+          "format": "path",
+          "title": "Output Path",
+          "type": "string"
+        },
+        "file_format": {
+          "$ref": "#/$defs/EpicsGUIFormat",
+          "default": ".bob"
+        },
+        "title": {
+          "default": "Simple Device",
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "title": "EpicsGUIOptions",
+      "type": "object"
+    },
+    "EpicsIOCOptions": {
+      "properties": {
+        "pv_prefix": {
+          "default": "MY-DEVICE-PREFIX",
+          "title": "Pv Prefix",
+          "type": "string"
+        }
+      },
+      "title": "EpicsIOCOptions",
+      "type": "object"
+    },
+    "EpicsPVAOptions": {
+      "properties": {
+        "docs": {
+          "$ref": "#/$defs/EpicsDocsOptions"
+        },
+        "gui": {
+          "$ref": "#/$defs/EpicsGUIOptions"
+        },
+        "ioc": {
+          "$ref": "#/$defs/EpicsIOCOptions"
+        }
+      },
+      "title": "EpicsPVAOptions",
+      "type": "object"
+    },
+    "GraphQLOptions": {
+      "properties": {
+        "gql": {
+          "$ref": "#/$defs/GraphQLServerOptions"
+        }
+      },
+      "title": "GraphQLOptions",
+      "type": "object"
+    },
+    "GraphQLServerOptions": {
+      "properties": {
+        "host": {
+          "default": "localhost",
+          "title": "Host",
+          "type": "string"
+        },
+        "port": {
+          "default": 8080,
+          "title": "Port",
+          "type": "integer"
+        },
+        "log_level": {
+          "default": "info",
+          "title": "Log Level",
+          "type": "string"
+        }
+      },
+      "title": "GraphQLServerOptions",
+      "type": "object"
+    },
+    "IPConnectionSettings": {
+      "properties": {
+        "ip": {
+          "default": "127.0.0.1",
+          "title": "Ip",
+          "type": "string"
+        },
+        "port": {
+          "default": 25565,
+          "title": "Port",
+          "type": "integer"
+        }
+      },
+      "title": "IPConnectionSettings",
+      "type": "object"
+    },
+    "RestOptions": {
+      "properties": {
+        "rest": {
+          "$ref": "#/$defs/RestServerOptions"
+        }
+      },
+      "title": "RestOptions",
+      "type": "object"
+    },
+    "RestServerOptions": {
+      "properties": {
+        "host": {
+          "default": "localhost",
+          "title": "Host",
+          "type": "string"
+        },
+        "port": {
+          "default": 8080,
+          "title": "Port",
+          "type": "integer"
+        },
+        "log_level": {
+          "default": "info",
+          "title": "Log Level",
+          "type": "string"
+        }
+      },
+      "title": "RestServerOptions",
+      "type": "object"
+    },
+    "TangoDSROptions": {
+      "properties": {
+        "dev_name": {
+          "default": "MY/DEVICE/NAME",
+          "title": "Dev Name",
+          "type": "string"
+        },
+        "dsr_instance": {
+          "default": "MY_SERVER_INSTANCE",
+          "title": "Dsr Instance",
+          "type": "string"
+        },
+        "debug": {
+          "default": false,
+          "title": "Debug",
+          "type": "boolean"
+        }
+      },
+      "title": "TangoDSROptions",
+      "type": "object"
+    },
+    "TangoOptions": {
+      "properties": {
+        "dsr": {
+          "$ref": "#/$defs/TangoDSROptions"
+        }
+      },
+      "title": "TangoOptions",
+      "type": "object"
+    },
+    "TempControllerSettings": {
+      "properties": {
+        "num_ramp_controllers": {
+          "title": "Num Ramp Controllers",
+          "type": "integer"
+        },
+        "ip_settings": {
+          "$ref": "#/$defs/IPConnectionSettings"
+        }
+      },
+      "required": [
+        "num_ramp_controllers",
+        "ip_settings"
+      ],
+      "title": "TempControllerSettings",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "controller": {
+      "$ref": "#/$defs/TempControllerSettings"
+    },
+    "transport": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/EpicsPVAOptions"
+          },
+          {
+            "$ref": "#/$defs/EpicsCAOptions"
+          },
+          {
+            "$ref": "#/$defs/TangoOptions"
+          },
+          {
+            "$ref": "#/$defs/RestOptions"
+          },
+          {
+            "$ref": "#/$defs/GraphQLOptions"
+          }
+        ]
+      },
+      "title": "Transport",
+      "type": "array"
+    }
+  },
+  "required": [
+    "controller",
+    "transport"
+  ],
+  "title": "TempController",
+  "type": "object"
+}

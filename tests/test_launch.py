@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 from ruamel.yaml import YAML
 from typer.testing import CliRunner
 
-from fastcs.__main__ import __version__
+from fastcs import __version__
 from fastcs.attributes import AttrR
 from fastcs.controller import Controller
 from fastcs.datatypes import Int
