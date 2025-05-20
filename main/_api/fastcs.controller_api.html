@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.controller_api &#8212; FastCS 0.8.1.dev39+g5495fde documentation</title>
+    <title>fastcs.controller_api &#8212; FastCS 0.8.1.dev51+gafd3ad4 documentation</title>
   
   
   
@@ -33,7 +33,9 @@
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=3fefa004" />
   
   <!-- So that users can add custom icons -->
   <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -41,12 +43,17 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=fe0d5de1"></script>
+    <script src="../_static/documentation_options.js?v=7fb1a3fd"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_api/fastcs.controller_api';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
@@ -55,7 +62,7 @@
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
-    <link rel="icon" href="../_static/dls-logo.svg"/>
+    <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="fastcs.cs_methods" href="fastcs.cs_methods.html" />
@@ -128,8 +135,8 @@
       
     
     
-    <img src="../_static/dls-logo.svg" class="logo__image only-light" alt=""/>
-    <img src="../_static/dls-logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <img src="../_static/fastcs.svg" class="logo__image only-light" alt=""/>
+    <img src="../_static/fastcs.svg" class="logo__image only-dark pst-js-only" alt=""/>
   
   
     <p class="title logo__title">FastCS</p>
@@ -409,6 +416,14 @@
 <li class="toctree-l2 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.controller_api</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.cs_methods.html"><code class="docutils literal notranslate"><span class="pre">fastcs.cs_methods</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.datatypes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.demo.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.demo.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.controllers</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.demo.simulation.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.simulation</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.demo.simulation.device.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.simulation.device</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.exceptions.html"><code class="docutils literal notranslate"><span class="pre">fastcs.exceptions</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.launch.html"><code class="docutils literal notranslate"><span class="pre">fastcs.launch</span></code></a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>

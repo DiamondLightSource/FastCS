@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; FastCS 0.8.1.dev39+g5495fde documentation</title>
+    <title>Index &#8212; FastCS 0.8.1.dev51+gafd3ad4 documentation</title>
   
   
   
@@ -32,7 +32,9 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=3fefa004" />
   
   <!-- So that users can add custom icons -->
   <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -40,12 +42,17 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=fe0d5de1"></script>
+    <script src="_static/documentation_options.js?v=7fb1a3fd"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=30646c52"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
@@ -54,7 +61,7 @@
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
-    <link rel="icon" href="_static/dls-logo.svg"/>
+    <link rel="icon" href="_static/fastcs.svg"/>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -125,8 +132,8 @@
       
     
     
-    <img src="_static/dls-logo.svg" class="logo__image only-light" alt=""/>
-    <img src="_static/dls-logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+    <img src="_static/fastcs.svg" class="logo__image only-light" alt=""/>
+    <img src="_static/fastcs.svg" class="logo__image only-dark pst-js-only" alt=""/>
   
   
     <p class="title logo__title">FastCS</p>
@@ -402,6 +409,14 @@
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controller_api</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.cs_methods.html"><code class="docutils literal notranslate"><span class="pre">fastcs.cs_methods</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.datatypes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_api/fastcs.demo.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="_api/fastcs.demo.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.controllers</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_api/fastcs.demo.simulation.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.simulation</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_api/fastcs.demo.simulation.device.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.simulation.device</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.exceptions.html"><code class="docutils literal notranslate"><span class="pre">fastcs.exceptions</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.launch.html"><code class="docutils literal notranslate"><span class="pre">fastcs.launch</span></code></a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_api/fastcs.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -487,6 +502,7 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
@@ -712,6 +728,34 @@
 </li>
       </ul></li>
       <li>
+    fastcs.demo
+
+      <ul>
+        <li><a href="_api/fastcs.demo.html#module-fastcs.demo">module</a>
+</li>
+      </ul></li>
+      <li>
+    fastcs.demo.controllers
+
+      <ul>
+        <li><a href="_api/fastcs.demo.controllers.html#module-fastcs.demo.controllers">module</a>
+</li>
+      </ul></li>
+      <li>
+    fastcs.demo.simulation
+
+      <ul>
+        <li><a href="_api/fastcs.demo.simulation.html#module-fastcs.demo.simulation">module</a>
+</li>
+      </ul></li>
+      <li>
+    fastcs.demo.simulation.device
+
+      <ul>
+        <li><a href="_api/fastcs.demo.simulation.device.html#module-fastcs.demo.simulation.device">module</a>
+</li>
+      </ul></li>
+      <li>
     fastcs.exceptions
 
       <ul>
@@ -788,6 +832,8 @@
         <li><a href="_api/fastcs.transport.epics.docs.html#module-fastcs.transport.epics.docs">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     fastcs.transport.epics.gui
 
@@ -802,8 +848,6 @@
         <li><a href="_api/fastcs.transport.epics.options.html#module-fastcs.transport.epics.options">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     fastcs.transport.epics.pva
 
@@ -991,6 +1035,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_api/fastcs.demo.simulation.device.html#fastcs.demo.simulation.device.handle_exceptions">handle_exceptions() (in module fastcs.demo.simulation.device)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1049,6 +1101,14 @@
         <li><a href="_api/fastcs.cs_methods.html#module-fastcs.cs_methods">fastcs.cs_methods</a>
 </li>
         <li><a href="_api/fastcs.datatypes.html#module-fastcs.datatypes">fastcs.datatypes</a>
+</li>
+        <li><a href="_api/fastcs.demo.html#module-fastcs.demo">fastcs.demo</a>
+</li>
+        <li><a href="_api/fastcs.demo.controllers.html#module-fastcs.demo.controllers">fastcs.demo.controllers</a>
+</li>
+        <li><a href="_api/fastcs.demo.simulation.html#module-fastcs.demo.simulation">fastcs.demo.simulation</a>
+</li>
+        <li><a href="_api/fastcs.demo.simulation.device.html#module-fastcs.demo.simulation.device">fastcs.demo.simulation.device</a>
 </li>
         <li><a href="_api/fastcs.exceptions.html#module-fastcs.exceptions">fastcs.exceptions</a>
 </li>
@@ -1227,11 +1287,17 @@
 </li>
       <li><a href="_api/fastcs.transport.tango.options.html#fastcs.transport.tango.options.TangoDSROptions">TangoDSROptions (class in fastcs.transport.tango.options)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_api/fastcs.transport.tango.options.html#fastcs.transport.tango.options.TangoOptions">TangoOptions (class in fastcs.transport.tango.options)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_api/fastcs.transport.tango.adapter.html#fastcs.transport.tango.adapter.TangoTransport">TangoTransport (class in fastcs.transport.tango.adapter)</a>
+</li>
+      <li><a href="_api/fastcs.demo.simulation.device.html#fastcs.demo.simulation.device.TempController">TempController (class in fastcs.demo.simulation.device)</a>
+</li>
+      <li><a href="_api/fastcs.demo.controllers.html#fastcs.demo.controllers.TemperatureControllerHandler">TemperatureControllerHandler (class in fastcs.demo.controllers)</a>
+</li>
+      <li><a href="_api/fastcs.demo.controllers.html#fastcs.demo.controllers.TemperatureControllerSettings">TemperatureControllerSettings (class in fastcs.demo.controllers)</a>
 </li>
       <li><a href="_api/fastcs.transport.adapter.html#fastcs.transport.adapter.TransportAdapter">TransportAdapter (class in fastcs.transport.adapter)</a>
 </li>
