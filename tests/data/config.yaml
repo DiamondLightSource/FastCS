@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=schema.json
 transport:
-  - ioc: {}
+  - ca_ioc: {}
     docs: {}
     gui: {}
   - rest: {}
