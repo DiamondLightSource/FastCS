@@ -9,7 +9,7 @@ transport:
       host: localhost
       port: 8083
       log_level: info
-  - ioc:
+  - ca_ioc:
       pv_prefix: GARY
     gui:
       title: Temperature Controller Demo

@@ -17,8 +17,8 @@ class EpicsPVATransport(TransportAdapter):
     ) -> None:
         self._controller_api = controller_api
         self._options = options or EpicsPVAOptions()
-        self._pv_prefix = self.options.ioc.pv_prefix
-        self._ioc = P4PIOC(self.options.ioc.pv_prefix, controller_api)
+        self._pv_prefix = self.options.pva_ioc.pv_prefix
+        self._ioc = P4PIOC(self.options.pva_ioc.pv_prefix, controller_api)
 
     @property
     def options(self) -> EpicsPVAOptions:

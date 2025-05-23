@@ -20,11 +20,11 @@ class EpicsCATransport(TransportAdapter):
         self._controller_api = controller_api
         self._loop = loop
         self._options = options or EpicsCAOptions()
-        self._pv_prefix = self.options.ioc.pv_prefix
+        self._pv_prefix = self.options.ca_ioc.pv_prefix
         self._ioc = EpicsCAIOC(
-            self.options.ioc.pv_prefix,
+            self.options.ca_ioc.pv_prefix,
             controller_api,
-            self._options.ioc,
+            self._options.ca_ioc,
         )
 
     @property
