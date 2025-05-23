@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Creating a FastCS Driver &#8212; FastCS 0.8.1.dev51+gafd3ad4 documentation</title>
+    <title>Creating a FastCS Driver &#8212; FastCS 0.8.1.dev53+g39806a1 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=7fb1a3fd"></script>
+    <script src="../_static/documentation_options.js?v=01038bdb"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -491,7 +491,7 @@ control of a device and instances can be loaded into a FastCS application to exp
 functionality.</p>
 <p>Create a <code class="docutils literal notranslate"><span class="pre">TemperatureController</span></code> class that inherits from <code class="docutils literal notranslate"><span class="pre">Controller</span></code>.</p>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 1</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 
 
@@ -508,7 +508,7 @@ and a list of transports to expose the API through and provides a <code class="d
 the application. Create a <code class="docutils literal notranslate"><span class="pre">FastCS</span></code> instance, pass the <code class="docutils literal notranslate"><span class="pre">TemperatureController</span></code> to it
 along with an empty list of transports (for now).</p>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 2</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 </span>
@@ -533,7 +533,7 @@ be added to the <code class="docutils literal notranslate"><span class="pre">Con
 written, so add an <code class="docutils literal notranslate"><span class="pre">AttrR</span></code>. An <code class="docutils literal notranslate"><span class="pre">Attribute</span></code> also needs a type. The ID from the simulator
 is a string, so <code class="docutils literal notranslate"><span class="pre">String</span></code> should be used.</p>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 3</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
@@ -571,7 +571,7 @@ following transports are currently supported</p>
 EPICS CA transport to the application by creating an <code class="docutils literal notranslate"><span class="pre">EPICSCAOptions</span></code> instance and
 passing it in.</p>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 4</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
@@ -614,7 +614,7 @@ ensure the connection is established before it is used.</p>
 <p>The simulator control connection is on port 25565.</p>
 </div>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 5</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
 <span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
@@ -659,11 +659,11 @@ instance of the <code class="docutils literal notranslate"><span class="pre">Upd
 <p>The <code class="docutils literal notranslate"><span class="pre">update_period</span></code> property tells the base class how often to call <code class="docutils literal notranslate"><span class="pre">update</span></code></p>
 </div>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 6</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+</span><span class="hll">
+</span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 </span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrHandlerR</span><span class="p">,</span> <span class="n">AttrR</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span>
@@ -671,9 +671,9 @@ instance of the <code class="docutils literal notranslate"><span class="pre">Upd
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCAOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
-<span class="hll">
-</span><span class="hll">
-</span><span class="hll"><span class="nd">@dataclass</span>
+
+
+<span class="hll"><span class="nd">@dataclass</span>
 </span><span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">IDUpdater</span><span class="p">(</span><span class="n">AttrHandlerR</span><span class="p">):</span>
 </span><span class="hll">    <span class="n">update_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span>
 </span><span class="hll">    <span class="n">_controller</span><span class="p">:</span> <span class="n">TemperatureController</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -682,23 +682,23 @@ instance of the <code class="docutils literal notranslate"><span class="pre">Upd
 </span><span class="hll">        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">TemperatureController</span><span class="p">)</span>
 </span><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
 </span><span class="hll">
-</span>    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">controller</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TemperatureController</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<span class="hll">            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Handler not initialised&quot;</span><span class="p">)</span>
+</span><span class="hll">    <span class="nd">@property</span>
+</span><span class="hll">    <span class="k">def</span><span class="w"> </span><span class="nf">controller</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TemperatureController</span><span class="p">:</span>
+</span><span class="hll">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span class="hll">            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Handler not initialised&quot;</span><span class="p">)</span>
+</span><span class="hll">
+</span><span class="hll">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span>
+</span><span class="hll">
+</span><span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">):</span>
+</span><span class="hll">        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="s2">&quot;ID?</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class="hll">        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class="hll">
+</span><span class="hll">        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 </span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">):</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="s2">&quot;ID?</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-    <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">IDUpdater</span><span class="p">())</span>
-
+<span class="hll">    <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">IDUpdater</span><span class="p">())</span>
+</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -748,50 +748,50 @@ because the value is actually a string, but for <code class="docutils literal no
 etc.</p>
 </div>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 7</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrHandlerR</span><span class="p">,</span> <span class="n">AttrR</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCAOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
 
-<span class="hll">
-</span><span class="hll"><span class="nd">@dataclass</span>
-</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerUpdater</span><span class="p">(</span><span class="n">AttrHandlerR</span><span class="p">):</span>
-    <span class="n">command_name</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">update_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span>
+
+<span class="nd">@dataclass</span>
+<span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerUpdater</span><span class="p">(</span><span class="n">AttrHandlerR</span><span class="p">):</span>
+</span><span class="hll">    <span class="n">command_name</span><span class="p">:</span> <span class="nb">str</span>
+</span>    <span class="n">update_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span>
     <span class="n">_controller</span><span class="p">:</span> <span class="n">TemperatureController</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
-<span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">):</span>
-</span>        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">TemperatureController</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">TemperatureController</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">controller</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TemperatureController</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<span class="hll">            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Handler not initialised&quot;</span><span class="p">)</span>
-</span><span class="hll">
-</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Handler not initialised&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">):</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}</span><span class="s2">?</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="hll">        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span>
+</span><span class="hll">            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}</span><span class="s2">?</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+</span><span class="hll">        <span class="p">)</span>
+</span>        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
     <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerUpdater</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
-    <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerUpdater</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
-
+<span class="hll">    <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerUpdater</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
+</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -826,24 +826,24 @@ also needs a <code class="docutils literal notranslate"><span class="pre">Sender
 <code class="docutils literal notranslate"><span class="pre">send_query</span></code>.</p>
 </div>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 8</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="hll">
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 </span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrHandlerRW</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrHandlerRW</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCAOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
 
-<span class="hll">
-</span><span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerHandler</span><span class="p">(</span><span class="n">AttrHandlerRW</span><span class="p">):</span>
-    <span class="n">command_name</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@dataclass</span>
+<span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerHandler</span><span class="p">(</span><span class="n">AttrHandlerRW</span><span class="p">):</span>
+</span>    <span class="n">command_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">update_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span>
     <span class="n">_controller</span><span class="p">:</span> <span class="n">TemperatureController</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -852,31 +852,31 @@ also needs a <code class="docutils literal notranslate"><span class="pre">Sender
         <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
 
     <span class="nd">@property</span>
-<span class="hll">    <span class="k">def</span><span class="w"> </span><span class="nf">controller</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TemperatureController</span><span class="p">:</span>
-</span><span class="hll">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span class="hll">            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Handler not initialised&quot;</span><span class="p">)</span>
-</span><span class="hll">
-</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">controller</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TemperatureController</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Handler not initialised&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">):</span>
         <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}</span><span class="s2">?</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-<span class="hll">        <span class="p">)</span>
-</span>        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-
+<span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+</span><span class="hll">        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span>
+</span><span class="hll">            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+</span><span class="hll">        <span class="p">)</span>
+</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
     <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
     <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
-    <span class="n">ramp_rate</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
-
+<span class="hll">    <span class="n">ramp_rate</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
+</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -926,17 +926,17 @@ commands so that it can be shared between the parent <code class="docutils liter
 argument to define how many ramps there are, which is used to register the correct
 number of ramp controllers with the parent.</p>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 9</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrHandlerRW</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
-</span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span><span class="p">,</span> <span class="n">SubController</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrHandlerRW</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span><span class="p">,</span> <span class="n">SubController</span>
+</span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCAOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
 
@@ -947,70 +947,70 @@ number of ramp controllers with the parent.</p>
     <span class="n">update_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span>
 <span class="hll">    <span class="n">_controller</span><span class="p">:</span> <span class="n">TemperatureController</span> <span class="o">|</span> <span class="n">TemperatureRampController</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 </span>
-<span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">):</span>
-</span><span class="hll">        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">TemperatureController</span> <span class="o">|</span> <span class="n">TemperatureRampController</span><span class="p">)</span>
-</span><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
-</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">):</span>
+<span class="hll">        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">TemperatureController</span> <span class="o">|</span> <span class="n">TemperatureRampController</span><span class="p">)</span>
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
+
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">controller</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TemperatureController</span> <span class="o">|</span> <span class="n">TemperatureRampController</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="hll">    <span class="k">def</span><span class="w"> </span><span class="nf">controller</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TemperatureController</span> <span class="o">|</span> <span class="n">TemperatureRampController</span><span class="p">:</span>
+</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Handler not initialised&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">):</span>
         <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">?</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-<span class="hll">        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span class="hll">
-</span><span class="hll">        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-</span><span class="hll">
-</span><span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-</span><span class="hll">        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span>
-</span><span class="hll">            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-</span><span class="hll">        <span class="p">)</span>
-</span><span class="hll">
-</span><span class="hll">
-</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">SubController</span><span class="p">):</span>
-    <span class="n">start</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
-    <span class="n">end</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
+<span class="hll">            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">?</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+</span>        <span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ramp</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span>
+<span class="hll">            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+</span>        <span class="p">)</span>
 
-<span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">connection</span>
-</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+<span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">SubController</span><span class="p">):</span>
+</span><span class="hll">    <span class="n">start</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
+</span><span class="hll">    <span class="n">end</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
+</span><span class="hll">
+</span><span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">):</span>
+</span><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class="hll">
+</span><span class="hll">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ramp</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class="hll">
+</span><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">connection</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
     <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
     <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
-<span class="hll">    <span class="n">ramp_rate</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
-</span><span class="hll">
+    <span class="n">ramp_rate</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
+<span class="hll">
 </span><span class="hll">    <span class="n">suffix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-</span><span class="hll">
-</span><span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ramp_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
-</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ramp_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">IPConnection</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TemperatureRampController</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-<span class="hll">            <span class="n">ramp_controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
-</span>            <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ramp_controller</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ramp_controller</span><span class="p">)</span>
-
+<span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TemperatureRampController</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span class="hll">        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span class="hll">            <span class="n">ramp_controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+</span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ramp_controller</span><span class="p">)</span>
+</span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ramp_controller</span><span class="p">)</span>
+</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
 
 <span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
-<span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
-
+<span class="hll"><span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
+</span>
 <span class="c1"># fastcs.run()  # Commented as this will block</span>
 </pre></div>
 </div>
@@ -1030,18 +1030,18 @@ enable (and disable) the ramping.</p>
 <p>Add an <code class="docutils literal notranslate"><span class="pre">AttrRW</span></code> to the <code class="docutils literal notranslate"><span class="pre">TemperatureRampController</span></code>s with an <code class="docutils literal notranslate"><span class="pre">Enum</span></code> type, using a
 <code class="docutils literal notranslate"><span class="pre">StrEnum</span></code> with states <code class="docutils literal notranslate"><span class="pre">Off</span></code> and <code class="docutils literal notranslate"><span class="pre">On</span></code>.</p>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<p class="admonition-title">Code 10</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="hll"><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrHandlerRW</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span><span class="p">,</span> <span class="n">SubController</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCAOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
 
@@ -1067,26 +1067,26 @@ enable (and disable) the ramping.</p>
         <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">?</span><span class="se">\r\n</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-<span class="hll">        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span class="hll">
-</span><span class="hll">        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">command_name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-<span class="hll">
-</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OnOffEnum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
-    <span class="n">Off</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
-    <span class="n">On</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">SubController</span><span class="p">):</span>
+<span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">OnOffEnum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+</span><span class="hll">    <span class="n">Off</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+</span><span class="hll">    <span class="n">On</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">SubController</span><span class="p">):</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
     <span class="n">end</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
-    <span class="n">enabled</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Enum</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="p">),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">))</span>
-
+<span class="hll">    <span class="n">enabled</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Enum</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="p">),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">))</span>
+</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
 
@@ -1165,12 +1165,12 @@ handler. Then add a method to the <code class="docutils literal notranslate"><sp
 gets the array of voltages and sets each ramp controller with its value. Also add
 <code class="docutils literal notranslate"><span class="pre">AttrR</span></code>s for the target and actual temperature for each ramp as described above.</p>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
+<p class="admonition-title">Code 11</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="hll">
-</span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="hll"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrHandlerRW</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
@@ -1216,17 +1216,17 @@ gets the array of voltages and sets each ramp controller with its value. Also ad
 
 <span class="k">class</span><span class="w"> </span><span class="nc">OnOffEnum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
     <span class="n">Off</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
-<span class="hll">    <span class="n">On</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
-</span>
+    <span class="n">On</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">SubController</span><span class="p">):</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
     <span class="n">end</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
     <span class="n">enabled</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Enum</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="p">),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">))</span>
-    <span class="n">target</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">))</span>
-    <span class="n">actual</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">))</span>
-    <span class="n">voltage</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">())</span>
-
+<span class="hll">    <span class="n">target</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">))</span>
+</span><span class="hll">    <span class="n">actual</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">handler</span><span class="o">=</span><span class="n">TemperatureControllerHandler</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">))</span>
+</span><span class="hll">    <span class="n">voltage</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">())</span>
+</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
 
@@ -1247,24 +1247,24 @@ gets the array of voltages and sets each ramp controller with its value. Also ad
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">IPConnection</span><span class="p">()</span>
-<span class="hll">
-</span><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TemperatureRampController</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span class="hll">        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-</span><span class="hll">            <span class="n">ramp_controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
-</span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ramp_controller</span><span class="p">)</span>
-</span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ramp_controller</span><span class="p">)</span>
-</span><span class="hll">
-</span>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TemperatureRampController</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">ramp_controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ramp_controller</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ramp_controller</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
-
-    <span class="nd">@scan</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_voltages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">voltages</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
-            <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="s2">&quot;V?</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">controller</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">):</span>
-            <span class="k">await</span> <span class="n">controller</span><span class="o">.</span><span class="n">voltage</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">voltages</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
-
+<span class="hll">
+</span><span class="hll">    <span class="nd">@scan</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+</span><span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_voltages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class="hll">        <span class="n">voltages</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+</span><span class="hll">            <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="s2">&quot;V?</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class="hll">        <span class="p">)</span>
+</span><span class="hll">        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">controller</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">):</span>
+</span><span class="hll">            <span class="k">await</span> <span class="n">controller</span><span class="o">.</span><span class="n">voltage</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">voltages</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
+</span>
 
 <span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
@@ -1285,11 +1285,11 @@ attribute does.</p>
 <p>Add a method with a <code class="docutils literal notranslate"><span class="pre">&#64;command</span></code> decorator to set enabled to false in every ramp
 controller.</p>
 <div class="dropdown hint admonition">
-<p class="admonition-title">Code</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<p class="admonition-title">Code 12</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="hll"><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -1301,8 +1301,8 @@ controller.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCAOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.wrappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">scan</span>
-
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.wrappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">scan</span>
+</span>
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerHandler</span><span class="p">(</span><span class="n">AttrHandlerRW</span><span class="p">):</span>
@@ -1333,10 +1333,10 @@ controller.</p>
         <span class="n">response</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
-<span class="hll">
-</span><span class="hll">
-</span><span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">OnOffEnum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
-</span>    <span class="n">Off</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">OnOffEnum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="n">Off</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
     <span class="n">On</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
 
 
@@ -1376,23 +1376,23 @@ controller.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ramp_controller</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="hll">        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
-</span><span class="hll">
-</span><span class="hll">    <span class="nd">@scan</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-</span><span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_voltages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class="hll">        <span class="n">voltages</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
-</span><span class="hll">            <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="s2">&quot;V?</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</span>        <span class="p">)</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
+
+    <span class="nd">@scan</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_voltages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">voltages</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+            <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="s2">&quot;V?</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">controller</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">):</span>
             <span class="k">await</span> <span class="n">controller</span><span class="o">.</span><span class="n">voltage</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">voltages</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
-
-    <span class="nd">@command</span><span class="p">()</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disable_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">rc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">rc</span><span class="o">.</span><span class="n">enabled</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="o">.</span><span class="n">Off</span><span class="p">)</span>
-            <span class="c1"># TODO: The requests all get concatenated and the sim doesn&#39;t handle it</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-
+<span class="hll">
+</span><span class="hll">    <span class="nd">@command</span><span class="p">()</span>
+</span><span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disable_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span class="hll">        <span class="k">for</span> <span class="n">rc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span>
+</span><span class="hll">            <span class="k">await</span> <span class="n">rc</span><span class="o">.</span><span class="n">enabled</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="o">.</span><span class="n">Off</span><span class="p">)</span>
+</span><span class="hll">            <span class="c1"># TODO: The requests all get concatenated and the sim doesn&#39;t handle it</span>
+</span><span class="hll">            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+</span>
 
 <span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>

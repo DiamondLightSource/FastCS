@@ -24,7 +24,7 @@ functionality.
 
 Create a `TemperatureController` class that inherits from `Controller`.
 
-::::{admonition} Code
+::::{admonition} Code 1
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static01.py
@@ -39,7 +39,7 @@ and a list of transports to expose the API through and provides a `run` method t
 the application. Create a `FastCS` instance, pass the `TemperatureController` to it
 along with an empty list of transports (for now).
 
-::::{admonition} Code
+::::{admonition} Code 2
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static02.py
@@ -59,7 +59,7 @@ be added to the `Controller`. There are 3 types of `Attribute`: `AttrR`, `AttrW`
 written, so add an `AttrR`. An `Attribute` also needs a type. The ID from the simulator
 is a string, so `String` should be used.
 
-::::{admonition} Code
+::::{admonition} Code 3
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static03.py
@@ -91,7 +91,7 @@ One or more of these can be loaded into the application and run in parallel. Add
 EPICS CA transport to the application by creating an `EPICSCAOptions` instance and
 passing it in.
 
-::::{admonition} Code
+::::{admonition} Code 4
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static04.py
@@ -125,7 +125,7 @@ ensure the connection is established before it is used.
 The simulator control connection is on port 25565.
 :::
 
-::::{admonition} Code
+::::{admonition} Code 5
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static05.py
@@ -148,11 +148,11 @@ instance of the `Updater` to the `device_id` attribute.
 The `update_period` property tells the base class how often to call `update`
 :::
 
-::::{admonition} Code
+::::{admonition} Code 6
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static06.py
-:emphasize-lines: 1,12-22,26
+:emphasize-lines: 1-3,14-34,38
 :::
 
 ::::
@@ -190,11 +190,11 @@ because the value is actually a string, but for `P` the value is a float, so the
 etc.
 ::::
 
-:::{admonition} Code
+:::{admonition} Code 7
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static07.py
-:emphasize-lines: 6,13-14,20,27-28
+:emphasize-lines: 8,15-16,32-34,42
 :::
 
 ::::
@@ -215,11 +215,11 @@ The set commands do not return a response, so use the `send_command` method inst
 `send_query`.
 :::
 
-::::{admonition} Code
+::::{admonition} Code 8
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static08.py
-:emphasize-lines: 2,4,14,26-29,35
+:emphasize-lines: 4,6,16,40-43,49
 :::
 
 ::::
@@ -260,11 +260,11 @@ commands so that it can be shared between the parent `TemperatureController` and
 argument to define how many ramps there are, which is used to register the correct
 number of ramp controllers with the parent.
 
-::::{admonition} Code
+::::{admonition} Code 9
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static09.py
-:emphasize-lines: 6,7,19,21-23,36-45,55,61-65,73
+:emphasize-lines: 8,9,19,22,26,34,42,46-57,62-63,71-75,83
 :::
 
 ::::
@@ -285,11 +285,11 @@ enable (and disable) the ramping.
 Add an `AttrRW` to the `TemperatureRampController`s with an `Enum` type, using a
 `StrEnum` with states `Off` and `On`.
 
-::::{admonition} Code
+::::{admonition} Code 10
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static10.py
-:emphasize-lines: 1,37-39,45
+:emphasize-lines: 3,10,47-51,55
 :::
 
 ::::
@@ -338,11 +338,11 @@ handler. Then add a method to the `TemperatureController` with a `@scan` decorat
 gets the array of voltages and sets each ramp controller with its value. Also add
 `AttrR`s for the target and actual temperature for each ramp as described above.
 
-::::{admonition} Code
+::::{admonition} Code 11
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static11.py
-:emphasize-lines: 2,51,82-88
+:emphasize-lines: 4,58-60,91-98
 :::
 
 ::::
@@ -359,11 +359,11 @@ attribute does.
 Add a method with a `@command` decorator to set enabled to false in every ramp
 controller.
 
-::::{admonition} Code
+::::{admonition} Code 12
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static12.py
-:emphasize-lines: 1,48-50,91-96
+:emphasize-lines: 3,16,100-106
 :::
 
 ::::
