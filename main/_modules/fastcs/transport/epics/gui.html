@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.gui &#8212; FastCS 0.8.1.dev53+g39806a1 documentation</title>
+    <title>fastcs.transport.epics.gui &#8212; FastCS 0.8.1.dev54+g6ee1578 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=01038bdb"></script>
+    <script src="../../../../_static/documentation_options.js?v=d43c6e7f"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -494,7 +494,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_pv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">attr_prefix</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_pv_prefix</span><span class="p">]</span> <span class="o">+</span> <span class="n">attr_path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">snake_to_pascal</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_read_widget</span><span class="p">(</span><span class="n">attribute</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReadWidgetUnion</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -532,8 +532,7 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">attr_path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">Attribute</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SignalR</span> <span class="o">|</span> <span class="n">SignalW</span> <span class="o">|</span> <span class="n">SignalRW</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">pv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pv</span><span class="p">(</span><span class="n">attr_path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-
+        <span class="n">name</span> <span class="o">=</span> <span class="n">snake_to_pascal</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">match</span> <span class="n">attribute</span><span class="p">:</span>
             <span class="k">case</span> <span class="n">AttrRW</span><span class="p">():</span>
                 <span class="n">read_widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_read_widget</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
@@ -562,7 +561,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_command_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">pv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pv</span><span class="p">(</span><span class="n">attr_path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">snake_to_pascal</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">SignalX</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.util &#8212; FastCS 0.8.1.dev53+g39806a1 documentation</title>
+    <title>fastcs.util &#8212; FastCS 0.8.1.dev54+g6ee1578 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=01038bdb"></script>
+    <script src="../../_static/documentation_options.js?v=d43c6e7f"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -449,13 +449,18 @@
                 <article class="bd-article">
                   
   <h1>Source code for fastcs.util</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+
 <div class="viewcode-block" id="snake_to_pascal">
 <a class="viewcode-back" href="../../_api/fastcs.util.html#fastcs.util.snake_to_pascal">[docs]</a>
-<span></span><span class="k">def</span><span class="w"> </span><span class="nf">snake_to_pascal</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a snake_case string to PascalCase.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-        <span class="n">part</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">islower</span><span class="p">()</span> <span class="k">else</span> <span class="n">part</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="nb">input</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
-    <span class="p">)</span></div>
+<span class="k">def</span><span class="w"> </span><span class="nf">snake_to_pascal</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts string from snake case to Pascal case.</span>
+<span class="sd">    If string is not a valid snake case it will be returned unchanged</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[a-z][a-z0-9]*(?:_[a-z0-9]+)*&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(?:^|_)([a-z0-9])&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">match</span><span class="p">:</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">name</span></div>
 
 </pre></div>
 
