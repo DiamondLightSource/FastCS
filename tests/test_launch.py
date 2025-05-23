@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import dataclass
 
 import pytest
@@ -137,6 +138,10 @@ def test_launch(mocker: MockerFixture, data):
 
 
 def test_get_schema(data):
-    ref_schema = YAML(typ="safe").load(data / "schema.json")
     target_schema = get_controller_schema(IsHinted)
+    if os.environ.get("FASTCS_REGENERATE_OUTPUT", None):
+        with open(data / "schema.json", "w") as f:
+            json.dump(target_schema, f, indent=2)
+
+    ref_schema = YAML(typ="safe").load(data / "schema.json")
     assert target_schema == ref_schema
