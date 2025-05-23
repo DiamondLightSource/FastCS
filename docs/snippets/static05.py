@@ -20,7 +20,7 @@ class TemperatureController(Controller):
         await self.connection.connect(self._ip_settings)
 
 
-epics_options = EpicsCAOptions(ioc=EpicsIOCOptions(pv_prefix="DEMO"))
+epics_options = EpicsCAOptions(ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"))
 connection_settings = IPConnectionSettings("localhost", 25565)
 fastcs = FastCS(TemperatureController(connection_settings), [epics_options])
 

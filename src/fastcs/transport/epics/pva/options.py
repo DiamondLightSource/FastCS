@@ -13,4 +13,4 @@ class EpicsPVAOptions:
 
     docs: EpicsDocsOptions = field(default_factory=EpicsDocsOptions)
     gui: EpicsGUIOptions = field(default_factory=EpicsGUIOptions)
-    ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
+    pva_ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)

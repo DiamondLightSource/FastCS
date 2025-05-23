@@ -231,7 +231,7 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
 
 
 def make_fastcs(pv_prefix: str, controller: Controller) -> FastCS:
-    epics_options = EpicsPVAOptions(ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
+    epics_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     return FastCS(controller, [epics_options])
 
 

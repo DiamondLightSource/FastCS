@@ -8,7 +8,7 @@
         "gui": {
           "$ref": "#/$defs/EpicsGUIOptions"
         },
-        "ioc": {
+        "ca_ioc": {
           "$ref": "#/$defs/EpicsIOCOptions"
         }
       },
@@ -88,7 +88,7 @@
         "gui": {
           "$ref": "#/$defs/EpicsGUIOptions"
         },
-        "ioc": {
+        "pva_ioc": {
           "$ref": "#/$defs/EpicsIOCOptions"
         }
       },

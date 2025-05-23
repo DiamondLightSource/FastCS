@@ -17,7 +17,7 @@ def run():
     transport_options = [
         RestOptions(rest=RestServerOptions(port=8090)),
         EpicsCAOptions(
-            ioc=EpicsIOCOptions(pv_prefix="BENCHMARK-DEVICE"),
+            ca_ioc=EpicsIOCOptions(pv_prefix="BENCHMARK-DEVICE"),
         ),
         TangoOptions(dsr=TangoDSROptions(dev_name="MY/BENCHMARK/DEVICE")),
     ]

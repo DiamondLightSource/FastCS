@@ -21,7 +21,7 @@ class ChildController(SubController):
 
 
 def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
-    epics_options = EpicsCAOptions(ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
+    epics_options = EpicsCAOptions(ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     controller = ParentController()
     controller.register_sub_controller("Child", ChildController())
     fastcs = FastCS(controller, [epics_options])
