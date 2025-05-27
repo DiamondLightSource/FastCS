@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Creating a FastCS Driver &#8212; FastCS 0.8.1.dev54+g6ee1578 documentation</title>
+    <title>Creating a FastCS Driver &#8212; FastCS 0.8.1.dev57+gfdcab7a documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=d43c6e7f"></script>
+    <script src="../_static/documentation_options.js?v=04b92c0b"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -584,7 +584,7 @@ passing it in.</p>
     <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">())</span>
 
 
-<span class="hll"><span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="hll"><span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 </span><span class="hll"><span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 </span>
 <span class="c1"># fastcs.run()  # Commented as this will block</span>
@@ -637,7 +637,7 @@ ensure the connection is established before it is used.</p>
 </span><span class="hll">        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 </span>
 
-<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="hll"><span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
 </span><span class="hll"><span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 </span>
@@ -709,7 +709,7 @@ instance of the <code class="docutils literal notranslate"><span class="pre">Upd
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
 
-<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
 <span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 
@@ -802,7 +802,7 @@ etc.</p>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
 
-<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
 <span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 
@@ -887,7 +887,7 @@ also needs a <code class="docutils literal notranslate"><span class="pre">Sender
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
 
-<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
 <span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 
@@ -1007,7 +1007,7 @@ number of ramp controllers with the parent.</p>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
 
-<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
 <span class="hll"><span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 </span>
@@ -1118,7 +1118,7 @@ enable (and disable) the ramping.</p>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
 
-<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
 <span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 
@@ -1266,7 +1266,7 @@ gets the array of voltages and sets each ramp controller with its value. Also ad
 </span><span class="hll">            <span class="k">await</span> <span class="n">controller</span><span class="o">.</span><span class="n">voltage</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">voltages</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
 </span>
 
-<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
 <span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 
@@ -1394,7 +1394,7 @@ controller.</p>
 </span><span class="hll">            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
 </span>
 
-<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
+<span class="n">epics_options</span> <span class="o">=</span> <span class="n">EpicsCAOptions</span><span class="p">(</span><span class="n">ca_ioc</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
 <span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_options</span><span class="p">])</span>
 
