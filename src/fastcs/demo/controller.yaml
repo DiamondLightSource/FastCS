@@ -9,8 +9,8 @@ transport:
       host: localhost
       port: 8083
       log_level: info
-  - ioc:
-      pv_prefix: GARY
+  - ca_ioc:
+      pv_prefix: DEMO
     gui:
       title: Temperature Controller Demo
       output_path: ./demo.bob

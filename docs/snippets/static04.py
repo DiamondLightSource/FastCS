@@ -10,7 +10,7 @@ class TemperatureController(Controller):
     device_id = AttrR(String())
 
 
-epics_options = EpicsCAOptions(ioc=EpicsIOCOptions(pv_prefix="DEMO"))
+epics_options = EpicsCAOptions(ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"))
 fastcs = FastCS(TemperatureController(), [epics_options])
 
 # fastcs.run()  # Commented as this will block

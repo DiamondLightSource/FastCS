@@ -65,7 +65,7 @@ class ChildController(SubController):
 
 
 def run(pv_prefix="P4P_TEST_DEVICE"):
-    p4p_options = EpicsPVAOptions(ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
+    p4p_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     controller = ParentController()
     controller.register_sub_controller(
         "Child1", ChildController(description="some sub controller")
