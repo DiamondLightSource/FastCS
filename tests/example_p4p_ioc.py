@@ -41,7 +41,6 @@ class ChildController(SubController):
         print("D: RUNNING")
         await asyncio.sleep(0.1)
         print("D: FINISHED")
-        raise ValueError()
 
     e: AttrR = AttrR(Bool())
 
@@ -75,7 +74,6 @@ def run(pv_prefix="P4P_TEST_DEVICE"):
         "Child2", ChildController(description="another sub controller")
     )
     fastcs = FastCS(controller, [p4p_options])
-    # fastcs.create_gui()
     fastcs.run()
 
 
