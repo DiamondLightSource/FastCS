@@ -17,7 +17,7 @@ class ChildController(SubController):
 
     @command()
     async def d(self):
-        pass
+        raise ValueError("error")
 
 
 def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
@@ -25,6 +25,7 @@ def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
     controller = ParentController()
     controller.register_sub_controller("Child", ChildController())
     fastcs = FastCS(controller, [epics_options])
+    fastcs.create_gui()
     fastcs.run()
 
 
