@@ -145,6 +145,11 @@ async def test_command_method(p4p_subprocess: tuple[str, Queue]):
         )
         assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "I: RUNNING"
         assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "\n"
+        # Traceback is printed to terminal via handler
+        assert "RuntimeError: I: FAILED WITH THIS WEIRD ERROR" in stdout_queue.get(
+            timeout=QUEUE_TIMEOUT
+        )
+        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "\n"
 
         # Second run succeeds
         assert stdout_queue.empty()
