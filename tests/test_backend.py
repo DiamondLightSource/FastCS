@@ -5,6 +5,7 @@ from fastcs.backend import Backend, build_controller_api
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Int
+from fastcs.exceptions import FastCSException
 from fastcs.wrappers import command, scan
 
 
@@ -89,3 +90,40 @@ def test_controller_api_methods():
         await backend.controller_api.command_methods["do_nothing_dynamic"]()
 
     loop.run_until_complete(test_wrapper())
+
+
+def test_scan_raises_exception_via_callback():
+    class MyTestController(Controller):
+        def __init__(self):
+            super().__init__()
+
+        @scan(0.1)
+        async def raise_exception(self):
+            raise ValueError("Scan Exception")
+
+    controller = MyTestController()
+    loop = asyncio.get_event_loop()
+    backend = Backend(controller, loop)
+
+    exception_info = {}
+    # This will intercept the exception raised in _raise_scan_exception
+    loop.set_exception_handler(
+        lambda _loop, context: exception_info.update(
+            {"exception": context.get("exception")}
+        )
+    )
+
+    async def test_scan_wrapper():
+        await backend._start_scan_tasks()
+        # This allows scan time to run
+        await asyncio.sleep(0.2)
+        # _raise_scan_exception should raise an exception
+        assert isinstance(exception_info["exception"], FastCSException)
+        for task in backend._scan_tasks:
+            internal_exception = task.exception()
+            assert internal_exception
+            # The task exception comes from scan method raise_exception
+            assert isinstance(internal_exception, ValueError)
+            assert "Scan Exception" == str(internal_exception)
+
+    loop.run_until_complete(test_scan_wrapper())

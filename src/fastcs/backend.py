@@ -60,7 +60,7 @@ class Backend:
         try:
             task.result()
         except Exception as e:
-            raise Exception(
+            raise FastCSException(
                 "Exception raised in scan method of "
                 f"{self._controller.__class__.__name__}"
             ) from e
