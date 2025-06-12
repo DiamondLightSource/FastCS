@@ -34,9 +34,10 @@ from github:
 $ python3 -m pip install git+https://github.com/DiamondLightSource/FastCS.git
 ```
 
-The library should now be installed and the commandline interface on your path.
-You can check the version that has been installed by typing:
+The library should now be installed. There is no application entrypoint, but the library can be imported:
 
 ```
-$ FastCS --version
+$ python3
+>>> from fastcs import __version__
+>>> fastcs.__version__  # doctest: +SKIP
 ```
