@@ -6,15 +6,14 @@ from pathlib import Path
 from fastcs.attributes import AttrHandlerR, AttrR
 from fastcs.connections import IPConnection, IPConnectionSettings
 from fastcs.controller import BaseController, Controller
-from fastcs.datatypes import Float, String
+from fastcs.datatypes import String
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.options import EpicsCAOptions
 from fastcs.transport.epics.options import EpicsGUIOptions, EpicsIOCOptions
 
 
 @dataclass
-class TemperatureControllerUpdater(AttrHandlerR):
-    command_name: str
+class IDUpdater(AttrHandlerR):
     update_period: float | None = 0.2
     _controller: TemperatureController | None = None
 
@@ -30,17 +29,14 @@ class TemperatureControllerUpdater(AttrHandlerR):
         return self._controller
 
     async def update(self, attr: AttrR):
-        response = await self.controller.connection.send_query(
-            f"{self.command_name}?\r\n"
-        )
+        response = await self.controller.connection.send_query("ID?\r\n")
         value = response.strip("\r\n")
 
-        await attr.set(attr.dtype(value))
+        await attr.set(value)
 
 
 class TemperatureController(Controller):
-    device_id = AttrR(String(), handler=TemperatureControllerUpdater("ID"))
-    power = AttrR(Float(), handler=TemperatureControllerUpdater("P"))
+    device_id = AttrR(String(), handler=IDUpdater())
 
     def __init__(self, settings: IPConnectionSettings):
         super().__init__()

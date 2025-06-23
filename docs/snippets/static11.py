@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import enum
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -13,7 +12,6 @@ from fastcs.datatypes import Enum, Float, Int, String
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.options import EpicsCAOptions
 from fastcs.transport.epics.options import EpicsGUIOptions, EpicsIOCOptions
-from fastcs.wrappers import scan
 
 
 @dataclass
@@ -56,9 +54,6 @@ class TemperatureRampController(SubController):
     start = AttrRW(Int(), handler=TemperatureControllerHandler("S"))
     end = AttrRW(Int(), handler=TemperatureControllerHandler("E"))
     enabled = AttrRW(Enum(OnOffEnum), handler=TemperatureControllerHandler("N"))
-    target = AttrR(Float(), handler=TemperatureControllerHandler("T"))
-    actual = AttrR(Float(), handler=TemperatureControllerHandler("A"))
-    voltage = AttrR(Float())
 
     def __init__(self, index: int, connection: IPConnection):
         self.suffix = f"{index:02d}"
@@ -89,14 +84,6 @@ class TemperatureController(Controller):
 
     async def connect(self):
         await self.connection.connect(self._ip_settings)
-
-    @scan(0.1)
-    async def update_voltages(self):
-        voltages = json.loads(
-            (await self.connection.send_query("V?\r\n")).strip("\r\n")
-        )
-        for index, controller in enumerate(self._ramp_controllers):
-            await controller.voltage.set(float(voltages[index]))
 
 
 gui_options = EpicsGUIOptions(
