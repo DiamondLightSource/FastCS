@@ -2,11 +2,12 @@
 
 ## Demo Simulation
 
-Within FastCS there is a tickit simulation of a temperature controller. This can be run
-with the `Temp Controller Sim` launch config by typing `Ctrl+P debug ` (note the
-trailing whitespace), selecting the launch config and pressing enter. The simulation
-will then sit and wait for commands to be sent. When it receives commands, it will log
-them to the console to show what it is doing.
+Within FastCS there is a tickit simulation of a temperature controller. Clone the FastCS
+repository and open it in VS Code. The simulation can be run with the 
+`Temp Controller Sim` launch config by typing `Ctrl+P debug ` (note the trailing 
+whitespace), selecting the launch config and pressing enter. The simulation will then
+sit and wait for commands to be sent. When it receives commands, it will log them to the
+console to show what it is doing.
 
 :::{note}
 FastCS must be installed with the `demo` extra for the demo simulator to run. This can
@@ -72,10 +73,6 @@ Now the controller has a property that will appear in the API, but the applicati
 completes immediately because there are no transports being run on the event loop to
 expose an API.
 
-Now that the controller has an attribute, it would be useful to open the generated UI.
-A `demo.bob` will have been created in the directory the application was run from. This
-can be launched with Phoebus.
-
 ## FastCS Transports
 
 FastCS supports multiple transports to expose the API of the loaded `Controller`. The
@@ -100,6 +97,11 @@ passing it in.
 
 ::::
 
+:::{note}
+In the above snippet and all hereafter, the final line is commented out. This is done to 
+avoid blocking our unit tests - in your own code, it should remain uncommented.
+:::
+
 The application will now run until it is stopped. There will also be a `DEMO:DeviceId`
 PV being served by the application. However, the record is unset because the
 `Controller` is not yet querying the simulator for the value.
@@ -108,6 +110,20 @@ PV being served by the application. However, the record is unset because the
 ❯ caget -S DEMO:DeviceId
 DEMO:DeviceId
 ```
+
+Now that the controller has a PV, it would be useful to open a UI. Add EPICS GUI
+options to the transport options and generate a `demo.bob` file to use with Phoebus.
+
+::::{admonition} Code 5
+:class: dropdown, hint
+
+:::{literalinclude} /snippets/static05.py
+:emphasize-lines: 1,7,15-21,24
+:::
+
+::::
+
+The `demo.bob` will have been created in the directory the application was run from.
 
 ## FastCS Device Connection
 
@@ -125,11 +141,11 @@ ensure the connection is established before it is used.
 The simulator control connection is on port 25565.
 :::
 
-::::{admonition} Code 5
+::::{admonition} Code 6
 :class: dropdown, hint
 
-:::{literalinclude} /snippets/static05.py
-:emphasize-lines: 2,13-20,24,25
+:::{literalinclude} /snippets/static06.py
+:emphasize-lines: 4,15-22,32-33
 :::
 
 ::::
@@ -148,11 +164,11 @@ instance of the `Updater` to the `device_id` attribute.
 The `update_period` property tells the base class how often to call `update`
 :::
 
-::::{admonition} Code 6
+::::{admonition} Code 7
 :class: dropdown, hint
 
-:::{literalinclude} /snippets/static06.py
-:emphasize-lines: 1-3,14-34,38
+:::{literalinclude} /snippets/static07.py
+:emphasize-lines: 1-3,6,8,15-35,39
 :::
 
 ::::
@@ -190,11 +206,11 @@ because the value is actually a string, but for `P` the value is a float, so the
 etc.
 ::::
 
-:::{admonition} Code 7
+:::{admonition} Code 8
 :class: dropdown, hint
 
-:::{literalinclude} /snippets/static07.py
-:emphasize-lines: 8,15-16,32-34,42
+:::{literalinclude} /snippets/static08.py
+:emphasize-lines: 9,16-17,33-35,38,42-43
 :::
 
 ::::
@@ -215,11 +231,11 @@ The set commands do not return a response, so use the `send_command` method inst
 `send_query`.
 :::
 
-::::{admonition} Code 8
+::::{admonition} Code 9
 :class: dropdown, hint
 
-:::{literalinclude} /snippets/static08.py
-:emphasize-lines: 4,6,16,40-43,49
+:::{literalinclude} /snippets/static09.py
+:emphasize-lines: 5,7,17,41-44, 48-50
 :::
 
 ::::
@@ -260,11 +276,11 @@ commands so that it can be shared between the parent `TemperatureController` and
 argument to define how many ramps there are, which is used to register the correct
 number of ramp controllers with the parent.
 
-::::{admonition} Code 9
+::::{admonition} Code 10
 :class: dropdown, hint
 
-:::{literalinclude} /snippets/static09.py
-:emphasize-lines: 8,9,19,22,26,34,42,46-57,62-63,71-75,83
+:::{literalinclude} /snippets/static10.py
+:emphasize-lines: 9,10,20,23,27,35,43,47-56,64,66,72-76,90
 :::
 
 ::::
@@ -285,11 +301,11 @@ enable (and disable) the ramping.
 Add an `AttrRW` to the `TemperatureRampController`s with an `Enum` type, using a
 `StrEnum` with states `Off` and `On`.
 
-::::{admonition} Code 10
+::::{admonition} Code 11
 :class: dropdown, hint
 
-:::{literalinclude} /snippets/static10.py
-:emphasize-lines: 3,10,47-51,55
+:::{literalinclude} /snippets/static11.py
+:emphasize-lines: 3,11,48-50,56
 :::
 
 ::::
@@ -338,11 +354,11 @@ handler. Then add a method to the `TemperatureController` with a `@scan` decorat
 gets the array of voltages and sets each ramp controller with its value. Also add
 `AttrR`s for the target and actual temperature for each ramp as described above.
 
-::::{admonition} Code 11
+::::{admonition} Code 12
 :class: dropdown, hint
 
-:::{literalinclude} /snippets/static11.py
-:emphasize-lines: 4,58-60,91-98
+:::{literalinclude} /snippets/static12.py
+:emphasize-lines: 4,16,59-61,93-99
 :::
 
 ::::
@@ -359,11 +375,11 @@ attribute does.
 Add a method with a `@command` decorator to set enabled to false in every ramp
 controller.
 
-::::{admonition} Code 12
+::::{admonition} Code 13
 :class: dropdown, hint
 
-:::{literalinclude} /snippets/static12.py
-:emphasize-lines: 3,16,100-106
+:::{literalinclude} /snippets/static13.py
+:emphasize-lines: 3,17,47,102-108
 :::
 
 ::::
