@@ -97,7 +97,7 @@ passing it in.
 
 ::::
 
-:::{note}
+:::{warning}
 In the above snippet and all hereafter, the final line is commented out. This is done to 
 avoid blocking our unit tests - in your own code, it should remain uncommented.
 :::
