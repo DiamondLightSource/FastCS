@@ -40,7 +40,7 @@ class TemperatureControllerHandler(AttrHandlerRW):
 
     async def put(self, attr: AttrW, value: Any):
         await self.controller.connection.send_command(
-            f"{self.command_name}={value}\r\n"
+            f"{self.command_name}={attr.dtype(value)}\r\n"
         )
 
 

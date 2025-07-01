@@ -379,7 +379,7 @@ controller.
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static13.py
-:emphasize-lines: 3,17,47,102-108
+:emphasize-lines: 3,17,102-108
 :::
 
 ::::
