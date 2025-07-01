@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import asyncio
 import enum
 import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from fastcs.attributes import AttrHandlerRW, AttrR, AttrRW, AttrW
@@ -12,13 +12,13 @@ from fastcs.controller import BaseController, Controller, SubController
 from fastcs.datatypes import Enum, Float, Int, String
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.options import EpicsCAOptions
-from fastcs.transport.epics.options import EpicsIOCOptions
-from fastcs.wrappers import command, scan
+from fastcs.transport.epics.options import EpicsGUIOptions, EpicsIOCOptions
+from fastcs.wrappers import scan
 
 
 @dataclass
 class TemperatureControllerHandler(AttrHandlerRW):
-    name: str
+    command_name: str
     update_period: float | None = 0.2
     _controller: TemperatureController | TemperatureRampController | None = None
 
@@ -33,18 +33,18 @@ class TemperatureControllerHandler(AttrHandlerRW):
 
         return self._controller
 
-    async def put(self, attr: AttrW, value: Any) -> None:
-        await self.controller.connection.send_command(
-            f"{self.name}{self.controller.suffix}={attr.dtype(value)}\r\n"
-        )
-
-    async def update(self, attr: AttrR) -> None:
+    async def update(self, attr: AttrR):
         response = await self.controller.connection.send_query(
-            f"{self.name}{self.controller.suffix}?\r\n"
+            f"{self.command_name}{self.controller.suffix}?\r\n"
         )
-        response = response.strip("\r\n")
+        value = response.strip("\r\n")
 
-        await attr.set(attr.dtype(response))
+        await attr.set(attr.dtype(value))
+
+    async def put(self, attr: AttrW, value: Any):
+        await self.controller.connection.send_command(
+            f"{self.command_name}{self.controller.suffix}={attr.dtype(value)}\r\n"
+        )
 
 
 class OnOffEnum(enum.StrEnum):
@@ -98,16 +98,17 @@ class TemperatureController(Controller):
         for index, controller in enumerate(self._ramp_controllers):
             await controller.voltage.set(float(voltages[index]))
 
-    @command()
-    async def disable_all(self) -> None:
-        for rc in self._ramp_controllers:
-            await rc.enabled.process(OnOffEnum.Off)
-            # TODO: The requests all get concatenated and the sim doesn't handle it
-            await asyncio.sleep(0.1)
 
-
-epics_options = EpicsCAOptions(ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"))
+gui_options = EpicsGUIOptions(
+    output_path=Path(".") / "demo.bob", title="Demo Temperature Controller"
+)
+epics_options = EpicsCAOptions(
+    gui=gui_options,
+    ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"),
+)
 connection_settings = IPConnectionSettings("localhost", 25565)
 fastcs = FastCS(TemperatureController(4, connection_settings), [epics_options])
+
+fastcs.create_gui()
 
 # fastcs.run()  # Commented as this will block

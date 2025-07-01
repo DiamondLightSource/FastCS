@@ -1,19 +1,19 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from pathlib import Path
 
-from fastcs.attributes import AttrHandlerRW, AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrHandlerR, AttrR
 from fastcs.connections import IPConnection, IPConnectionSettings
 from fastcs.controller import BaseController, Controller
 from fastcs.datatypes import Float, String
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.options import EpicsCAOptions
-from fastcs.transport.epics.options import EpicsIOCOptions
+from fastcs.transport.epics.options import EpicsGUIOptions, EpicsIOCOptions
 
 
 @dataclass
-class TemperatureControllerHandler(AttrHandlerRW):
+class TemperatureControllerUpdater(AttrHandlerR):
     command_name: str
     update_period: float | None = 0.2
     _controller: TemperatureController | None = None
@@ -37,16 +37,10 @@ class TemperatureControllerHandler(AttrHandlerRW):
 
         await attr.set(attr.dtype(value))
 
-    async def put(self, attr: AttrW, value: Any):
-        await self.controller.connection.send_command(
-            f"{self.command_name}={value}\r\n"
-        )
-
 
 class TemperatureController(Controller):
-    device_id = AttrR(String(), handler=TemperatureControllerHandler("ID"))
-    power = AttrR(Float(), handler=TemperatureControllerHandler("P"))
-    ramp_rate = AttrRW(Float(), handler=TemperatureControllerHandler("R"))
+    device_id = AttrR(String(), handler=TemperatureControllerUpdater("ID"))
+    power = AttrR(Float(), handler=TemperatureControllerUpdater("P"))
 
     def __init__(self, settings: IPConnectionSettings):
         super().__init__()
@@ -58,8 +52,16 @@ class TemperatureController(Controller):
         await self.connection.connect(self._ip_settings)
 
 
-epics_options = EpicsCAOptions(ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"))
+gui_options = EpicsGUIOptions(
+    output_path=Path(".") / "demo.bob", title="Demo Temperature Controller"
+)
+epics_options = EpicsCAOptions(
+    gui=gui_options,
+    ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"),
+)
 connection_settings = IPConnectionSettings("localhost", 25565)
 fastcs = FastCS(TemperatureController(connection_settings), [epics_options])
+
+fastcs.create_gui()
 
 # fastcs.run()  # Commented as this will block

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import asyncio
+import enum
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -7,10 +10,11 @@ from typing import Any
 from fastcs.attributes import AttrHandlerRW, AttrR, AttrRW, AttrW
 from fastcs.connections import IPConnection, IPConnectionSettings
 from fastcs.controller import BaseController, Controller, SubController
-from fastcs.datatypes import Float, Int, String
+from fastcs.datatypes import Enum, Float, Int, String
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.options import EpicsCAOptions
 from fastcs.transport.epics.options import EpicsGUIOptions, EpicsIOCOptions
+from fastcs.wrappers import command, scan
 
 
 @dataclass
@@ -30,7 +34,7 @@ class TemperatureControllerHandler(AttrHandlerRW):
 
         return self._controller
 
-    async def update(self, attr: AttrR):
+    async def update(self, attr: AttrR) -> None:
         response = await self.controller.connection.send_query(
             f"{self.command_name}{self.controller.suffix}?\r\n"
         )
@@ -38,15 +42,24 @@ class TemperatureControllerHandler(AttrHandlerRW):
 
         await attr.set(attr.dtype(value))
 
-    async def put(self, attr: AttrW, value: Any):
+    async def put(self, attr: AttrW, value: Any) -> None:
         await self.controller.connection.send_command(
             f"{self.command_name}{self.controller.suffix}={attr.dtype(value)}\r\n"
         )
 
 
+class OnOffEnum(enum.StrEnum):
+    Off = "0"
+    On = "1"
+
+
 class TemperatureRampController(SubController):
     start = AttrRW(Int(), handler=TemperatureControllerHandler("S"))
     end = AttrRW(Int(), handler=TemperatureControllerHandler("E"))
+    enabled = AttrRW(Enum(OnOffEnum), handler=TemperatureControllerHandler("N"))
+    target = AttrR(Float(), handler=TemperatureControllerHandler("T"))
+    actual = AttrR(Float(), handler=TemperatureControllerHandler("A"))
+    voltage = AttrR(Float())
 
     def __init__(self, index: int, connection: IPConnection):
         self.suffix = f"{index:02d}"
@@ -77,6 +90,21 @@ class TemperatureController(Controller):
 
     async def connect(self):
         await self.connection.connect(self._ip_settings)
+
+    @scan(0.1)
+    async def update_voltages(self):
+        voltages = json.loads(
+            (await self.connection.send_query("V?\r\n")).strip("\r\n")
+        )
+        for index, controller in enumerate(self._ramp_controllers):
+            await controller.voltage.set(float(voltages[index]))
+
+    @command()
+    async def disable_all(self) -> None:
+        for rc in self._ramp_controllers:
+            await rc.enabled.process(OnOffEnum.Off)
+            # TODO: The requests all get concatenated and the sim doesn't handle it
+            await asyncio.sleep(0.1)
 
 
 gui_options = EpicsGUIOptions(
