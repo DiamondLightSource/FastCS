@@ -40,7 +40,9 @@ class EpicsGUI:
         self._pv_prefix = pv_prefix
 
     def _get_pv(self, attr_path: list[str], name: str):
-        attr_prefix = ":".join([self._pv_prefix] + attr_path)
+        attr_prefix = ":".join(
+            [self._pv_prefix] + [snake_to_pascal(attr) for attr in attr_path]
+        )
         return f"{attr_prefix}:{snake_to_pascal(name)}"
 
     @staticmethod
