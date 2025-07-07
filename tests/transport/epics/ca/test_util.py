@@ -90,6 +90,7 @@ def test_casting_to_epics(datatype, input, output):
 @pytest.mark.parametrize(
     "datatype, input",
     [
+        (object(), 0),
         # TODO cover Waveform and Table cases
         (Enum(ShortEnum), 0),  # can't use index
         (Enum(ShortEnum), LongEnum.TOO),  # wrong enum.Enum class
@@ -120,10 +121,24 @@ def test_cast_to_epics_validations(datatype, input):
         (Enum(ShortMixedEnum), 0, ShortMixedEnum.STRING_MEMBER),
         (Enum(ShortMixedEnum), 1, ShortMixedEnum.INT_MEMBER),
         (Enum(ShortMixedEnum), 2, ShortMixedEnum.NONE_MEMBER),
+        (Bool(), 1, True),
+        (Bool(), 0, False),
     ],
 )
 def test_cast_from_epics_type(datatype, from_epics, result):
     assert cast_from_epics_type(datatype, from_epics) == result
+
+
+@pytest.mark.parametrize(
+    "datatype, input",
+    [
+        (object(), 0),
+        (Bool(), 3),
+    ],
+)
+def test_cast_from_epics_validations(datatype, input):
+    with pytest.raises(ValueError):
+        cast_from_epics_type(datatype, input)
 
 
 @pytest.mark.parametrize(
