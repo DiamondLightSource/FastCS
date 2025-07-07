@@ -195,48 +195,23 @@ class EpicsGUI:
 
 
 class PvaEpicsGUI(EpicsGUI):
-    """For creating gui in the PVA transport."""
+    """For creating gui in the PVA EPICS transport."""
 
     def _get_pv(self, attr_path: list[str], name: str):
-        attr_prefix = ":".join(
-            [self._pv_prefix] + [snake_to_pascal(attr) for attr in attr_path]
-        )
-        return f"pva://{attr_prefix}:{snake_to_pascal(name)}"
+        return f"pva://{super()._get_pv(attr_path, name)}"
 
     @staticmethod
     def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion | None:
-        match attribute.datatype:
-            case Bool():
-                return LED()
-            case Int() | Float():
-                return TextRead()
-            case String():
-                return TextRead(format=TextFormat.string)
-            case Enum():
-                return TextRead(format=TextFormat.string)
-            case Waveform():
-                return None
-            case Table():
-                return TableRead(
-                    widgets=[TextRead()] * 4 + [LED()] * 6 + [TextRead()] + [LED()] * 6
-                )
-            case datatype:
-                raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
+        if isinstance(attribute.datatype, Table):
+            return TableRead(
+                widgets=[TextRead()] * 4 + [LED()] * 6 + [TextRead()] + [LED()] * 6
+            )
+        else:
+            return EpicsGUI._get_read_widget(attribute)  # noqa: SLF001
 
     @staticmethod
     def _get_write_widget(attribute: AttrW) -> WriteWidgetUnion | None:
-        match attribute.datatype:
-            case Bool():
-                return ToggleButton()
-            case Int() | Float():
-                return TextWrite()
-            case String():
-                return TextWrite(format=TextFormat.string)
-            case Enum():
-                return ComboBox(choices=attribute.datatype.names)
-            case Waveform():
-                return None
-            case Table():
-                return TableWrite(widgets=[TextWrite()])
-            case datatype:
-                raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
+        if isinstance(attribute.datatype, Table):
+            return TableWrite(widgets=[TextWrite()])
+        else:
+            return EpicsGUI._get_write_widget(attribute)  # noqa: SLF001
