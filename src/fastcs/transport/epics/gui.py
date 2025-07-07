@@ -13,6 +13,8 @@ from pvi.device import (
     SignalW,
     SignalX,
     SubScreen,
+    TableRead,
+    TableWrite,
     TextFormat,
     TextRead,
     TextWrite,
@@ -25,7 +27,7 @@ from pydantic import ValidationError
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
+from fastcs.datatypes import Bool, Enum, Float, Int, String, Table, Waveform
 from fastcs.exceptions import FastCSException
 from fastcs.util import snake_to_pascal
 
@@ -190,3 +192,51 @@ class EpicsGUI:
             components.append(Group(name=name, layout=Grid(), children=children))
 
         return components
+
+
+class PvaEpicsGUI(EpicsGUI):
+    """For creating gui in the PVA transport."""
+
+    def _get_pv(self, attr_path: list[str], name: str):
+        attr_prefix = ":".join(
+            [self._pv_prefix] + [snake_to_pascal(attr) for attr in attr_path]
+        )
+        return f"pva://{attr_prefix}:{snake_to_pascal(name)}"
+
+    @staticmethod
+    def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion | None:
+        match attribute.datatype:
+            case Bool():
+                return LED()
+            case Int() | Float():
+                return TextRead()
+            case String():
+                return TextRead(format=TextFormat.string)
+            case Enum():
+                return TextRead(format=TextFormat.string)
+            case Waveform():
+                return None
+            case Table():
+                return TableRead(
+                    widgets=[TextRead()] * 4 + [LED()] * 6 + [TextRead()] + [LED()] * 6
+                )
+            case datatype:
+                raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
+
+    @staticmethod
+    def _get_write_widget(attribute: AttrW) -> WriteWidgetUnion | None:
+        match attribute.datatype:
+            case Bool():
+                return ToggleButton()
+            case Int() | Float():
+                return TextWrite()
+            case String():
+                return TextWrite(format=TextFormat.string)
+            case Enum():
+                return ComboBox(choices=attribute.datatype.names)
+            case Waveform():
+                return None
+            case Table():
+                return TableWrite(widgets=[TextWrite()])
+            case datatype:
+                raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
