@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.ca.util &#8212; FastCS 0.9.1.dev3+g77189df documentation</title>
+    <title>fastcs.transport.epics.ca.util &#8212; FastCS 0.9.1.dev4+ge3e15ea documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=9ae720f3"></script>
+    <script src="../../../../../_static/documentation_options.js?v=cd1b6462"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -552,6 +552,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">cast_from_epics_type</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Casts from an EPICS datatype to a FastCS datatype.&quot;&quot;&quot;</span>
     <span class="k">match</span> <span class="n">datatype</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">Bool</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid bool value from EPICS record </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">MBB_MAX_CHOICES</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
