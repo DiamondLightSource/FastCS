@@ -93,6 +93,13 @@ def record_metadata_from_datatype(
 def cast_from_epics_type(datatype: DataType[T], value: object) -> T:
     """Casts from an EPICS datatype to a FastCS datatype."""
     match datatype:
+        case Bool():
+            if value == 0:
+                return False
+            elif value == 1:
+                return True
+            else:
+                raise ValueError(f"Invalid bool value from EPICS record {value}")
         case Enum():
             if len(datatype.members) <= MBB_MAX_CHOICES:
                 return datatype.validate(datatype.members[value])
