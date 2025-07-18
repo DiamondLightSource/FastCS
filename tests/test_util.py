@@ -1,8 +1,10 @@
+import numpy as np
 import pytest
 from pvi.device import SignalR
 from pydantic import ValidationError
 
-from fastcs.util import snake_to_pascal
+from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.util import numpy_to_fastcs_datatype, snake_to_pascal
 
 
 def test_snake_to_pascal():
@@ -36,3 +38,21 @@ def test_pvi_validation_error():
     name = snake_to_pascal("Name-With_%_Invalid-&-Symbols_£_")
     with pytest.raises(ValidationError):
         SignalR(name=name, read_pv="test")
+
+
+@pytest.mark.parametrize(
+    "numpy_type, fastcs_datatype",
+    [
+        (np.float16, Float()),
+        (np.float32, Float()),
+        (np.int16, Int()),
+        (np.int32, Int()),
+        (np.bool, Bool()),
+        (np.dtype("S1000"), String()),
+        (np.dtype("U25"), String()),
+        (np.dtype(">i4"), Int()),
+        (np.dtype("d"), Float()),
+    ],
+)
+def test_numpy_to_fastcs_datatype(numpy_type, fastcs_datatype):
+    assert fastcs_datatype == numpy_to_fastcs_datatype(numpy_type)
