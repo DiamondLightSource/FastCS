@@ -15,6 +15,9 @@ def snake_to_pascal(name: str) -> str:
 
 
 def numpy_to_fastcs_datatype(np_type) -> DataType:
+    """Converts numpy types to fastcs types for widget creation.
+    Only types important for widget creation are explicitly converted
+    """
     if np.issubdtype(np_type, np.integer):
         return Int()
     elif np.issubdtype(np_type, np.floating):
