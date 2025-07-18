@@ -58,8 +58,8 @@ async def parse_attributes(
                     provider.add(pv_name, attribute_pv)
                     pvi_tree.add_signal(pv_name, "r")
                 case AttrW():
-                    attribute_pv_rbv = make_shared_write_pv(attribute)
-                    provider.add(f"{pv_name}_RBV", attribute_pv_rbv)
+                    attribute_pv = make_shared_write_pv(attribute)
+                    provider.add(pv_name, attribute_pv)
                     pvi_tree.add_signal(pv_name, "w")
 
         for attr_name, method in controller_api.command_methods.items():
