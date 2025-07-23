@@ -98,29 +98,23 @@ class CommandPvHandler:
             raise RuntimeError("Commands should only take the value `True`.")
 
 
-def _make_shared_pv_arguments(
-    attribute: Attribute, initial_value: T
-) -> dict[str, object]:
+def _make_shared_pv_arguments(attribute: Attribute) -> dict[str, object]:
     type_ = make_p4p_type(attribute)
-    kwargs = {"initial": cast_to_p4p_value(attribute, initial_value)}
     if isinstance(type_, (NTEnum | NTNDArray | NTTable)):
-        kwargs["nt"] = type_
+        return {"nt": type_}
     else:
 
         def _wrap(value: dict):
             return Value(type_, value)
 
-        kwargs["wrap"] = _wrap
-
-    return kwargs
+        return {"wrap": _wrap}
 
 
 def make_shared_read_pv(attribute: AttrR) -> SharedPV:
-    initial_value = attribute.get()
-
-    kwargs = _make_shared_pv_arguments(attribute, initial_value)
-
-    shared_pv = SharedPV(**kwargs)
+    shared_pv = SharedPV(
+        initial=cast_to_p4p_value(attribute, attribute.get()),
+        **_make_shared_pv_arguments(attribute),
+    )
 
     async def on_update(value):
         shared_pv.post(cast_to_p4p_value(attribute, value))
@@ -131,13 +125,11 @@ def make_shared_read_pv(attribute: AttrR) -> SharedPV:
 
 
 def make_shared_write_pv(attribute: AttrW) -> SharedPV:
-    initial_value = attribute.datatype.initial_value
-
-    kwargs = _make_shared_pv_arguments(attribute, initial_value)
-
-    kwargs["handler"] = WritePvHandler(attribute)
-
-    shared_pv = SharedPV(**kwargs)
+    shared_pv = SharedPV(
+        handler=WritePvHandler(attribute),
+        initial=cast_to_p4p_value(attribute, attribute.datatype.initial_value),
+        **_make_shared_pv_arguments(attribute),
+    )
 
     async def async_write_display(value):
         shared_pv.post(cast_to_p4p_value(attribute, value))
