@@ -161,7 +161,7 @@ class UnboundCommand(Method[Controller_T]):
             raise FastCSException("Command method cannot have arguments")
 
     def bind(self, controller: Controller_T) -> Command:
-        return Command(MethodType(self.fn, controller))
+        return Command(MethodType(self.fn, controller), group=self.group)
 
     def __call__(self):
         raise method_not_bound_error
