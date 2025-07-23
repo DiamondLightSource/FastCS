@@ -45,9 +45,6 @@ class WritePvHandler:
         cast_value = cast_from_p4p_value(self._attr_w, raw_value)
 
         await self._attr_w.process_without_display_update(cast_value)
-        if type(self._attr_w) is AttrW:
-            # For AttrRW a post is done from the `_process_callback`.
-            pv.post(cast_to_p4p_value(self._attr_w, cast_value))
         op.done()
 
 
