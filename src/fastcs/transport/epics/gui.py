@@ -2,6 +2,7 @@ from pvi._format.dls import DLSFormatter  # type: ignore
 from pvi.device import (
     LED,
     ButtonPanel,
+    CheckBox,
     ComboBox,
     ComponentUnion,
     Device,
@@ -213,20 +214,24 @@ class PvaEpicsGUI(EpicsGUI):
                 numpy_to_fastcs_datatype(datatype)
                 for _, datatype in fastcs_datatype.structured_dtype
             ]
+
             base_get_read_widget = super()._get_read_widget
             widgets = [base_get_read_widget(datatype) for datatype in fastcs_datatypes]
+
             return TableRead(widgets=widgets)  # type: ignore
         else:
             return super()._get_read_widget(fastcs_datatype)
 
     def _get_write_widget(self, fastcs_datatype: DataType) -> WriteWidgetUnion | None:
         if isinstance(fastcs_datatype, Table):
-            fastcs_datatypes = [
-                numpy_to_fastcs_datatype(datatype)
-                for _, datatype in fastcs_datatype.structured_dtype
-            ]
-            base_get_write_widget = super()._get_write_widget
-            widgets = [base_get_write_widget(datatype) for datatype in fastcs_datatypes]
-            return TableWrite(widgets=widgets)  # type: ignore
+            widgets = []
+            for _, datatype in fastcs_datatype.structured_dtype:
+                fastcs_datatype = numpy_to_fastcs_datatype(datatype)
+                widget = super()._get_write_widget(fastcs_datatype)
+                if isinstance(widget, ToggleButton):
+                    # Replace with compact version for Table row
+                    widget = CheckBox()
+                widgets.append(widget)
+            return TableWrite(widgets=widgets)
         else:
             return super()._get_write_widget(fastcs_datatype)
