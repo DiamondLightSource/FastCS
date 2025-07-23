@@ -1,10 +1,12 @@
-from numpy import uint32
+import numpy as np
 from pvi.device import (
     LED,
+    CheckBox,
     SignalR,
     SignalW,
     TableRead,
     TableWrite,
+    TextFormat,
     TextRead,
     TextWrite,
 )
@@ -25,22 +27,50 @@ def test_get_pv_in_pva(controller_api):
 def test_get_attribute_component_table_write(controller_api):
     gui = PvaEpicsGUI(controller_api, "DEVICE")
 
-    assert gui._get_attribute_component(
-        [], "Table", AttrW(Table(structured_dtype=[("FIELD", uint32)]))
-    ) == SignalW(
-        name="Table", write_pv="Table", write_widget=TableWrite(widgets=[TextWrite()])
+    attribute_component = gui._get_attribute_component(
+        [],
+        "Table",
+        AttrW(
+            Table(
+                structured_dtype=[
+                    ("FIELD1", np.uint32),
+                    ("FIELD2", np.bool),
+                    ("FIELD3", np.dtype("S1000")),
+                ]
+            )
+        ),
     )
+
+    assert isinstance(attribute_component, SignalW)
+    assert isinstance(attribute_component.write_widget, TableWrite)
+    assert attribute_component.write_widget.widgets == [
+        TextWrite(),
+        CheckBox(),
+        TextWrite(format=TextFormat.string),
+    ]
 
 
 def test_get_attribute_component_table_read(controller_api):
     gui = PvaEpicsGUI(controller_api, "DEVICE")
 
-    assert gui._get_attribute_component(
-        [], "Table", AttrR(Table(structured_dtype=[("FIELD", uint32)]))
-    ) == SignalR(
-        name="Table",
-        read_pv="Table",
-        read_widget=TableRead(
-            widgets=[TextRead()] * 4 + [LED()] * 6 + [TextRead()] + [LED()] * 6
+    attribute_component = gui._get_attribute_component(
+        [],
+        "Table",
+        AttrR(
+            Table(
+                structured_dtype=[
+                    ("FIELD1", np.uint32),
+                    ("FIELD2", np.bool),
+                    ("FIELD3", np.dtype("S1000")),
+                ]
+            )
         ),
     )
+
+    assert isinstance(attribute_component, SignalR)
+    assert isinstance(attribute_component.read_widget, TableRead)
+    assert attribute_component.read_widget.widgets == [
+        TextRead(),
+        LED(),
+        TextRead(format=TextFormat.string),
+    ]
