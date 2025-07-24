@@ -1,7 +1,7 @@
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
 from fastcs.transport.epics.docs import EpicsDocs
-from fastcs.transport.epics.gui import EpicsGUI
+from fastcs.transport.epics.gui import PvaEpicsGUI
 from fastcs.transport.epics.pva.options import EpicsPVAOptions
 
 from .ioc import P4PIOC
@@ -32,4 +32,4 @@ class EpicsPVATransport(TransportAdapter):
         EpicsDocs(self._controller_api).create_docs(self.options.docs)
 
     def create_gui(self) -> None:
-        EpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.options.gui)
+        PvaEpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.options.gui)

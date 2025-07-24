@@ -78,12 +78,14 @@ def test_get_attribute_component_none(mocker, controller_api):
     assert gui._get_attribute_component([], "Attr", AttrRW(Int())) is None
 
 
-def test_get_read_widget_none():
-    assert EpicsGUI._get_read_widget(AttrR(Waveform(np.int32))) is None
+def test_get_read_widget_none(controller_api):
+    gui = EpicsGUI(controller_api, "DEVICE")
+    assert gui._get_read_widget(fastcs_datatype=Waveform(np.int32)) is None
 
 
-def test_get_write_widget_none():
-    assert EpicsGUI._get_write_widget(AttrW(Waveform(np.int32))) is None
+def test_get_write_widget_none(controller_api):
+    gui = EpicsGUI(controller_api, "DEVICE")
+    assert gui._get_write_widget(fastcs_datatype=Waveform(np.int32)) is None
 
 
 def test_get_components(controller_api):

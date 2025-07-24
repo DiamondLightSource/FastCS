@@ -2,6 +2,7 @@ from pvi._format.dls import DLSFormatter  # type: ignore
 from pvi.device import (
     LED,
     ButtonPanel,
+    CheckBox,
     ComboBox,
     ComponentUnion,
     Device,
@@ -13,6 +14,8 @@ from pvi.device import (
     SignalW,
     SignalX,
     SubScreen,
+    TableRead,
+    TableWrite,
     TextFormat,
     TextRead,
     TextWrite,
@@ -25,9 +28,18 @@ from pydantic import ValidationError
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
+from fastcs.datatypes import (
+    Bool,
+    DataType,
+    Enum,
+    Float,
+    Int,
+    String,
+    Table,
+    Waveform,
+)
 from fastcs.exceptions import FastCSException
-from fastcs.util import snake_to_pascal
+from fastcs.util import numpy_to_fastcs_datatype, snake_to_pascal
 
 from .options import EpicsGUIFormat, EpicsGUIOptions
 
@@ -40,12 +52,13 @@ class EpicsGUI:
         self._pv_prefix = pv_prefix
 
     def _get_pv(self, attr_path: list[str], name: str):
-        attr_prefix = ":".join([self._pv_prefix] + attr_path)
+        attr_prefix = ":".join(
+            [self._pv_prefix] + [snake_to_pascal(node) for node in attr_path]
+        )
         return f"{attr_prefix}:{snake_to_pascal(name)}"
 
-    @staticmethod
-    def _get_read_widget(attribute: AttrR) -> ReadWidgetUnion | None:
-        match attribute.datatype:
+    def _get_read_widget(self, fastcs_datatype: DataType) -> ReadWidgetUnion | None:
+        match fastcs_datatype:
             case Bool():
                 return LED()
             case Int() | Float():
@@ -59,9 +72,8 @@ class EpicsGUI:
             case datatype:
                 raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
 
-    @staticmethod
-    def _get_write_widget(attribute: AttrW) -> WriteWidgetUnion | None:
-        match attribute.datatype:
+    def _get_write_widget(self, fastcs_datatype: DataType) -> WriteWidgetUnion | None:
+        match fastcs_datatype:
             case Bool():
                 return ToggleButton()
             case Int() | Float():
@@ -69,7 +81,7 @@ class EpicsGUI:
             case String():
                 return TextWrite(format=TextFormat.string)
             case Enum():
-                return ComboBox(choices=attribute.datatype.names)
+                return ComboBox(choices=fastcs_datatype.names)
             case Waveform():
                 return None
             case datatype:
@@ -82,8 +94,8 @@ class EpicsGUI:
         name = snake_to_pascal(name)
         match attribute:
             case AttrRW():
-                read_widget = self._get_read_widget(attribute)
-                write_widget = self._get_write_widget(attribute)
+                read_widget = self._get_read_widget(attribute.datatype)
+                write_widget = self._get_write_widget(attribute.datatype)
                 if write_widget is None or read_widget is None:
                     return None
                 return SignalRW(
@@ -94,12 +106,12 @@ class EpicsGUI:
                     read_widget=read_widget,
                 )
             case AttrR():
-                read_widget = self._get_read_widget(attribute)
+                read_widget = self._get_read_widget(attribute.datatype)
                 if read_widget is None:
                     return None
                 return SignalR(name=name, read_pv=pv, read_widget=read_widget)
             case AttrW():
-                write_widget = self._get_write_widget(attribute)
+                write_widget = self._get_write_widget(attribute.datatype)
                 if write_widget is None:
                     return None
                 return SignalW(name=name, write_pv=pv, write_widget=write_widget)
@@ -188,3 +200,39 @@ class EpicsGUI:
             components.append(Group(name=name, layout=Grid(), children=children))
 
         return components
+
+
+class PvaEpicsGUI(EpicsGUI):
+    """For creating gui in the PVA EPICS transport."""
+
+    def _get_pv(self, attr_path: list[str], name: str):
+        return f"pva://{super()._get_pv(attr_path, name)}"
+
+    def _get_read_widget(self, fastcs_datatype: DataType) -> ReadWidgetUnion | None:
+        if isinstance(fastcs_datatype, Table):
+            fastcs_datatypes = [
+                numpy_to_fastcs_datatype(datatype)
+                for _, datatype in fastcs_datatype.structured_dtype
+            ]
+
+            base_get_read_widget = super()._get_read_widget
+            widgets = [base_get_read_widget(datatype) for datatype in fastcs_datatypes]
+
+            return TableRead(widgets=widgets)  # type: ignore
+        else:
+            return super()._get_read_widget(fastcs_datatype)
+
+    def _get_write_widget(self, fastcs_datatype: DataType) -> WriteWidgetUnion | None:
+        if isinstance(fastcs_datatype, Table):
+            widgets = []
+            for _, datatype in fastcs_datatype.structured_dtype:
+                fastcs_datatype = numpy_to_fastcs_datatype(datatype)
+                if isinstance(fastcs_datatype, Bool):
+                    # Replace with compact version for Table row
+                    widget = CheckBox()
+                else:
+                    widget = super()._get_write_widget(fastcs_datatype)
+                widgets.append(widget)
+            return TableWrite(widgets=widgets)
+        else:
+            return super()._get_write_widget(fastcs_datatype)
