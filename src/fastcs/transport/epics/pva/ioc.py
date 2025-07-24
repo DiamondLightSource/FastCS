@@ -6,7 +6,11 @@ from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
 from fastcs.util import snake_to_pascal
 
-from ._pv_handlers import make_command_pv, make_shared_pv
+from ._pv_handlers import (
+    make_command_pv,
+    make_shared_read_pv,
+    make_shared_write_pv,
+)
 from .pvi_tree import AccessModeType, PviTree
 
 
@@ -42,9 +46,21 @@ async def parse_attributes(
 
         for attr_name, attribute in controller_api.attributes.items():
             pv_name = get_pv_name(pv_prefix, attr_name)
-            attribute_pv = make_shared_pv(attribute)
-            provider.add(pv_name, attribute_pv)
-            pvi_tree.add_signal(pv_name, _attribute_to_access(attribute))
+            match attribute:
+                case AttrRW():
+                    attribute_pv = make_shared_write_pv(attribute)
+                    attribute_pv_rbv = make_shared_read_pv(attribute)
+                    provider.add(pv_name, attribute_pv)
+                    provider.add(f"{pv_name}_RBV", attribute_pv_rbv)
+                    pvi_tree.add_signal(pv_name, "rw")
+                case AttrR():
+                    attribute_pv = make_shared_read_pv(attribute)
+                    provider.add(pv_name, attribute_pv)
+                    pvi_tree.add_signal(pv_name, "r")
+                case AttrW():
+                    attribute_pv = make_shared_write_pv(attribute)
+                    provider.add(pv_name, attribute_pv)
+                    pvi_tree.add_signal(pv_name, "w")
 
         for attr_name, method in controller_api.command_methods.items():
             pv_name = get_pv_name(pv_prefix, attr_name)

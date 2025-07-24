@@ -256,7 +256,7 @@ def test_read_signal_set():
         await controller.b.set(-0.9111111)
 
     a_values, b_values = [], []
-    a_monitor = ctxt.monitor(f"{pv_prefix}:A", a_values.append)
+    a_monitor = ctxt.monitor(f"{pv_prefix}:A_RBV", a_values.append)
     b_monitor = ctxt.monitor(f"{pv_prefix}:B", b_values.append)
     serve = asyncio.ensure_future(fastcs.serve())
     wait_and_set_attr_r = asyncio.ensure_future(_wait_and_set_attr_r())
@@ -448,6 +448,8 @@ def test_more_exotic_dataypes():
 
     async def _wait_and_set_attrs():
         await asyncio.sleep(0.1)
+        # This demonstrates an update from hardware,
+        # resulting in only a change in the read back.
         await asyncio.gather(
             controller.some_waveform.set(server_set_waveform_value),
             controller.some_table.set(server_set_table_value),
@@ -457,6 +459,8 @@ def test_more_exotic_dataypes():
     async def _wait_and_put_pvs():
         await asyncio.sleep(0.3)
         ctxt = Context("pva")
+        # This demonstrates a client put,
+        # resulting in a change in the demand and read back.
         await asyncio.gather(
             ctxt.put(f"{pv_prefix}:SomeWaveform", client_put_waveform_value),
             ctxt.put(f"{pv_prefix}:SomeTable", client_put_table_value),
@@ -464,12 +468,17 @@ def test_more_exotic_dataypes():
         )
 
     waveform_values, table_values, enum_values = [], [], []
-    waveform_monitor = ctxt.monitor(f"{pv_prefix}:SomeWaveform", waveform_values.append)
-    table_monitor = ctxt.monitor(f"{pv_prefix}:SomeTable", table_values.append)
+
+    # Monitoring read backs to capture both client and server sets.
+    waveform_monitor = ctxt.monitor(
+        f"{pv_prefix}:SomeWaveform_RBV", waveform_values.append
+    )
+    table_monitor = ctxt.monitor(f"{pv_prefix}:SomeTable_RBV", table_values.append)
     enum_monitor = ctxt.monitor(
-        f"{pv_prefix}:SomeEnum",
+        f"{pv_prefix}:SomeEnum_RBV",
         enum_values.append,
     )
+
     serve = asyncio.ensure_future(fastcs.serve())
     wait_and_set_attrs = asyncio.ensure_future(_wait_and_set_attrs())
     wait_and_put_pvs = asyncio.ensure_future(_wait_and_put_pvs())
