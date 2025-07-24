@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.pva.adapter &#8212; FastCS 0.9.1.dev5+gaec213b documentation</title>
+    <title>fastcs.transport.epics.pva.adapter &#8212; FastCS 0.9.1.dev6+g3ec51ea documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=3985581b"></script>
+    <script src="../../../../../_static/documentation_options.js?v=26ecf6c5"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -452,7 +452,7 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportAdapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.docs</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsDocs</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.gui</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.gui</span><span class="w"> </span><span class="kn">import</span> <span class="n">PvaEpicsGUI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.pva.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsPVAOptions</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ioc</span><span class="w"> </span><span class="kn">import</span> <span class="n">P4PIOC</span>
@@ -485,7 +485,7 @@
         <span class="n">EpicsDocs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller_api</span><span class="p">)</span><span class="o">.</span><span class="n">create_docs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">create_gui</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">EpicsGUI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller_api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_prefix</span><span class="p">)</span><span class="o">.</span><span class="n">create_gui</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">gui</span><span class="p">)</span></div>
+        <span class="n">PvaEpicsGUI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller_api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_prefix</span><span class="p">)</span><span class="o">.</span><span class="n">create_gui</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">gui</span><span class="p">)</span></div>
 
 </pre></div>
 
