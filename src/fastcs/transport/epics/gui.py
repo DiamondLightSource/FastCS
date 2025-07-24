@@ -227,10 +227,11 @@ class PvaEpicsGUI(EpicsGUI):
             widgets = []
             for _, datatype in fastcs_datatype.structured_dtype:
                 fastcs_datatype = numpy_to_fastcs_datatype(datatype)
-                widget = super()._get_write_widget(fastcs_datatype)
-                if isinstance(widget, ToggleButton):
+                if isinstance(fastcs_datatype, Bool):
                     # Replace with compact version for Table row
                     widget = CheckBox()
+                else:
+                    widget = super()._get_write_widget(fastcs_datatype)
                 widgets.append(widget)
             return TableWrite(widgets=widgets)
         else:
