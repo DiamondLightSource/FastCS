@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.pva.ioc &#8212; FastCS 0.9.1.dev4+ge3e15ea documentation</title>
+    <title>fastcs.transport.epics.pva.ioc &#8212; FastCS 0.9.1.dev5+gaec213b documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=cd1b6462"></script>
+    <script src="../../../../../_static/documentation_options.js?v=3985581b"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -457,7 +457,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">snake_to_pascal</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">._pv_handlers</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_command_pv</span><span class="p">,</span> <span class="n">make_shared_pv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._pv_handlers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">make_command_pv</span><span class="p">,</span>
+    <span class="n">make_shared_read_pv</span><span class="p">,</span>
+    <span class="n">make_shared_write_pv</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.pvi_tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessModeType</span><span class="p">,</span> <span class="n">PviTree</span>
 
 
@@ -498,9 +502,21 @@
 
         <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">pv_name</span> <span class="o">=</span> <span class="n">get_pv_name</span><span class="p">(</span><span class="n">pv_prefix</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
-            <span class="n">attribute_pv</span> <span class="o">=</span> <span class="n">make_shared_pv</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
-            <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pv_name</span><span class="p">,</span> <span class="n">attribute_pv</span><span class="p">)</span>
-            <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_signal</span><span class="p">(</span><span class="n">pv_name</span><span class="p">,</span> <span class="n">_attribute_to_access</span><span class="p">(</span><span class="n">attribute</span><span class="p">))</span>
+            <span class="k">match</span> <span class="n">attribute</span><span class="p">:</span>
+                <span class="k">case</span> <span class="n">AttrRW</span><span class="p">():</span>
+                    <span class="n">attribute_pv</span> <span class="o">=</span> <span class="n">make_shared_write_pv</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+                    <span class="n">attribute_pv_rbv</span> <span class="o">=</span> <span class="n">make_shared_read_pv</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+                    <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pv_name</span><span class="p">,</span> <span class="n">attribute_pv</span><span class="p">)</span>
+                    <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_name</span><span class="si">}</span><span class="s2">_RBV&quot;</span><span class="p">,</span> <span class="n">attribute_pv_rbv</span><span class="p">)</span>
+                    <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_signal</span><span class="p">(</span><span class="n">pv_name</span><span class="p">,</span> <span class="s2">&quot;rw&quot;</span><span class="p">)</span>
+                <span class="k">case</span> <span class="n">AttrR</span><span class="p">():</span>
+                    <span class="n">attribute_pv</span> <span class="o">=</span> <span class="n">make_shared_read_pv</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+                    <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pv_name</span><span class="p">,</span> <span class="n">attribute_pv</span><span class="p">)</span>
+                    <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_signal</span><span class="p">(</span><span class="n">pv_name</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+                <span class="k">case</span> <span class="n">AttrW</span><span class="p">():</span>
+                    <span class="n">attribute_pv</span> <span class="o">=</span> <span class="n">make_shared_write_pv</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+                    <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pv_name</span><span class="p">,</span> <span class="n">attribute_pv</span><span class="p">)</span>
+                    <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_signal</span><span class="p">(</span><span class="n">pv_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">command_methods</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">pv_name</span> <span class="o">=</span> <span class="n">get_pv_name</span><span class="p">(</span><span class="n">pv_prefix</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
