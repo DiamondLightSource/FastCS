@@ -468,6 +468,8 @@ def test_more_exotic_dataypes():
         )
 
     waveform_values, table_values, enum_values = [], [], []
+
+    # Monitoring read backs to capture both client and server sets.
     waveform_monitor = ctxt.monitor(
         f"{pv_prefix}:SomeWaveform_RBV", waveform_values.append
     )
@@ -476,6 +478,7 @@ def test_more_exotic_dataypes():
         f"{pv_prefix}:SomeEnum_RBV",
         enum_values.append,
     )
+
     serve = asyncio.ensure_future(fastcs.serve())
     wait_and_set_attrs = asyncio.ensure_future(_wait_and_set_attrs())
     wait_and_put_pvs = asyncio.ensure_future(_wait_and_put_pvs())
