@@ -45,7 +45,7 @@ async def test_unbound_command():
         async def do_nothing_with_arg(self, arg):
             pass
 
-    unbound_command = UnboundCommand(TestController.do_nothing)
+    unbound_command = UnboundCommand(TestController.do_nothing, group="Test")
 
     with pytest.raises(NotImplementedError):
         await unbound_command()
@@ -57,6 +57,8 @@ async def test_unbound_command():
         Command(TestController().do_nothing_with_arg)  # type: ignore
 
     command = unbound_command.bind(TestController())
+    # Test that group is passed when binding commands
+    assert command.group == "Test"
 
     await command()
 
