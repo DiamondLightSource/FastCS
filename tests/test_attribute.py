@@ -1,3 +1,4 @@
+import enum
 from functools import partial
 
 import numpy as np
@@ -106,3 +107,21 @@ async def test_handler_initialise(mocker: MockerFixture):
 def test_validate(datatype, init_args, value):
     with pytest.raises(ValueError):
         datatype(**init_args).validate(value)
+
+
+class MyEnum(enum.Enum):
+    TEST = "Test"
+
+
+class MyOtherEnum(enum.Enum):
+    TEST = "Test"
+
+
+def test_enum_validate():
+    enum_datatype = Enum(MyEnum)
+    enum_datatype.validate(MyEnum.TEST)
+    enum_datatype.validate("Test")
+    with pytest.raises(ValueError):
+        enum_datatype.validate("BadTest")
+    with pytest.raises(ValueError):
+        enum_datatype.validate(MyOtherEnum.TEST)

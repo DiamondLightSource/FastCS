@@ -139,6 +139,17 @@ class Enum(Generic[T_Enum], DataType[T_Enum]):
     def index_of(self, value: T_Enum) -> int:
         return self.members.index(value)
 
+    def validate(self, value: T) -> T:
+        enum_vals = [key.value for key in self.dtype]
+
+        if value not in enum_vals and not issubclass(type(value), self.dtype):
+            raise ValueError(
+                f"Value '{value}' is not a member of {self.dtype} or of "
+                f"type {self.dtype}"
+            )
+
+        return value
+
     @cached_property
     def members(self) -> list[T_Enum]:
         return list(self.enum_cls)

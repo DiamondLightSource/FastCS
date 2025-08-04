@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm[toml]>=8"]
+requires = ["setuptools>=70.1", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -20,7 +20,7 @@ dependencies = [
     "pytango",
     "softioc>=4.5.0",
     "strawberry-graphql",
-    "p4p"
+    "p4p",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"
@@ -53,9 +53,7 @@ dev = [
     "httpx",
     "tickit~=0.4.3",
 ]
-demo = [
-    "tickit~=0.4.3",
-]
+demo = ["tickit~=0.4.3"]
 
 [project.scripts]
 fastcs-demo = "fastcs.demo.__main__:main"
