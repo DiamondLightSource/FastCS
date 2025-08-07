@@ -5,7 +5,7 @@ from abc import abstractmethod
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 import numpy as np
 from numpy.typing import DTypeLike
@@ -36,12 +36,23 @@ class DataType(Generic[T]):
     def dtype(self) -> type[T]:  # Using property due to lack of Generic ClassVars
         pass
 
-    def validate(self, value: T) -> T:
-        """Validate a value against fields in the datatype."""
-        if not isinstance(value, self.dtype):
-            raise ValueError(f"Value '{value}' is not of type {self.dtype}")
+    def validate(self, value: Any) -> T:
+        """Validate a value against the datatype.
 
-        return value
+        The base implementation is to try the cast and raise a useful error if it fails.
+
+        Child classes can implement logic before calling ``super.validate(value)`` to
+        modify the value passed in and help the cast succeed or after to perform further
+        validation of the coerced type.
+
+        """
+        if isinstance(value, self.dtype):
+            return value
+
+        try:
+            return self.dtype(value)
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Failed to cast {value} to type {self.dtype}") from e
 
     @property
     @abstractmethod
