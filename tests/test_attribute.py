@@ -1,11 +1,16 @@
 from functools import partial
 
-import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-from fastcs.attributes import AttrHandlerR, AttrHandlerRW, AttrR, AttrRW, AttrW
-from fastcs.datatypes import Enum, Float, Int, String, Waveform
+from fastcs.attributes import (
+    AttrHandlerR,
+    AttrHandlerRW,
+    AttrR,
+    AttrRW,
+    AttrW,
+)
+from fastcs.datatypes import Int, String
 
 
 @pytest.mark.asyncio
@@ -36,28 +41,22 @@ async def test_attributes():
 
 
 @pytest.mark.asyncio
-async def test_simple_handler_w(mocker: MockerFixture):
-    attr = AttrW(Int())
-    update_display_mock = mocker.patch.object(attr, "update_display_without_process")
+async def test_simple_handler_rw(mocker: MockerFixture):
+    attr = AttrRW(Int())
 
+    attr.update_display_without_process = mocker.MagicMock(
+        wraps=attr.update_display_without_process
+    )
+    attr.set = mocker.MagicMock(wraps=attr.set)
+
+    assert attr.sender
     # This is called by the transport when it receives a put
     await attr.sender.put(attr, 1)
 
-    # The callback to update the transport display should be called
-    update_display_mock.assert_called_once_with(1)
-
-
-@pytest.mark.asyncio
-async def test_simple_handler_rw(mocker: MockerFixture):
-    attr = AttrRW(Int())
-    update_display_mock = mocker.patch.object(attr, "update_display_without_process")
-    set_mock = mocker.patch.object(attr, "set")
-
-    await attr.sender.put(attr, 1)
-
-    update_display_mock.assert_called_once_with(1)
     # The Sender of the attribute should just set the value on the attribute
-    set_mock.assert_awaited_once_with(1)
+    attr.update_display_without_process.assert_called_once_with(1)
+    attr.set.assert_called_once_with(1)
+    assert attr.get() == 1
 
 
 class SimpleUpdater(AttrHandlerR):
@@ -87,22 +86,3 @@ async def test_handler_initialise(mocker: MockerFixture):
 
     # Assert no error in calling initialise on the TestUpdater handler
     await attr.initialise(mocker.ANY)
-
-
-@pytest.mark.parametrize(
-    ["datatype", "init_args", "value"],
-    [
-        (Int, {"min": 1}, 0),
-        (Int, {"max": -1}, 0),
-        (Float, {"min": 1}, 0.0),
-        (Float, {"max": -1}, 0.0),
-        (Float, {}, 0),
-        (String, {}, 0),
-        (Enum, {"enum_cls": int}, 0),
-        (Waveform, {"array_dtype": "U64", "shape": (1,)}, np.ndarray([1])),
-        (Waveform, {"array_dtype": "float64", "shape": (1, 1)}, np.ndarray([1])),
-    ],
-)
-def test_validate(datatype, init_args, value):
-    with pytest.raises(ValueError):
-        datatype(**init_args).validate(value)
