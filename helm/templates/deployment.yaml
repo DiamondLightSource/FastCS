@@ -16,7 +16,7 @@ to a minimum
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "fastcs.fullname" . }}
+  name: {{ .Release.Name }}
   labels:
     location: {{ $location }}
     ioc_group: {{ $ioc_group }}
@@ -35,6 +35,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        location: {{ $location }}
+        ioc_group: {{ $ioc_group }}
+        enabled: {{ $enabled | quote }}
+        is_ioc: "true"
         {{- include "fastcs.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
