@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import enum
+import typing
 from copy import deepcopy
-from typing import get_type_hints
+from types import GenericAlias
 
-from fastcs.attributes import Attribute
+from fastcs.attributes import Attribute, AttrR, AttrW
+from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 
 
 class BaseController:
@@ -73,14 +76,12 @@ class BaseController:
         class_dir = {key: None for key in dir(type(self)) if not key.startswith("_")}
         class_type_hints = {
             key: value
-            for key, value in get_type_hints(type(self)).items()
+            for key, value in typing.get_type_hints(type(self)).items()
             if not key.startswith("_")
         }
-
-        for attr_name in {**class_dir, **class_type_hints}:
+        for attr_name, attr_value in {**class_dir, **class_type_hints}.items():
             if attr_name == "root_attribute":
                 continue
-
             attr = getattr(self, attr_name, None)
             if isinstance(attr, Attribute):
                 if (
@@ -97,6 +98,27 @@ class BaseController:
                 self.attributes[attr_name] = new_attribute
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
+            elif isinstance(attr_value, typing._GenericAlias):
+                if issubclass(
+                    attr_class := typing.get_origin(attr_value), (AttrR | AttrW)
+                ):
+                    (t,) = typing.get_args(attr_value)
+                    # TODO can probably be a match case or dict.get
+                    if t is int:
+                        dtype = Int()
+                    elif t is float:
+                        dtype = Float()
+                    elif t is bool:
+                        dtype = Bool()
+                    elif t is str:
+                        dtype = String()
+                    elif issubclass(t, enum.Enum):
+                        dtype = Enum(t)
+                    else:
+                        raise NotImplementedError
+                    attr = attr_class(dtype)
+                    setattr(self, attr_name, attr)
+                    self.attributes[attr_name] = attr
 
     def register_sub_controller(self, name: str, sub_controller: SubController):
         if name in self.__sub_controller_tree.keys():

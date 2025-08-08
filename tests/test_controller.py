@@ -1,6 +1,8 @@
+import enum
+
 import pytest
 
-from fastcs.attributes import AttrR
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Int
 
@@ -112,3 +114,25 @@ def test_root_attribute():
         ),
     ):
         FailingController(SomeSubController())
+
+
+@pytest.mark.asyncio
+async def test_hinted_attributes():
+    class MyEnum(enum.Enum):
+        A = 0
+        B = "ONE"
+
+    class ControllerWithHint(Controller):
+        int_attr: AttrRW[int]
+        float_attr: AttrRW[float]
+        bool_attr: AttrRW[bool]
+        str_attr: AttrRW[str]
+        enum_attr: AttrRW[MyEnum]
+
+    controller = ControllerWithHint()
+    # await controller.initialise()
+    await controller.int_attr.set(10)
+    await controller.float_attr.set(9.9)
+    await controller.bool_attr.set(True)
+    await controller.str_attr.set("test")
+    await controller.str_attr.set(MyEnum.B)
