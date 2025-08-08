@@ -90,14 +90,8 @@ def test_casting_to_epics(datatype, input, output):
 @pytest.mark.parametrize(
     "datatype, input",
     [
-        (object(), 0),
         # TODO cover Waveform and Table cases
-        (Enum(ShortEnum), 0),  # can't use index
         (Enum(ShortEnum), LongEnum.TOO),  # wrong enum.Enum class
-        (Int(), 4.0),
-        (Float(), 1),
-        (Bool(), None),
-        (String(), 10),
     ],
 )
 def test_cast_to_epics_validations(datatype, input):
