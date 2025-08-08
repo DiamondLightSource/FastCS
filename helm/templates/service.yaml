@@ -1,10 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "fastcs.fullname" . }}
+  name: {{ .Release.Name }}
   labels:
-    "{{- include "fastcs.labels" . | nindent 4 }}"
+    {{- include "fastcs.labels" . | nindent 4 }}
+    app: {{ .Release.Name }}
+    location: {{ .Values.global.location }}
+    ioc_group: {{ .Values.global.ioc_group }}
+    is_ioc: "true"
 spec:
+  selector:
+    app: {{ .Release.Name }}
   type: {{ .Values.service.type }}
   # allocate a fixed clusterIP for this service based on the service name
   {{- $alloc_args := dict "name" .Release.Name "namespace" .Release.Namespace "baseIp" .Values.baseIp "startIp" .Values.startIp }}
