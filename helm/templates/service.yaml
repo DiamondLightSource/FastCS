@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fastcs.fullname" . }}
+  labels:
+    "{{- include "fastcs.labels" . | nindent 4 }}"
+spec:
+  type: {{ .Values.service.type }}
+  # allocate a fixed clusterIP for this service based on the service name
+  {{- $alloc_args := dict "name" .Release.Name "namespace" .Release.Namespace "baseIp" .Values.baseIp "startIp" .Values.startIp }}
+  clusterIP: {{ .Values.clusterIP | default (include "allocateIpFromName" $alloc_args) }}
+  ports:
+    - port: {{ .Values.service.ca_port }}
+      targetPort: 5064
+      protocol: TCP
+      name: channel-access
+    - port: {{ .Values.service.pva_port }}
+      targetPort: 5075
+      protocol: TCP
+      name: pv-access
+  selector:
+    {{- include "fastcs.selectorLabels" . | nindent 4 }}
