@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=values.schema.json
+
+# @schema
+# title: FastCS IOC Values
+# description: Values for the FastCS IOC instance
+# type: object
+# $ref: ../fastcs-instance/values.schema.json
+# @schema
+fastcs-instance: {}

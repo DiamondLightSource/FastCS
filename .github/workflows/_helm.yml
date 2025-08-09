@@ -44,10 +44,20 @@ jobs:
 
           mkdir -p charts
           for i in Charts/*; do
-            cd $(realpath "${i}")
-            helm package -u --app-version ${VERSION} --version ${VERSION} .
-            mv *.tgz ../../charts
+            if [[ ${i} =~ ^.*-ioc$ ]]; then
+              echo "Skipping IOC schema chart: ${i}"
+              continue
+            fi
+            echo "Packaging chart: ${i}"
+            helm package -u --app-version ${VERSION} --version ${VERSION} ${i}
+            mv $(basename ${i})-*.tgz charts/
           done
+
+      - name: Upload helm chart values schemas
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-chart-schemas
+          path: schemas/
 
       - name: Push tagged helm chart to registry
         if: ${{ github.ref_type == 'tag' }}
