@@ -47,7 +47,6 @@ spec:
         # unless the Commit Hash is supplied (by ArgoCD or helm command line)
         rollme: {{ .Values.global.commitHash | default (randAlphaNum 5) | quote }}
     spec:
-      serviceAccountName: {{ include "fastcs.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
