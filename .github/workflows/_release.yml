@@ -20,6 +20,17 @@ jobs:
             rm -rf $GITHUB_REF_NAME
           fi
 
+      - name: Push tagged helm chart to registry
+        run: |
+          set -x
+
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io/${{ github.repository_owner }} --username ${{ github.repository_owner }} --password-stdin
+
+          IFS='@' read -r NAME VERSION <<< "${GITHUB_REF_NAME}"
+          REGISTRY=oci://ghcr.io/diamondlightsource
+
+          helm push "${NAME}-${VERSION}.tgz" ${REGISTRY}
+
       - name: Create GitHub Release
         # We pin to the SHA, not the tag, for security reasons.
         # https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions

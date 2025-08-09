@@ -1,0 +1,54 @@
+name: Package helm charts
+
+on:
+  workflow_call:
+
+env:
+  HELM_VERSION_TO_INSTALL: 3.14.3
+
+jobs:
+  package-helm-charts:
+    name: Test helm chart packaging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install helm
+        uses: Azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION_TO_INSTALL }}
+
+      # Check that alpha/beta versions have the form 2025.8.1+b1 requried by Helm.
+      # An early check saves waiting for the build to find problems.
+      - name: Check helm version tag
+        if: ${{ github.ref_type == 'tag' }}
+        env:
+          VERSION: "${{ github.ref_name }}"
+        run: |
+          if [[ "${VERSION}" =~ '^[0-9]+\.[0-9]+\.[0-9]+(\+.*)?$' ]]; then
+              echo "Valid version format: ${VERSION}"
+          else
+              echo "Invalid version format: ${VERSION}. Expected format: X.Y.Z or X.Y.Z+string"
+              return 1
+          fi
+
+      - name: Package helm charts
+        env:
+          VERSION: "${{ github.ref_type == 'tag' && github.ref_name || '0.0.0' }}"
+        run: |
+          set -xe
+
+          mkdir -p charts
+          cd helm
+
+          helm package -u --app-version ${VERSION} --version ${VERSION} .
+          mv *.tgz ../../charts
+
+      - name: Upload helm charts as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: charts
+          path: charts
