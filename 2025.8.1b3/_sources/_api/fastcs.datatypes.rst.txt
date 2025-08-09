@@ -1,0 +1,35 @@
+``fastcs.datatypes``
+====================
+        
+        
+        
+        
+        
+        
+        
+        
+
+.. automodule:: fastcs.datatypes
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        Bool
+        DataType
+        Enum
+        Float
+        Int
+        String
+        Table
+        Waveform
+    
+    
