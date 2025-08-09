@@ -1,16 +1,23 @@
-# Default values for fastcs.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# yaml-language-server: $schema=values.schema.json
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+# Default values for fastcs-instance chart.
+#
+# helm-schema annotations describe the schema for values files.
+# see https://github.com/dadav/helm-schema
+# If there is no annotation, the type is inferred from the default value.
+# Generate the values schema with `generate-schema.sh`
+#
+# This file itself adheres to the schema it describes (to help writing the annotations).
+
+# @schema
+# required: false
+# title: Container Image URI
+# type: [string, null]
+# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/image
+# @schema
 image:
-  repository:
-  # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag:
 
-# location of config folder (defaults to be the same as c++ IOCs)
+# location of config folder (defaults to be the same as C++ IOCs)
 iocFolder: /epics/ioc
 iocConfig: /epics/ioc/config
 
@@ -18,81 +25,132 @@ iocConfig: /epics/ioc/config
 ca_server_port: 5064
 pva_server_port: 5075
 
-# extra containers to run in the pod
-extra_containers: []
-# - name: foo
-#   image: ghcr.io/epics-containers/ioc-adsimdetector-runtime:2025.8.2
-#   startCommand:
-#     - tickit
-#     - all
-#     - /epics/ioc/config/temp_controller.yaml
-
-# must be the CIDR for services clusterIP (this default is for all DLS clusters)
-# used by allocateIpFromName to allocate a fixed cluster IP for the service
+# CIDR for services addresses.
+# Used by allocateIpFromName to allocate a fixed cluster IP for the service.
+# The default is the same for all DLS clusters.
 baseIp: 10.96.0.0/12
-# supply a fixed cluster IP for the service to override allocateIpFromName
+# @schema
+# title: Override for the cluster IP - only needed if allocateIpFromName clashes
+# type: [string, null]
+# format: ipv4
+# @schema
 clusterIP:
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-podLabels: {}
-
-podSecurityContext:
-  {}
-  # fsGroup: 2000
-
-securityContext:
-  {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# The service will be configured for Channel Access and PVA. Here you can override
+# the ports and also make this a LoadBalancer service if required.
 service:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   type: ClusterIP
-  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   ca_port: 5064
   pva_port: 5075
 
-resources:
-  {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+# @schema
+# title: extra containers
+# description: adds addtional containers specified by image and startCommand
+# type: array
+# items:
+#   type: object
+#   properties:
+#     name:
+#       type: string
+#       description: A name for the additional container
+#     image:
+#       type: string
+#       format: image
+#       description: Container image URI
+#     startCommand:
+#       type: array
+#       description: Command to run in the container (as array of arguments)
+#   required: [name, image, startCommand]
+#   additionalProperties: false
+# @schema
+extra_containers: []
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# @schema
+# title: Pod Annotations
+# type: object
+# @schema
+podAnnotations: {}
+# @schema
+# title: Pod Labels
+# type: object
+# @schema
+podLabels: {}
+
+# @schema
+# title: Pod Security Context
+# type: object
+# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+# @schema
+podSecurityContext: {}
+
+# @schema
+# title: Container Security Context
+# type: object
+# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+# @schema
+securityContext: {}
+
+# @schema
+# title: Resource limits and requests
+# type: object
+# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
+# @schema
+resources: {}
+
+# @schema
+# title: livenessProbe
+# type: object
+# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
+# @schema
 livenessProbe: {}
+# @schema
+# title: readinessProbe
+# type: object
+# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
+# @schema
 readinessProbe: {}
 
-# Additional volumes on the output Deployment definition.
+# @schema
+# title: volumes
+# description: Additional volumes to mount in the output Deployment definition.
+# type: array
+# items:
+#   type: object
+#   $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Volume
+# @schema
 volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
 
-# Additional volumeMounts on the output Deployment definition.
+# @schema
+# title: volumeMounts
+# type: array
+# items:
+#   type: object
+#   $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.VolumeMount
+# @schema
 volumeMounts: []
-# - name: foo
-#   mountPath: "/etc/foo"
-#   readOnly: true
 
+# @schema
+# title: nodeSelector
+# description: Node selector for the pod
+# type: object
+# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.NodeSelector
+# @schema
 nodeSelector: {}
 
+# @schema
+# title: tolerations
+# description: Tolerations for the pod
+# type: array
+# items:
+#   type: object
+#   $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
+# @schema
 tolerations: []
 
+# @schema
+# title: affinity
+# description: Affinity for the pod
+# type: object
+# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
+# @schema
 affinity: {}
