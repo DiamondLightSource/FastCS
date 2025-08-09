@@ -43,9 +43,11 @@ jobs:
           set -xe
 
           mkdir -p charts
-          cd helm
-          helm package -u --app-version ${VERSION} --version ${VERSION} .
-          mv *.tgz ../charts
+          for i in Charts/*; do
+            cd $(realpath "${i}")
+            helm package -u --app-version ${VERSION} --version ${VERSION} .
+            mv *.tgz ../../charts
+          done
 
       - name: Push tagged helm chart to registry
         if: ${{ github.ref_type == 'tag' }}
