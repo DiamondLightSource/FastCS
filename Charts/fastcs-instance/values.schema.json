@@ -9,16 +9,27 @@
       "title": "affinity",
       "type": "object"
     },
+    "args": {
+      "description": "arguments to pass to the above command",
+      "items": {
+        "required": [],
+        "type": "string"
+      },
+      "required": [],
+      "title": "args",
+      "type": "array"
+    },
     "baseIp": {
       "default": "10.96.0.0/12",
-      "description": "CIDR for services addresses.\nUsed by allocateIpFromName to allocate a fixed cluster IP for the service.\nThe default is the same for all DLS clusters.",
+      "description": "Used by allocateIpFromName to allocate a fixed cluster IP for the service.\nThe default is the same for all DLS clusters.\n",
+      "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}\\/\\d{1,2}$",
       "required": [],
-      "title": "baseIp",
+      "title": "CIDR for services addresses.",
       "type": "string"
     },
     "ca_server_port": {
       "default": 5064,
-      "description": "ports to expose on the service",
+      "description": "service port for Channel Access",
       "required": [],
       "title": "ca_server_port",
       "type": "integer"
@@ -33,11 +44,26 @@
         "null"
       ]
     },
+    "command": {
+      "description": "Command to run in the container (as array of arguments)",
+      "items": {
+        "required": [],
+        "type": "string"
+      },
+      "required": [],
+      "title": "command",
+      "type": "array"
+    },
     "extra_containers": {
-      "description": "adds addtional containers specified by image and startCommand",
+      "description": "adds addtional containers specified by image and command",
       "items": {
         "additionalProperties": false,
         "properties": {
+          "command": {
+            "description": "Command to run in the container (as array of arguments)",
+            "required": [],
+            "type": "array"
+          },
           "image": {
             "description": "Container image URI",
             "format": "image",
@@ -48,22 +74,17 @@
             "description": "A name for the additional container",
             "required": [],
             "type": "string"
-          },
-          "startCommand": {
-            "description": "Command to run in the container (as array of arguments)",
-            "required": [],
-            "type": "array"
           }
         },
         "required": [
           "name",
           "image",
-          "startCommand"
+          "command"
         ],
         "type": "object"
       },
       "required": [],
-      "title": "extra containers",
+      "title": "extra_containers",
       "type": "array"
     },
     "global": {
@@ -75,23 +96,14 @@
     "image": {
       "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/image",
       "required": [],
-      "title": "Container Image URI",
-      "type": [
-        "string",
-        "null"
-      ]
+      "title": "image",
+      "type": "string"
     },
     "iocConfig": {
       "default": "/epics/ioc/config",
-      "required": [],
-      "title": "iocConfig",
-      "type": "string"
-    },
-    "iocFolder": {
-      "default": "/epics/ioc",
       "description": "location of config folder (defaults to be the same as C++ IOCs)",
       "required": [],
-      "title": "iocFolder",
+      "title": "iocConfig",
       "type": "string"
     },
     "livenessProbe": {
@@ -127,6 +139,7 @@
     },
     "pva_server_port": {
       "default": 5075,
+      "description": "service port for PV Access",
       "required": [],
       "title": "pva_server_port",
       "type": "integer"
@@ -151,7 +164,7 @@
     },
     "service": {
       "additionalProperties": false,
-      "description": "The service will be configured for Channel Access and PVA. Here you can override\nthe ports and also make this a LoadBalancer service if required.",
+      "description": "The service will be configured for Channel Access and PVA. Here you can override\nthe ports and also make this a LoadBalancer service if required.\n",
       "properties": {
         "ca_port": {
           "default": 5064,
@@ -213,13 +226,6 @@
       "type": "array"
     }
   },
-  "required": [
-    "iocFolder",
-    "iocConfig",
-    "ca_server_port",
-    "pva_server_port",
-    "baseIp",
-    "service"
-  ],
+  "required": [],
   "type": "object"
 }
