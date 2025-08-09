@@ -23,3 +23,10 @@ repos:
         entry: ruff format --force-exclude
         types: [python]
         require_serial: true
+
+      - id: helm-schema
+        name: Generate Helm schema
+        entry: ./generate-schemas.sh
+        language: system
+        types: [yaml]
+        require_serial: true
