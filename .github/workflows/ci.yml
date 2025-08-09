@@ -51,9 +51,12 @@ jobs:
     permissions:
       id-token: write
 
+  helm:
+    uses: ./.github/workflows/_helm.yml
+
   release:
     if: github.ref_type == 'tag'
-    needs: [dist, docs]
+    needs: [dist, docs, helm]
     uses: ./.github/workflows/_release.yml
     permissions:
       contents: write
