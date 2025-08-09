@@ -1,0 +1,25 @@
+``fastcs.launch``
+=================
+        
+        
+        
+
+.. automodule:: fastcs.launch
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        FastCS
+        get_controller_schema
+        launch
+    
+    
