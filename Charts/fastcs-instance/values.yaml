@@ -171,10 +171,10 @@ volumeMounts: []
 # @schema
 # title: nodeSelector
 # description: Node selector for the pod
-# type: object
+# type: [object, null]
 # $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.NodeSelector
 # @schema
-nodeSelector: {}
+nodeSelector:
 
 # @schema
 # title: tolerations
