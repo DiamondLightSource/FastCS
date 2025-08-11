@@ -117,7 +117,10 @@
       "description": "Node selector for the pod",
       "required": [],
       "title": "nodeSelector",
-      "type": "object"
+      "type": [
+        "object",
+        "null"
+      ]
     },
     "podAnnotations": {
       "additionalProperties": false,

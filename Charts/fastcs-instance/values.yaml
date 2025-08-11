@@ -168,13 +168,16 @@ volumes: []
 # @schema
 volumeMounts: []
 
+# TODO - I had problems with schema checking at helm chart ArgoCD deploy time
+# TODO - it seemed that {} for nodeSelector was illegal, so I added null as an option
+# TODO - I'm not sure why this was needed but not for other object fields with k8s schemas
 # @schema
 # title: nodeSelector
 # description: Node selector for the pod
-# type: object
+# type: [object, null]
 # $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.NodeSelector
 # @schema
-nodeSelector: {}
+nodeSelector:
 
 # @schema
 # title: tolerations
