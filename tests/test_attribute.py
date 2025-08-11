@@ -6,7 +6,6 @@ from pytest_mock import MockerFixture
 from fastcs.attributes import (
     AttrHandlerR,
     AttrHandlerRW,
-    AttrHandlerW,
     AttrR,
     AttrRW,
     AttrW,
