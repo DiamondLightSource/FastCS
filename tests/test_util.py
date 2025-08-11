@@ -1,9 +1,15 @@
+import asyncio
+import enum
+
 import numpy as np
 import pytest
 from pvi.device import SignalR
 from pydantic import ValidationError
 
-from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.attributes import AttrR, AttrRW
+from fastcs.backend import Backend
+from fastcs.controller import Controller
+from fastcs.datatypes import Bool, Enum, Float, Int, String
 from fastcs.util import numpy_to_fastcs_datatype, snake_to_pascal
 
 
@@ -56,3 +62,88 @@ def test_pvi_validation_error():
 )
 def test_numpy_to_fastcs_datatype(numpy_type, fastcs_datatype):
     assert fastcs_datatype == numpy_to_fastcs_datatype(numpy_type)
+
+
+def test_hinted_attributes_verified():
+    loop = asyncio.get_event_loop()
+
+    class ControllerWithWrongType(Controller):
+        hinted_wrong_type: AttrR[int]
+
+        async def initialise(self):
+            self.hinted_wrong_type = AttrR(Float())  # type: ignore
+            self.attributes["hinted_wrong_type"] = self.hinted_wrong_type
+
+    with pytest.raises(AssertionError) as excinfo:
+        Backend(ControllerWithWrongType(), loop)
+    assert (
+        "Expected dtype <class 'int'> for hinted_wrong_type, got <class 'float'>"
+        in str(excinfo.value)
+    )
+
+    class ControllerWithMissingAttr(Controller):
+        hinted_int_missing: AttrR[int]
+
+    with pytest.raises(AssertionError) as excinfo:
+        Backend(ControllerWithMissingAttr(), loop)
+    assert "No attribute named hinted_int_missing bound on controller" in str(
+        excinfo.value
+    )
+
+    class ControllerAttrNotInDict(Controller):
+        hinted: AttrR[int]
+
+        async def initialise(self):
+            self.hinted = AttrR(Int())
+
+    with pytest.raises(AssertionError) as excinfo:
+        Backend(ControllerAttrNotInDict(), loop)
+    assert (
+        str(excinfo.value)
+        == "Hinted attribute hinted not found in controller's attribute dict"
+    )
+
+    class ControllerAttrMismatch(Controller):
+        hinted: AttrR[int]
+
+        async def initialise(self):
+            self.hinted = AttrR(Int())
+            self.attributes["hinted"] = AttrR(Int())
+
+    with pytest.raises(AssertionError) as excinfo:
+        Backend(ControllerAttrMismatch(), loop)
+    assert str(excinfo.value) == (
+        "Hinted attribute hinted in controller's attribute dict"
+        " is not the bound attribute"
+    )
+
+    class ControllerAttrWrongAccessMode(Controller):
+        hinted: AttrR[int]
+
+        async def initialise(self):
+            self.hinted = AttrRW(Int())
+            self.attributes["hinted"] = self.hinted
+
+    with pytest.raises(AssertionError) as excinfo:
+        Backend(ControllerAttrWrongAccessMode(), loop)
+    assert str(excinfo.value) == (
+        "Expected <class 'fastcs.attributes.AttrR'> for hinted,"
+        " got <class 'fastcs.attributes.AttrRW'>"
+    )
+
+    class MyEnum(enum.Enum):
+        A = 0
+        B = 1
+
+    class MyEnum2(enum.Enum):
+        A = 2
+        B = 3
+
+    class ControllerWrongEnumClass(Controller):
+        hinted_enum: AttrRW[MyEnum] = AttrRW(Enum(MyEnum2))
+
+    with pytest.raises(AssertionError) as excinfo:
+        Backend(ControllerWrongEnumClass(), loop)
+    assert str(excinfo.value) == (
+        "Expected dtype <enum 'MyEnum'> for hinted_enum, got <enum 'MyEnum2'>"
+    )

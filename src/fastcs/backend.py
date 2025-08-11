@@ -9,6 +9,7 @@ from .attributes import AttrHandlerR, AttrHandlerW, AttrR, AttrW
 from .controller import BaseController, Controller
 from .controller_api import ControllerAPI
 from .exceptions import FastCSException
+from .util import validate_hinted_attributes
 
 
 class Backend:
@@ -28,6 +29,7 @@ class Backend:
         # Initialise controller and then build its APIs
         loop.run_until_complete(controller.initialise())
         loop.run_until_complete(controller.attribute_initialise())
+        validate_hinted_attributes(controller)
         self.controller_api = build_controller_api(controller)
         self._link_process_tasks()
 
