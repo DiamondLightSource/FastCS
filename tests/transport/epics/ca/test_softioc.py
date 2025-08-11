@@ -181,7 +181,7 @@ def test_make_output_record(
     pv = "PV"
     _make_record(pv, attribute, on_update=update, out_record=True)
 
-    kwargs.update(record_metadata_from_datatype(attribute.datatype))
+    kwargs.update(record_metadata_from_datatype(attribute.datatype, out_record=True))
     kwargs.update(record_metadata_from_attribute(attribute))
     kwargs.update({"always_update": True, "on_update": update})
 
@@ -266,7 +266,8 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
             epics_controller_api.attributes["read_write_float"]
         ),
         **record_metadata_from_datatype(
-            epics_controller_api.attributes["read_write_float"].datatype
+            epics_controller_api.attributes["read_write_float"].datatype,
+            out_record=True,
         ),
     )
     builder.longIn.assert_any_call(
@@ -286,7 +287,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
             epics_controller_api.attributes["read_write_int"]
         ),
         **record_metadata_from_datatype(
-            epics_controller_api.attributes["read_write_int"].datatype
+            epics_controller_api.attributes["read_write_int"].datatype, out_record=True
         ),
     )
     builder.mbbIn.assert_called_once_with(
@@ -302,7 +303,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
         on_update=mocker.ANY,
         **record_metadata_from_attribute(epics_controller_api.attributes["enum"]),
         **record_metadata_from_datatype(
-            epics_controller_api.attributes["enum"].datatype
+            epics_controller_api.attributes["enum"].datatype, out_record=True
         ),
     )
     builder.boolOut.assert_called_once_with(
@@ -311,7 +312,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
         on_update=mocker.ANY,
         **record_metadata_from_attribute(epics_controller_api.attributes["write_bool"]),
         **record_metadata_from_datatype(
-            epics_controller_api.attributes["write_bool"].datatype
+            epics_controller_api.attributes["write_bool"].datatype, out_record=True
         ),
     )
     ioc_builder.Action.assert_any_call(
@@ -452,7 +453,8 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
         always_update=True,
         on_update=mocker.ANY,
         **record_metadata_from_datatype(
-            long_name_controller_api.attributes["attr_rw_short_name"].datatype
+            long_name_controller_api.attributes["attr_rw_short_name"].datatype,
+            out_record=True,
         ),
         **record_metadata_from_attribute(
             long_name_controller_api.attributes["attr_rw_short_name"]
@@ -528,9 +530,9 @@ def test_update_datatype(mocker: MockerFixture):
         **record_metadata_from_datatype(attr_r.datatype),
     )
     record_r.set_field.assert_not_called()
-    attr_r.update_datatype(Int(units="m", min=-3))
+    attr_r.update_datatype(Int(units="m", min_alarm=-3))
     record_r.set_field.assert_any_call("EGU", "m")
-    record_r.set_field.assert_any_call("DRVL", -3)
+    record_r.set_field.assert_any_call("LOPR", -3)
 
     with pytest.raises(
         ValueError,
@@ -547,9 +549,9 @@ def test_update_datatype(mocker: MockerFixture):
         **record_metadata_from_datatype(attr_w.datatype),
     )
     record_w.set_field.assert_not_called()
-    attr_w.update_datatype(Int(units="m", min=-3))
+    attr_w.update_datatype(Int(units="m", min_alarm=-3))
     record_w.set_field.assert_any_call("EGU", "m")
-    record_w.set_field.assert_any_call("DRVL", -3)
+    record_w.set_field.assert_any_call("LOPR", -3)
 
     with pytest.raises(
         ValueError,
