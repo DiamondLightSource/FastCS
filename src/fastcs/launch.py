@@ -104,11 +104,12 @@ class FastCS:
 
     async def serve(self) -> None:
         coros = [self._backend.serve()]
-        context = {"controller": self._backend}
-        for transport in self._transports:
-            context.update(transport.context())
-            coros.append(transport.serve())
-        coros.append(self._interactive_shell(context))
+        if self._transports:
+            context = {"controller": self._backend}
+            for transport in self._transports:
+                context.update(transport.context())
+                coros.append(transport.serve())
+            coros.append(self._interactive_shell(context))
         try:
             await asyncio.gather(*coros)
         except asyncio.CancelledError:
