@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
 
@@ -28,3 +30,6 @@ class RestTransport(TransportAdapter):
 
     async def serve(self) -> None:
         await self._server.serve(self.options.rest)
+
+    def context(self) -> dict[str, Any]:
+        return {}

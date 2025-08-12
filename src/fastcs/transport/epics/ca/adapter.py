@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
@@ -42,3 +43,6 @@ class EpicsCATransport(TransportAdapter):
         self._ioc.run(self._loop)
         while True:
             await asyncio.sleep(1)
+
+    def context(self) -> dict[str, Any]:
+        return {}
