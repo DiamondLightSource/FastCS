@@ -3,6 +3,7 @@ from fastcs.transport.adapter import TransportAdapter
 from fastcs.transport.epics.docs import EpicsDocs
 from fastcs.transport.epics.gui import PvaEpicsGUI
 from fastcs.transport.epics.pva.options import EpicsPVAOptions
+from fastcs.util import snake_to_pascal
 
 from .ioc import P4PIOC
 
@@ -33,3 +34,19 @@ class EpicsPVATransport(TransportAdapter):
 
     def create_gui(self) -> None:
         PvaEpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.options.gui)
+
+    def print_all(self) -> None:
+        def parse_attributes(api: ControllerAPI) -> list:
+            prefix = ":".join([self._pv_prefix] + list(api.path))
+            attrs = [
+                f"{prefix}:{snake_to_pascal(attribute)}"
+                for attribute in api.attributes.keys()
+            ]
+            for sub_api in api.sub_apis.values():
+                attrs.extend(parse_attributes(sub_api))
+            return attrs
+
+        print(*parse_attributes(self._controller_api), sep="\n")
+
+    def context(self) -> dict:
+        return {"print_all": self.print_all}

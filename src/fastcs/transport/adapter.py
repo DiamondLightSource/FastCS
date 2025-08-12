@@ -22,3 +22,6 @@ class TransportAdapter(ABC):
     @abstractmethod
     def create_gui(self) -> None:
         pass
+
+    def context(self) -> dict[str, Any]:
+        return {}
