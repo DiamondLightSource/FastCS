@@ -15,6 +15,9 @@ def snake_to_pascal(name: str) -> str:
 
 
 def pascal_to_snake(name: str) -> str:
+    """Converts string from Pascal case to snake case.
+    If string is not a valid Pascal case it will be returned unchanged
+    """
     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9]*", name):
         return name
 
