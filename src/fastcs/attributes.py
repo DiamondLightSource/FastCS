@@ -9,6 +9,8 @@ import fastcs
 
 from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
 
+ONCE = float("inf")
+
 
 class AttrMode(Enum):
     """Access mode of an ``Attribute``."""
