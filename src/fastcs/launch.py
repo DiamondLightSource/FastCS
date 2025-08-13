@@ -115,6 +115,14 @@ class FastCS:
 
         for transport in self._transports:
             coros.append(transport.serve())
+            common_context = context.keys() & transport.context.keys()
+            if common_context:
+                raise LaunchError(
+                    "Duplicate context keys found between "
+                    f"current context { ({k: context[k] for k in common_context}) } "
+                    f"and {transport.__class__.__name__} context: "
+                    f"{ ({k: transport.context[k] for k in common_context}) }"
+                )
             context.update(transport.context)
 
         if not os.getenv("NOT_INTERACTIVE"):
