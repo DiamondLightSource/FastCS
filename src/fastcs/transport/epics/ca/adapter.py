@@ -41,8 +41,6 @@ class EpicsCATransport(TransportAdapter):
     async def serve(self) -> None:
         print(f"Running FastCS IOC: {self._pv_prefix}")
         self._ioc.run(self._loop)
-        while True:
-            await asyncio.sleep(1)
 
     def context(self) -> dict[str, Any]:
         return {}
