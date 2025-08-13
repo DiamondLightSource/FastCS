@@ -187,11 +187,7 @@ class AttrW(Attribute[T]):
         )
         self._process_callbacks: list[AttrCallback[T]] | None = None
         self._write_display_callbacks: list[AttrCallback[T]] | None = None
-
-        if handler is not None:
-            self._setter = handler
-        else:
-            self._setter = SimpleAttrHandler()
+        self._setter = handler
 
     async def process(self, value: T) -> None:
         await self.process_without_display_update(value)
@@ -221,7 +217,7 @@ class AttrW(Attribute[T]):
         self._write_display_callbacks.append(callback)
 
     @property
-    def sender(self) -> AttrHandlerW:
+    def sender(self) -> AttrHandlerW | None:
         return self._setter
 
 
@@ -241,7 +237,7 @@ class AttrRW(AttrR[T], AttrW[T]):
             datatype,  # type: ignore
             access_mode,
             group=group,
-            handler=handler,
+            handler=handler if handler else SimpleAttrHandler(),
             initial_value=initial_value,
             description=description,
         )
