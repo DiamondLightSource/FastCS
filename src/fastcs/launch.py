@@ -1,6 +1,7 @@
 import asyncio
 import inspect
 import json
+import os
 import signal
 from collections.abc import Coroutine
 from functools import partial
@@ -104,12 +105,21 @@ class FastCS:
 
     async def serve(self) -> None:
         coros = [self._backend.serve()]
-        if self._transports:
-            context = {"controller": self._backend}
-            for transport in self._transports:
-                context.update(transport.context())
-                coros.append(transport.serve())
+        context = {
+            "controller": self._controller,
+            "controller_api": self._backend.controller_api,
+            "transports": [
+                transport.__class__.__name__ for transport in self._transports
+            ],
+        }
+
+        for transport in self._transports:
+            coros.append(transport.serve())
+            context.update(transport.context())
+
+        if not os.getenv("NOT_INTERACTIVE"):
             coros.append(self._interactive_shell(context))
+
         try:
             await asyncio.gather(*coros)
         except asyncio.CancelledError:
