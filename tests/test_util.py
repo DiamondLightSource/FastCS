@@ -90,33 +90,6 @@ def test_hinted_attributes_verified():
         excinfo.value
     )
 
-    class ControllerAttrNotInDict(Controller):
-        hinted: AttrR[int]
-
-        async def initialise(self):
-            self.hinted = AttrR(Int())
-
-    with pytest.raises(AssertionError) as excinfo:
-        Backend(ControllerAttrNotInDict(), loop)
-    assert (
-        str(excinfo.value)
-        == "Hinted attribute hinted not found in controller's attribute dict"
-    )
-
-    class ControllerAttrMismatch(Controller):
-        hinted: AttrR[int]
-
-        async def initialise(self):
-            self.hinted = AttrR(Int())
-            self.attributes["hinted"] = AttrR(Int())
-
-    with pytest.raises(AssertionError) as excinfo:
-        Backend(ControllerAttrMismatch(), loop)
-    assert str(excinfo.value) == (
-        "Hinted attribute hinted in controller's attribute dict"
-        " is not the bound attribute"
-    )
-
     class ControllerAttrWrongAccessMode(Controller):
         hinted: AttrR[int]
 

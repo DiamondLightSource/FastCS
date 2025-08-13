@@ -51,14 +51,6 @@ def validate_hinted_attributes(controller: BaseController):
         assert type(attr) is attr_class, (
             f"Expected {attr_class} for {name}, got {type(attr)}"
         )
-        dict_attr = controller.attributes.get(name, None)
-        assert dict_attr is not None, (
-            f"Hinted attribute {name} not found in controller's attribute dict"
-        )
-        assert dict_attr is attr, (
-            f"Hinted attribute {name} in controller's attribute dict"
-            " is not the bound attribute"
-        )
         assert attr.datatype.dtype == attr_dtype, (
             f"Expected dtype {attr_dtype} for {name}, got {attr.datatype.dtype}"
         )
