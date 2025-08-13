@@ -14,19 +14,6 @@ def snake_to_pascal(name: str) -> str:
     return name
 
 
-def pascal_to_snake(name: str) -> str:
-    """Converts string from Pascal case to snake case.
-    If string is not a valid Pascal case it will be returned unchanged
-    """
-    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9]*", name):
-        return name
-
-    s = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
-    s = re.sub(r"([A-Z]+)([A-Z][a-z0-9])", r"\1_\2", s)
-
-    return s.lower()
-
-
 def numpy_to_fastcs_datatype(np_type) -> DataType:
     """Converts numpy types to fastcs types for widget creation.
     Only types important for widget creation are explicitly converted
