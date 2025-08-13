@@ -49,9 +49,11 @@ class AttrHandlerRW(AttrHandlerR, AttrHandlerW):
 class SimpleAttrHandler(AttrHandlerRW):
     """Handler for internal parameters"""
 
-    async def put(self, attr: AttrRW[T], value: T) -> None:  # type: ignore
-        await attr.set(value)
+    async def put(self, attr: AttrW[T], value: T) -> None:
         await attr.update_display_without_process(value)
+
+        if isinstance(attr, AttrRW):
+            await attr.set(value)
 
     async def update(self, attr: AttrR) -> None:
         raise RuntimeError("SimpleHandler cannot update")
