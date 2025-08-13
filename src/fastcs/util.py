@@ -41,9 +41,6 @@ def validate_hinted_attributes(controller: BaseController):
         attr_class = get_origin(hint)
         if not issubclass(attr_class, Attribute):
             continue
-        args = get_args(hint)
-        assert len(args) == 1, f"Hinted attribute {name} has too many arguments"
-        (attr_dtype,) = args
         attr = getattr(controller, name, None)
         assert attr is not None, (
             f"No attribute named {name} bound on controller {controller}"
@@ -51,6 +48,8 @@ def validate_hinted_attributes(controller: BaseController):
         assert type(attr) is attr_class, (
             f"Expected {attr_class} for {name}, got {type(attr)}"
         )
+        # TypeError raised if the number of args if not 1
+        (attr_dtype,) = get_args(hint)
         assert attr.datatype.dtype == attr_dtype, (
             f"Expected dtype {attr_dtype} for {name}, got {attr.datatype.dtype}"
         )
