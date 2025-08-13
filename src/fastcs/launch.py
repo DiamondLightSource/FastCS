@@ -115,7 +115,7 @@ class FastCS:
 
         for transport in self._transports:
             coros.append(transport.serve())
-            context.update(transport.context())
+            context.update(transport.context)
 
         if not os.getenv("NOT_INTERACTIVE"):
             coros.append(self._interactive_shell(context))

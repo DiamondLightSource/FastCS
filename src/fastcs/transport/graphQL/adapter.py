@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
 
@@ -30,6 +28,3 @@ class GraphQLTransport(TransportAdapter):
 
     async def serve(self) -> None:
         await self._server.serve(self.options.gql)
-
-    def context(self) -> dict[str, Any]:
-        return {}

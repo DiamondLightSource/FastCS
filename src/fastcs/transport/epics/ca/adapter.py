@@ -1,5 +1,4 @@
 import asyncio
-from typing import Any
 
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
@@ -41,6 +40,3 @@ class EpicsCATransport(TransportAdapter):
     async def serve(self) -> None:
         print(f"Running FastCS IOC: {self._pv_prefix}")
         self._ioc.run(self._loop)
-
-    def context(self) -> dict[str, Any]:
-        return {}

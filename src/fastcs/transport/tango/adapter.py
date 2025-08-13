@@ -1,5 +1,4 @@
 import asyncio
-from typing import Any
 
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
@@ -36,6 +35,3 @@ class TangoTransport(TransportAdapter):
             self.options.dsr,
         )
         await coro
-
-    def context(self) -> dict[str, Any]:
-        return {}

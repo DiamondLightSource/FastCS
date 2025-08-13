@@ -33,6 +33,3 @@ class EpicsPVATransport(TransportAdapter):
 
     def create_gui(self) -> None:
         PvaEpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.options.gui)
-
-    def context(self):
-        return {}
