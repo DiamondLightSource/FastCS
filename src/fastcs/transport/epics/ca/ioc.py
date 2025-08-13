@@ -187,7 +187,7 @@ def _make_record(
     )
 
     def datatype_updater(datatype: DataType):
-        for name, value in record_metadata_from_datatype(datatype).items():
+        for name, value in record_metadata_from_datatype(datatype, out_record).items():
             record.set_field(name, value)
 
     attribute.add_update_datatype_callback(datatype_updater)

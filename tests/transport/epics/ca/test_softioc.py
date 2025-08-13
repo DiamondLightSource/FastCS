@@ -541,7 +541,7 @@ def test_update_datatype(mocker: MockerFixture):
         attr_r.update_datatype(String())  # type: ignore
 
     attr_w = AttrW(Int())
-    record_w = _make_record(pv_name, attr_w, on_update=mocker.ANY)
+    record_w = _make_record(pv_name, attr_w, on_update=mocker.ANY, out_record=True)
 
     builder.longIn.assert_called_once_with(
         pv_name,
@@ -549,9 +549,10 @@ def test_update_datatype(mocker: MockerFixture):
         **record_metadata_from_datatype(attr_w.datatype),
     )
     record_w.set_field.assert_not_called()
-    attr_w.update_datatype(Int(units="m", min_alarm=-3))
+    attr_w.update_datatype(Int(units="m", min_alarm=-1, min=-3))
     record_w.set_field.assert_any_call("EGU", "m")
-    record_w.set_field.assert_any_call("LOPR", -3)
+    record_w.set_field.assert_any_call("LOPR", -1)
+    record_w.set_field.assert_any_call("DRVL", -3)
 
     with pytest.raises(
         ValueError,
