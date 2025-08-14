@@ -60,6 +60,7 @@ async def test_ioc(p4p_subprocess: tuple[str, Queue]):
         "g": {"rw": f"{pv_prefix}:Child1:G"},
         "h": {"rw": f"{pv_prefix}:Child1:H"},
         "i": {"x": f"{pv_prefix}:Child1:I"},
+        "j": {"r": f"{pv_prefix}:Child1:J"},
     }
 
 
