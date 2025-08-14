@@ -62,6 +62,11 @@ def record_metadata_from_datatype(
         if field in DATATYPE_FIELD_TO_RECORD_FIELD
     }
 
+    if not out_record:
+        # in type records don't have DRVL/DRVH fields
+        arguments.pop("DRVL", None)
+        arguments.pop("DRVH", None)
+
     match datatype:
         case Waveform():
             if len(datatype.shape) != 1:
