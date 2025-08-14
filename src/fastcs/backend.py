@@ -49,7 +49,9 @@ class Backend:
         for coro in self._initial_coros:
             await coro()
 
-    async def _start_scan_tasks(self, coros):
+    async def _start_scan_tasks(
+        self, coros: list[Callable[[], Coroutine[None, None, None]]]
+    ):
         self._scan_tasks = {self._loop.create_task(coro()) for coro in coros}
 
     def _stop_scan_tasks(self):
