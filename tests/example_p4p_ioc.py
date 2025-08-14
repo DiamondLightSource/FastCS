@@ -46,6 +46,7 @@ class ChildController(SubController):
         print("D: RUNNING")
         await asyncio.sleep(0.1)
         print("D: FINISHED")
+        await self.j.set(self.j.get() + 1)
 
     e: AttrR = AttrR(Bool())
 
@@ -67,6 +68,9 @@ class ChildController(SubController):
         else:
             self.fail_on_next_e = True
             print("I: FINISHED")
+            await self.j.set(self.j.get() + 1)
+
+    j: AttrR = AttrR(Int())
 
 
 def run(pv_prefix="P4P_TEST_DEVICE"):

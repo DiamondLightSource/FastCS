@@ -20,7 +20,8 @@ dependencies = [
     "pytango",
     "softioc>=4.5.0",
     "strawberry-graphql",
-    "p4p"
+    "p4p",
+    "IPython",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"

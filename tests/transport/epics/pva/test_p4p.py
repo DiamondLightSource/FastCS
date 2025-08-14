@@ -60,6 +60,7 @@ async def test_ioc(p4p_subprocess: tuple[str, Queue]):
         "g": {"rw": f"{pv_prefix}:Child1:G"},
         "h": {"rw": f"{pv_prefix}:Child1:H"},
         "i": {"x": f"{pv_prefix}:Child1:I"},
+        "j": {"r": f"{pv_prefix}:Child1:J"},
     }
 
 
@@ -104,31 +105,29 @@ async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
 
 @pytest.mark.asyncio
 async def test_command_method(p4p_subprocess: tuple[str, Queue]):
-    QUEUE_TIMEOUT = 1
-    pv_prefix, stdout_queue = p4p_subprocess
+    pv_prefix, _ = p4p_subprocess
     d_values = asyncio.Queue()
     i_values = asyncio.Queue()
+    j_values = asyncio.Queue()
     ctxt = Context("pva")
 
     d_monitor = ctxt.monitor(f"{pv_prefix}:Child1:D", d_values.put)
     i_monitor = ctxt.monitor(f"{pv_prefix}:Child1:I", i_values.put)
+    j_monitor = ctxt.monitor(f"{pv_prefix}:Child1:J", j_values.put)
 
     try:
-        if not stdout_queue.empty():
-            raise RuntimeError("stdout_queue not empty", stdout_queue.get())
+        j_initial_value = await j_values.get()
         assert (await d_values.get()).raw.value is False
         await ctxt.put(f"{pv_prefix}:Child1:D", True)
         assert (await d_values.get()).raw.value is True
+        # D process hangs for 0.1s, so we wait slightly longer
         await asyncio.sleep(0.2)
+        # Value returns to False, signifying completed process
         assert (await d_values.get()).raw.value is False
-
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "D: RUNNING"
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "\n"
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "D: FINISHED"
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "\n"
+        # D process increments J by 1
+        assert (await j_values.get()).raw.value == j_initial_value + 1
 
         # First run fails
-        assert stdout_queue.empty()
         before_command_value = (await i_values.get()).raw
         assert before_command_value["value"] is False
         assert before_command_value["alarm"]["severity"] == 0
@@ -143,30 +142,26 @@ async def test_command_method(p4p_subprocess: tuple[str, Queue]):
         assert (
             after_command_value["alarm"]["message"] == "I: FAILED WITH THIS WEIRD ERROR"
         )
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "I: RUNNING"
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "\n"
+        # Failed I process does not increment J
+        assert j_values.empty()
 
         # Second run succeeds
-        assert stdout_queue.empty()
         await ctxt.put(f"{pv_prefix}:Child1:I", True)
         assert (await i_values.get()).raw.value is True
         await asyncio.sleep(0.2)
         after_command_value = (await i_values.get()).raw
+        # Successful I process increments J by 1
+        assert (await j_values.get()).raw.value == j_initial_value + 2
 
         # On the second run the command succeeded so we left the error state
         assert after_command_value["value"] is False
         assert after_command_value["alarm"]["severity"] == 0
         assert after_command_value["alarm"]["message"] == ""
 
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "I: RUNNING"
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "\n"
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "I: FINISHED"
-        assert stdout_queue.get(timeout=QUEUE_TIMEOUT) == "\n"
-        assert stdout_queue.empty()
-
     finally:
         d_monitor.close()
         i_monitor.close()
+        j_monitor.close()
 
 
 @pytest.mark.asyncio
