@@ -145,3 +145,17 @@ def test_get_schema(data):
 
     ref_schema = YAML(typ="safe").load(data / "schema.json")
     assert target_schema == ref_schema
+
+
+def test_error_if_identical_context_in_transports(mocker: MockerFixture, data):
+    mocker.patch("fastcs.launch.FastCS.create_gui")
+    mocker.patch("fastcs.launch.FastCS.create_docs")
+    mocker.patch(
+        "fastcs.transport.adapter.TransportAdapter.context",
+        new_callable=mocker.PropertyMock,
+        return_value={"controller": "test"},
+    )
+    app = _launch(IsHinted)
+    result = runner.invoke(app, ["run", str(data / "config.yaml")])
+    assert isinstance(result.exception, RuntimeError)
+    assert "Duplicate context keys found" in result.exception.args[0]

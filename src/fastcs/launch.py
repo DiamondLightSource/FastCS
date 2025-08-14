@@ -116,7 +116,7 @@ class FastCS:
             coros.append(transport.serve())
             common_context = context.keys() & transport.context.keys()
             if common_context:
-                raise LaunchError(
+                raise RuntimeError(
                     "Duplicate context keys found between "
                     f"current context { ({k: context[k] for k in common_context}) } "
                     f"and {transport.__class__.__name__} context: "
