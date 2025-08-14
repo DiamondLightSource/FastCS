@@ -42,19 +42,22 @@ def validate_hinted_attributes(controller: BaseController):
         if not issubclass(attr_class, Attribute):
             continue
         attr = getattr(controller, name, None)
-        assert attr is not None, (
-            f"Controller `{controller.__class__.__name__}` failed to introspect hinted "
-            f"attribute `{name}` during initialisation"
-        )
-        assert type(attr) is attr_class, (
-            f"Controller '{controller.__class__.__name__}' introspection of hinted "
-            f"attribute '{name}' does not match defined access mode. "
-            f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
-        )
-        # TypeError raised if the number of args if not 1
+        if attr is None:
+            raise RuntimeError(
+                f"Controller `{controller.__class__.__name__}` failed to introspect "
+                f"hinted attribute `{name}` during initialisation"
+            )
+        if type(attr) is not attr_class:
+            raise RuntimeError(
+                f"Controller '{controller.__class__.__name__}' introspection of hinted "
+                f"attribute '{name}' does not match defined access mode. "
+                f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
+            )
         (attr_dtype,) = get_args(hint)
-        assert attr.datatype.dtype == attr_dtype, (
-            f"Controller '{controller.__class__.__name__}' introspection of hinted "
-            f"attribute '{name}' does not match defined datatype. "
-            f"Expected '{attr_dtype.__name__}', got '{attr.datatype.dtype.__name__}'."
-        )
+        if attr.datatype.dtype != attr_dtype:
+            raise RuntimeError(
+                f"Controller '{controller.__class__.__name__}' introspection of hinted "
+                f"attribute '{name}' does not match defined datatype. "
+                f"Expected '{attr_dtype.__name__}', "
+                f"got '{attr.datatype.dtype.__name__}'."
+            )

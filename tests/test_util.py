@@ -74,20 +74,22 @@ def test_hinted_attributes_verified():
             self.hinted_wrong_type = AttrR(Float())  # type: ignore
             self.attributes["hinted_wrong_type"] = self.hinted_wrong_type
 
-    with pytest.raises(AssertionError) as excinfo:
+    with pytest.raises(RuntimeError) as excinfo:
         Backend(ControllerWithWrongType(), loop)
-    assert (
-        "Expected dtype <class 'int'> for hinted_wrong_type, got <class 'float'>"
-        in str(excinfo.value)
+    assert str(excinfo.value) == (
+        "Controller 'ControllerWithWrongType' introspection of hinted attribute "
+        "'hinted_wrong_type' does not match defined datatype. "
+        "Expected 'int', got 'float'."
     )
 
     class ControllerWithMissingAttr(Controller):
         hinted_int_missing: AttrR[int]
 
-    with pytest.raises(AssertionError) as excinfo:
+    with pytest.raises(RuntimeError) as excinfo:
         Backend(ControllerWithMissingAttr(), loop)
-    assert "No attribute named hinted_int_missing bound on controller" in str(
-        excinfo.value
+    assert str(excinfo.value) == (
+        "Controller `ControllerWithMissingAttr` failed to introspect hinted attribute "
+        "`hinted_int_missing` during initialisation"
     )
 
     class ControllerAttrWrongAccessMode(Controller):
@@ -97,11 +99,11 @@ def test_hinted_attributes_verified():
             self.hinted = AttrRW(Int())
             self.attributes["hinted"] = self.hinted
 
-    with pytest.raises(AssertionError) as excinfo:
+    with pytest.raises(RuntimeError) as excinfo:
         Backend(ControllerAttrWrongAccessMode(), loop)
     assert str(excinfo.value) == (
-        "Expected <class 'fastcs.attributes.AttrR'> for hinted,"
-        " got <class 'fastcs.attributes.AttrRW'>"
+        "Controller 'ControllerAttrWrongAccessMode' introspection of hinted attribute "
+        "'hinted' does not match defined access mode. Expected 'AttrR', got 'AttrRW'."
     )
 
     class MyEnum(enum.Enum):
@@ -115,8 +117,10 @@ def test_hinted_attributes_verified():
     class ControllerWrongEnumClass(Controller):
         hinted_enum: AttrRW[MyEnum] = AttrRW(Enum(MyEnum2))
 
-    with pytest.raises(AssertionError) as excinfo:
+    with pytest.raises(RuntimeError) as excinfo:
         Backend(ControllerWrongEnumClass(), loop)
     assert str(excinfo.value) == (
-        "Expected dtype <enum 'MyEnum'> for hinted_enum, got <enum 'MyEnum2'>"
+        "Controller 'ControllerWrongEnumClass' introspection of hinted attribute "
+        "'hinted_enum' does not match defined datatype. "
+        "Expected 'MyEnum', got 'MyEnum2'."
     )
