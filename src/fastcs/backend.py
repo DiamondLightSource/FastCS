@@ -1,11 +1,11 @@
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 
 from fastcs.cs_methods import Command, Put, Scan
 from fastcs.datatypes import T
 
-from .attributes import AttrHandlerR, AttrHandlerW, AttrR, AttrW
+from .attributes import ONCE, AttrHandlerR, AttrHandlerW, AttrR, AttrW
 from .controller import BaseController, Controller
 from .controller_api import ControllerAPI
 from .exceptions import FastCSException
@@ -40,18 +40,19 @@ class Backend:
         self._stop_scan_tasks()
 
     async def serve(self):
+        scans, initials = _get_scan_and_initial_coros(self.controller_api)
+        self._initial_coros += initials
         await self._run_initial_coros()
-        await self._start_scan_tasks()
+        await self._start_scan_tasks(scans)
 
     async def _run_initial_coros(self):
         for coro in self._initial_coros:
             await coro()
 
-    async def _start_scan_tasks(self):
-        self._scan_tasks = {
-            self._loop.create_task(coro())
-            for coro in _get_scan_coros(self.controller_api)
-        }
+    async def _start_scan_tasks(
+        self, coros: list[Callable[[], Coroutine[None, None, None]]]
+    ):
+        self._scan_tasks = {self._loop.create_task(coro()) for coro in coros}
 
     def _stop_scan_tasks(self):
         for task in self._scan_tasks:
@@ -96,15 +97,18 @@ def _create_sender_callback(attribute):
     return callback
 
 
-def _get_scan_coros(root_controller_api: ControllerAPI) -> list[Callable]:
+def _get_scan_and_initial_coros(
+    root_controller_api: ControllerAPI,
+) -> tuple[list[Callable], list[Callable]]:
     scan_dict: dict[float, list[Callable]] = defaultdict(list)
+    initial_coros: list[Callable] = []
 
     for controller_api in root_controller_api.walk_api():
         _add_scan_method_tasks(scan_dict, controller_api)
-        _add_attribute_updater_tasks(scan_dict, controller_api)
+        _add_attribute_updater_tasks(scan_dict, initial_coros, controller_api)
 
     scan_coros = _get_periodic_scan_coros(scan_dict)
-    return scan_coros
+    return scan_coros, initial_coros
 
 
 def _add_scan_method_tasks(
@@ -115,13 +119,17 @@ def _add_scan_method_tasks(
 
 
 def _add_attribute_updater_tasks(
-    scan_dict: dict[float, list[Callable]], controller_api: ControllerAPI
+    scan_dict: dict[float, list[Callable]],
+    initial_coros: list[Callable],
+    controller_api: ControllerAPI,
 ):
     for attribute in controller_api.attributes.values():
         match attribute:
             case AttrR(updater=AttrHandlerR(update_period=update_period)) as attribute:
                 callback = _create_updater_callback(attribute)
-                if update_period is not None:
+                if update_period is ONCE:
+                    initial_coros.append(callback)
+                elif update_period is not None:
                     scan_dict[update_period].append(callback)
 
 

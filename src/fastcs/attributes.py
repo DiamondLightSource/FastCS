@@ -9,6 +9,9 @@ import fastcs
 
 from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
 
+ONCE = float("inf")
+"""Special value to indicate that an attribute should be updated once on start up."""
+
 
 class AttrMode(Enum):
     """Access mode of an ``Attribute``."""
