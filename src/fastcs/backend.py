@@ -1,6 +1,6 @@
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 
 from fastcs.cs_methods import Command, Put, Scan
 from fastcs.datatypes import T
