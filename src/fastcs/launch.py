@@ -1,7 +1,6 @@
 import asyncio
 import inspect
 import json
-import os
 import signal
 from collections.abc import Coroutine
 from functools import partial
@@ -125,8 +124,7 @@ class FastCS:
                 )
             context.update(transport.context)
 
-        if not os.getenv("NOT_INTERACTIVE"):
-            coros.append(self._interactive_shell(context))
+        coros.append(self._interactive_shell(context))
 
         try:
             await asyncio.gather(*coros)

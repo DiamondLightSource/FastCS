@@ -84,9 +84,6 @@ if os.getenv("PYTEST_RAISE", "0") == "1":
 PV_PREFIX = "".join(random.choice(string.ascii_lowercase) for _ in range(12))
 HERE = Path(os.path.dirname(os.path.abspath(__file__)))
 
-# Prevent interactive terminal from running in tests
-os.environ["NOT_INTERACTIVE"] = "true"
-
 
 def _run_ioc_as_subprocess(
     pv_prefix: str,
