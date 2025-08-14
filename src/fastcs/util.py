@@ -43,13 +43,18 @@ def validate_hinted_attributes(controller: BaseController):
             continue
         attr = getattr(controller, name, None)
         assert attr is not None, (
-            f"No attribute named {name} bound on controller {controller}"
+            f"Controller `{controller.__class__.__name__}` failed to introspect hinted "
+            f"attribute `{name}` during initialisation"
         )
         assert type(attr) is attr_class, (
-            f"Expected {attr_class} for {name}, got {type(attr)}"
+            f"Controller '{controller.__class__.__name__}' introspection of hinted "
+            f"attribute '{name}' does not match defined access mode. "
+            f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
         )
         # TypeError raised if the number of args if not 1
         (attr_dtype,) = get_args(hint)
         assert attr.datatype.dtype == attr_dtype, (
-            f"Expected dtype {attr_dtype} for {name}, got {attr.datatype.dtype}"
+            f"Controller '{controller.__class__.__name__}' introspection of hinted "
+            f"attribute '{name}' does not match defined datatype. "
+            f"Expected '{attr_dtype.__name__}', got '{attr.datatype.dtype.__name__}'."
         )
