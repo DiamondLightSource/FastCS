@@ -203,4 +203,5 @@ def _build_controller_api(controller: BaseController, path: list[str]) -> Contro
             for name, sub_controller in controller.get_sub_controllers().items()
         },
         description=controller.description,
+        vector_name=controller.get_sub_controller_vector(),
     )

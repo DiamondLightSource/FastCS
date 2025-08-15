@@ -18,6 +18,7 @@ class ControllerAPI:
     sub_apis: dict[str, "ControllerAPI"] = field(default_factory=dict)
     """APIs of the sub controllers of the `Controller` this API was built from"""
     description: str | None = None
+    vector_name: str | None = None
 
     def walk_api(self) -> Iterator["ControllerAPI"]:
         """Walk through all the nested `ControllerAPI` s of this `ControllerAPI`.

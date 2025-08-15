@@ -42,16 +42,19 @@ class PviDevice(dict[str, "PviDevice"]):
     pv_prefix: str
     description: str | None
     device_signal_info: _PviSignalInfo | None
+    pvi_group: str | None
 
     def __init__(
         self,
         pv_prefix: str,
         description: str | None = None,
         device_signal_info: _PviSignalInfo | None = None,
+        pvi_group: str | None = None,
     ):
         self.pv_prefix = pv_prefix
         self.description = description
         self.device_signal_info = device_signal_info
+        self.pvi_group = pvi_group
 
     def __missing__(self, key: str) -> "PviDevice":
         new_device = PviDevice(pv_prefix=f"{self.pv_prefix}:{key}")
@@ -83,10 +86,13 @@ class PviDevice(dict[str, "PviDevice"]):
             stripped_leaf = pv_leaf.rstrip(":PVI")
             is_controller = stripped_leaf != pv_leaf
             pvi_name, number = _pv_to_pvi_name(stripped_leaf or pv_leaf)
-            if is_controller and number is not None:
-                if signal_info.access not in p4p_raw_value[pvi_name]:
-                    p4p_raw_value[pvi_name][signal_info.access] = {}
-                p4p_raw_value[pvi_name][signal_info.access][f"v{number}"] = (
+            pvi_group = self[stripped_leaf].pvi_group
+
+            if is_controller and pvi_group is not None and number is not None:
+                pvi_group = _pascal_to_snake(pvi_group)
+                if signal_info.access not in p4p_raw_value[pvi_group]:
+                    p4p_raw_value[pvi_group][signal_info.access] = {}
+                p4p_raw_value[pvi_group][signal_info.access][f"v{number}"] = (
                     signal_info.pv
                 )
             elif is_controller:
@@ -179,14 +185,18 @@ class PviTree:
         self,
         device_pv: str,
         description: str | None,
+        pvi_group: str | None,
     ):
         if ":" not in device_pv:
             assert device_pv == self._pvi_tree_root.pv_prefix
             self._pvi_tree_root.description = description
+            self._pvi_tree_root.pvi_group = pvi_group
         else:
-            self._pvi_tree_root.get_recursively(
+            pvi_device = self._pvi_tree_root.get_recursively(
                 *device_pv.split(":")[1:]  # To remove the prefix
-            ).description = description
+            )
+            pvi_device.description = description
+            pvi_device.pvi_group = pvi_group
 
     def add_signal(
         self,
