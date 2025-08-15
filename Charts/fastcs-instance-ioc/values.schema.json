@@ -58,6 +58,13 @@
           "title": "command",
           "type": "array"
         },
+        "debugMode": {
+          "default": false,
+          "description": "If true, the container will run in debug mode meaning:-\n  - the entrypoint is sleep\n  - a PVC is created and mounted over /venv with /venv copied into it\n  - adds '-debug' suffix to the image name\n",
+          "required": [],
+          "title": "debugMode",
+          "type": "boolean"
+        },
         "extra_containers": {
           "description": "adds addtional containers specified by image and command",
           "items": {
@@ -98,10 +105,34 @@
           "type": "object"
         },
         "image": {
-          "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/image",
-          "required": [],
+          "additionalProperties": false,
+          "properties": {
+            "pullPolicy": {
+              "default": "IfNotPresent",
+              "required": [],
+              "title": "pullPolicy",
+              "type": "string"
+            },
+            "repository": {
+              "default": "",
+              "required": [],
+              "title": "repository",
+              "type": "string"
+            },
+            "tag": {
+              "default": "",
+              "required": [],
+              "title": "tag",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repository",
+            "pullPolicy",
+            "tag"
+          ],
           "title": "image",
-          "type": "string"
+          "type": "object"
         },
         "iocConfig": {
           "default": "/epics/ioc/config",

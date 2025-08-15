@@ -11,6 +11,7 @@ metadata:
 spec:
   selector:
     app: {{ .Release.Name }}
+    {{- include "fastcs.selectorLabels" . | nindent 4 }}
   type: {{ .Values.service.type }}
   # allocate a fixed clusterIP for this service based on the service name
   {{- $alloc_args := dict "name" .Release.Name "namespace" .Release.Namespace "baseIp" .Values.baseIp "startIp" .Values.startIp }}
@@ -48,5 +49,3 @@ spec:
       port: {{ add1 (.Values.pva_server_port | default 5075) }}
       targetPort: {{ add1 (.Values.pva_server_port | default 5075) }}
       protocol: UDP
-  selector:
-    {{- include "fastcs.selectorLabels" . | nindent 4 }}
