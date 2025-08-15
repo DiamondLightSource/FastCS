@@ -105,8 +105,10 @@ spec:
               subPath: "{{ $.Release.Name }}"
             - name: config-volume
               mountPath: {{ $.Values.iocConfig }}
+          {{- if $.Values.debugMode }}
             - name: {{ $.Release.Name }}-develop
               mountPath: /dest
+          {{- end }}
         {{- end }}
         - name: {{ .Chart.Name }}
           image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.debugMode }}:{{ .Values.image.tag }}'
