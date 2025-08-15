@@ -36,6 +36,18 @@ command: []
 args: []
 
 # @schema
+# description: Command to run in the debug version of the container
+# type: array
+# items:
+#   type: string
+# required: false
+# @schema
+debugCommand:
+  - /bin/bash
+  - -c
+  - "sleep infinity"
+
+# @schema
 # description: |
 #   If true, the container will run in debug mode meaning:-
 #     - the entrypoint is sleep

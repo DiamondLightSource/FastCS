@@ -58,6 +58,16 @@
           "title": "command",
           "type": "array"
         },
+        "debugCommand": {
+          "description": "Command to run in the debug version of the container",
+          "items": {
+            "required": [],
+            "type": "string"
+          },
+          "required": [],
+          "title": "debugCommand",
+          "type": "array"
+        },
         "debugMode": {
           "default": false,
           "description": "If true, the container will run in debug mode meaning:-\n  - the entrypoint is sleep\n  - a PVC is created and mounted over /venv with /venv copied into it\n  - adds '-debug' suffix to the image name\n",
