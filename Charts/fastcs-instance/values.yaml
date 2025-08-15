@@ -10,10 +10,12 @@
 
 # @schema
 # title: image
-# type: string
-# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/image
+# type: object
 # @schema
-image: ""
+image:
+  repository: ""
+  pullPolicy: IfNotPresent
+  tag: ""
 
 # @schema
 # description: Command to run in the container (as array of arguments)
@@ -32,6 +34,16 @@ command: []
 # required: false
 # @schema
 args: []
+
+# @schema
+# description: |
+#   If true, the container will run in debug mode meaning:-
+#     - the entrypoint is sleep
+#     - a PVC is created and mounted over /venv with /venv copied into it
+#     - adds '-debug' suffix to the image name
+# type: boolean
+# @schema
+debugMode: false
 
 # @schema
 # description: location of config folder (defaults to be the same as C++ IOCs)

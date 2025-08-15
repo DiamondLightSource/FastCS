@@ -51,14 +51,37 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.debugMode }}
+      # add in an init container to copy out virtual environment and workspaces
+      initContainers:
+      - name: {{ .Release.Name }}-init-debug
+        image: "{{ .Values.image.repository }}-debug:{{ .Values.image.tag }}"
+        image: {{ .Values.image }}
+        imagePullPolicy: IfNotPresent
+        resources:
+          {{- .Values.initResources | default .Values.resources | toYaml | nindent 12 }}
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Copying virtual env to the debugging volume"
+            cp -r /venv /dest/venv
+            echo "Copying workspaces to the debugging volume"
+            cp -r /workspaces /dest/workspaces
+            echo "Setting permissions on the debugging volume"
+            chmod -R o+rwX /dest/venv /dest/workspaces
+        volumeMounts:
+          - name: {{ .Release.Name }}-develop
+            mountPath: /dest
+      {{- end }}
       containers:
         {{- range .Values.extra_containers }}
         - name: {{ .name }}
+          image: {{ .Values.image.repository }}-debug:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with $.Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: {{ .image }}
           {{- with .command }}
           command:
           {{- if (kindIs "string" .) }}
@@ -82,33 +105,14 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image }}"
-          imagePullPolicy: IfNotPresent
+          image: {{ .Values.image.repository }}{{ ternary "-debug" "" .Values.debug.enabled }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.command }}
-          command:
-          {{- if (kindIs "string" .) }}
-            - {{ . }}
-          {{- else if (kindIs "slice" .) }}
-          {{- . | toYaml | nindent 10 }}
-          {{- end }}
+          command: {{ . }}
           {{- end }}
           {{- with .Values.args }}
-          args:
-          {{- if (kindIs "string" .) }}
-            - {{ . }}
-          {{- else if (kindIs "slice" .) }}
-          {{- . | toYaml | nindent 10 }}
+          args: {{ . }}
           {{- end }}
-          {{- end }}
-
-          ports:
-            - name: channel-access
-              containerPort: 5064
-              protocol: TCP
-            - name: pv-access
-              containerPort: 5075
-              protocol: TCP
-          {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -129,6 +133,14 @@ spec:
               subPath: "{{ .Release.Name }}"
             - name: config-volume
               mountPath: {{ .Values.iocConfig }}
+          {{- if .Values.debugMode }}
+            - name: {{ .Release.Name }}-develop
+              mountPath: /workspaces
+              subPath: workspaces
+            - name: {{ .Release.Name }}-develop
+              mountPath: /venv
+              subPath: venv
+          {{- end }}
       volumes:
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
@@ -139,6 +151,11 @@ spec:
         - name: config-volume
           configMap:
             name: {{ .Release.Name }}-config
+        {{- if .Values.debugMode }}
+        - name: {{ .Release.Name }}-develop
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-develop
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
