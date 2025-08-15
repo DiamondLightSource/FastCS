@@ -1,4 +1,7 @@
 import asyncio
+from typing import Any
+
+from softioc import softioc
 
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
@@ -40,3 +43,11 @@ class EpicsCATransport(TransportAdapter):
     async def serve(self) -> None:
         print(f"Running FastCS IOC: {self._pv_prefix}")
         self._ioc.run(self._loop)
+
+    @property
+    def context(self) -> dict[str, Any]:
+        return {
+            command_name: getattr(softioc, command_name)
+            for command_name in softioc.command_names
+            if command_name != "exit"
+        }
