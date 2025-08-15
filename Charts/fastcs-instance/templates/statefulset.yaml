@@ -51,22 +51,50 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.debugMode }}
+      # add in an init container to copy out virtual environment and workspaces
+      initContainers:
+      - name: {{ .Release.Name }}-init-debug
+        image: "{{ .Values.image.repository }}-debug:{{ .Values.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        resources:
+          {{- .Values.initResources | default .Values.resources | toYaml | nindent 12 }}
+        {{- with .Values.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "running as account"; id
+            if [ -d dest/venv ]; then
+              echo "Virtual environment already exists, skipping copy"
+            else
+              echo "Copying virtual env to the debugging volume"
+              cp -r /venv /dest/venv
+              echo "Copying workspaces to the debugging volume"
+              cp -r /workspaces /dest/workspaces
+              echo "Setting permissions on the debugging volume"
+              chmod -R o+rwX /dest/venv /dest/workspaces
+            fi
+            echo "Init container completed successfully"
+        volumeMounts:
+          - name: {{ .Release.Name }}-develop
+            mountPath: /dest
+      {{- end }}
       containers:
         {{- range .Values.extra_containers }}
         - name: {{ .name }}
           image: {{ .image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          terminationGracePeriodSeconds: 2
           {{- with $.Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .command }}
           command:
-          {{- if (kindIs "string" .) }}
-            - {{ . }}
-          {{- else if (kindIs "slice" .) }}
-          {{- . | toYaml | nindent 10 }}
-          {{- end }}
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
           {{- with $.Values.volumeMounts }}
@@ -77,19 +105,24 @@ spec:
               subPath: "{{ $.Release.Name }}"
             - name: config-volume
               mountPath: {{ $.Values.iocConfig }}
+            - name: {{ $.Release.Name }}-develop
+              mountPath: /dest
         {{- end }}
         - name: {{ .Chart.Name }}
+          image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.debugMode }}:{{ .Values.image.tag }}'
+          terminationGracePeriodSeconds: 2
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: {{ .Values.image.repository }}{{ ternary "-debug" "" .Values.debugMode }}":"{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.command }}
-          command: {{ . }}
+          command:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.args }}
-          args: {{ . }}
+          args:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .livenessProbe }}
           livenessProbe:
