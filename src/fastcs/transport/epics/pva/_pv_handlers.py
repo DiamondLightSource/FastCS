@@ -1,5 +1,3 @@
-import traceback
-
 import numpy as np
 from p4p import Value
 from p4p.nt import NTEnum, NTNDArray, NTScalar, NTTable
@@ -60,7 +58,6 @@ class CommandPvHandler:
         try:
             await self._command()
         except Exception as e:
-            print(traceback.format_exc())
             alarm_states = p4p_alarm_states(
                 MAJOR_ALARM_SEVERITY, RECORD_ALARM_STATUS, str(e)
             )
