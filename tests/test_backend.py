@@ -144,7 +144,7 @@ def test_scan_raises_exception_via_callback():
     backend = Backend(controller, loop)
 
     exception_info = {}
-    # This will intercept the exception raised in _raise_scan_exception
+    # This will intercept the exception raised in _scan_done
     loop.set_exception_handler(
         lambda _loop, context: exception_info.update(
             {"exception": context.get("exception")}
@@ -155,7 +155,7 @@ def test_scan_raises_exception_via_callback():
         await backend.serve()
         # This allows scan time to run
         await asyncio.sleep(0.2)
-        # _raise_scan_exception should raise an exception
+        # _scan_done should raise an exception
         assert isinstance(exception_info["exception"], FastCSException)
         for task in backend._scan_tasks:
             internal_exception = task.exception()
