@@ -42,7 +42,9 @@ async def parse_attributes(
     for controller_api in root_controller_api.walk_api():
         pv_prefix = get_pv_name(root_pv_prefix, *controller_api.path)
 
-        pvi_tree.add_sub_device(pv_prefix, controller_api.description)
+        pvi_tree.add_sub_device(
+            pv_prefix, controller_api.description, controller_api.vector_name
+        )
 
         for attr_name, attribute in controller_api.attributes.items():
             pv_name = get_pv_name(pv_prefix, attr_name)

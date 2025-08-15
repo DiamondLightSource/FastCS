@@ -14,7 +14,7 @@ from p4p.client.thread import Context as ThreadContext
 from p4p.nt import NTTable
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller, SubController, SubControllerVector
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import EpicsIOCOptions
@@ -290,15 +290,15 @@ def test_pvi_grouping():
 
     controller = SomeController()
 
-    sub_controller = ChildController()
-    controller.register_sub_controller("Child0", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
-    sub_controller = ChildController()
-    controller.register_sub_controller("Child1", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
-    sub_controller = ChildController()
-    controller.register_sub_controller("Child2", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
+    sub_controller_vector = SubControllerVector(
+        {i: ChildController() for i in range(3)}
+    )
+
+    for _, child in sub_controller_vector.children():
+        child.register_sub_controller("ChildChild", ChildChildController())
+
+    controller.register_sub_controller("Child", sub_controller_vector)
+
     sub_controller = ChildController()
     controller.register_sub_controller("another_child", sub_controller)
     sub_controller.register_sub_controller("ChildChild", ChildChildController())

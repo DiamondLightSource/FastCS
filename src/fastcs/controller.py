@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Iterator, Mapping, MutableMapping
 from copy import deepcopy
 from typing import get_type_hints
 
@@ -27,6 +28,7 @@ class BaseController:
             self.attributes = {}
         self._path: list[str] = path or []
         self.__sub_controller_tree: dict[str, SubController] = {}
+        self.__sub_controller_vector: str | None = None
 
         self._bind_attrs()
 
@@ -98,7 +100,15 @@ class BaseController:
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
-    def register_sub_controller(self, name: str, sub_controller: SubController):
+    def register_sub_controller(
+        self, name: str, sub_controller: SubController | SubControllerVector
+    ):
+        if isinstance(sub_controller, SubControllerVector):
+            for index, child in sub_controller.children():
+                child.__sub_controller_vector = name  # noqa: SLF001
+                self.register_sub_controller(f"{name}{index}", child)
+            return
+
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
                 f"Controller {self} already has a SubController registered as {name}"
@@ -118,6 +128,9 @@ class BaseController:
 
     def get_sub_controllers(self) -> dict[str, SubController]:
         return self.__sub_controller_tree
+
+    def get_sub_controller_vector(self) -> str | None:
+        return self.__sub_controller_vector
 
 
 class Controller(BaseController):
@@ -144,6 +157,50 @@ class SubController(BaseController):
     """
 
     root_attribute: Attribute | None = None
+    _pvi_group: str | None = None
 
     def __init__(self, description: str | None = None) -> None:
         super().__init__(description=description)
+
+
+class SubControllerVector(MutableMapping[int, SubController]):
+    """A collection of SubControllers, with an arbitrary integer index.
+
+    An instance of this class can be registered with a parent ``Controller`` to include
+    it's children as part of a larger controller. Each child of the vector will keep
+    a string name of the vector.
+    """
+
+    def __init__(
+        self, children: Mapping[int, SubController], description: str | None = None
+    ) -> None:
+        self._children: dict[int, SubController] = {}
+        self.update(children)
+
+    def __getitem__(self, key: int) -> SubController:
+        return self._children[key]
+
+    def __setitem__(self, key: int, value: SubController) -> None:
+        if not isinstance(key, int):
+            msg = f"Expected int, got {key}"
+            raise TypeError(msg)
+        if not isinstance(value, SubController):
+            msg = f"Expected SubController, got {value}"
+            raise TypeError(msg)
+        self._children[key] = value
+
+    def __delitem__(self, key: int) -> None:
+        del self._children[key]
+
+    def __iter__(self) -> Iterator[int]:
+        yield from self._children
+
+    def __len__(self) -> int:
+        return len(self._children)
+
+    def children(self) -> Iterator[tuple[str, SubController]]:
+        for key, child in self._children.items():
+            yield str(key), child
+
+    def __hash__(self):
+        return hash(id(self))
