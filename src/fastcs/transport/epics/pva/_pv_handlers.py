@@ -46,9 +46,6 @@ class WritePvHandler:
         cast_value = cast_from_p4p_value(self._attr_w, raw_value)
 
         await self._attr_w.process_without_display_update(cast_value)
-        if type(self._attr_w) is AttrW:
-            # For AttrRW a post is done from the `_process_callback`.
-            pv.post(cast_to_p4p_value(self._attr_w, cast_value))
         op.done()
 
 
@@ -103,35 +100,43 @@ class CommandPvHandler:
             raise RuntimeError("Commands should only take the value `True`.")
 
 
-def make_shared_pv(attribute: Attribute) -> SharedPV:
-    initial_value = (
-        attribute.get()
-        if isinstance(attribute, AttrR)
-        else attribute.datatype.initial_value
-    )
-
+def _make_shared_pv_arguments(attribute: Attribute) -> dict[str, object]:
     type_ = make_p4p_type(attribute)
-    kwargs = {"initial": cast_to_p4p_value(attribute, initial_value)}
     if isinstance(type_, (NTEnum | NTNDArray | NTTable)):
-        kwargs["nt"] = type_
+        return {"nt": type_}
     else:
 
         def _wrap(value: dict):
             return Value(type_, value)
 
-        kwargs["wrap"] = _wrap
+        return {"wrap": _wrap}
 
-    if isinstance(attribute, AttrW):
-        kwargs["handler"] = WritePvHandler(attribute)
 
-    shared_pv = SharedPV(**kwargs)
+def make_shared_read_pv(attribute: AttrR) -> SharedPV:
+    shared_pv = SharedPV(
+        initial=cast_to_p4p_value(attribute, attribute.get()),
+        **_make_shared_pv_arguments(attribute),
+    )
 
-    if isinstance(attribute, AttrR):
+    async def on_update(value):
+        shared_pv.post(cast_to_p4p_value(attribute, value))
 
-        async def on_update(value):
-            shared_pv.post(cast_to_p4p_value(attribute, value))
+    attribute.add_update_callback(on_update)
 
-        attribute.add_update_callback(on_update)
+    return shared_pv
+
+
+def make_shared_write_pv(attribute: AttrW) -> SharedPV:
+    shared_pv = SharedPV(
+        handler=WritePvHandler(attribute),
+        initial=cast_to_p4p_value(attribute, attribute.datatype.initial_value),
+        **_make_shared_pv_arguments(attribute),
+    )
+
+    async def async_write_display(value):
+        shared_pv.post(cast_to_p4p_value(attribute, value))
+
+    attribute.add_write_display_callback(async_write_display)
 
     return shared_pv
 

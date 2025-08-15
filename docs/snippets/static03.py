@@ -9,4 +9,4 @@ class TemperatureController(Controller):
 
 
 fastcs = FastCS(TemperatureController(), [])
-fastcs.run()
+# fastcs.run() # Commented as this will block

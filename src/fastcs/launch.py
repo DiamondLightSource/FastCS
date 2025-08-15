@@ -2,10 +2,13 @@ import asyncio
 import inspect
 import json
 import signal
+from collections.abc import Coroutine
+from functools import partial
 from pathlib import Path
 from typing import Annotated, Any, Optional, TypeAlias, get_type_hints
 
 import typer
+from IPython.terminal.embed import InteractiveShellEmbed
 from pydantic import BaseModel, create_model
 from ruamel.yaml import YAML
 
@@ -36,6 +39,7 @@ class FastCS:
         transport_options: TransportOptions,
     ):
         self._loop = asyncio.get_event_loop()
+        self._controller = controller
         self._backend = Backend(controller, self._loop)
         transport: TransportAdapter
         self._transports: list[TransportAdapter] = []
@@ -100,11 +104,58 @@ class FastCS:
 
     async def serve(self) -> None:
         coros = [self._backend.serve()]
-        coros.extend([transport.serve() for transport in self._transports])
+        context = {
+            "controller": self._controller,
+            "controller_api": self._backend.controller_api,
+            "transports": [
+                transport.__class__.__name__ for transport in self._transports
+            ],
+        }
+
+        for transport in self._transports:
+            coros.append(transport.serve())
+            common_context = context.keys() & transport.context.keys()
+            if common_context:
+                raise RuntimeError(
+                    "Duplicate context keys found between "
+                    f"current context { ({k: context[k] for k in common_context}) } "
+                    f"and {transport.__class__.__name__} context: "
+                    f"{ ({k: transport.context[k] for k in common_context}) }"
+                )
+            context.update(transport.context)
+
+        coros.append(self._interactive_shell(context))
+
         try:
             await asyncio.gather(*coros)
         except asyncio.CancelledError:
             pass
+
+    async def _interactive_shell(self, context: dict[str, Any]):
+        """Spawn interactive shell in another thread and wait for it to complete."""
+
+        def run(coro: Coroutine[None, None, None]):
+            """Run coroutine on FastCS event loop from IPython thread."""
+
+            def wrapper():
+                asyncio.create_task(coro)
+
+            self._loop.call_soon_threadsafe(wrapper)
+
+        async def interactive_shell(
+            context: dict[str, object], stop_event: asyncio.Event
+        ):
+            """Run interactive shell in a new thread."""
+            shell = InteractiveShellEmbed()
+            await asyncio.to_thread(partial(shell.mainloop, local_ns=context))
+
+            stop_event.set()
+
+        context["run"] = run
+
+        stop_event = asyncio.Event()
+        self._loop.create_task(interactive_shell(context, stop_event))
+        await stop_event.wait()
 
 
 def launch(

@@ -20,7 +20,8 @@ dependencies = [
     "pytango",
     "softioc>=4.5.0",
     "strawberry-graphql",
-    "p4p"
+    "p4p",
+    "IPython",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"
@@ -48,6 +49,7 @@ dev = [
     "sphinx-design",
     "tox-direct",
     "types-mock",
+    "setuptools>=70.1", # https://github.com/DiamondLightSource/aioca/issues/71
     "aioca",
     "p4p",
     "httpx",

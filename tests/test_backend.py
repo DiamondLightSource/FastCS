@@ -1,6 +1,7 @@
 import asyncio
+from dataclasses import dataclass
 
-from fastcs.attributes import AttrRW
+from fastcs.attributes import ONCE, AttrHandlerR, AttrR, AttrRW
 from fastcs.backend import Backend, build_controller_api
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
@@ -92,6 +93,43 @@ def test_controller_api_methods():
     loop.run_until_complete(test_wrapper())
 
 
+def test_update_periods():
+    @dataclass
+    class AttrHandlerTimesCalled(AttrHandlerR):
+        update_period: float | None
+        _times_called = 0
+
+        async def update(self, attr):
+            self._times_called += 1
+            await attr.set(self._times_called)
+
+    class MyController(Controller):
+        update_once = AttrR(Int(), handler=AttrHandlerTimesCalled(update_period=ONCE))
+        update_quickly = AttrR(Int(), handler=AttrHandlerTimesCalled(update_period=0.1))
+        update_never = AttrR(Int(), handler=AttrHandlerTimesCalled(update_period=None))
+
+    controller = MyController()
+    loop = asyncio.get_event_loop()
+
+    backend = Backend(controller, loop)
+
+    assert controller.update_quickly.get() == 0
+    assert controller.update_once.get() == 0
+    assert controller.update_never.get() == 0
+
+    async def test_wrapper():
+        loop.create_task(backend.serve())
+        await asyncio.sleep(1)
+
+    loop.run_until_complete(test_wrapper())
+    assert controller.update_quickly.get() > 1
+    assert controller.update_once.get() == 1
+    assert controller.update_never.get() == 0
+
+    assert len(backend._scan_tasks) == 1
+    assert len(backend._initial_coros) == 2
+
+
 def test_scan_raises_exception_via_callback():
     class MyTestController(Controller):
         def __init__(self):
@@ -114,7 +152,7 @@ def test_scan_raises_exception_via_callback():
     )
 
     async def test_scan_wrapper():
-        await backend._start_scan_tasks()
+        await backend.serve()
         # This allows scan time to run
         await asyncio.sleep(0.2)
         # _raise_scan_exception should raise an exception
