@@ -171,9 +171,7 @@ class SubControllerVector(MutableMapping[int, SubController]):
     a string name of the vector.
     """
 
-    def __init__(
-        self, children: Mapping[int, SubController], description: str | None = None
-    ) -> None:
+    def __init__(self, children: Mapping[int, SubController]) -> None:
         self._children: dict[int, SubController] = {}
         self.update(children)
 
