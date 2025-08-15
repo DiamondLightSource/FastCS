@@ -87,7 +87,6 @@ spec:
         - name: {{ .name }}
           image: {{ .image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          terminationGracePeriodSeconds: 2
           {{- with $.Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
@@ -112,7 +111,6 @@ spec:
         {{- end }}
         - name: {{ .Chart.Name }}
           image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.debugMode }}:{{ .Values.image.tag }}'
-          terminationGracePeriodSeconds: 2
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
