@@ -86,7 +86,7 @@ class GraphQLAPI:
     def _process_sub_apis(self, root_controller_api: ControllerAPI):
         """Recursively add fields from the queries and mutations of sub apis"""
         for controller_api in root_controller_api.sub_apis.values():
-            name = "".join(controller_api.path)
+            name = "".join([str(node) for node in controller_api.path])
             child_tree = GraphQLAPI(controller_api)
             if child_tree.queries:
                 self.queries.append(

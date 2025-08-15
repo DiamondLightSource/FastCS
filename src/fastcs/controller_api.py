@@ -17,12 +17,12 @@ logger = _fastcs_logger.bind(logger_name=__name__)
 class ControllerAPI:
     """Attributes, bound methods and sub APIs of a `Controller`"""
 
-    path: list[str] = field(default_factory=list)
+    path: list[str | int] = field(default_factory=list)
     """Path within controller tree (empty if this is the root)"""
     attributes: dict[str, Attribute] = field(default_factory=dict)
     command_methods: dict[str, Command] = field(default_factory=dict)
     scan_methods: dict[str, Scan] = field(default_factory=dict)
-    sub_apis: dict[str, "ControllerAPI"] = field(default_factory=dict)
+    sub_apis: dict[str | int, "ControllerAPI"] = field(default_factory=dict)
     """APIs of the sub controllers of the `Controller` this API was built from"""
     description: str | None = None
 

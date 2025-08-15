@@ -3,15 +3,20 @@ import enum
 
 import numpy as np
 
-from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller
+from fastcs.attributes import AttrHandlerW, AttrR, AttrRW, AttrW
+from fastcs.controller import Controller, SubController, SubControllerVector
 from fastcs.datatypes import Bool, Enum, Float, Int, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import (
     EpicsIOCOptions,
 )
-from fastcs.transport.epics.pva.transport import EpicsPVATransport
+from fastcs.transport.epics.pva.options import EpicsPVAOptions
 from fastcs.wrappers import command, scan
+
+
+class SimpleAttributeSetter(AttrHandlerW):
+    async def put(self, attr, value):
+        await attr.update_display_without_process(value)
 
 
 class FEnum(enum.Enum):
@@ -25,29 +30,29 @@ class FEnum(enum.Enum):
 class ParentController(Controller):
     description = "some controller"
     a: AttrRW = AttrRW(Int(max=400_000, max_alarm=40_000))
-    b: AttrW = AttrW(Float(min=-1, min_alarm=-0.5))
+    b: AttrW = AttrW(Float(min=-1, min_alarm=-0.5), handler=SimpleAttributeSetter())
 
     table: AttrRW = AttrRW(
         Table([("A", np.int32), ("B", "i"), ("C", "?"), ("D", np.float64)])
     )
 
 
-class ChildController(Controller):
+class ChildController(SubController):
     fail_on_next_e = True
-    c: AttrW = AttrW(Int())
+    c: AttrW = AttrW(Int(), handler=SimpleAttributeSetter())
 
     @command()
     async def d(self):
         print("D: RUNNING")
         await asyncio.sleep(0.1)
         print("D: FINISHED")
-        await self.j.update(self.j.get() + 1)
+        await self.j.set(self.j.get() + 1)
 
     e: AttrR = AttrR(Bool())
 
     @scan(1)
     async def flip_flop(self):
-        await self.e.update(not self.e.get())
+        await self.e.set(not self.e.get())
 
     f: AttrRW = AttrRW(Enum(FEnum))
     g: AttrRW = AttrRW(Waveform(np.int64, shape=(3,)))
@@ -63,21 +68,36 @@ class ChildController(Controller):
         else:
             self.fail_on_next_e = True
             print("I: FINISHED")
-            await self.j.update(self.j.get() + 1)
+            await self.j.set(self.j.get() + 1)
 
     j: AttrR = AttrR(Int())
 
 
 def run(pv_prefix="P4P_TEST_DEVICE"):
+    p4p_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     controller = ParentController()
-    controller.a.enable_tracing()
-    controller.child1 = ChildController(description="some sub controller")
-    controller.child2 = ChildController(description="another sub controller")
+    # controller.register_sub_controller(
+    #     "Child1", ChildController(description="some sub controller")
+    # )
+    # controller.register_sub_controller(
+    #     "Child2", ChildController(description="another sub controller")
+    # )
 
-    fastcs = FastCS(
-        controller, [EpicsPVATransport(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))]
+    class Vector(SubControllerVector):
+        int: AttrR = AttrR(Int())
+
+    sub_controller = Vector(
+        {
+            1: ChildController(description="some sub controller"),
+            2: ChildController(description="another sub controller"),
+        }
     )
-    fastcs.run(interactive=False)
+
+    controller.register_sub_controller("Child", sub_controller)
+
+    fastcs = FastCS(controller, [p4p_options])
+    fastcs.create_gui()
+    fastcs.run()
 
 
 if __name__ == "__main__":
