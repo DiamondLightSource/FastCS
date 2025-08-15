@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "affinity": {
+      "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity",
+      "description": "Affinity for the pod",
+      "required": [],
+      "title": "affinity",
+      "type": "object"
+    },
+    "args": {
+      "description": "arguments to pass to the above command",
+      "items": {
+        "required": [],
+        "type": "string"
+      },
+      "required": [],
+      "title": "args",
+      "type": "array"
+    },
+    "baseIp": {
+      "default": "10.96.0.0/12",
+      "description": "Used by allocateIpFromName to allocate a fixed cluster IP for the service.\nThe default is the same for all DLS clusters.\n",
+      "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}\\/\\d{1,2}$",
+      "required": [],
+      "title": "CIDR for services addresses.",
+      "type": "string"
+    },
+    "ca_server_port": {
+      "default": 5064,
+      "description": "service port for Channel Access",
+      "required": [],
+      "title": "ca_server_port",
+      "type": "integer"
+    },
+    "clusterIP": {
+      "default": "",
+      "format": "ipv4",
+      "required": [],
+      "title": "Override for the cluster IP - only needed if allocateIpFromName clashes",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "command": {
+      "description": "Command to run in the container (as array of arguments)",
+      "items": {
+        "required": [],
+        "type": "string"
+      },
+      "required": [],
+      "title": "command",
+      "type": "array"
+    },
+    "extra_containers": {
+      "description": "adds addtional containers specified by image and command",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "command": {
+            "description": "Command to run in the container (as array of arguments)",
+            "required": [],
+            "type": "array"
+          },
+          "image": {
+            "description": "Container image URI",
+            "format": "image",
+            "required": [],
+            "type": "string"
+          },
+          "name": {
+            "description": "A name for the additional container",
+            "required": [],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "image",
+          "command"
+        ],
+        "type": "object"
+      },
+      "required": [],
+      "title": "extra_containers",
+      "type": "array"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "image": {
+      "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Container/properties/image",
+      "required": [],
+      "title": "image",
+      "type": "string"
+    },
+    "iocConfig": {
+      "default": "/epics/ioc/config",
+      "description": "location of config folder (defaults to be the same as C++ IOCs)",
+      "required": [],
+      "title": "iocConfig",
+      "type": "string"
+    },
+    "livenessProbe": {
+      "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe",
+      "required": [],
+      "title": "livenessProbe",
+      "type": "object"
+    },
+    "nodeSelector": {
+      "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.NodeSelector",
+      "description": "Node selector for the pod",
+      "required": [],
+      "title": "nodeSelector",
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "podAnnotations": {
+      "additionalProperties": false,
+      "required": [],
+      "title": "Pod Annotations",
+      "type": "object"
+    },
+    "podLabels": {
+      "additionalProperties": false,
+      "required": [],
+      "title": "Pod Labels",
+      "type": "object"
+    },
+    "podSecurityContext": {
+      "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+      "required": [],
+      "title": "Pod Security Context",
+      "type": "object"
+    },
+    "pva_server_port": {
+      "default": 5075,
+      "description": "service port for PV Access",
+      "required": [],
+      "title": "pva_server_port",
+      "type": "integer"
+    },
+    "readinessProbe": {
+      "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe",
+      "required": [],
+      "title": "readinessProbe",
+      "type": "object"
+    },
+    "resources": {
+      "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+      "required": [],
+      "title": "Resource limits and requests",
+      "type": "object"
+    },
+    "securityContext": {
+      "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+      "required": [],
+      "title": "Container Security Context",
+      "type": "object"
+    },
+    "service": {
+      "additionalProperties": false,
+      "description": "The service will be configured for Channel Access and PVA. Here you can override\nthe ports and also make this a LoadBalancer service if required.\n",
+      "properties": {
+        "ca_port": {
+          "default": 5064,
+          "required": [],
+          "title": "ca_port",
+          "type": "integer"
+        },
+        "pva_port": {
+          "default": 5075,
+          "required": [],
+          "title": "pva_port",
+          "type": "integer"
+        },
+        "type": {
+          "default": "ClusterIP",
+          "required": [],
+          "title": "type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "ca_port",
+        "pva_port"
+      ],
+      "title": "service",
+      "type": "object"
+    },
+    "tolerations": {
+      "description": "Tolerations for the pod",
+      "items": {
+        "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
+        "required": [],
+        "type": "object"
+      },
+      "required": [],
+      "title": "tolerations",
+      "type": "array"
+    },
+    "volumeMounts": {
+      "items": {
+        "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.VolumeMount",
+        "required": [],
+        "type": "object"
+      },
+      "required": [],
+      "title": "volumeMounts",
+      "type": "array"
+    },
+    "volumes": {
+      "description": "Additional volumes to mount in the output Deployment definition.",
+      "items": {
+        "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Volume",
+        "required": [],
+        "type": "object"
+      },
+      "required": [],
+      "title": "volumes",
+      "type": "array"
+    }
+  },
+  "required": [],
+  "type": "object"
+}
