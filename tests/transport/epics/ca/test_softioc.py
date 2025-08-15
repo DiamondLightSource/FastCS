@@ -4,6 +4,7 @@ from typing import Any
 import numpy as np
 import pytest
 from pytest_mock import MockerFixture
+from softioc import softioc
 from tests.assertable_controller import (
     AssertableControllerAPI,
     MyTestController,
@@ -19,6 +20,7 @@ from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSException
+from fastcs.transport.epics.ca.adapter import EpicsCATransport
 from fastcs.transport.epics.ca.ioc import (
     EPICS_MAX_NAME_LENGTH,
     EpicsCAIOC,
@@ -559,3 +561,15 @@ def test_update_datatype(mocker: MockerFixture):
         match="Attribute datatype must be of type <class 'fastcs.datatypes.Int'>",
     ):
         attr_w.update_datatype(String())  # type: ignore
+
+
+def test_ca_context_contains_softioc_commands(mocker: MockerFixture):
+    transport = EpicsCATransport(mocker.MagicMock(), mocker.MagicMock())
+
+    softioc_commands = {
+        command: getattr(softioc, command) for command in softioc.command_names
+    }
+    # We exclude "exit" from the context
+    softioc_commands.pop("exit")
+
+    assert transport.context == softioc_commands
