@@ -8,6 +8,7 @@ from pvi.device import (
     Device,
     Grid,
     Group,
+    ImageRead,
     ReadWidgetUnion,
     SignalR,
     SignalRW,
@@ -68,7 +69,16 @@ class EpicsGUI:
             case Enum():
                 return TextRead(format=TextFormat.string)
             case Waveform():
-                return None
+                if len(fastcs_datatype.shape) == 2:
+                    default_width = 800
+                    height = int(
+                        default_width
+                        * fastcs_datatype.shape[0]
+                        / fastcs_datatype.shape[1]
+                    )
+                    return ImageRead(width=default_width, height=height, grayscale=True)
+                else:
+                    raise NotImplementedError("hmm figure this out")
             case datatype:
                 raise FastCSError(f"Unsupported type {type(datatype)}: {datatype}")
 
