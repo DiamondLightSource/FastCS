@@ -24,9 +24,10 @@ repos:
         types: [python]
         require_serial: true
 
+  - repo: https://github.com/losisin/helm-values-schema-json
+    rev: v2.2.1
+    hooks:
       - id: helm-schema
-        name: Generate Helm schema
-        entry: ./generate-schemas.sh
-        language: system
-        types: [yaml]
-        require_serial: true
+        args:
+          - --config
+          - Charts/fastcs/.schema.config.yaml

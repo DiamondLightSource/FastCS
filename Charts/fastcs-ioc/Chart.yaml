@@ -1,8 +1,0 @@
-apiVersion: v2
-name: fastcs-ioc
-version: 0.1.0
-# This chart allows generating a schema for the fastcs-ioc values file.
-# fastcs-ioc schema is used by IOC instances which have fastcs
-# as a dependency.
-#
-# This chart is never used except by helm-schema.
