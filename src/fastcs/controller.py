@@ -157,7 +157,6 @@ class SubController(BaseController):
     """
 
     root_attribute: Attribute | None = None
-    _pvi_group: str | None = None
 
     def __init__(self, description: str | None = None) -> None:
         super().__init__(description=description)
