@@ -4,6 +4,6 @@
 # title: FastCS IOC Values
 # description: Values for the FastCS IOC instance
 # type: object
-# $ref: ../fastcs-instance/values.schema.json
+# $ref: ../fastcs/values.schema.json
 # @schema
-fastcs-instance: {}
+fastcs: {}

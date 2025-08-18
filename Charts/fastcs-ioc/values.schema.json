@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
-    "fastcs-instance": {
+    "fastcs": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "additionalProperties": false,
       "properties": {
@@ -285,7 +285,7 @@
         }
       },
       "required": [],
-      "title": "fastcs-instance",
+      "title": "fastcs",
       "type": "object"
     },
     "global": {

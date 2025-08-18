@@ -51,7 +51,7 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.debugMode }}
+      {{- if .Values.developerMode }}
       # add in an init container to copy out virtual environment and workspaces
       initContainers:
       - name: {{ .Release.Name }}-init-debug
@@ -93,19 +93,19 @@ spec:
               subPath: "{{ $.Release.Name }}"
             - name: config-volume
               mountPath: {{ $.Values.iocConfig }}
-          {{- if $.Values.debugMode }}
+          {{- if $.Values.developerMode }}
             - name: {{ $.Release.Name }}-develop
               mountPath: /dest
           {{- end }}
         {{- end }}
         - name: {{ .Chart.Name }}
-          image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.debugMode }}:{{ .Values.image.tag }}'
+          image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.developerMode }}:{{ .Values.image.tag }}'
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.debugMode }}
+          {{- if .Values.developerMode }}
           {{- with .Values.debugCommand }}
           command:
             {{- toYaml . | nindent 12 }}
@@ -141,7 +141,7 @@ spec:
               subPath: "{{ .Release.Name }}"
             - name: config-volume
               mountPath: {{ .Values.iocConfig }}
-          {{- if .Values.debugMode }}
+          {{- if .Values.developerMode }}
             - name: {{ .Release.Name }}-develop
               mountPath: /workspaces
               subPath: workspaces
@@ -159,7 +159,7 @@ spec:
         - name: config-volume
           configMap:
             name: {{ .Release.Name }}-config
-        {{- if .Values.debugMode }}
+        {{- if .Values.developerMode }}
         - name: {{ .Release.Name }}-develop
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-develop
