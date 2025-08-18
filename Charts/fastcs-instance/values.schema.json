@@ -64,11 +64,11 @@
       "title": "debugCommand",
       "type": "array"
     },
-    "debugMode": {
+    "developerMode": {
       "default": false,
       "description": "If true, the container will run in debug mode meaning:-\n  - the entrypoint is sleep\n  - a PVC is created and mounted over /venv with /venv copied into it\n  - adds '-debug' suffix to the image name\n",
       "required": [],
-      "title": "debugMode",
+      "title": "developerMode",
       "type": "boolean"
     },
     "extra_containers": {
@@ -139,6 +139,16 @@
       ],
       "title": "image",
       "type": "object"
+    },
+    "initCommand": {
+      "description": "Command to run in the init container.\nDefaults to copying workspace and venv.\n",
+      "items": {
+        "required": [],
+        "type": "string"
+      },
+      "required": [],
+      "title": "initCommand",
+      "type": "array"
     },
     "iocConfig": {
       "default": "/epics/ioc/config",

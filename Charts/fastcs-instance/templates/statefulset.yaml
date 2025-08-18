@@ -63,21 +63,10 @@ spec:
         securityContext:
           {{- toYaml . | nindent 12 }}
         {{- end }}
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            echo "running as account"; id
-            if [ -d dest/venv ]; then
-              echo "Virtual environment already exists, skipping copy"
-            else
-              echo "Copying virtual env to the debugging volume"
-              cp -r /venv /dest/venv
-              echo "Copying workspaces to the debugging volume"
-              cp -r /workspaces /dest/workspaces
-              echo "Setting permissions on the debugging volume"
-              chmod -R o+rwX /dest/venv /dest/workspaces
-            fi
-            echo "Init container completed successfully"
+        {{- with .Values.initCommand }}
+        command:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
         volumeMounts:
           - name: {{ .Release.Name }}-develop
             mountPath: /dest

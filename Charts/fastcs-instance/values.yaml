@@ -49,13 +49,39 @@ debugCommand:
 
 # @schema
 # description: |
+#   Command to run in the init container.
+#   Defaults to copying workspace and venv.
+# type: array
+# items:
+#   type: string
+# required: false
+# @schema
+initCommand:
+  - /bin/bash
+  - -c
+  - |
+    echo "running as account"; id
+    if [ -d /dest/venv ]; then
+      echo "Virtual environment already exists, skipping copy"
+    else
+      echo "Copying virtual env to the debugging volume"
+      cp -r /venv /dest/venv
+      echo "Copying workspaces to the debugging volume"
+      cp -r /workspaces /dest/workspaces
+      echo "Setting permissions on the debugging volume"
+      chmod -R o+rwX /dest/venv /dest/workspaces
+    fi
+    echo "Init container completed successfully"
+
+# @schema
+# description: |
 #   If true, the container will run in debug mode meaning:-
 #     - the entrypoint is sleep
 #     - a PVC is created and mounted over /venv with /venv copied into it
 #     - adds '-debug' suffix to the image name
 # type: boolean
 # @schema
-debugMode: false
+developerMode: false
 
 # @schema
 # description: location of config folder (defaults to be the same as C++ IOCs)
