@@ -1,0 +1,39 @@
+``fastcs.attributes``
+=====================
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+.. automodule:: fastcs.attributes
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        AttrHandlerR
+        AttrHandlerRW
+        AttrHandlerW
+        AttrMode
+        AttrR
+        AttrRW
+        AttrW
+        Attribute
+        ONCE
+        SimpleAttrHandler
+    
+    

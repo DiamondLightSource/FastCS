@@ -1,0 +1,23 @@
+``fastcs.util``
+===============
+        
+        
+
+.. automodule:: fastcs.util
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        numpy_to_fastcs_datatype
+        snake_to_pascal
+    
+    
