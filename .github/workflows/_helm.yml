@@ -10,7 +10,6 @@ jobs:
   package-helm-charts:
     name: Package and Push Helm Chart
     runs-on: ubuntu-latest
-    environment: release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
