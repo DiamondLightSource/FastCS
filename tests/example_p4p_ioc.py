@@ -4,7 +4,7 @@ import enum
 import numpy as np
 
 from fastcs.attributes import AttrHandlerW, AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller, SubController, SubControllerVector
 from fastcs.datatypes import Bool, Enum, Float, Int, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import (
@@ -76,13 +76,27 @@ class ChildController(SubController):
 def run(pv_prefix="P4P_TEST_DEVICE"):
     p4p_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     controller = ParentController()
-    controller.register_sub_controller(
-        "Child1", ChildController(description="some sub controller")
+    # controller.register_sub_controller(
+    #     "Child1", ChildController(description="some sub controller")
+    # )
+    # controller.register_sub_controller(
+    #     "Child2", ChildController(description="another sub controller")
+    # )
+
+    class Vector(SubControllerVector):
+        int: AttrR = AttrR(Int())
+
+    sub_controller = Vector(
+        {
+            1: ChildController(description="some sub controller"),
+            2: ChildController(description="another sub controller"),
+        }
     )
-    controller.register_sub_controller(
-        "Child2", ChildController(description="another sub controller")
-    )
+
+    controller.register_sub_controller("Child", sub_controller)
+
     fastcs = FastCS(controller, [p4p_options])
+    fastcs.create_gui()
     fastcs.run()
 
 

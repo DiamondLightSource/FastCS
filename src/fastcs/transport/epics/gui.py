@@ -53,7 +53,7 @@ class EpicsGUI:
 
     def _get_pv(self, attr_path: list[str], name: str):
         attr_prefix = ":".join(
-            [self._pv_prefix] + [snake_to_pascal(node) for node in attr_path]
+            [self._pv_prefix] + [snake_to_pascal(str(node)) for node in attr_path]
         )
         return f"{attr_prefix}:{snake_to_pascal(name)}"
 
@@ -149,6 +149,8 @@ class EpicsGUI:
         components: Tree = []
 
         for name, api in controller_api.sub_apis.items():
+            if isinstance(name, int):
+                name = f"{controller_api.path[-1]}{name}"
             components.append(
                 Group(
                     name=snake_to_pascal(name),

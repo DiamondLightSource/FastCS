@@ -14,7 +14,7 @@ from p4p.client.thread import Context as ThreadContext
 from p4p.nt import NTTable
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller, SubController, SubControllerVector
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import EpicsIOCOptions
@@ -290,15 +290,16 @@ def test_pvi_grouping():
 
     controller = SomeController()
 
-    sub_controller = ChildController()
-    controller.register_sub_controller("Child0", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
-    sub_controller = ChildController()
-    controller.register_sub_controller("Child1", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
-    sub_controller = ChildController()
-    controller.register_sub_controller("Child2", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
+    class MyVector(SubControllerVector):
+        attr_1: AttrRW = AttrRW(Int(max=400_000, max_alarm=40_000))
+
+    sub_controller_vector = MyVector({i: ChildController() for i in range(3)})
+
+    for _, child in sub_controller_vector.children():
+        child.register_sub_controller("ChildChild", ChildChildController())
+
+    controller.register_sub_controller("Child", sub_controller_vector)
+
     sub_controller = ChildController()
     controller.register_sub_controller("another_child", sub_controller)
     sub_controller.register_sub_controller("ChildChild", ChildChildController())
@@ -313,13 +314,21 @@ def test_pvi_grouping():
 
     ctxt = ThreadContext("pva")
 
-    controller_pvi, child_controller_pvi, child_child_controller_pvi = [], [], []
+    (
+        controller_pvi,
+        child_vector_controller_pvi,
+        child_child_controller_pvi,
+        child_child_child_controller_pvi,
+    ) = [], [], [], []
     controller_monitor = ctxt.monitor(f"{pv_prefix}:PVI", controller_pvi.append)
-    child_controller_monitor = ctxt.monitor(
-        f"{pv_prefix}:Child0:PVI", child_controller_pvi.append
+    child_vector_controller_monitor = ctxt.monitor(
+        f"{pv_prefix}:Child:PVI", child_vector_controller_pvi.append
     )
     child_child_controller_monitor = ctxt.monitor(
-        f"{pv_prefix}:Child0:ChildChild:PVI", child_child_controller_pvi.append
+        f"{pv_prefix}:Child:0:PVI", child_child_controller_pvi.append
+    )
+    child_child_child_controller_monitor = ctxt.monitor(
+        f"{pv_prefix}Child:0:ChildChild:PVI", child_child_child_controller_pvi.append
     )
     serve = asyncio.ensure_future(fastcs.serve())
 
@@ -331,8 +340,9 @@ def test_pvi_grouping():
         ...
     finally:
         controller_monitor.close()
-        child_controller_monitor.close()
+        child_vector_controller_monitor.close()
         child_child_controller_monitor.close()
+        child_child_child_controller_monitor.close()
         serve.cancel()
 
         assert len(controller_pvi) == 1
@@ -351,21 +361,15 @@ def test_pvi_grouping():
                 "another_attr1000": {"rw": f"{pv_prefix}:AnotherAttr1000"},
                 "a_third_attr": {"w": f"{pv_prefix}:AThirdAttr"},
                 "attr1": {"rw": f"{pv_prefix}:Attr1"},
-                "child": {
-                    "d": {
-                        "v0": f"{pv_prefix}:Child0:PVI",
-                        "v1": f"{pv_prefix}:Child1:PVI",
-                        "v2": f"{pv_prefix}:Child2:PVI",
-                    }
-                },
+                "child": {"d": f"{pv_prefix}:Child:PVI"},
                 "child_attribute_same_name": {
                     "d": f"{pv_prefix}:ChildAttributeSameName:PVI",
                     "r": f"{pv_prefix}:ChildAttributeSameName",
                 },
             },
         }
-        assert len(child_controller_pvi) == 1
-        assert child_controller_pvi[0].todict() == {
+        assert len(child_vector_controller_pvi) == 1
+        assert child_vector_controller_pvi[0].todict() == {
             "alarm": {"message": "", "severity": 0, "status": 0},
             "display": {"description": ""},
             "timeStamp": {
@@ -374,11 +378,13 @@ def test_pvi_grouping():
                 "userTag": 0,
             },
             "value": {
-                "attr_c": {"w": f"{pv_prefix}:Child0:AttrC"},
-                "attr_d": {
-                    "w": f"{pv_prefix}:Child0:AttrD",
+                "child": {
+                    "d": {
+                        "v0": f"{pv_prefix}:Child:0:PVI",
+                        "v1": f"{pv_prefix}:Child:1:PVI",
+                        "v2": f"{pv_prefix}:Child:2:PVI",
+                    },
                 },
-                "child_child": {"d": f"{pv_prefix}:Child0:ChildChild:PVI"},
             },
         }
         assert len(child_child_controller_pvi) == 1
@@ -391,8 +397,11 @@ def test_pvi_grouping():
                 "userTag": 0,
             },
             "value": {
-                "attr_e": {"rw": f"{pv_prefix}:Child0:ChildChild:AttrE"},
-                "attr_f": {"r": f"{pv_prefix}:Child0:ChildChild:AttrF"},
+                "attr_c": {"w": f"{pv_prefix}:Child:0:AttrC"},
+                "attr_d": {
+                    "w": f"{pv_prefix}:Child:0:AttrD",
+                },
+                "child_child": {"d": f"{pv_prefix}:Child:0:ChildChild:PVI"},
             },
         }
 
