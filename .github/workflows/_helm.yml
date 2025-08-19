@@ -59,6 +59,7 @@ jobs:
           path: schemas/
 
       - name: Push tagged helm chart to registry
+        # TODO - switch to using https://github.com/helm/chart-releaser-action of maybe the docker action?
         if: ${{ github.ref_type == 'tag' }}
         run: |
           set -x
