@@ -47,6 +47,11 @@
         "extraContainers": {
             "type": "array"
         },
+        "global": {
+            "description": "shared values for all services",
+            "type": "object",
+            "additionalProperties": true
+        },
         "hostNetwork": {
             "description": "enable host networking for the pod",
             "type": "boolean"

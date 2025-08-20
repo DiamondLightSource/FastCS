@@ -4,6 +4,10 @@
 # With annotations for building the schema using:
 #   https://github.com/losisin/helm-values-schema-json.git
 
+# @schema description: shared values for all services
+# @schema additionalProperties: true
+global: {}
+
 # @schema description: container image URI
 image:
   repository: ""
