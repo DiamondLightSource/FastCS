@@ -104,11 +104,11 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: ControllerAPI):
         parent: Controller to add PVI refs for
 
     """
-    parent_pvi = ":".join([pv_prefix] + parent.path + ["PVI"])
+    parent_pvi = ":".join([pv_prefix] + [str(node) for node in parent.path] + ["PVI"])
 
     for child in parent.sub_apis.values():
-        child_pvi = ":".join([pv_prefix] + child.path + ["PVI"])
-        child_name = child.path[-1].lower()
+        child_pvi = ":".join([pv_prefix] + [str(node) for node in child.path] + ["PVI"])
+        child_name = str(child.path[-1]).lower()
 
         _add_pvi_info(child_pvi, parent_pvi, child_name)
 
@@ -119,7 +119,7 @@ def _create_and_link_attribute_pvs(
     pv_prefix: str, root_controller_api: ControllerAPI
 ) -> None:
     for controller_api in root_controller_api.walk_api():
-        path = controller_api.path
+        path = [str(node) for node in controller_api.path]
         for attr_name, attribute in controller_api.attributes.items():
             pv_name = snake_to_pascal(attr_name)
             _pv_prefix = ":".join([pv_prefix] + path)
@@ -218,7 +218,7 @@ def _create_and_link_command_pvs(
     pv_prefix: str, root_controller_api: ControllerAPI
 ) -> None:
     for controller_api in root_controller_api.walk_api():
-        path = controller_api.path
+        path = [str(node) for node in controller_api.path]
         for attr_name, method in controller_api.command_methods.items():
             pv_name = snake_to_pascal(attr_name)
             _pv_prefix = ":".join([pv_prefix] + path)
