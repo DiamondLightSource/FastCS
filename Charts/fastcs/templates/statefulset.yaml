@@ -47,11 +47,13 @@ spec:
         # unless the Commit Hash is supplied (by ArgoCD or helm command line)
         rollme: {{ .Values.global.commitHash | default (randAlphaNum 5) | quote }}
     spec:
+      terminationGracePeriodSeconds: 2
+      hostNetwork: {{ .Values.hostNetwork }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.developerMode }}
+      {{- if .Values.editable }}
       # add in an init container to copy out virtual environment and workspaces
       initContainers:
       - name: {{ .Release.Name }}-init-debug
@@ -93,25 +95,25 @@ spec:
               subPath: "{{ $.Release.Name }}"
             - name: config-volume
               mountPath: {{ $.Values.iocConfig }}
-          {{- if $.Values.developerMode }}
+          {{- if $.Values.editable }}
             - name: {{ $.Release.Name }}-develop
               mountPath: /dest
           {{- end }}
         {{- end }}
         - name: {{ .Chart.Name }}
-          image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.developerMode }}:{{ .Values.image.tag }}'
+          image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.editable }}:{{ .Values.image.tag }}'
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.developerMode }}
-          {{- with .Values.debugCommand }}
+          {{- if .Values.autostart }}
+          {{- with .Values.command }}
           command:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- else }}
-          {{- with .Values.command }}
+          {{- with .Values.debugCommand }}
           command:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -141,7 +143,7 @@ spec:
               subPath: "{{ .Release.Name }}"
             - name: config-volume
               mountPath: {{ .Values.iocConfig }}
-          {{- if .Values.developerMode }}
+          {{- if .Values.editable }}
             - name: {{ .Release.Name }}-develop
               mountPath: /workspaces
               subPath: workspaces
@@ -159,7 +161,7 @@ spec:
         - name: config-volume
           configMap:
             name: {{ .Release.Name }}-config
-        {{- if .Values.developerMode }}
+        {{- if .Values.editable }}
         - name: {{ .Release.Name }}-develop
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-develop

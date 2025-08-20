@@ -74,14 +74,29 @@ initCommand:
     echo "Init container completed successfully"
 
 # @schema
-# description: |
-#   If true, the container will run in debug mode meaning:-
-#     - the entrypoint is sleep
-#     - a PVC is created and mounted over /venv with /venv copied into it
-#     - adds '-debug' suffix to the image name
+# description: enables host networking for the pod
 # type: boolean
 # @schema
-developerMode: false
+hostNetwork: true
+
+# @schema
+# description: |
+#   editable and autostart are used for debugging and development in-cluster.
+#   editable:
+#     creates a PVC with /venv and /workspaces mounted into the container
+#     runs an init container with entrypoint initCommand above
+# type: boolean
+# @schema
+editable: false
+
+# @schema
+# description: |
+#   autostart:
+#     false: entrypoint is debugCommand above
+#     true: entrypoint is command above
+# type: boolean
+# @schema
+autostart: true
 
 # @schema
 # description: location of config folder (defaults to be the same as C++ IOCs)
@@ -113,6 +128,7 @@ pva_server_port: 5075
 # required: false
 # @schema
 baseIp: 10.96.0.0/12
+
 # @schema
 # title: Override for the cluster IP - only needed if allocateIpFromName clashes
 # type: [string, null]

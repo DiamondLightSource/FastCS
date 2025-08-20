@@ -19,6 +19,13 @@
       "title": "args",
       "type": "array"
     },
+    "autostart": {
+      "default": true,
+      "description": "autostart:\n  false: entrypoint is debugCommand above\n  true: entrypoint is command above\n",
+      "required": [],
+      "title": "autostart",
+      "type": "boolean"
+    },
     "baseIp": {
       "default": "10.96.0.0/12",
       "description": "Used by allocateIpFromName to allocate a fixed cluster IP for the service.\nThe default is the same for all DLS clusters.\n",
@@ -64,11 +71,11 @@
       "title": "debugCommand",
       "type": "array"
     },
-    "developerMode": {
+    "editable": {
       "default": false,
-      "description": "If true, the container will run in debug mode meaning:-\n  - the entrypoint is sleep\n  - a PVC is created and mounted over /venv with /venv copied into it\n  - adds '-debug' suffix to the image name\n",
+      "description": "editable and autostart are used for debugging and development in-cluster.\neditable:\n  creates a PVC with /venv and /workspaces mounted into the container\n  runs an init container with entrypoint initCommand above\n",
       "required": [],
-      "title": "developerMode",
+      "title": "editable",
       "type": "boolean"
     },
     "extra_containers": {
@@ -109,6 +116,13 @@
       "required": [],
       "title": "global",
       "type": "object"
+    },
+    "hostNetwork": {
+      "default": true,
+      "description": "enables host networking for the pod",
+      "required": [],
+      "title": "hostNetwork",
+      "type": "boolean"
     },
     "image": {
       "additionalProperties": false,
