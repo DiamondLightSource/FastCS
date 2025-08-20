@@ -1,14 +1,9 @@
 # yaml-language-server: $schema=values.schema.json
 
-# @schema
-# title: FastCS IOC Values
-# description: Values for the FastCS IOC instance
-# type: object
-# $ref: ../fastcs/values.schema.json
-# @schema
-fastcs: {}
+# fast cs schema appears under the subchart fastcs
+fastcs: {} # @schema $ref: ../fastcs/values.schema.json
 
 # Because fastcs and ioc-instance will share the same global values file
 # we must also allow ioc-instance to be defined here but do not use it in
 # fastcs itself.
-ioc-instance: {}
+ioc-instance: {} # @schema required:false

@@ -1,61 +1,28 @@
 # yaml-language-server: $schema=values.schema.json
 
 # Default values for fastcs-instance chart.
-#
-# helm-schema annotations describe the schema for values files.
-# see https://github.com/dadav/helm-schema
-# Generate the values schema with `generate-schema.sh`
-#
-# This file itself adheres to the schema it describes (to help writing the annotations).
+# With annotations for building the schema using:
+#   https://github.com/losisin/helm-values-schema-json.git
 
-# @schema
-# title: image
-# type: object
-# @schema
+# container image URI
 image:
   repository: ""
   pullPolicy: IfNotPresent
   tag: ""
 
-# @schema
-# description: Command to run in the container (as array of arguments)
-# type: array
-# items:
-#   type: string
-# required: false
-# @schema
+# command to run for the production container
 command: []
 
-# @schema
-# description: arguments to pass to the above command
-# type: array
-# items:
-#   type: string
-# required: false
-# @schema
+# command args to pass to the production container
 args: []
 
-# @schema
-# description: Command to run in the debug version of the container
-# type: array
-# items:
-#   type: string
-# required: false
-# @schema
+# command to run for the debugging (non- autostart) container
 debugCommand:
   - /bin/bash
   - -c
   - "sleep infinity"
 
-# @schema
-# description: |
-#   Command to run in the init container.
-#   Defaults to copying workspace and venv.
-# type: array
-# items:
-#   type: string
-# required: false
-# @schema
+# command to run in the init container for editable mode
 initCommand:
   - /bin/bash
   - -c
@@ -73,83 +40,45 @@ initCommand:
     fi
     echo "Init container completed successfully"
 
-# @schema
-# description: enables host networking for the pod
-# type: boolean
-# @schema
+# enable host networking for the pod
 hostNetwork: true
 
-# @schema
-# description: |
-#   editable and autostart are used for debugging and development in-cluster.
+# editable and autostart are used for debugging and development in-cluster.
 #   editable:
 #     creates a PVC with /venv and /workspaces mounted into the container
 #     runs an init container with entrypoint initCommand above
-# type: boolean
-# @schema
-editable: false
-
-# @schema
-# description: |
 #   autostart:
 #     false: entrypoint is debugCommand above
 #     true: entrypoint is command above
-# type: boolean
-# @schema
+editable: false
 autostart: true
 
-# @schema
-# description: location of config folder (defaults to be the same as C++ IOCs)
-# type: string
-# required: false
-# @schema
+# path to the location of config folder (defaults to be the same as C++ IOCs)
 iocConfig: /epics/ioc/config
 
-# @schema
-# description: service port for Channel Access
-# type: integer
-# required: false
-# @schema
+# service port for Channel Access
 ca_server_port: 5064
-# @schema
-# description: service port for PV Access
-# type: integer
-# required: false
-# @schema
+# service port for PV Access
 pva_server_port: 5075
 
-# @schema
-# title: CIDR for services addresses.
-# description: |
+# CIDR for services addresses.
 #   Used by allocateIpFromName to allocate a fixed cluster IP for the service.
 #   The default is the same for all DLS clusters.
-# type: string
-# pattern: ^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$
-# required: false
-# @schema
-baseIp: 10.96.0.0/12
+baseIp: 10.96.0.0/12 # @schema pattern:^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$
 
-# @schema
-# title: Override for the cluster IP - only needed if allocateIpFromName clashes
-# type: [string, null]
-# format: ipv4
-# required: false
-# @schema
-clusterIP:
+# Override for the cluster IP - only needed if allocateIpFromName clashes
+clusterIP: # @schema pattern:^(\d{1,3}\.){3}\d{1,3}$
 
-# @schema
-# description: |
-#   The service will be configured for Channel Access and PVA. Here you can override
-#   the ports and also make this a LoadBalancer service if required.
-# type: object
-# required: false
-# @schema
+# The service will be configured for Channel Access and PVA. Here you can override
+# the ports and also make this a LoadBalancer service if required.
 service:
   type: ClusterIP
   ca_port: 5064
   pva_port: 5075
 
 # @schema
+# TODO: how do we represent this using
+#   https://github.com/losisin/helm-values-schema-json.git
 # description: adds addtional containers specified by image and command
 # type: array
 # items:
@@ -170,95 +99,28 @@ service:
 # @schema
 extraContainers: []
 
-# @schema
-# title: Pod Annotations
-# type: object
-# @schema
 podAnnotations: {}
-# @schema
-# title: Pod Labels
-# type: object
-# @schema
+
 podLabels: {}
 
-# @schema
-# title: Pod Security Context
-# type: object
-# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
-# @schema
-podSecurityContext: {}
+podSecurityContext: {} # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
 
-# @schema
-# title: Container Security Context
-# type: object
-# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
-# @schema
-securityContext: {}
+securityContext: {} # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
 
-# @schema
-# title: Resource limits and requests
-# type: object
-# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
-# @schema
-resources: {}
+resources: {} # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
 
-# @schema
-# title: livenessProbe
-# type: object
-# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
-# @schema
-livenessProbe: {}
-# @schema
-# title: readinessProbe
-# type: object
-# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
-# @schema
-readinessProbe: {}
+livenessProbe: {} # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
 
-# @schema
-# title: volumes
-# description: Additional volumes to mount in the output Deployment definition.
-# type: array
-# items:
-#   type: object
-#   $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Volume
-# @schema
-volumes: []
+readinessProbe: {} # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
 
-# @schema
-# title: volumeMounts
-# type: array
-# items:
-#   type: object
-#   $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.VolumeMount
-# @schema
-volumeMounts: []
+volumes: [] # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Volume
 
-# TODO - I had problems with schema checking at helm chart ArgoCD deploy time
-# TODO - it seemed that {} for nodeSelector was illegal, so I added null as an option
-# TODO - I'm not sure why this was needed but not for other object fields with k8s schemas
-# @schema
-# title: nodeSelector
-# description: Node selector for the pod
-# type: [object, null]
+volumeMount: [] # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.VolumeMount
+
+# TODO I cant find a way to allow null for nodeSelector but also pass
 # $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.NodeSelector
-# @schema
-nodeSelector:
+nodeSelector: {} # @schema type:[object, null]
 
-# @schema
-# title: tolerations
-# description: Tolerations for the pod
-# type: array
-# items:
-#   type: object
-#   $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
-# @schema
-tolerations: []
+tolerations: [] # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
 
-# @schema
-# title: affinity
-# description: Affinity for the pod
-# type: object
-# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
-# @schema
-affinity: {}
+affinity: {} # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity

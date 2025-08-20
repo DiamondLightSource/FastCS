@@ -1,5 +1,5 @@
 apiVersion: v2
-name: fastcs-ioc
+name: fastcs-service
 version: 0.1.0
 # This chart allows generating a schema for the fastcs-ioc values file.
 # fastcs-ioc schema is used by IOC instances which have fastcs
