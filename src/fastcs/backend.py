@@ -56,6 +56,18 @@ class Backend:
     ):
         self._scan_tasks = {self._loop.create_task(coro()) for coro in coros}
 
+        for task in self._scan_tasks:
+            task.add_done_callback(self._scan_done)
+
+    def _scan_done(self, task: asyncio.Task):
+        try:
+            task.result()
+        except Exception as e:
+            raise FastCSException(
+                "Exception raised in scan method of "
+                f"{self._controller.__class__.__name__}"
+            ) from e
+
     def _stop_scan_tasks(self):
         for task in self._scan_tasks:
             if not task.done():
