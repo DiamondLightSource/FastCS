@@ -125,6 +125,7 @@ livenessProbe: {}
 # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
 readinessProbe: {}
 
+# @schema item: object
 # @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Volume
 volumes: []
 

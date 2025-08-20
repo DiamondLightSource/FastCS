@@ -155,7 +155,11 @@
         },
         "volumes": {
             "$ref": "https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Volume",
-            "type": "array"
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false
+            }
         }
     },
     "additionalProperties": false
