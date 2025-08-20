@@ -6,4 +6,7 @@
 # type: object
 # $ref: ../fastcs/values.schema.json
 # @schema
-fastcs: {}
+ioc-instance: {}
+# Note that C++ IOCs and FastCS IOCs share the same root key `ioc-instance`
+# This is so that common values can be supplied via the global values file
+# in services/values.yaml

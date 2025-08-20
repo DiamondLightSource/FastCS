@@ -2,7 +2,13 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
-    "fastcs": {
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "ioc-instance": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "additionalProperties": false,
       "properties": {
@@ -285,13 +291,7 @@
         }
       },
       "required": [],
-      "title": "fastcs",
-      "type": "object"
-    },
-    "global": {
-      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
-      "required": [],
-      "title": "global",
+      "title": "ioc-instance",
       "type": "object"
     }
   },
