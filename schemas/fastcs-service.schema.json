@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "fastcs": {
+            "$ref": "fastcs-values.schema.json",
+            "type": "object",
+            "additionalProperties": false
+        },
+        "ioc-instance": {
+            "type": "object",
+            "additionalProperties": true
+        }
+    },
+    "additionalProperties": false
+}

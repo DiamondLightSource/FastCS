@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=fastcs-service.schema.json
+
+# This yaml file represents the values used in services projects where
+# fastcs is a subchart.
+#
+# It is used to generate the schema for fastcs-service.schema.json
+# which is used to validate the values.yaml files in services projects.
+
+# fast cs schema appears under the subchart fastcs
+# @schema $ref: fastcs-values.schema.json
+fastcs: {}
+
+# Because fastcs and ioc-instance will share the same global values file
+# we must also allow ioc-instance to be defined here but do not use it in
+# fastcs itself.
+#
+# @schema required:false;additionalProperties:true
+ioc-instance: {}

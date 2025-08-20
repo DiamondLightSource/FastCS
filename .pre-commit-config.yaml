@@ -28,10 +28,20 @@ repos:
     rev: v2.2.1
     hooks:
       - id: helm-schema
-        args: ["--values", "Charts/fastcs/values.yaml", "--no-additional-properties", "-o", "Charts/fastcs/values.schema.json"]
+        args:
+          - --values
+          - Charts/fastcs/values.yaml
+          - --no-additional-properties
+          - -o
+          - Charts/fastcs/values.schema.json
 
   - repo: https://github.com/losisin/helm-values-schema-json
     rev: v2.2.1
     hooks:
       - id: helm-schema
-        args: ["--values", "Charts/fastcs-service/values.yaml", "--bundle", "--no-additional-properties", "-o", "Charts/fastcs-service/values.schema.json"]
+        args:
+          - --values
+          - schemas/fastcs-service-values.yaml
+          - --no-additional-properties
+          - -o
+          - schemas/fastcs-service.schema.json
