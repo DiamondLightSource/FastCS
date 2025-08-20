@@ -168,7 +168,7 @@ service:
 #   required: [name, image, command]
 #   additionalProperties: false
 # @schema
-extra_containers: []
+extraContainers: []
 
 # @schema
 # title: Pod Annotations

@@ -74,7 +74,7 @@ spec:
             mountPath: /dest
       {{- end }}
       containers:
-        {{- range .Values.extra_containers }}
+        {{- range .Values.extraContainers }}
         - name: {{ .name }}
           image: {{ .image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}

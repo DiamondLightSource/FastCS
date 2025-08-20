@@ -82,7 +82,7 @@
           "title": "editable",
           "type": "boolean"
         },
-        "extra_containers": {
+        "extraContainers": {
           "description": "adds addtional containers specified by image and command",
           "items": {
             "additionalProperties": false,
@@ -112,7 +112,7 @@
             "type": "object"
           },
           "required": [],
-          "title": "extra_containers",
+          "title": "extraContainers",
           "type": "array"
         },
         "global": {
