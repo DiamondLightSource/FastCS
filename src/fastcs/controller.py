@@ -17,7 +17,7 @@ class BaseController:
     description: str | None = None
 
     def __init__(
-        self, path: list[str] | None = None, description: str | None = None
+        self, path: list[str | int] | None = None, description: str | None = None
     ) -> None:
         if (
             description is not None
@@ -26,9 +26,8 @@ class BaseController:
 
         if not hasattr(self, "attributes"):
             self.attributes = {}
-        self._path: list[str] = path or []
-        self.__sub_controller_tree: dict[str, SubController] = {}
-        self.__sub_controller_vector: str | None = None
+        self._path: list[str | int] = path or []
+        self.__sub_controller_tree: dict[str | int, SubController] = {}
 
         self._bind_attrs()
 
@@ -47,11 +46,11 @@ class BaseController:
             await controller.attribute_initialise()
 
     @property
-    def path(self) -> list[str]:
+    def path(self) -> list[str | int]:
         """Path prefix of attributes, recursively including parent Controllers."""
         return self._path
 
-    def set_path(self, path: list[str]):
+    def set_path(self, path: list[str | int]):
         if self._path:
             raise ValueError(f"SubController is already registered under {self.path}")
 
@@ -100,15 +99,7 @@ class BaseController:
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
-    def register_sub_controller(
-        self, name: str, sub_controller: SubController | SubControllerVector
-    ):
-        if isinstance(sub_controller, SubControllerVector):
-            for index, child in sub_controller.children():
-                child.__sub_controller_vector = name  # noqa: SLF001
-                self.register_sub_controller(f"{name}{index}", child)
-            return
-
+    def register_sub_controller(self, name: str | int, sub_controller: SubController):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
                 f"Controller {self} already has a SubController registered as {name}"
@@ -124,13 +115,10 @@ class BaseController:
                     f"on the parent controller `{type(self).__name__}` "
                     f"as it already has an attribute of that name."
                 )
-            self.attributes[name] = sub_controller.root_attribute
+            self.attributes[str(name)] = sub_controller.root_attribute
 
-    def get_sub_controllers(self) -> dict[str, SubController]:
+    def get_sub_controllers(self) -> dict[str | int, SubController]:
         return self.__sub_controller_tree
-
-    def get_sub_controller_vector(self) -> str | None:
-        return self.__sub_controller_vector
 
 
 class Controller(BaseController):
@@ -162,17 +150,21 @@ class SubController(BaseController):
         super().__init__(description=description)
 
 
-class SubControllerVector(MutableMapping[int, SubController]):
+class SubControllerVector(MutableMapping[int, SubController], SubController):
     """A collection of SubControllers, with an arbitrary integer index.
-
     An instance of this class can be registered with a parent ``Controller`` to include
     it's children as part of a larger controller. Each child of the vector will keep
     a string name of the vector.
     """
 
-    def __init__(self, children: Mapping[int, SubController]) -> None:
+    def __init__(
+        self, children: Mapping[int, SubController], description: str | None = None
+    ) -> None:
         self._children: dict[int, SubController] = {}
         self.update(children)
+        super().__init__(description=description)
+        for index, child in children.items():
+            self.register_sub_controller(index, child)
 
     def __getitem__(self, key: int) -> SubController:
         return self._children[key]

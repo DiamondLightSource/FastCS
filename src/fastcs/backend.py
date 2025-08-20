@@ -175,7 +175,9 @@ def build_controller_api(controller: Controller) -> ControllerAPI:
     return _build_controller_api(controller, [])
 
 
-def _build_controller_api(controller: BaseController, path: list[str]) -> ControllerAPI:
+def _build_controller_api(
+    controller: BaseController, path: list[str | int]
+) -> ControllerAPI:
     """Build a `ControllerAPI` for a `BaseController` and its sub controllers"""
     scan_methods: dict[str, Scan] = {}
     put_methods: dict[str, Put] = {}
@@ -203,5 +205,4 @@ def _build_controller_api(controller: BaseController, path: list[str]) -> Contro
             for name, sub_controller in controller.get_sub_controllers().items()
         },
         description=controller.description,
-        vector_name=controller.get_sub_controller_vector(),
     )

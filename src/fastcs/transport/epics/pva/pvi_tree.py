@@ -42,19 +42,16 @@ class PviDevice(dict[str, "PviDevice"]):
     pv_prefix: str
     description: str | None
     device_signal_info: _PviSignalInfo | None
-    pvi_group: str | None
 
     def __init__(
         self,
         pv_prefix: str,
         description: str | None = None,
         device_signal_info: _PviSignalInfo | None = None,
-        pvi_group: str | None = None,
     ):
         self.pv_prefix = pv_prefix
         self.description = description
         self.device_signal_info = device_signal_info
-        self.pvi_group = pvi_group
 
     def __missing__(self, key: str) -> "PviDevice":
         new_device = PviDevice(pv_prefix=f"{self.pv_prefix}:{key}")
@@ -86,17 +83,29 @@ class PviDevice(dict[str, "PviDevice"]):
             stripped_leaf = pv_leaf.rstrip(":PVI")
             is_controller = stripped_leaf != pv_leaf
             pvi_name, number = _pv_to_pvi_name(stripped_leaf or pv_leaf)
-            pvi_group = self[stripped_leaf].pvi_group
+            if is_controller and number is not None and not pvi_name:
+                pattern = rf"(?:(?<=:)|^)([^:]+)(?=:{re.escape(str(number))}(?:[:]|$))"
+                match = re.search(pattern, signal_info.pv)
 
-            if is_controller and pvi_group is not None and number is not None:
-                pvi_group = _pascal_to_snake(pvi_group)
-                if signal_info.access not in p4p_raw_value[pvi_group]:
-                    p4p_raw_value[pvi_group][signal_info.access] = {}
-                p4p_raw_value[pvi_group][signal_info.access][f"v{number}"] = (
+                if not match:
+                    raise RuntimeError(
+                        "Failed to extract parent SubControllerVector name "
+                        f"from Subcontroller pv {signal_info.pv}"
+                    )
+                if (
+                    signal_info.access
+                    not in p4p_raw_value[_pascal_to_snake(match.group(1))]
+                ):
+                    p4p_raw_value[_pascal_to_snake(match.group(1))][
+                        signal_info.access
+                    ] = {}
+                p4p_raw_value[_pascal_to_snake(match.group(1))][signal_info.access][
+                    f"v{number}"
+                ] = signal_info.pv
+            elif is_controller:
+                p4p_raw_value[_pascal_to_snake(stripped_leaf)][signal_info.access] = (
                     signal_info.pv
                 )
-            elif is_controller:
-                p4p_raw_value[pvi_name][signal_info.access] = signal_info.pv
             else:
                 attr_pvi_name = f"{pvi_name}{'' if number is None else number}"
                 p4p_raw_value[attr_pvi_name][signal_info.access] = signal_info.pv
@@ -185,18 +194,14 @@ class PviTree:
         self,
         device_pv: str,
         description: str | None,
-        pvi_group: str | None,
     ):
         if ":" not in device_pv:
             assert device_pv == self._pvi_tree_root.pv_prefix
             self._pvi_tree_root.description = description
-            self._pvi_tree_root.pvi_group = pvi_group
         else:
-            pvi_device = self._pvi_tree_root.get_recursively(
+            self._pvi_tree_root.get_recursively(
                 *device_pv.split(":")[1:]  # To remove the prefix
-            )
-            pvi_device.description = description
-            pvi_device.pvi_group = pvi_group
+            ).description = description
 
     def add_signal(
         self,

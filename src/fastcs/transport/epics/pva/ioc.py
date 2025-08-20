@@ -26,9 +26,9 @@ def _attribute_to_access(attribute: Attribute) -> AccessModeType:
             raise ValueError(f"Unknown attribute type {type(attribute)}")
 
 
-def get_pv_name(pv_prefix: str, *attribute_names: str) -> str:
+def get_pv_name(pv_prefix: str, *attribute_names: str | int) -> str:
     """Converts from an attribute name to a pv name."""
-    pv_formatted = ":".join([snake_to_pascal(attr) for attr in attribute_names])
+    pv_formatted = ":".join([snake_to_pascal(str(attr)) for attr in attribute_names])
     return f"{pv_prefix}:{pv_formatted}" if pv_formatted else pv_prefix
 
 
@@ -42,9 +42,7 @@ async def parse_attributes(
     for controller_api in root_controller_api.walk_api():
         pv_prefix = get_pv_name(root_pv_prefix, *controller_api.path)
 
-        pvi_tree.add_sub_device(
-            pv_prefix, controller_api.description, controller_api.vector_name
-        )
+        pvi_tree.add_sub_device(pv_prefix, controller_api.description)
 
         for attr_name, attribute in controller_api.attributes.items():
             pv_name = get_pv_name(pv_prefix, attr_name)

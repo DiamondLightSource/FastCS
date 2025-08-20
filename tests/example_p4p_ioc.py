@@ -76,16 +76,27 @@ class ChildController(SubController):
 def run(pv_prefix="P4P_TEST_DEVICE"):
     p4p_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     controller = ParentController()
-    controller.register_sub_controller(
-        "Child",
-        SubControllerVector(
-            {
-                1: ChildController(description="some sub controller"),
-                2: ChildController(description="another sub controller"),
-            }
-        ),
+    # controller.register_sub_controller(
+    #     "Child1", ChildController(description="some sub controller")
+    # )
+    # controller.register_sub_controller(
+    #     "Child2", ChildController(description="another sub controller")
+    # )
+
+    class Vector(SubControllerVector):
+        int: AttrR = AttrR(Int())
+
+    sub_controller = Vector(
+        {
+            1: ChildController(description="some sub controller"),
+            2: ChildController(description="another sub controller"),
+        }
     )
+
+    controller.register_sub_controller("Child", sub_controller)
+
     fastcs = FastCS(controller, [p4p_options])
+    fastcs.create_gui()
     fastcs.run()
 
 
