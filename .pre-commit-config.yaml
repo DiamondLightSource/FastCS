@@ -33,7 +33,7 @@ repos:
           - Charts/fastcs/values.yaml
           - --no-additional-properties
           - -o
-          - Charts/fastcs/values.schema.json
+          - schemas/fastcs-values.schema.json
 
   - repo: https://github.com/losisin/helm-values-schema-json
     rev: v2.2.1

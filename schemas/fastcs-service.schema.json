@@ -6,10 +6,6 @@
             "$ref": "fastcs-values.schema.json",
             "type": "object",
             "additionalProperties": false
-        },
-        "ioc-instance": {
-            "type": "object",
-            "additionalProperties": true
         }
     },
     "additionalProperties": false
