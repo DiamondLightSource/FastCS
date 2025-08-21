@@ -113,9 +113,14 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: ControllerAPI):
 
     for child in parent.sub_apis.values():
         child_pvi = f"{controller_pv_prefix(pv_prefix, child)}:PVI"
-        child_name = str(child.path[-1]).lower()
+        child_name = (
+            f"{child.path[-2]}{child.path[-1]}"  # Parent name + child idx
+            if isinstance(child.path[-1], int)
+            else str(child.path[-1])  # Child name
+        )
 
-        _add_pvi_info(child_pvi, parent_pvi, child_name)
+        _add_pvi_info(child_pvi, parent_pvi, child_name.lower())
+
         _add_sub_controller_pvi_info(pv_prefix, child)
 
 
