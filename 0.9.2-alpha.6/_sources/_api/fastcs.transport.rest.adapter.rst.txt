@@ -1,0 +1,21 @@
+``fastcs.transport.rest.adapter``
+=================================
+        
+
+.. automodule:: fastcs.transport.rest.adapter
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        RestTransport
+    
+    
