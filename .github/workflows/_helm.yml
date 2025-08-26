@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: helm-chart-schemas
-          path: schemas/*.schema.json
+          path: Charts/*/*.schema.json
 
       - name: Push tagged helm chart to registry
         # TODO - switch to using https://github.com/helm/chart-releaser-action of maybe the docker action?

@@ -1,5 +1,9 @@
 # yaml-language-server: $schema=values.schema.json
 
+# NOTE: the $k8s schema references come from
+# https://github.com/yannh/kubernetes-json-schema/tree/master/v1.33.1
+# with the version set in .fastcs.schema.config.yaml (k8sSchemaVersion)
+
 # Default values for fastcs-instance chart.
 # With annotations for building the schema using:
 #   https://github.com/losisin/helm-values-schema-json.git
@@ -110,35 +114,32 @@ podAnnotations: {}
 # @schema description: Add labels to the pod
 podLabels: {}
 
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+# @schema $ref: $k8s/podspec.json#/properties/securityContext
 podSecurityContext: {}
 
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+# @schema  $ref:$k8s/container.json#/properties/securityContext
 securityContext: {}
 
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
+# @schema  $ref: $k8s/container.json#/properties/resources
 resources: {}
 
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
+# @schema $ref: $k8s/container.json#/properties/livenessProbe
 livenessProbe: {}
 
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Probe
+# @schema $ref: $k8s/container.json#/properties/readinessProbe
 readinessProbe: {}
 
-# @schema item: object
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Volume
+# @schema $ref: $k8s/podspec.json#/properties/volumes
 volumes: []
 
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.VolumeMount
+# @schema $ref: $k8s/container.json#/properties/volumeMounts
 volumeMounts: []
 
-# TODO I cant find a way to allow null for nodeSelector but also pass the ref for the object
-# $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.NodeSelector
-# @schema type:[object, null]
-nodeSelector: {}
-
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
+# @schema $ref: $k8s/podspec.json#/properties/tolerations
 tolerations: []
 
-# @schema $ref: https://kubernetesjsonschema.dev/v1.18.1/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
+# @schema $ref: $k8s/podspec.json#/properties/nodeSelector
+nodeSelector: {}
+
+# @schema $ref: $k8s/affinity.json
 affinity: {}

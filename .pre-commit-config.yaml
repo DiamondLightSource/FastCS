@@ -29,19 +29,13 @@ repos:
     hooks:
       - id: helm-schema
         args:
-          - --values
-          - Charts/fastcs/values.yaml
-          - --no-additional-properties
-          - -o
-          - schemas/fastcs-values.schema.json
+          - --config
+          - Charts/fastcs/.schema.config.yaml
 
   - repo: https://github.com/losisin/helm-values-schema-json
     rev: v2.2.1
     hooks:
       - id: helm-schema
         args:
-          - --values
-          - schemas/fastcs-service-values.yaml
-          - --no-additional-properties
-          - -o
-          - schemas/fastcs-service.schema.json
+          - --config
+          - Charts/fastcs/.schema.service.config.yaml

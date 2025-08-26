@@ -1,0 +1,13 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "FastCS Helm chart schema for services using FastCS as a subchart",
+    "description": "Schema to allow validation FastCS IOC instances",
+    "type": "object",
+    "properties": {
+        "fastcs": {
+            "$ref": "/workspaces/fastcs/Charts/fastcs/values.schema.json",
+            "type": "object"
+        }
+    },
+    "additionalProperties": false
+}
