@@ -1,0 +1,23 @@
+``fastcs.transport.tango.dsr``
+==============================
+        
+        
+
+.. automodule:: fastcs.transport.tango.dsr
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        TangoDSR
+        register_dev
+    
+    
