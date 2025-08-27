@@ -1,5 +1,5 @@
 # PVC for debugging volume
-{{ if .Values.developerMode }}
+{{ if .Values.editable }}
 {{- $location := default .Values.global.location .Values.location | required "ERROR - You must supply location or global.location" -}}
 {{- $ioc_group := default .Values.global.ioc_group .Values.ioc_group | required "ERROR - You must supply ioc_group or global.ioc_group" -}}
 
