@@ -85,27 +85,14 @@ service:
   ca_port: 5064
   pva_port: 5075
 
-# @schema
-# TODO: how do we represent this using
-#   https://github.com/losisin/helm-values-schema-json.git
-# description: adds addtional containers specified by image and command
-# type: array
-# items:
-#   type: object
-#   properties:
-#     name:
-#       type: string
-#       description: A name for the additional container
-#     image:
-#       type: string
-#       format: image
-#       description: Container image URI
-#     command:
-#       type: array
-#       description: Command to run in the container (as array of arguments)
-#   required: [name, image, command]
-#   additionalProperties: false
-# @schema
+
+# Add addtional containers specified by image and command
+#
+# should be of the form:
+#     name: # A name for the additional container
+#     image: # Container image URI
+#     command: # Command to run in the container (as array of arguments)
+# @schema item: object
 extraContainers: []
 
 # @schema description: Add annotations to the pod

@@ -46,7 +46,10 @@
             "type": "boolean"
         },
         "extraContainers": {
-            "type": "array"
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
         },
         "global": {
             "description": "shared values for all services",
