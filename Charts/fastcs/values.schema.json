@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "FastCS Helm chart schema",
-    "description": "Schema to allow validation of values passed to FastCS Helm chart",
+    "title": "FastCS Helm chart",
+    "description": "Helm chart for deploying a FastCS application",
     "type": "object",
     "properties": {
         "affinity": {

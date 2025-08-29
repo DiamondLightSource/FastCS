@@ -35,7 +35,7 @@ initCommand:
   - /bin/bash
   - -c
   - |
-    echo "running as account"; id
+    echo "Running as account"; id
     if [ -d /dest/venv ]; then
       echo "Virtual environment already exists, skipping copy"
     else
