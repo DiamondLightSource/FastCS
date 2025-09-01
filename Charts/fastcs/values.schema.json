@@ -1,0 +1,171 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "FastCS Helm chart",
+    "description": "Helm chart for deploying a FastCS application",
+    "type": "object",
+    "properties": {
+        "affinity": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/affinity.json",
+            "type": "object"
+        },
+        "args": {
+            "description": "command args to pass to the production container",
+            "type": "array"
+        },
+        "autostart": {
+            "description": "editable and autostart are used for debugging and development in-cluster",
+            "type": "boolean"
+        },
+        "baseIp": {
+            "description": "CIDR for services addresses.",
+            "type": "string",
+            "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}\\/\\d{1,2}$"
+        },
+        "ca_server_port": {
+            "description": "service port for Channel Access",
+            "type": "integer"
+        },
+        "clusterIP": {
+            "description": "Override for the cluster IP - only needed if allocateIpFromName clashes",
+            "type": "null",
+            "pattern": "^(\\d{1,3}\\.){3}\\d{1,3}$"
+        },
+        "command": {
+            "description": "command to run for the production container",
+            "type": "array"
+        },
+        "debugCommand": {
+            "description": "command to run for the debugging (non- autostart) container",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "editable": {
+            "description": "editable and autostart are used for debugging and development in-cluster",
+            "type": "boolean"
+        },
+        "extraContainers": {
+            "description": "Add arbitrary containers to the pod",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/command",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "image": {
+                        "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/image",
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "global": {
+            "description": "shared values for all services",
+            "type": "object",
+            "additionalProperties": true
+        },
+        "hostNetwork": {
+            "description": "enable host networking for the pod",
+            "type": "boolean"
+        },
+        "image": {
+            "description": "container image URI",
+            "type": "object",
+            "properties": {
+                "pullPolicy": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "initCommand": {
+            "description": "command to run in the init container for editable mode",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "iocConfig": {
+            "description": "path to the location of config folder (defaults to be the same as C++ IOCs)",
+            "type": "string"
+        },
+        "livenessProbe": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/livenessProbe",
+            "type": "object"
+        },
+        "nodeSelector": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/podspec.json#/properties/nodeSelector",
+            "type": "object"
+        },
+        "podAnnotations": {
+            "description": "Add annotations to the pod",
+            "type": "object"
+        },
+        "podLabels": {
+            "description": "Add labels to the pod",
+            "type": "object"
+        },
+        "podSecurityContext": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/podspec.json#/properties/securityContext",
+            "type": "object"
+        },
+        "pva_server_port": {
+            "description": "service port for PV Access",
+            "type": "integer"
+        },
+        "readinessProbe": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/readinessProbe",
+            "type": "object"
+        },
+        "resources": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/resources",
+            "type": "object"
+        },
+        "securityContext": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/securityContext",
+            "type": "object"
+        },
+        "service": {
+            "description": "The service will be configured for Channel Access and PVA.",
+            "type": "object",
+            "properties": {
+                "ca_port": {
+                    "type": "integer"
+                },
+                "pva_port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "tolerations": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/podspec.json#/properties/tolerations",
+            "type": "array"
+        },
+        "volumeMounts": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/volumeMounts",
+            "type": "array"
+        },
+        "volumes": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/podspec.json#/properties/volumes",
+            "type": "array"
+        }
+    },
+    "additionalProperties": false
+}

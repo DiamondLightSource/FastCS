@@ -1,0 +1,71 @@
+name: Package helm charts
+
+on:
+  workflow_call:
+
+env:
+  HELM_VERSION_TO_INSTALL: 3.14.3
+
+jobs:
+  package-helm-charts:
+    name: Package and Push Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install helm
+        uses: Azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION_TO_INSTALL }}
+
+      # Check that alpha/beta versions have the form X.Y.Z-alpha.A requried by Helm.
+      # An early check saves waiting for the entire build before finding a problem.
+      - name: Check helm version tag
+        if: ${{ github.ref_type == 'tag' }}
+        env:
+          VERSION: "${{ github.ref_name }}"
+        run: |
+          if [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-alpha|-beta|-rc).*?$ ]]; then
+              echo "Valid version format: ${VERSION}"
+          else
+              echo "Invalid version: ${VERSION}. Expected: X.Y.Z or X.Y.Z-beta.1 or X.Y.Z-alpha.1"
+              exit 1
+          fi
+
+      - name: Package helm charts
+        env:
+          VERSION: "${{ github.ref_type == 'tag' && github.ref_name || '0.0.0' }}"
+        run: |
+          set -xe
+
+          mkdir -p charts
+          for i in $(find Charts -type d -maxdepth 1 -mindepth 1); do
+            if [[ ${i} =~ ^.*-ioc$ ]]; then
+              echo "Skipping IOC schema chart: ${i}"
+              continue
+            fi
+            echo "Packaging chart: ${i}"
+            helm package -u --app-version ${VERSION} --version ${VERSION} ${i}
+            mv $(basename ${i})-*.tgz charts/
+          done
+
+      - name: Upload helm chart values schemas
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-chart-schemas
+          path: schemas/*
+
+      - name: Push tagged helm chart to registry
+        # TODO - switch to using https://github.com/helm/chart-releaser-action of maybe the docker action?
+        if: ${{ github.ref_type == 'tag' }}
+        run: |
+          set -x
+
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io/${{ github.repository_owner }} --username ${{ github.repository_owner }} --password-stdin
+          REGISTRY=oci://ghcr.io/${{github.repository_owner }}/charts
+          for i in charts/*.tgz; do
+            helm push "${i}" ${REGISTRY,,}
+          done

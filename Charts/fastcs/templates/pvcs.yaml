@@ -1,0 +1,20 @@
+# PVC for debugging volume
+{{ if .Values.editable }}
+{{- $location := default .Values.global.location .Values.location | required "ERROR - You must supply location or global.location" -}}
+{{- $ioc_group := default .Values.global.ioc_group .Values.ioc_group | required "ERROR - You must supply ioc_group or global.ioc_group" -}}
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-develop
+  labels:
+    app: {{ .Release.Name }}
+    location: {{ $location }}
+    ioc_group: {{ $ioc_group }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "1Gi"
+{{- end }}

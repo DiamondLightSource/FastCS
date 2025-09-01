@@ -1,0 +1,180 @@
+{{- /*
+Default the derivable substitution values.
+
+This keeps the length of the values.txt file for each individual IOC
+to a minimum
+*/ -}}
+{{- $location := default .Values.global.location .Values.location | required "ERROR - You must supply location or global.location" -}}
+{{- $ioc_group := default .Values.global.ioc_group .Values.ioc_group | required "ERROR - You must supply ioc_group or global.ioc_group" -}}
+{{- $opisClaim := default (print $ioc_group "-opi-claim") .Values.opisClaim -}}
+{{- $runtimeClaim := default (print $ioc_group "-runtime-claim") .Values.runtimeClaim -}}
+{{- $autosaveClaim := default (print $ioc_group "-autosave-claim") .Values.autosaveClaim -}}
+{{- $image := .Values.image | required "ERROR - You must supply image." -}}
+
+{{- $enabled := eq .Values.global.enabled false | ternary false true -}}
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    location: {{ $location }}
+    ioc_group: {{ $ioc_group }}
+    enabled: {{ $enabled | quote }}
+    is_ioc: "true"
+    {{- include "fastcs.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $enabled | ternary 1 0 }}
+  selector:
+    matchLabels:
+      {{- include "fastcs.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        location: {{ $location }}
+        ioc_group: {{ $ioc_group }}
+        enabled: {{ $enabled | quote }}
+        is_ioc: "true"
+        {{- include "fastcs.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        # re-deploy in case the configMap has changed - use a random value
+        # unless the Commit Hash is supplied (by ArgoCD or helm command line)
+        rollme: {{ .Values.global.commitHash | default (randAlphaNum 5) | quote }}
+    spec:
+      terminationGracePeriodSeconds: 2
+      hostNetwork: {{ .Values.hostNetwork }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.editable }}
+      # add in an init container to copy out virtual environment and workspaces
+      initContainers:
+      - name: {{ .Release.Name }}-init-debug
+        image: "{{ .Values.image.repository }}-debug:{{ .Values.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        resources:
+          {{- .Values.initResources | default .Values.resources | toYaml | nindent 12 }}
+        {{- with .Values.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.initCommand }}
+        command:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        volumeMounts:
+          - name: {{ .Release.Name }}-develop
+            mountPath: /dest
+      {{- end }}
+      containers:
+        {{- range .Values.extraContainers }}
+        - name: {{ .name }}
+          image: {{ .image }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          {{- with $.Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .command }}
+          command:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- with $.Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+            - name: opis-volume
+              mountPath: /epics/opi
+              subPath: "{{ $.Release.Name }}"
+            - name: config-volume
+              mountPath: {{ $.Values.iocConfig }}
+          {{- if $.Values.editable }}
+            - name: {{ $.Release.Name }}-develop
+              mountPath: /dest
+          {{- end }}
+        {{- end }}
+        - name: {{ .Chart.Name }}
+          image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.editable }}:{{ .Values.image.tag }}'
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.autostart }}
+          {{- with .Values.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
+          {{- with .Values.debugCommand }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- with .livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+            - name: opis-volume
+              mountPath: /epics/opi
+              subPath: "{{ .Release.Name }}"
+            - name: config-volume
+              mountPath: {{ .Values.iocConfig }}
+          {{- if .Values.editable }}
+            - name: {{ .Release.Name }}-develop
+              mountPath: /workspaces
+              subPath: workspaces
+            - name: {{ .Release.Name }}-develop
+              mountPath: /venv
+              subPath: venv
+          {{- end }}
+      volumes:
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+        - name: opis-volume
+          persistentVolumeClaim:
+            claimName: {{ $opisClaim }}
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-config
+        {{- if .Values.editable }}
+        - name: {{ .Release.Name }}-develop
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-develop
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
