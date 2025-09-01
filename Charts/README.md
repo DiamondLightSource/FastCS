@@ -2,8 +2,6 @@
 
 This directory contains Helm charts for deploying FastCS services.
 
-TODO: The implementation of helm charts in this repo is intended to be general purpose and is a proposed solution for the `python-copier-template`.
-
 ## Github Actions
 
 This folder works in tandem with [_helm.yml](../.github/workflows/_helm.yml) github actions workflow which:
@@ -15,8 +13,6 @@ This folder works in tandem with [_helm.yml](../.github/workflows/_helm.yml) git
 
 This standalone Helm related workflow is independent of the rest of the workflows except that the _pypi workflow has _helm added to its `needs` in `ci.yml`, making sure we only publish to pypi with valid SemVer tags.
 
-TODO: for a project that publishes containers referred to by the helm chart, the `_containers.yml` workflow should be added to the `needs` of _helm in `ci.yml`.
-
 ## Schema Generation
 
 Schema generation for charts' `values.yaml` is handled by [helm-values-schema-json](https://github.com/losisin/helm-values-schema-json). Which is in turn controlled by annotations in the default [values.yaml](fastcs/values.yaml) file.
@@ -25,20 +21,23 @@ The generated schema file will be called `values.schema.json` and will be placed
 
 ```bash
 git add . ; pre-commit
+# or
+pre-commit run --all-files
 ```
+
 
 Note that this standard name for the schema file means that it is packaged up with the helm chart and available for schema checks in ArgoCD for example.
 
-## schemas folder
+## `schemas` folder
 
-The schemas folder allows us to declare the schemas you want to publish to the release.
+The schemas folder allows us to declare the schemas we want to publish to the release.
 
 It should contain:
 
 - A symlink to each of the `values.schema.json` files in the subfolders of `Charts`. The symlink should have a unique name, e.g. `fastcs-values.schema.json`, thus allowing multiple schemas to be published per repo.
 - A service schema file which references the above and can be used to validate `values.yaml` in epics-containers services repos, where the these charts will be used as sub-charts. e.g. [fastcs-service.schema.json](../schemas/fastcs-service.schema.json)
 
-The service schema files are hand coded as they are extremely simple. The symlinks are also manually created at present. (both of these could potentially be automated).
+The service schema files are hand coded as they are extremely simple and unlikely to change.
 
 ## Debuging/Development In-Cluster
 
@@ -60,8 +59,8 @@ These features will be accessed via `ec`. See https://github.com/epics-container
 
 This script will:
 
-- inspect the values of `editable` and `autostart` in the `values.yaml` file of the specified IOC (TODO: at present it uses the p47-services source code to do so but this should be determined from the cluster in future).
-- port forward the debugpy port (5678) from the pod to localhost.
+- Inspect the values of `editable` and `autostart` in the `values.yaml` file of the specified IOC (TODO: at present it uses the p47-services source code to do so but this should be determined from the cluster in future).
+- Port forward the debugpy port (5678) from the pod to localhost.
 - If editable is true, it will mount the PVC locally using pv-mounter and open VSCode to the /workspaces/xxx folder.
 - If autostart is false, it will exec into the container and launch debugpy to run the main program.
 - If autostart is true, it will exec into the container and attach debugpy to PID 1.
