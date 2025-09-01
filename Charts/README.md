@@ -56,7 +56,7 @@ The `fastcs` helm chart has two variables to enable debugging/development in-clu
 
 In combination these flags can be used to debug or develop in-cluster.
 
-An initial demonstration script to use these features is provided in [debug.py](https://github.com/epics-containers/p47-services/blob/add-fastcs/debug.py) in the `p47-services` repo.
+These features will be accessed via `ec`. See https://github.com/epics-containers/edge-containers-cli/issues/207
 
 This script will:
 
