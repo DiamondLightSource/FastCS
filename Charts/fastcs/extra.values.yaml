@@ -1,0 +1,15 @@
+################################################################################
+# values for lists of custom objects from values.yaml for schema generation
+################################################################################
+
+# @schema description: Add arbitrary containers to the pod
+extraContainers:
+  # @schema: description: A name for the additional container
+  - name: container_name
+    # @schema  $ref: $k8s/container.json#/properties/image
+    image: image_uri
+    # @schema  $ref: $k8s/container.json#/properties/command
+    command:
+      - command
+      - arg1
+      - arg2

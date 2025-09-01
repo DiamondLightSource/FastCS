@@ -85,14 +85,8 @@ service:
   ca_port: 5064
   pva_port: 5075
 
-
-# Add addtional containers specified by image and command
-#
-# should be of the form:
-#     name: # A name for the additional container
-#     image: # Container image URI
-#     command: # Command to run in the container (as array of arguments)
-# @schema item: object
+# Add additional containers specified by image and command
+# see extra.values.yaml for the schema of this list of objects
 extraContainers: []
 
 # @schema description: Add annotations to the pod

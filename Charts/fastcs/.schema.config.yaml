@@ -3,6 +3,7 @@
 # Define input, output and source for $refs relative to repository root for pre-commit
 values:
   - Charts/fastcs/values.yaml
+  - Charts/fastcs/extra.values.yaml
 
 output: Charts/fastcs/values.schema.json
 
