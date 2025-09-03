@@ -28,10 +28,10 @@ jobs:
         env:
           VERSION: "${{ github.ref_name }}"
         run: |
-          if [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-alpha|-beta|-rc).*?$ ]]; then
-              echo "Valid version format: ${VERSION}"
+          if [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+((-alpha|-beta|-rc)\.[0-9]+)?$ ]]; then
+              echo "Valid version format: `${VERSION}`"
           else
-              echo "Invalid version: ${VERSION}. Expected: X.Y.Z or X.Y.Z-beta.1 or X.Y.Z-alpha.1"
+              echo "Invalid version: `${VERSION}`. Expected: `X.Y.Z` or `X.Y.Z-beta.1` or `X.Y.Z-alpha.1`"
               exit 1
           fi
 
