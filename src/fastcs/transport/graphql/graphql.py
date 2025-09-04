@@ -9,7 +9,7 @@ from strawberry.types.field import StrawberryField
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, T
 from fastcs.controller_api import ControllerAPI
-from fastcs.exceptions import FastCSException
+from fastcs.exceptions import FastCSError
 
 from .options import GraphQLServerOptions
 
@@ -102,7 +102,7 @@ class GraphQLAPI:
     def create_schema(self) -> strawberry.Schema:
         """Create a Strawberry Schema to load into a GraphQL application."""
         if not self.queries:
-            raise FastCSException(
+            raise FastCSError(
                 "Can't create GraphQL transport from ControllerAPI with no read "
                 "attributes"
             )

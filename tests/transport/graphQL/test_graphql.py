@@ -15,7 +15,7 @@ from tests.assertable_controller import (
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import Bool, Float, Int, String
-from fastcs.transport.graphQL.adapter import GraphQLTransport
+from fastcs.transport.graphql.adapter import GraphQLTransport
 
 
 class GraphQLController(MyTestController):

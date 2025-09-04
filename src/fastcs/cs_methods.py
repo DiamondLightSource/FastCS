@@ -6,7 +6,7 @@ from typing import Any, Generic, TypeVar
 
 from fastcs.controller import BaseController
 
-from .exceptions import FastCSException
+from .exceptions import FastCSError
 
 MethodCallback = Callable[..., Coroutine[None, None, None]]
 """Generic base class for all `Controller` methods"""
@@ -48,10 +48,10 @@ class Method(Generic[Controller_T]):
 
     def _validate(self, fn: MethodCallback) -> None:
         if self.return_type not in (None, Signature.empty):
-            raise FastCSException("Method return type must be None or empty")
+            raise FastCSError("Method return type must be None or empty")
 
         if not iscoroutinefunction(fn):
-            raise FastCSException("Method must be async function")
+            raise FastCSError("Method must be async function")
 
     @property
     def return_type(self):
@@ -89,7 +89,7 @@ class Command(Method[BaseController]):
         super()._validate(fn)
 
         if not len(self.parameters) == 0:
-            raise FastCSException(f"Command method cannot have arguments: {fn}")
+            raise FastCSError(f"Command method cannot have arguments: {fn}")
 
     async def __call__(self):
         return await self._fn()
@@ -116,7 +116,7 @@ class Scan(Method[BaseController]):
         super()._validate(fn)
 
         if not len(self.parameters) == 0:
-            raise FastCSException("Scan method cannot have arguments")
+            raise FastCSError("Scan method cannot have arguments")
 
     async def __call__(self):
         return await self._fn()
@@ -132,7 +132,7 @@ class Put(Method[BaseController]):
         super()._validate(fn)
 
         if not len(self.parameters) == 1:
-            raise FastCSException("Put method can only take one argument")
+            raise FastCSError("Put method can only take one argument")
 
     async def __call__(self, value: Any):
         return await self._fn(value)
@@ -158,7 +158,7 @@ class UnboundCommand(Method[Controller_T]):
         super()._validate(fn)
 
         if not len(self.parameters) == 1:
-            raise FastCSException("Command method cannot have arguments")
+            raise FastCSError("Command method cannot have arguments")
 
     def bind(self, controller: Controller_T) -> Command:
         return Command(MethodType(self.fn, controller), group=self.group)
@@ -191,7 +191,7 @@ class UnboundScan(Method[Controller_T]):
         super()._validate(fn)
 
         if not len(self.parameters) == 1:
-            raise FastCSException("Scan method cannot have arguments")
+            raise FastCSError("Scan method cannot have arguments")
 
     def bind(self, controller: Controller_T) -> Scan:
         return Scan(MethodType(self.fn, controller), self._period)
@@ -210,7 +210,7 @@ class UnboundPut(Method[Controller_T]):
         super()._validate(fn)
 
         if not len(self.parameters) == 2:
-            raise FastCSException("Put method can only take one argument")
+            raise FastCSError("Put method can only take one argument")
 
     def bind(self, controller: Controller_T) -> Put:
         return Put(MethodType(self.fn, controller))

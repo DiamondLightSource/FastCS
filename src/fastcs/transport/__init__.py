@@ -3,8 +3,8 @@ from .epics.options import EpicsDocsOptions as EpicsDocsOptions
 from .epics.options import EpicsGUIOptions as EpicsGUIOptions
 from .epics.options import EpicsIOCOptions as EpicsIOCOptions
 from .epics.pva.options import EpicsPVAOptions as EpicsPVAOptions
-from .graphQL.options import GraphQLOptions as GraphQLOptions
-from .graphQL.options import GraphQLServerOptions as GraphQLServerOptions
+from .graphql.options import GraphQLOptions as GraphQLOptions
+from .graphql.options import GraphQLServerOptions as GraphQLServerOptions
 from .rest.options import RestOptions as RestOptions
 from .rest.options import RestServerOptions as RestServerOptions
 from .tango.options import TangoDSROptions as TangoDSROptions

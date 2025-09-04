@@ -4,7 +4,7 @@ from softioc import builder
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, Waveform
-from fastcs.exceptions import FastCSException
+from fastcs.exceptions import FastCSError
 
 _MBB_FIELD_PREFIXES = (
     "ZR",
@@ -151,6 +151,6 @@ def builder_callable_from_attribute(
         case Waveform():
             return builder.WaveformIn if make_in_record else builder.WaveformOut
         case _:
-            raise FastCSException(
+            raise FastCSError(
                 f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
             )

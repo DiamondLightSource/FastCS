@@ -6,7 +6,7 @@ from fastcs.backend import Backend, build_controller_api
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Int
-from fastcs.exceptions import FastCSException
+from fastcs.exceptions import FastCSError
 from fastcs.wrappers import command, scan
 
 
@@ -156,7 +156,7 @@ def test_scan_raises_exception_via_callback():
         # This allows scan time to run
         await asyncio.sleep(0.2)
         # _scan_done should raise an exception
-        assert isinstance(exception_info["exception"], FastCSException)
+        assert isinstance(exception_info["exception"], FastCSError)
         for task in backend._scan_tasks:
             internal_exception = task.exception()
             assert internal_exception

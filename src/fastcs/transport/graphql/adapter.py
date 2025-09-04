@@ -1,7 +1,7 @@
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport.adapter import TransportAdapter
 
-from .graphQL import GraphQLServer
+from .graphql import GraphQLServer
 from .options import GraphQLOptions
 
 

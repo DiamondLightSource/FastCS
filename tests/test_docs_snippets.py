@@ -19,14 +19,14 @@ def sim_temperature_controller():
         text=True,
     )
 
-    TIMEOUT = 10
+    timeout = 10
     start_time = time.monotonic()
     while process.stdout is not None:
         line = process.stdout.readline()
         if "Temperature controller running" in line:
             break
 
-        if time.monotonic() - start_time > TIMEOUT:
+        if time.monotonic() - start_time > timeout:
             raise TimeoutError("Simulator did not start in time")
 
         time.sleep(0.1)

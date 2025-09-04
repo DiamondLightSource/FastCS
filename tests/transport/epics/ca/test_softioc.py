@@ -19,7 +19,7 @@ from fastcs.controller import Controller
 from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
-from fastcs.exceptions import FastCSException
+from fastcs.exceptions import FastCSError
 from fastcs.transport.epics.ca.adapter import EpicsCATransport
 from fastcs.transport.epics.ca.ioc import (
     EPICS_MAX_NAME_LENGTH,
@@ -106,7 +106,7 @@ def test_make_input_record(
 
 def test_make_record_raises(mocker: MockerFixture):
     # Pass a mock as attribute to provoke the fallback case matching on datatype
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         _make_record("PV", mocker.MagicMock())
 
 
@@ -206,7 +206,7 @@ def test_long_enum_validator(mocker: MockerFixture):
 
 def test_get_output_record_raises(mocker: MockerFixture):
     # Pass a mock as attribute to provoke the fallback case matching on datatype
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         _make_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
 
 
@@ -429,7 +429,7 @@ async def do_nothing(): ...
 
 class ControllerLongNames(Controller):
     attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name = AttrR(Int())
-    attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV = AttrRW(Int())
+    attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_rbv = AttrRW(Int())
     attr_rw_short_name = AttrRW(Int())
     command_with_reallyreallyreallyreallyreallyreallyreally_long_name = Command(
         do_nothing
@@ -466,12 +466,12 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
         f"{DEVICE}:{short_pv_name}_RBV",
         **record_metadata_from_datatype(
             long_name_controller_api.attributes[
-                "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
+                "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_rbv"
             ].datatype
         ),
         **record_metadata_from_attribute(
             long_name_controller_api.attributes[
-                "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
+                "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_rbv"
             ]
         ),
     )

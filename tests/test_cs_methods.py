@@ -10,20 +10,20 @@ from fastcs.cs_methods import (
     UnboundPut,
     UnboundScan,
 )
-from fastcs.exceptions import FastCSException
+from fastcs.exceptions import FastCSError
 
 
 def test_method():
     def sync_do_nothing():
         pass
 
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         Method(sync_do_nothing)  # type: ignore
 
     async def do_nothing_with_return() -> int:
         return 1
 
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         Method(do_nothing_with_return)  # type: ignore
 
     async def do_nothing():
@@ -50,10 +50,10 @@ async def test_unbound_command():
     with pytest.raises(NotImplementedError):
         await unbound_command()
 
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         UnboundCommand(TestController.do_nothing_with_arg)  # type: ignore
 
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         Command(TestController().do_nothing_with_arg)  # type: ignore
 
     command = unbound_command.bind(TestController())
@@ -79,10 +79,10 @@ async def test_unbound_scan():
     with pytest.raises(NotImplementedError):
         await unbound_scan()
 
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         UnboundScan(TestController.update_nothing_with_arg, 1.0)  # type: ignore
 
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         Scan(TestController().update_nothing_with_arg, 1.0)  # type: ignore
 
     scan = unbound_scan.bind(TestController())
@@ -106,10 +106,10 @@ async def test_unbound_put():
     with pytest.raises(NotImplementedError):
         await unbound_put()
 
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         UnboundPut(TestController.put_no_value)  # type: ignore
 
-    with pytest.raises(FastCSException):
+    with pytest.raises(FastCSError):
         Put(TestController().put_no_value)  # type: ignore
 
     put = unbound_put.bind(TestController())
