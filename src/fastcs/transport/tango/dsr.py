@@ -61,7 +61,7 @@ def _collect_dev_attributes(
 ) -> dict[str, Any]:
     collection: dict[str, Any] = {}
     for controller_api in root_controller_api.walk_api():
-        path = controller_api.path
+        path = [str(node) for node in controller_api.path]
 
         for attr_name, attribute in controller_api.attributes.items():
             attr_name = attr_name.title().replace("_", "")
@@ -109,7 +109,8 @@ def _wrap_command_f(
 ) -> Callable[..., Awaitable[None]]:
     async def _dynamic_f(tango_device: Device) -> None:
         tango_device.info_stream(
-            f"called {'_'.join(controller_api.path)} f method: {method_name}"
+            f"called {'_'.join([str(node) for node in controller_api.path])} "
+            f"f method: {method_name}"
         )
 
         coro = method()
@@ -125,7 +126,7 @@ def _collect_dev_commands(
 ) -> dict[str, Any]:
     collection: dict[str, Any] = {}
     for controller_api in root_controller_api.walk_api():
-        path = controller_api.path
+        path = [str(node) for node in controller_api.path]
 
         for name, method in controller_api.command_methods.items():
             cmd_name = name.title().replace("_", "")
