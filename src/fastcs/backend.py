@@ -8,7 +8,7 @@ from fastcs.datatypes import T
 from .attributes import ONCE, AttrHandlerR, AttrHandlerW, AttrR, AttrW
 from .controller import BaseController, Controller
 from .controller_api import ControllerAPI
-from .exceptions import FastCSException
+from .exceptions import FastCSError
 from .util import validate_hinted_attributes
 
 
@@ -63,7 +63,7 @@ class Backend:
         try:
             task.result()
         except Exception as e:
-            raise FastCSException(
+            raise FastCSError(
                 "Exception raised in scan method of "
                 f"{self._controller.__class__.__name__}"
             ) from e
@@ -86,7 +86,7 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
             case AttrW():
                 attribute.add_process_callback(method.fn)
             case _:
-                raise FastCSException(
+                raise FastCSError(
                     f"Mode {attribute.access_mode} does not "
                     f"support put operations for {name}"
                 )

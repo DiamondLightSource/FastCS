@@ -20,7 +20,7 @@ from .exceptions import LaunchError
 from .transport.adapter import TransportAdapter
 from .transport.epics.ca.options import EpicsCAOptions
 from .transport.epics.pva.options import EpicsPVAOptions
-from .transport.graphQL.options import GraphQLOptions
+from .transport.graphql.options import GraphQLOptions
 from .transport.rest.options import RestOptions
 from .transport.tango.options import TangoOptions
 
@@ -76,7 +76,7 @@ class FastCS:
                         option,
                     )
                 case GraphQLOptions():
-                    from .transport.graphQL.adapter import GraphQLTransport
+                    from .transport.graphql.adapter import GraphQLTransport
 
                     transport = GraphQLTransport(
                         self._backend.controller_api,

@@ -38,7 +38,7 @@ from fastcs.datatypes import (
     Table,
     Waveform,
 )
-from fastcs.exceptions import FastCSException
+from fastcs.exceptions import FastCSError
 from fastcs.util import numpy_to_fastcs_datatype, snake_to_pascal
 
 from .options import EpicsGUIFormat, EpicsGUIOptions
@@ -70,7 +70,7 @@ class EpicsGUI:
             case Waveform():
                 return None
             case datatype:
-                raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
+                raise FastCSError(f"Unsupported type {type(datatype)}: {datatype}")
 
     def _get_write_widget(self, fastcs_datatype: DataType) -> WriteWidgetUnion | None:
         match fastcs_datatype:
@@ -85,7 +85,7 @@ class EpicsGUI:
             case Waveform():
                 return None
             case datatype:
-                raise FastCSException(f"Unsupported type {type(datatype)}: {datatype}")
+                raise FastCSError(f"Unsupported type {type(datatype)}: {datatype}")
 
     def _get_attribute_component(
         self, attr_path: list[str], name: str, attribute: Attribute
@@ -116,7 +116,7 @@ class EpicsGUI:
                     return None
                 return SignalW(name=name, write_pv=pv, write_widget=write_widget)
             case _:
-                raise FastCSException(f"Unsupported attribute type: {type(attribute)}")
+                raise FastCSError(f"Unsupported attribute type: {type(attribute)}")
 
     def _get_command_component(self, attr_path: list[str], name: str):
         pv = self._get_pv(attr_path, name)
@@ -134,7 +134,7 @@ class EpicsGUI:
             options = EpicsGUIOptions()
 
         if options.file_format is EpicsGUIFormat.edl:
-            raise FastCSException("FastCS does not support .edl screens.")
+            raise FastCSError("FastCS does not support .edl screens.")
 
         assert options.output_path.suffix == options.file_format.value
         options.output_path.parent.mkdir(parents=True, exist_ok=True)

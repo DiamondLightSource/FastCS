@@ -116,8 +116,8 @@ def _run_ioc_as_subprocess(
 def run_ioc_as_subprocess(
     run_ioc: Callable, ctxt: DefaultContext
 ) -> Generator[tuple[str, multiprocessing.Queue], None, None]:
-    IOC_STARTUP_TIMEOUT = 10
-    IOC_STARTUP_TIMEOUT_ERROR = TimeoutError("IOC did not start in time")
+    ioc_startup_timeout = 10
+    ioc_startup_timeout_error = TimeoutError("IOC did not start in time")
 
     pv_prefix = str(uuid4())
     error_queue = ctxt.Queue()
@@ -133,14 +133,14 @@ def run_ioc_as_subprocess(
         while True:
             try:
                 if "Running FastCS IOC" in (
-                    stdout_queue.get(timeout=IOC_STARTUP_TIMEOUT)  # type: ignore
+                    stdout_queue.get(timeout=ioc_startup_timeout)  # type: ignore
                 ):
                     stdout_queue.get()  # get the newline
                     break
             except Exception as error:
-                raise IOC_STARTUP_TIMEOUT_ERROR from error
-            if time.monotonic() - start_time > IOC_STARTUP_TIMEOUT:
-                raise IOC_STARTUP_TIMEOUT_ERROR
+                raise ioc_startup_timeout_error from error
+            if time.monotonic() - start_time > ioc_startup_timeout:
+                raise ioc_startup_timeout_error
 
         time.sleep(0.1)
         yield pv_prefix, stdout_queue
@@ -156,7 +156,7 @@ def run_ioc_as_subprocess(
         error_queue.close()
         stdout_queue.close()
         process.terminate()
-        process.join(timeout=IOC_STARTUP_TIMEOUT)
+        process.join(timeout=ioc_startup_timeout)
 
 
 @pytest.fixture(scope="module")
@@ -186,13 +186,13 @@ def tango_system():
 
 @pytest.fixture(scope="session")
 def register_device():
-    ATTEMPTS = 10
-    SLEEP = 1
+    attempts = 10
+    sleep = 1
 
     if not os.getenv("TANGO_HOST"):
         raise RuntimeError("TANGO_HOST not defined")
 
-    for attempt in range(1, ATTEMPTS + 1):
+    for attempt in range(1, attempts + 1):
         try:
             register_dev(
                 dev_name="MY/BENCHMARK/DEVICE",
@@ -201,14 +201,14 @@ def register_device():
             )
             break
         except Exception:
-            time.sleep(SLEEP)
-        if attempt == ATTEMPTS:
+            time.sleep(sleep)
+        if attempt == attempts:
             raise TimeoutError("Tango device could not be registered")
 
 
 @pytest.fixture(scope="session")
 def test_controller(tango_system, register_device):
-    TIMEOUT = 10
+    timeout = 10
     process = subprocess.Popen(
         ["python", HERE / "benchmarking" / "controller.py"],
         stdin=subprocess.PIPE,
@@ -221,7 +221,7 @@ def test_controller(tango_system, register_device):
     while "Uvicorn running" not in (
         process.stdout.readline().strip()  # type: ignore
     ):
-        if time.monotonic() - start_time > TIMEOUT:
+        if time.monotonic() - start_time > timeout:
             raise TimeoutError("Controller did not start in time")
 
     # close backend caches before the event loop
@@ -235,4 +235,4 @@ def test_controller(tango_system, register_device):
     yield process
 
     process.send_signal(signal.SIGINT)
-    process.wait(TIMEOUT)
+    process.wait(timeout)

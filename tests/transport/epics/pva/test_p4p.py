@@ -72,7 +72,7 @@ async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
 
     # While the scan method will update every 0.1 seconds, it takes around that
     # time for the p4p backends to update, broadcast, get.
-    LATENCY = 1e8
+    latency = 1e8
 
     e_monitor = ctxt.monitor(f"{pv_prefix}:Child1:E", e_values.put)
     try:
@@ -87,7 +87,7 @@ async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
         new_raw_value = (await e_values.get()).raw
         assert new_raw_value["value"] is not value
         assert new_raw_value["timeStamp"]["nanoseconds"] == pytest.approx(
-            nanoseconds + 1e8, abs=LATENCY
+            nanoseconds + 1e8, abs=latency
         )
         value = new_raw_value["value"]
         assert isinstance(value, bool)
@@ -96,7 +96,7 @@ async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
         new_raw_value = (await e_values.get()).raw
         assert new_raw_value["value"] is not value
         assert new_raw_value["timeStamp"]["nanoseconds"] == pytest.approx(
-            nanoseconds + 1e8, abs=LATENCY
+            nanoseconds + 1e8, abs=latency
         )
 
     finally:
