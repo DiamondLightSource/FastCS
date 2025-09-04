@@ -471,7 +471,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportAdapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCAOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.epics.pva.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsPVAOptions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.transport.graphQL.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.transport.graphql.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.rest.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">RestOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.tango.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">TangoOptions</span>
 
@@ -529,7 +529,7 @@
                         <span class="n">option</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">case</span> <span class="n">GraphQLOptions</span><span class="p">():</span>
-                    <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.graphQL.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLTransport</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.graphql.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLTransport</span>
 
                     <span class="n">transport</span> <span class="o">=</span> <span class="n">GraphQLTransport</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">controller_api</span><span class="p">,</span>

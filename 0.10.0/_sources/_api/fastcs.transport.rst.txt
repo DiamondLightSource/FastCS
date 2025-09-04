@@ -15,7 +15,7 @@
     
         adapter
         epics
-        graphQL
+        graphql
         rest
         tango
     
