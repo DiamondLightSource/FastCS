@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.launch &#8212; FastCS 0.9.2.dev15+g90207e1dc documentation</title>
+    <title>fastcs.launch &#8212; FastCS 0.9.2.dev16+g9c2042a70 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=56253b3a"></script>
+    <script src="../../_static/documentation_options.js?v=91eac263"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -471,7 +471,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportAdapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCAOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.epics.pva.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsPVAOptions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.transport.graphQL.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.transport.graphql.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.rest.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">RestOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.tango.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">TangoOptions</span>
 
@@ -529,7 +529,7 @@
                         <span class="n">option</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">case</span> <span class="n">GraphQLOptions</span><span class="p">():</span>
-                    <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.graphQL.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLTransport</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">.transport.graphql.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLTransport</span>
 
                     <span class="n">transport</span> <span class="o">=</span> <span class="n">GraphQLTransport</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">controller_api</span><span class="p">,</span>

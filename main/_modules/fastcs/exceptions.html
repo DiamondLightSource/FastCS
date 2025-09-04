@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.exceptions &#8212; FastCS 0.9.2.dev15+g90207e1dc documentation</title>
+    <title>fastcs.exceptions &#8212; FastCS 0.9.2.dev16+g9c2042a70 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=56253b3a"></script>
+    <script src="../../_static/documentation_options.js?v=91eac263"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -449,16 +449,16 @@
                 <article class="bd-article">
                   
   <h1>Source code for fastcs.exceptions</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="FastCSException">
-<a class="viewcode-back" href="../../_api/fastcs.exceptions.html#fastcs.exceptions.FastCSException">[docs]</a>
-<span></span><span class="k">class</span><span class="w"> </span><span class="nc">FastCSException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="FastCSError">
+<a class="viewcode-back" href="../../_api/fastcs.exceptions.html#fastcs.exceptions.FastCSError">[docs]</a>
+<span></span><span class="k">class</span><span class="w"> </span><span class="nc">FastCSError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for general problems in the running of a FastCS transport.&quot;&quot;&quot;</span></div>
 
 
 
 <div class="viewcode-block" id="LaunchError">
 <a class="viewcode-back" href="../../_api/fastcs.exceptions.html#fastcs.exceptions.LaunchError">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LaunchError</span><span class="p">(</span><span class="n">FastCSException</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LaunchError</span><span class="p">(</span><span class="n">FastCSError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;For when there is an error in launching FastCS with the given</span>
 <span class="sd">    transports and controller.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>

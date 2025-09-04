@@ -17,7 +17,7 @@
     .. autosummary::
         :nosignatures:
     
-        FastCSException
+        FastCSError
         LaunchError
     
     

@@ -1,0 +1,24 @@
+``fastcs.transport.graphql``
+============================
+
+.. automodule:: fastcs.transport.graphql
+    :members:
+
+    
+    
+    .. rubric:: Submodules
+
+    .. autosummary::
+        :toctree:
+        :template: custom-module-template.rst
+        :recursive:
+    
+        adapter
+        graphql
+        options
+    
+    
+
+    
+    
+    

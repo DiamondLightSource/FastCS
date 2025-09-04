@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.backend &#8212; FastCS 0.9.2.dev15+g90207e1dc documentation</title>
+    <title>fastcs.backend &#8212; FastCS 0.9.2.dev16+g9c2042a70 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=56253b3a"></script>
+    <script src="../../_static/documentation_options.js?v=91eac263"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -459,7 +459,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">ONCE</span><span class="p">,</span> <span class="n">AttrHandlerR</span><span class="p">,</span> <span class="n">AttrHandlerW</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCSException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCSError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_hinted_attributes</span>
 
 
@@ -516,7 +516,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">task</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FastCSException</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span>
                 <span class="s2">&quot;Exception raised in scan method of &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
@@ -540,7 +540,7 @@
             <span class="k">case</span> <span class="n">AttrW</span><span class="p">():</span>
                 <span class="n">attribute</span><span class="o">.</span><span class="n">add_process_callback</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">FastCSException</span><span class="p">(</span>
+                <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Mode </span><span class="si">{</span><span class="n">attribute</span><span class="o">.</span><span class="n">access_mode</span><span class="si">}</span><span class="s2"> does not &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;support put operations for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
