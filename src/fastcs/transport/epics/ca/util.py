@@ -1,5 +1,6 @@
 from dataclasses import asdict
 
+import numpy as np
 from softioc import builder
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
@@ -47,7 +48,12 @@ def record_metadata_from_attribute(
 ) -> dict[str, str | None]:
     """Converts attributes on the `Attribute` to the
     field name/value in the record metadata."""
-    return {"DESC": attribute.description}
+    metadata = {"DESC": attribute.description}
+    if isinstance(attribute, AttrRW):
+        initial = attribute.get()
+        if np.any(initial):
+            metadata["initial_value"] = cast_to_epics_type(attribute.datatype, initial)
+    return metadata
 
 
 def record_metadata_from_datatype(
