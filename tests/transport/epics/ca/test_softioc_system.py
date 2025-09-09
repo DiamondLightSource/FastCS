@@ -1,5 +1,8 @@
 from multiprocessing import Queue
 
+import numpy as np
+import pytest
+from aioca import caget
 from p4p import Value
 from p4p.client.thread import Context
 
@@ -29,3 +32,31 @@ def test_ioc(softioc_subprocess: tuple[str, Queue]):
         "c": {"w": f"{pv_prefix}:Child:C"},
         "d": {"x": f"{pv_prefix}:Child:D"},
     }
+
+
+@pytest.mark.asyncio
+async def test_initial_values_set_in_ca(initial_softioc_subprocess):
+    pv_prefix, _ = initial_softioc_subprocess
+    # combine cagets to reduce timeouts
+    scalar_sets = await caget(
+        [
+            f"{pv_prefix}:Int",
+            f"{pv_prefix}:Float",
+            f"{pv_prefix}:Bool",
+            f"{pv_prefix}:Enum",
+        ]
+    )
+    assert scalar_sets == [4, 3.1, 1, 1]
+    scalar_rbvs = await caget(
+        [
+            f"{pv_prefix}:Int_RBV",
+            f"{pv_prefix}:Float_RBV",
+            f"{pv_prefix}:Bool_RBV",
+            f"{pv_prefix}:Enum_RBV",
+        ]
+    )
+    assert scalar_rbvs == [4, 3.1, 1, 1]
+    assert (await caget(f"{pv_prefix}:Str")).tobytes() == b"initial\0"
+    assert np.array_equal((await caget(f"{pv_prefix}:Waveform")), list(range(10)))
+    assert (await caget(f"{pv_prefix}:Str_RBV")).tobytes() == b"initial\0"
+    assert np.array_equal((await caget(f"{pv_prefix}:Waveform_RBV")), list(range(10)))
