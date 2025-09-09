@@ -49,10 +49,14 @@ def record_metadata_from_attribute(
     """Converts attributes on the `Attribute` to the
     field name/value in the record metadata."""
     metadata = {"DESC": attribute.description}
-    if isinstance(attribute, AttrRW):
-        initial = attribute.get()
-        if np.any(initial):
-            metadata["initial_value"] = cast_to_epics_type(attribute.datatype, initial)
+    initial = None
+    match attribute:
+        case AttrR():
+            initial = attribute.get()
+        case AttrW():
+            initial = attribute.datatype.initial_value
+    if np.any(initial):
+        metadata["initial_value"] = cast_to_epics_type(attribute.datatype, initial)
     return metadata
 
 
