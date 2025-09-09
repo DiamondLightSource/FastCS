@@ -371,7 +371,7 @@ def test_pvi_grouping():
         }
 
 
-def test_more_exotic_dataypes():
+def test_more_exotic_datatypes():
     table_columns: list[tuple[str, DTypeLike]] = [
         ("A", "i"),
         ("B", "i"),
