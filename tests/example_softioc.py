@@ -14,6 +14,7 @@ from fastcs.wrappers import command
 class InitialEnum(enum.Enum):
     A = 0
     B = 1
+    C = 2
 
 
 class ParentController(Controller):
@@ -39,6 +40,21 @@ class InitialValuesController(Controller):
         Waveform(np.int64, shape=(10,)),
         initial_value=np.array(range(10), dtype=np.int64),
     )
+    int_r = AttrR(Int(), initial_value=5)
+    float_r = AttrR(Float(), initial_value=4.1)
+    bool_r = AttrR(Bool(), initial_value=False)
+    enum_r = AttrR(Enum(InitialEnum), initial_value=InitialEnum.C)
+    str_r = AttrR(String(), initial_value="initial_r")
+    waveform_r = AttrR(
+        Waveform(np.int64, shape=(10,)),
+        initial_value=np.array(range(10, 20), dtype=np.int64),
+    )
+    int_w = AttrW(Int())
+    float_w = AttrW(Float())
+    bool_w = AttrW(Bool())
+    enum_w = AttrW(Enum(InitialEnum))
+    str_w = AttrW(String())
+    waveform_w = AttrW(Waveform(np.int64, shape=(10,)))
 
 
 def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
