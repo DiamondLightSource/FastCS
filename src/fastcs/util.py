@@ -32,8 +32,8 @@ def numpy_to_fastcs_datatype(np_type) -> DataType:
 
 
 def validate_hinted_attributes(controller: BaseController):
-    """Validates that type-hinted attributes exist in the controller, and are accessible
-    via the dot accessor, from the attributes dictionary and with the right datatype.
+    """Validates that type-hinted attributes in the controller and all subcontrollers
+    exist with the right datatype and access mode.
     """
     for subcontroller in controller.get_sub_controllers().values():
         validate_hinted_attributes(subcontroller)
