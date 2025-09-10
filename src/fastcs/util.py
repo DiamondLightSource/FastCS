@@ -67,7 +67,7 @@ def validate_hinted_attributes(controller: BaseController):
                 f"attribute '{name}' does not match defined access mode. "
                 f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
             )
-        if attr_dtype not in [attr.datatype.dtype, None]:
+        if attr_dtype is not None and attr_dtype != attr.datatype.dtype:
             raise RuntimeError(
                 f"Controller '{controller.__class__.__name__}' introspection of hinted "
                 f"attribute '{name}' does not match defined datatype. "
