@@ -60,8 +60,10 @@ def validate_hinted_attributes(controller: BaseController):
                 f"Controller `{controller.__class__.__name__}` failed to introspect "
                 f"hinted attribute `{name}` during initialisation"
             )
-        if attr_class not in [type(attr), Attribute]:
+        if attr_class is not type(attr):
             # skip validation if access mode not specified
+            if attr_class is Attribute and isinstance(attr, Attribute):
+                continue
             raise RuntimeError(
                 f"Controller '{controller.__class__.__name__}' introspection of hinted "
                 f"attribute '{name}' does not match defined access mode. "
