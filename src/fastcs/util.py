@@ -37,7 +37,8 @@ def validate_hinted_attributes(controller: BaseController):
     For each type-hinted attribute, validate that a corresponding instance exists in the
     controller with the correct access mode and datatype.
     """
-
+    for subcontroller in controller.sub_controllers.values():
+        validate_hinted_attributes(subcontroller)
     hints = get_type_hints(type(controller))
     alias_hints = {k: v for k, v in hints.items() if isinstance(v, _GenericAlias)}
     for name, hint in alias_hints.items():
