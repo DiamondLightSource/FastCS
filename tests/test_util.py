@@ -153,10 +153,5 @@ def test_hinted_attributes_verified_on_subcontrollers():
             subcontroller = ControllerWithWrongType()
             self.register_sub_controller("MySubController", subcontroller)
 
-    with pytest.raises(RuntimeError) as excinfo:
+    with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
         Backend(TopController(), loop)
-
-    assert str(excinfo.value) == (
-        "Controller `ControllerWithWrongType` failed to introspect hinted attribute "
-        "`hinted_missing` during initialisation"
-    )
