@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from fastcs.attributes import AttrR, AttrRW
 from fastcs.backend import Backend
-from fastcs.controller import Controller
+from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Bool, Enum, Float, Int, String
 from fastcs.util import numpy_to_fastcs_datatype, snake_to_pascal
 
@@ -123,4 +123,27 @@ def test_hinted_attributes_verified():
         "Controller 'ControllerWrongEnumClass' introspection of hinted attribute "
         "'hinted_enum' does not match defined datatype. "
         "Expected 'MyEnum', got 'MyEnum2'."
+    )
+
+
+def test_hinted_attributes_verified_on_subcontrollers():
+    loop = asyncio.get_event_loop()
+
+    class ControllerWithWrongType(SubController):
+        hinted_missing: AttrR[int]
+
+        async def connect(self):
+            return
+
+    class TopController(Controller):
+        async def initialise(self):
+            subcontroller = ControllerWithWrongType()
+            self.register_sub_controller("MySubController", subcontroller)
+
+    with pytest.raises(RuntimeError) as excinfo:
+        Backend(TopController(), loop)
+
+    assert str(excinfo.value) == (
+        "Controller `ControllerWithWrongType` failed to introspect hinted attribute "
+        "`hinted_missing` during initialisation"
     )
