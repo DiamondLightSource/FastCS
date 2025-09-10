@@ -5,7 +5,7 @@ import pytest
 from pvi.device import SignalR
 from pydantic import ValidationError
 
-from fastcs.attributes import AttrR, AttrRW
+from fastcs.attributes import Attribute, AttrR, AttrRW
 from fastcs.backend import Backend
 from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, String
@@ -138,6 +138,15 @@ async def test_hinted_attributes_verified():
         "Expected 'MyEnum', got 'MyEnum2'."
     )
 
+    class ControllerUnspecifiedAccessMode(Controller):
+        hinted: Attribute[int]
+
+        async def initialise(self):
+            self.hinted = AttrR(Int())
+
+    # no assertion thrown
+    Backend(ControllerUnspecifiedAccessMode(), loop)
+
 
 def test_hinted_attributes_verified_on_subcontrollers():
     loop = asyncio.get_event_loop()
@@ -155,3 +164,25 @@ def test_hinted_attributes_verified_on_subcontrollers():
 
     with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
         Backend(TopController(), loop)
+
+
+def test_hinted_attribute_types_verified():
+    # test verification works with non-GenericAlias type hints
+    loop = asyncio.get_event_loop()
+
+    class ControllerAttrWrongAccessMode(Controller):
+        read_attr: AttrR
+
+        async def initialise(self):
+            self.read_attr = AttrRW(Int())
+
+    with pytest.raises(RuntimeError, match="does not match defined access mode"):
+        Backend(ControllerAttrWrongAccessMode(), loop)
+
+    class ControllerUnspecifiedAccessMode(Controller):
+        unspecified_access_mode: Attribute
+
+        async def initialise(self):
+            self.unspecified_access_mode = AttrRW(Int())
+
+    Backend(ControllerUnspecifiedAccessMode(), loop)
