@@ -78,7 +78,7 @@ spec:
         - name: {{ .name }}
           image: {{ .image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          # a writeable place to have cwd
+          # a writable place to have cwd
           workingDir: /epics/runtime
           env:
             - name: HOME
@@ -122,7 +122,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.editable }}:{{ .Values.image.tag }}'
           {{- with .Values.securityContext }}
-          # a writeable place to have cwd
+          # a writable place to have cwd
           workingDir: /epics/runtime
           env:
             - name: HOME
