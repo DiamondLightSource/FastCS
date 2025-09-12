@@ -78,6 +78,17 @@ spec:
         - name: {{ .name }}
           image: {{ .image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          env:
+            - name: IPYTHONDIR
+              value: /tmp/.ipython
+            - name: TERM
+              value: xterm-256color
+            {{- with  $.Values.globalEnv }}
+            {{-  toYaml . | nindent 12}}
+            {{- end }}
+            {{-  with $.Values.iocEnv }}
+            {{-  toYaml . | nindent 12}}
+            {{- end }}
           {{- with $.Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}

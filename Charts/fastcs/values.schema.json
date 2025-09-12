@@ -73,6 +73,21 @@
             "type": "object",
             "additionalProperties": true
         },
+        "globalEnv": {
+            "description": "Add environment to all IOCs",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "hostNetwork": {
             "description": "enable host networking for the pod",
             "type": "boolean"
@@ -102,6 +117,21 @@
         "iocConfig": {
             "description": "path to the location of config folder (defaults to be the same as C++ IOCs)",
             "type": "string"
+        },
+        "iocEnv": {
+            "description": "Add environment to individual IOCs",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "livenessProbe": {
             "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/livenessProbe",

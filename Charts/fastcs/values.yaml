@@ -12,6 +12,12 @@
 # @schema additionalProperties: true
 global: {}
 
+# @schema description: Add environment to all IOCs
+globalEnv: []
+
+# @schema description: Add environment to individual IOCs
+iocEnv: []
+
 # @schema description: container image URI
 image:
   repository: ""
