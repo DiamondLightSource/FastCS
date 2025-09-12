@@ -78,7 +78,7 @@ spec:
         - name: {{ .name }}
           image: {{ .image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          # a writeable place to have cwd and HOME
+          # a writeable place to have cwd
           workingDir: /epics/runtime
           env:
             - name: HOME
@@ -105,13 +105,13 @@ spec:
           {{- end }}
             - name: runtime-volume
               mountPath: /epics/runtime
-              subPath: "{{ .Release.Name }}"
+              subPath: {{ $.Release.Name }}
             - name: opis-volume
               mountPath: /epics/opi
-              subPath: "{{ .Release.Name }}"
+              subPath: {{ $.Release.Name }}
             - name: autosave-volume
               mountPath: /autosave
-              subPath: "{{ .Release.Name }}"
+              subPath: {{ $.Release.Name }}
             - name: config-volume
               mountPath: {{ $.Values.iocConfig }}
           {{- if $.Values.editable }}
@@ -157,9 +157,15 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+            - name: runtime-volume
+              mountPath: /epics/runtime
+              subPath: {{ .Release.Name }}
             - name: opis-volume
               mountPath: /epics/opi
-              subPath: "{{ .Release.Name }}"
+              subPath: {{ .Release.Name }}
+            - name: autosave-volume
+              mountPath: /autosave
+              subPath: {{ .Release.Name }}
             - name: config-volume
               mountPath: {{ .Values.iocConfig }}
           {{- if .Values.editable }}
