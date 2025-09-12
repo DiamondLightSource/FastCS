@@ -1,0 +1,21 @@
+``fastcs.transport.graphql.adapter``
+====================================
+        
+
+.. automodule:: fastcs.transport.graphql.adapter
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        GraphQLTransport
+    
+    

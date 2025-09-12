@@ -1,0 +1,21 @@
+``fastcs.transport.tango.adapter``
+==================================
+        
+
+.. automodule:: fastcs.transport.tango.adapter
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        TangoTransport
+    
+    
