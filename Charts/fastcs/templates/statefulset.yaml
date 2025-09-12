@@ -122,6 +122,19 @@ spec:
         - name: {{ .Chart.Name }}
           image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.editable }}:{{ .Values.image.tag }}'
           {{- with .Values.securityContext }}
+          # a writeable place to have cwd
+          workingDir: /epics/runtime
+          env:
+            - name: HOME
+              value: /epics/runtime
+            - name: TERM
+              value: xterm-256color
+            {{- with  $.Values.globalEnv }}
+            {{-  toYaml . | nindent 12}}
+            {{- end }}
+            {{-  with $.Values.iocEnv }}
+            {{-  toYaml . | nindent 12}}
+            {{- end }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
