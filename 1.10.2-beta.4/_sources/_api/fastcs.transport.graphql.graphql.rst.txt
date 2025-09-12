@@ -1,0 +1,23 @@
+``fastcs.transport.graphql.graphql``
+====================================
+        
+        
+
+.. automodule:: fastcs.transport.graphql.graphql
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        GraphQLAPI
+        GraphQLServer
+    
+    
