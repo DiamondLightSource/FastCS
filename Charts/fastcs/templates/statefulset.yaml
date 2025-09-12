@@ -78,9 +78,11 @@ spec:
         - name: {{ .name }}
           image: {{ .image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          # a writeable place to have cwd and HOME
+          workingDir: /epics/runtime
           env:
-            - name: IPYTHONDIR
-              value: /tmp/.ipython
+            - name: HOME
+              value: /epics/runtime
             - name: TERM
               value: xterm-256color
             {{- with  $.Values.globalEnv }}
@@ -101,9 +103,15 @@ spec:
           {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+            - name: runtime-volume
+              mountPath: /epics/runtime
+              subPath: "{{ .Release.Name }}"
             - name: opis-volume
               mountPath: /epics/opi
-              subPath: "{{ $.Release.Name }}"
+              subPath: "{{ .Release.Name }}"
+            - name: autosave-volume
+              mountPath: /autosave
+              subPath: "{{ .Release.Name }}"
             - name: config-volume
               mountPath: {{ $.Values.iocConfig }}
           {{- if $.Values.editable }}
@@ -166,9 +174,15 @@ spec:
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+        - name: runtime-volume
+          persistentVolumeClaim:
+            claimName: {{ $runtimeClaim }}
         - name: opis-volume
           persistentVolumeClaim:
             claimName: {{ $opisClaim }}
+        - name: autosave-volume
+          persistentVolumeClaim:
+            claimName: {{ $autosaveClaim }}
         - name: config-volume
           configMap:
             name: {{ .Release.Name }}-config
