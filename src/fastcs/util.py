@@ -32,13 +32,23 @@ def numpy_to_fastcs_datatype(np_type) -> DataType:
 
 
 def validate_hinted_attributes(controller: BaseController):
-    """Validates that type-hinted attributes exist in the controller, and are accessible
-    via the dot accessor, from the attributes dictionary and with the right datatype.
+    """Validates that type-hinted attributes in the controller and all subcontrollers
+    exist with the right datatype and access mode.
     """
-    hints = get_type_hints(type(controller))
-    alias_hints = {k: v for k, v in hints.items() if isinstance(v, _GenericAlias)}
-    for name, hint in alias_hints.items():
-        attr_class = get_origin(hint)
+    for subcontroller in controller.get_sub_controllers().values():
+        validate_hinted_attributes(subcontroller)
+    hints = {
+        k: v
+        for k, v in get_type_hints(type(controller)).items()
+        if isinstance(v, _GenericAlias | type)
+    }
+    for name, hint in hints.items():
+        if isinstance(hint, type):
+            attr_class = hint
+            attr_dtype = None
+        else:
+            attr_class = get_origin(hint)
+            (attr_dtype,) = get_args(hint)
         if not issubclass(attr_class, Attribute):
             continue
         attr = getattr(controller, name, None)
@@ -47,14 +57,16 @@ def validate_hinted_attributes(controller: BaseController):
                 f"Controller `{controller.__class__.__name__}` failed to introspect "
                 f"hinted attribute `{name}` during initialisation"
             )
-        if type(attr) is not attr_class:
+        if attr_class is not type(attr):
+            # skip validation if access mode not specified
+            if attr_class is Attribute and isinstance(attr, Attribute):
+                continue
             raise RuntimeError(
                 f"Controller '{controller.__class__.__name__}' introspection of hinted "
                 f"attribute '{name}' does not match defined access mode. "
                 f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
             )
-        (attr_dtype,) = get_args(hint)
-        if attr.datatype.dtype != attr_dtype:
+        if attr_dtype is not None and attr_dtype != attr.datatype.dtype:
             raise RuntimeError(
                 f"Controller '{controller.__class__.__name__}' introspection of hinted "
                 f"attribute '{name}' does not match defined datatype. "
