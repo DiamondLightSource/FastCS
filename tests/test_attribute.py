@@ -28,7 +28,7 @@ async def test_attributes():
         device["number"] += 1
 
     attr_r = AttrR(String())
-    attr_r.add_update_callback(partial(update_ui, key="state"))
+    attr_r.add_set_callback(partial(update_ui, key="state"))
     await attr_r.set(device["state"])
     assert ui["state"] == "Idle"
 

@@ -118,7 +118,7 @@ def make_shared_read_pv(attribute: AttrR) -> SharedPV:
     async def on_update(value):
         shared_pv.post(cast_to_p4p_value(attribute, value))
 
-    attribute.add_update_callback(on_update)
+    attribute.add_set_callback(on_update)
 
     return shared_pv
 

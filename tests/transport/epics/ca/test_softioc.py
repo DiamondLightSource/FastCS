@@ -53,7 +53,7 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
     record = make_record.return_value
 
     attribute = AttrR(Int())
-    attribute.add_update_callback = mocker.MagicMock()
+    attribute.add_set_callback = mocker.MagicMock()
 
     _create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
 
@@ -61,8 +61,8 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "r")
 
     # Extract the callback generated and set in the function and call it
-    attribute.add_update_callback.assert_called_once_with(mocker.ANY)
-    record_set_callback = attribute.add_update_callback.call_args[0][0]
+    attribute.add_set_callback.assert_called_once_with(mocker.ANY)
+    record_set_callback = attribute.add_set_callback.call_args[0][0]
     await record_set_callback(1)
 
     record.set.assert_called_once_with(1)

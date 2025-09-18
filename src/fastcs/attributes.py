@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from enum import Enum
-from typing import Any, Generic
+from typing import Any, Generic, Self
 
 import fastcs
 from fastcs.attribute_io_ref import AttributeIORefT
@@ -149,7 +149,14 @@ class AttrR(Attribute[T, AttributeIORefT]):
         self._value: T = (
             datatype.initial_value if initial_value is None else initial_value
         )
-        self._update_callbacks: list[AttrCallback[T]] | None = None
+        self._on_set_callbacks: list[AttrCallback[T]] | None = None
+
+        async def _updater_update(attr):
+            await attr.updater.update(attr)
+
+        self._on_update_callbacks: list[
+            Callable[[Self], Coroutine[None, None, None]]
+        ] = [_updater_update]
         self._updater = handler
 
     def get(self) -> T:
@@ -158,20 +165,20 @@ class AttrR(Attribute[T, AttributeIORefT]):
     async def set(self, value: T) -> None:
         self._value = self._datatype.validate(value)
 
-        if self._update_callbacks is not None:
-            await asyncio.gather(*[cb(self._value) for cb in self._update_callbacks])
+        if self._on_set_callbacks is not None:
+            await asyncio.gather(*[cb(self._value) for cb in self._on_set_callbacks])
 
-    def add_update_callback(self, callback: AttrCallback[T]) -> None:
-        if self._update_callbacks is None:
-            self._update_callbacks = []
-        self._update_callbacks.append(callback)
+    def add_set_callback(self, callback: AttrCallback[T]) -> None:
+        if self._on_set_callbacks is None:
+            self._on_set_callbacks = []
+        self._on_set_callbacks.append(callback)
 
     @property
     def updater(self) -> AttrHandlerR | None:
         return self._updater
 
     async def update(self):
-        await self.updater.update(self)
+        await asyncio.gather(*[cb(self) for cb in self._on_update_callbacks])
 
 
 class AttrW(Attribute[T, AttributeIORefT]):
