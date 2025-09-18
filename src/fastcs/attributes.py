@@ -154,14 +154,13 @@ class AttrR(Attribute[T, AttributeIORefT]):
             datatype.initial_value if initial_value is None else initial_value
         )
         self._on_set_callbacks: list[AttrCallback[T]] | None = None
+        self._on_update_callbacks: list[AttrCallback[T]] | None = None
 
-        async def _updater_update(attr):
+        async def _updater_update(attr):  # TODO remove this when we get rid of handlers
             await attr.updater.update(attr)
 
-        self._on_update_callbacks: list[
-            Callable[[Self], Coroutine[None, None, None]]
-        ] = [_updater_update]
         self._updater = handler
+        self.add_update_callback(_updater_update)
 
     def get(self) -> T:
         return self._value
@@ -176,6 +175,13 @@ class AttrR(Attribute[T, AttributeIORefT]):
         if self._on_set_callbacks is None:
             self._on_set_callbacks = []
         self._on_set_callbacks.append(callback)
+
+    def add_update_callback(
+        self, callback: Callable[[Self], Coroutine[None, None, None]]
+    ):
+        if self._on_update_callbacks is None:
+            self._on_update_callbacks = []
+        self._on_update_callbacks.append(callback)
 
     @property
     def updater(self) -> AttrHandlerR | None:
