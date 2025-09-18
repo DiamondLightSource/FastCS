@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Any, Generic, Self
 
 import fastcs
-from fastcs.attribute_io_ref import AttributeIORefT
+from fastcs.attribute_io_ref import AttributeIORef, AttributeIORefT
 
 from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
 
@@ -73,6 +73,7 @@ class Attribute(Generic[T, AttributeIORefT]):
         self,
         datatype: DataType[T],
         access_mode: AttrMode,
+        io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         handler: Any = None,
         description: str | None = None,
@@ -81,6 +82,7 @@ class Attribute(Generic[T, AttributeIORefT]):
             f"Attr type must be one of {ATTRIBUTE_TYPES}, "
             "received type {datatype.dtype}"
         )
+        self.io_ref = io_ref or AttributeIORef()
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
         self._group = group
@@ -134,6 +136,7 @@ class AttrR(Attribute[T, AttributeIORefT]):
         self,
         datatype: DataType[T],
         access_mode=AttrMode.READ,
+        io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         handler: AttrHandlerR | None = None,
         initial_value: T | None = None,
@@ -142,6 +145,7 @@ class AttrR(Attribute[T, AttributeIORefT]):
         super().__init__(
             datatype,  # type: ignore
             access_mode,
+            io_ref,
             group,
             handler,
             description=description,
@@ -188,6 +192,7 @@ class AttrW(Attribute[T, AttributeIORefT]):
         self,
         datatype: DataType[T],
         access_mode=AttrMode.WRITE,
+        io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         handler: AttrHandlerW | None = None,
         description: str | None = None,
@@ -195,6 +200,7 @@ class AttrW(Attribute[T, AttributeIORefT]):
         super().__init__(
             datatype,  # type: ignore
             access_mode,
+            io_ref,
             group,
             handler,
             description=description,
@@ -245,6 +251,7 @@ class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
         self,
         datatype: DataType[T],
         access_mode=AttrMode.READ_WRITE,
+        io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         handler: AttrHandlerRW | None = None,
         initial_value: T | None = None,
@@ -253,6 +260,7 @@ class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
         super().__init__(
             datatype,  # type: ignore
             access_mode,
+            io_ref,
             group=group,
             handler=handler if handler else SimpleAttrHandler(),
             initial_value=initial_value,
