@@ -106,7 +106,7 @@ def _link_attribute_sender_class(controller_api: ControllerAPI) -> None:
 
 def _create_sender_callback(attribute):
     async def callback(value):
-        await attribute.sender.put(attribute, value)
+        await attribute.put(value)
 
     return callback
 
@@ -148,14 +148,11 @@ def _add_attribute_updater_tasks(
 
 
 def _create_updater_callback(attribute: AttrR[T]):
-    updater = attribute.updater
-    assert updater is not None
-
     async def callback():
         try:
-            await updater.update(attribute)
+            await attribute.update()
         except Exception as e:
-            print(f"Update loop in {updater} stopped:\n{e.__class__.__name__}: {e}")
+            print(f"Update loop in {attribute} stopped:\n{e.__class__.__name__}: {e}")
             raise
 
     return callback

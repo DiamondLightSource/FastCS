@@ -170,6 +170,9 @@ class AttrR(Attribute[T, AttributeIORefT]):
     def updater(self) -> AttrHandlerR | None:
         return self._updater
 
+    async def update(self):
+        await self.updater.update(self)
+
 
 class AttrW(Attribute[T, AttributeIORefT]):
     """A write-only ``Attribute``."""
@@ -223,6 +226,9 @@ class AttrW(Attribute[T, AttributeIORefT]):
     @property
     def sender(self) -> AttrHandlerW | None:
         return self._setter
+
+    async def put(self, value):
+        await self.sender.put(self, value)
 
 
 class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
