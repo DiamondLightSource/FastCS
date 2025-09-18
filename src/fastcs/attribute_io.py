@@ -5,7 +5,7 @@ from fastcs.attribute_io_ref import AttributeIORef, AttributeIORefT
 from fastcs.datatypes import T
 
 
-class AttributeIO(Generic[AttributeIORefT, T]):
+class AttributeIO(Generic[T, AttributeIORefT]):
     def __init__(self, io_ref: type[AttributeIORefT]):
         self.ref = io_ref
 
@@ -18,4 +18,4 @@ class AttributeIO(Generic[AttributeIORefT, T]):
         raise NotImplementedError()
 
 
-AnyAttributeIO = AttributeIO[AttributeIORef, T]
+AnyAttributeIO = AttributeIO[T, AttributeIORef]
