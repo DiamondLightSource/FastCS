@@ -1,7 +1,7 @@
 from typing import Generic
 
-from fastcs.attributes import AttrR, AttrRW
 from fastcs.attribute_io_ref import AttributeIORef, AttributeIORefT
+from fastcs.attributes import AttrR, AttrRW
 from fastcs.datatypes import T
 
 
@@ -13,7 +13,9 @@ class AttributeIO(Generic[T, AttributeIORefT]):
         raise NotImplementedError()
 
     async def send(
-        self, attr: AttrRW[T], value # TODO, type this
+        self,
+        attr: AttrRW[T],
+        value,  # TODO, type this
     ) -> None:
         raise NotImplementedError()
 

@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any, Generic
 
 import fastcs
+from fastcs.attribute_io_ref import AttributeIORefT
 
 from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
 
@@ -62,7 +63,7 @@ class SimpleAttrHandler(AttrHandlerRW):
         raise RuntimeError("SimpleHandler cannot update")
 
 
-class Attribute(Generic[T]):
+class Attribute(Generic[T, AttributeIORefT]):
     """Base FastCS attribute.
 
     Instances of this class added to a ``Controller`` will be used by the backend.
@@ -126,7 +127,7 @@ class Attribute(Generic[T]):
             callback(datatype)
 
 
-class AttrR(Attribute[T]):
+class AttrR(Attribute[T, AttributeIORefT]):
     """A read-only ``Attribute``."""
 
     def __init__(
@@ -170,7 +171,7 @@ class AttrR(Attribute[T]):
         return self._updater
 
 
-class AttrW(Attribute[T]):
+class AttrW(Attribute[T, AttributeIORefT]):
     """A write-only ``Attribute``."""
 
     def __init__(
@@ -224,7 +225,7 @@ class AttrW(Attribute[T]):
         return self._setter
 
 
-class AttrRW(AttrR[T], AttrW[T]):
+class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
     """A read-write ``Attribute``."""
 
     def __init__(

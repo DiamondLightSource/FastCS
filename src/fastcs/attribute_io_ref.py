@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from typing_extensions import TypeVar
 
 
@@ -8,8 +9,5 @@ class AttributeIORef:
 
 
 AttributeIORefT = TypeVar(
-    "AttributeIORefT",
-    default=AttributeIORef,
-    bound=AttributeIORef,
-    covariant=True
+    "AttributeIORefT", default=AttributeIORef, bound=AttributeIORef, covariant=True
 )
