@@ -6,8 +6,10 @@ metadata:
     {{- include "fastcs.labels" . | nindent 4 }}
     app: {{ .Release.Name }}
     location: {{ .Values.global.location }}
+    {{- with .Values.global.ioc_group }}
     ioc_group: {{ .Values.global.ioc_group }}
-    is_ioc: "true"
+    {{- end }}
+    is_ioc: {{ .Values.is_ioc | quote }}
 spec:
   selector:
     app: {{ .Release.Name }}

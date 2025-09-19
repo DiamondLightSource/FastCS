@@ -51,7 +51,18 @@
         },
         "env": {
             "description": "Add environment to individual services",
-            "type": "array"
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "extraContainers": {
             "description": "Add arbitrary containers to the pod",
@@ -82,24 +93,21 @@
             "properties": {
                 "env": {
                     "description": "Add environment to all services",
-                    "type": "array"
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 }
             },
             "additionalProperties": true
-        },
-        "globalEnv": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "value": {
-                        "type": "string"
-                    }
-                }
-            }
         },
         "hostNetwork": {
             "description": "enable host networking for the pod",
@@ -125,20 +133,6 @@
             "type": "array",
             "items": {
                 "type": "string"
-            }
-        },
-        "iocEnv": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "value": {
-                        "type": "string"
-                    }
-                }
             }
         },
         "is_ioc": {

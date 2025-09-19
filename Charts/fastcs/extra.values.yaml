@@ -14,10 +14,11 @@ extraContainers:
       - arg1
       - arg2
 
-globalEnv:
-  - name: example
-    value: example
+global:
+  env:
+    - name: example
+      value: example
 
-iocEnv:
+env:
   - name: example
     value: example
