@@ -64,7 +64,13 @@ class BaseController:
                 attr.add_update_callback(io.update)
             if isinstance(attr, AttrW):
                 # is it on process or write_display?
-                attr.add_process_callback(io.send)
+                attr.add_process_callback(self._create_send_callback(io, attr))
+
+    def _create_send_callback(self, io, attr):
+        async def send_callback(value):
+            await io.send(attr, value)
+
+        return send_callback
 
     @property
     def path(self) -> list[str]:
