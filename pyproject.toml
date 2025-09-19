@@ -19,6 +19,8 @@ dependencies = [
     "pydantic",
     "ruamel.yaml",
     "IPython",
+    "loguru~=0.7",
+    "pygelf",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"

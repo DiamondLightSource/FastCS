@@ -15,6 +15,17 @@ from ruamel.yaml import YAML
 
 from fastcs import __version__
 from fastcs.attribute_io_ref import AttributeIORef
+from fastcs.logging import (
+    GraylogEndpoint,
+    GraylogEnvFields,
+    GraylogStaticFields,
+    LogLevel,
+    configure_logging,
+    parse_graylog_env_fields,
+    parse_graylog_static_fields,
+)
+from fastcs.logging import logger as _fastcs_logger
+from fastcs.tracer import Tracer
 from fastcs.transport.epics.ca.transport import EpicsCATransport
 from fastcs.transport.epics.pva.transport import EpicsPVATransport
 from fastcs.transport.graphql.transport import GraphQLTransport
@@ -38,6 +49,9 @@ TransportList: TypeAlias = list[
     | RestTransport
     | GraphQLTransport
 ]
+
+tracer = Tracer(name=__name__)
+logger = _fastcs_logger.bind(logger_name=__name__)
 
 
 class FastCS:
@@ -149,6 +163,12 @@ class FastCS:
 
         coros.append(self._interactive_shell(context))
 
+        logger.info(
+            "Starting FastCS",
+            controller=self._controller,
+            transports=f"[{', '.join(str(t) for t in self._transports)}]",
+        )
+
         try:
             await asyncio.gather(*coros)
         except asyncio.CancelledError:
@@ -237,9 +257,10 @@ def _add_attribute_updater_tasks(
 def _create_updater_callback(attribute: AttrR[T]):
     async def callback():
         try:
+            tracer.log_event("Call attribute updater", topic=attribute)
             await attribute.update()
-        except Exception as e:
-            print(f"Update loop in {attribute} stopped:\n{e.__class__.__name__}: {e}")
+        except Exception:
+            logger.opt(exception=True).error("Update loop failed", attribute=attribute)
             raise
 
     return callback
@@ -381,10 +402,39 @@ def _launch(
                 help=f"A yaml file matching the {controller_class.__name__} schema"
             ),
         ],
+        log_level: Annotated[
+            Optional[LogLevel],  # noqa: UP045
+            typer.Option(),
+        ] = None,
+        graylog_endpoint: Annotated[
+            Optional[GraylogEndpoint],  # noqa: UP045
+            typer.Option(
+                help="Endpoint for graylog logging - '<host>:<port>'",
+                parser=GraylogEndpoint.parse_graylog_endpoint,
+            ),
+        ] = None,
+        graylog_static_fields: Annotated[
+            Optional[GraylogStaticFields],  # noqa: UP045
+            typer.Option(
+                help="Fields to add to graylog messages with static values",
+                parser=parse_graylog_static_fields,
+            ),
+        ] = None,
+        graylog_env_fields: Annotated[
+            Optional[GraylogEnvFields],  # noqa: UP045
+            typer.Option(
+                help="Fields to add to graylog messages from environment variables",
+                parser=parse_graylog_env_fields,
+            ),
+        ] = None,
     ):
         """
         Start the controller
         """
+        configure_logging(
+            log_level, graylog_endpoint, graylog_static_fields, graylog_env_fields
+        )
+
         controller_class = ctx.obj.controller_class
         fastcs_options = ctx.obj.fastcs_options
 

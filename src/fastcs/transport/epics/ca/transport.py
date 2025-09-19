@@ -5,6 +5,7 @@ from typing import Any
 from softioc import softioc
 
 from fastcs.controller_api import ControllerAPI
+from fastcs.logging import logger as _fastcs_logger
 from fastcs.transport.epics.ca.ioc import EpicsCAIOC
 from fastcs.transport.epics.docs import EpicsDocs
 from fastcs.transport.epics.gui import EpicsGUI
@@ -14,6 +15,8 @@ from fastcs.transport.epics.options import (
     EpicsIOCOptions,
 )
 from fastcs.transport.transport import Transport
+
+logger = _fastcs_logger.bind(logger_name=__name__)
 
 
 @dataclass
@@ -41,7 +44,7 @@ class EpicsCATransport(Transport):
         EpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
 
     async def serve(self) -> None:
-        print(f"Running FastCS IOC: {self._pv_prefix}")
+        logger.info("Running IOC", pv_prefix=self._pv_prefix)
         self._ioc.run(self._loop)
 
     @property

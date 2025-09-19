@@ -5,6 +5,7 @@ from types import MethodType
 from typing import Any, Generic, TypeVar
 
 from fastcs.controller import BaseController
+from fastcs.tracer import Tracer
 
 from .exceptions import FastCSError
 
@@ -31,10 +32,12 @@ method_not_bound_error = NotImplementedError(
 )
 
 
-class Method(Generic[Controller_T]):
+class Method(Generic[Controller_T], Tracer):
     """Generic base class for all FastCS Controller methods."""
 
     def __init__(self, fn: MethodCallback, *, group: str | None = None) -> None:
+        super().__init__()
+
         self._docstring = getdoc(fn)
 
         sig = signature(fn, eval_str=True)

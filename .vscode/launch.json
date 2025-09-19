@@ -39,7 +39,14 @@
             "request": "launch",
             "justMyCode": false,
             "module": "fastcs.demo",
-            "args": ["run", "${workspaceFolder:FastCS}/src/fastcs/demo/controller.yaml"],
+            "args": [
+                "run",
+                "${workspaceFolder:FastCS}/src/fastcs/demo/controller.yaml",
+                "--log-level",
+                "TRACE",
+                // "--graylog-endpoint",
+                // "graylog-log-target.diamond.ac.uk:12201",
+            ],
             "console": "integratedTerminal",
         }
     ]

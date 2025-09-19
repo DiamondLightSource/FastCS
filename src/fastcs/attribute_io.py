@@ -3,9 +3,10 @@ from typing import Any, Generic, cast, get_args
 from fastcs.attribute_io_ref import AttributeIORef, AttributeIORefT
 from fastcs.attributes import AttrR, AttrRW
 from fastcs.datatypes import T
+from fastcs.tracer import Tracer
 
 
-class AttributeIO(Generic[T, AttributeIORefT]):
+class AttributeIO(Generic[T, AttributeIORefT], Tracer):
     ref_type = AttributeIORef
 
     def __init_subclass__(cls) -> None:

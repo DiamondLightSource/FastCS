@@ -33,6 +33,10 @@ class TemperatureControllerAttributeIORef(AttributeIORef):
     name: str
     update_period: float | None = 0.2
 
+    def __post_init__(self):
+        # Call __init__ of non-dataclass parent
+        super().__init__()
+
 
 class TemperatureControllerAttributeIO(
     AttributeIO[NumberT, TemperatureControllerAttributeIORef]
@@ -44,17 +48,22 @@ class TemperatureControllerAttributeIO(
     async def send(
         self, attr: AttrW[NumberT, TemperatureControllerAttributeIORef], value: NumberT
     ) -> None:
-        await self._connection.send_command(
-            f"{attr.io_ref.name}{self.suffix}={attr.dtype(value)}\r\n"
-        )
+        command = f"{attr.io_ref.name}{self.suffix}={attr.dtype(value)}"
+        await self._connection.send_command(f"{command}\r\n")
+        self.log_event("Send command for attribute", topic=attr, command=command)
 
     async def update(
         self, attr: AttrR[NumberT, TemperatureControllerAttributeIORef]
     ) -> None:
-        response = await self._connection.send_query(
-            f"{attr.io_ref.name}{self.suffix}?\r\n"
-        )
+        query = f"{attr.io_ref.name}{self.suffix}?"
+        response = await self._connection.send_query(f"{query}?\r\n")
         response = response.strip("\r\n")
+        self.log_event(
+            "Query for attribute",
+            topic=attr,
+            query=query,
+            response=response,
+        )
 
         await attr.set(attr.dtype(response))
 
@@ -93,10 +102,17 @@ class TemperatureController(Controller):
 
     @scan(0.1)
     async def update_voltages(self):
+        query = "V?"
         voltages = json.loads(
-            (await self.connection.send_query("V?\r\n")).strip("\r\n")
+            (await self.connection.send_query(f"{query}\r\n")).strip("\r\n")
         )
         for index, controller in enumerate(self._ramp_controllers):
+            self.log_event(
+                "Update voltages",
+                topic=controller.voltage,
+                query=query,
+                response=voltages,
+            )
             await controller.voltage.set(float(voltages[index]))
 
 
