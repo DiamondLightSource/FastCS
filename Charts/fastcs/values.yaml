@@ -10,13 +10,12 @@
 
 # @schema description: shared values for all services
 # @schema additionalProperties: true
-global: {}
+global:
+  # @schema description: Add environment to all services
+  env: []
 
-# @schema description: Add environment to all IOCs
-globalEnv: []
-
-# @schema description: Add environment to individual IOCs
-iocEnv: []
+# @schema description: Add environment to individual services
+env: []
 
 # @schema description: container image URI
 image:
@@ -68,8 +67,17 @@ editable: false
 #     true: entrypoint is command above
 autostart: true
 
-# @schema description: path to the location of config folder (defaults to be the same as C++ IOCs)
-iocConfig: /epics/ioc/config
+# @schema description: path to the location of config folder
+configFolder: /config
+
+# @schema description: name of the PVC to use to store opi files, leave blank for IOCs - will then default to ixx-epics-opis
+opisClaim:
+
+# @schema description: where to mount the opis volume inside the container
+opisMountPoint: /epics/opi
+
+# @schema description: set to true of IOCs in services repos
+is_ioc: false
 
 # @schema description: service port for Channel Access
 ca_server_port: 5064

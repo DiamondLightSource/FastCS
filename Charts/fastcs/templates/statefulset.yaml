@@ -4,24 +4,27 @@ Default the derivable substitution values.
 This keeps the length of the values.txt file for each individual IOC
 to a minimum
 */ -}}
-{{- $location := default .Values.global.location .Values.location | required "ERROR - You must supply location or global.location" -}}
-{{- $ioc_group := default .Values.global.ioc_group .Values.ioc_group | required "ERROR - You must supply ioc_group or global.ioc_group" -}}
+{{- $location := default .Values.global.location .Values.location | default "" -}}
+# for epics-containers services repos, ioc_group is set in services/values.yaml
+{{- $ioc_group := default .Values.global.ioc_group .Values.ioc_group | default "" -}}
+# for epics-containers services repos, opisClaim is named after the ioc_group in services/values.yaml
+# for non-epics-containers services repos, opisClaim should be set in the service values.yaml
 {{- $opisClaim := default (print $ioc_group "-opi-claim") .Values.opisClaim -}}
-{{- $runtimeClaim := default (print $ioc_group "-runtime-claim") .Values.runtimeClaim -}}
-{{- $autosaveClaim := default (print $ioc_group "-autosave-claim") .Values.autosaveClaim -}}
 {{- $image := .Values.image | required "ERROR - You must supply image." -}}
 
-{{- $enabled := eq .Values.global.enabled false | ternary false true -}}
+{{- $enabled := eq .Values.global.enabled false | ternary false true }}
 
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}
   labels:
-    location: {{ $location }}
+    location: {{ $location | quote }}
+    {{- with $ioc_group }}
     ioc_group: {{ $ioc_group }}
+    {{- end }}
     enabled: {{ $enabled | quote }}
-    is_ioc: "true"
+    is_ioc: {{ .Values.is_ioc | quote }}
     {{- include "fastcs.labels" . | nindent 4 }}
 spec:
   replicas: {{ $enabled | ternary 1 0 }}
@@ -35,10 +38,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        location: {{ $location }}
+        location: {{ $location | quote }}
+        {{- with $ioc_group }}
         ioc_group: {{ $ioc_group }}
+        {{- end }}
         enabled: {{ $enabled | quote }}
-        is_ioc: "true"
+        is_ioc: {{ .Values.is_ioc | quote }}
         {{- include "fastcs.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
@@ -79,16 +84,16 @@ spec:
           image: {{ .image }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           # a writable place to have cwd
-          workingDir: /epics/runtime
+          workingDir: /tmp
           env:
             - name: HOME
-              value: /epics/runtime
+              value: /tmp
             - name: TERM
               value: xterm-256color
-            {{- with  $.Values.globalEnv }}
+            {{- with  $.Values.env }}
             {{-  toYaml . | nindent 12}}
             {{- end }}
-            {{-  with $.Values.iocEnv }}
+            {{-  with $.Values.global.env }}
             {{-  toYaml . | nindent 12}}
             {{- end }}
           {{- with $.Values.securityContext }}
@@ -103,17 +108,13 @@ spec:
           {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-            - name: runtime-volume
-              mountPath: /epics/runtime
-              subPath: {{ $.Release.Name }}
+          {{- with $.Values.opisMountPoint }}
             - name: opis-volume
-              mountPath: /epics/opi
+              mountPath: .
               subPath: {{ $.Release.Name }}
-            - name: autosave-volume
-              mountPath: /autosave
-              subPath: {{ $.Release.Name }}
+          {{- end }}
             - name: config-volume
-              mountPath: {{ $.Values.iocConfig }}
+              mountPath: {{ $.Values.configFolder }}
           {{- if $.Values.editable }}
             - name: {{ $.Release.Name }}-develop
               mountPath: /dest
@@ -123,16 +124,16 @@ spec:
           image: '{{ .Values.image.repository }}{{ ternary "-debug" "" .Values.editable }}:{{ .Values.image.tag }}'
           {{- with .Values.securityContext }}
           # a writable place to have cwd
-          workingDir: /epics/runtime
+          workingDir: /tmp
           env:
             - name: HOME
-              value: /epics/runtime
+              value: /tmp
             - name: TERM
               value: xterm-256color
-            {{- with  $.Values.globalEnv }}
+            {{- with  $.Values.env }}
             {{-  toYaml . | nindent 12}}
             {{- end }}
-            {{-  with $.Values.iocEnv }}
+            {{-  with $.Values.global.env }}
             {{-  toYaml . | nindent 12}}
             {{- end }}
           securityContext:
@@ -170,17 +171,13 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-            - name: runtime-volume
-              mountPath: /epics/runtime
-              subPath: {{ .Release.Name }}
+          {{- if $.Values.mountEpicsOpis | default true }}
             - name: opis-volume
               mountPath: /epics/opi
-              subPath: {{ .Release.Name }}
-            - name: autosave-volume
-              mountPath: /autosave
-              subPath: {{ .Release.Name }}
+              subPath: {{ $.Release.Name }}
+          {{- end }}
             - name: config-volume
-              mountPath: {{ .Values.iocConfig }}
+              mountPath: {{ .Values.configFolder }}
           {{- if .Values.editable }}
             - name: {{ .Release.Name }}-develop
               mountPath: /workspaces
@@ -193,15 +190,12 @@ spec:
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-        - name: runtime-volume
-          persistentVolumeClaim:
-            claimName: {{ $runtimeClaim }}
+        {{- if $.Values.mountEpicsOpis | default true }}
         - name: opis-volume
           persistentVolumeClaim:
-            claimName: {{ $opisClaim }}
-        - name: autosave-volume
-          persistentVolumeClaim:
-            claimName: {{ $autosaveClaim }}
+            # use the supplied claim name or default to one based on ioc_group
+            claimName: {{ $.Values.opisClaimName | default $opisClaim }}
+        {{- end }}
         - name: config-volume
           configMap:
             name: {{ .Release.Name }}-config

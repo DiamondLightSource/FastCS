@@ -59,7 +59,7 @@ These features will be accessed via `ec`. See https://github.com/epics-container
 
 This script will:
 
-- Inspect the values of `editable` and `autostart` in the `values.yaml` file of the specified IOC (TODO: at present it uses the p47-services source code to do so but this should be determined from the cluster in future).
+- Inspect the values of `editable` and `autostart` in the `values.yaml` file of the specified service (TODO: at present it uses the p47-services source code to do so but this should be determined from the cluster in future).
 - Port forward the debugpy port (5678) from the pod to localhost.
 - If editable is true, it will mount the PVC locally using pv-mounter and open VSCode to the /workspaces/xxx folder.
 - If autostart is false, it will exec into the container and launch debugpy to run the main program.
