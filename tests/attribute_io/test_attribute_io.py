@@ -19,12 +19,6 @@ async def test_attribute_io(mocker: MockerFixture):
         cool: int
 
     class MyAttributeIO(AttributeIO[int, MyAttributeIORef]):
-        def __init__(self):
-            # i don't really like this pattern of having to call super...
-            super().__init__(
-                MyAttributeIORef
-            )  # i see, so we use the class not an instance of the ref??
-
         async def update(self, attr: AttrR[Int, MyAttributeIORef]):
             print("I am updating", self.ref_type, attr.io_ref.cool)
 
