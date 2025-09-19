@@ -71,10 +71,10 @@ autostart: true
 configFolder: /config
 
 # @schema description: name of the PVC to use to store opi files, leave blank for IOCs - will then default to ixx-epics-opis
-opisClaim:
+opisClaim: ""
 
 # @schema description: where to mount the opis volume inside the container
-opisMountPoint: /epics/opi
+opisMountPoint: ""
 
 # @schema description: set to true of IOCs in services repos
 is_ioc: false

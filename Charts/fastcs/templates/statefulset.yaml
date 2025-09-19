@@ -110,7 +110,7 @@ spec:
           {{- end }}
           {{- with $.Values.opisMountPoint }}
             - name: opis-volume
-              mountPath: .
+              mountPath: {{ . }}
               subPath: {{ $.Release.Name }}
           {{- end }}
             - name: config-volume
@@ -171,9 +171,9 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if $.Values.mountEpicsOpis | default true }}
+          {{- with $.Values.opisMountPoint }}
             - name: opis-volume
-              mountPath: /epics/opi
+              mountPath: {{ . }}
               subPath: {{ $.Release.Name }}
           {{- end }}
             - name: config-volume
@@ -190,7 +190,10 @@ spec:
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-        {{- if $.Values.mountEpicsOpis | default true }}
+        # if a mount point has been specified, claim a PVC to mount
+        # the PVC name will be ixx-epics-opis for IOCs (created in $opisClaim above)
+        # the PVC name must be specified in values.yaml for non-IOC services
+        {{- if .Values.opisMountPoint | default false }}
         - name: opis-volume
           persistentVolumeClaim:
             # use the supplied claim name or default to one based on ioc_group

@@ -155,7 +155,7 @@
         },
         "opisClaim": {
             "description": "name of the PVC to use to store opi files, leave blank for IOCs - will then default to ixx-epics-opis",
-            "type": "null"
+            "type": "string"
         },
         "opisMountPoint": {
             "description": "where to mount the opis volume inside the container",
