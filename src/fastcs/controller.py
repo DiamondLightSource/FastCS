@@ -6,7 +6,7 @@ from copy import deepcopy
 from typing import get_type_hints
 
 from fastcs.attribute_io import AttributeIO
-from fastcs.attributes import Attribute
+from fastcs.attributes import Attribute, AttrR, AttrW
 
 
 class BaseController:
@@ -51,8 +51,20 @@ class BaseController:
         except asyncio.CancelledError:
             pass
 
+        self._add_io_callbacks()
+
         for controller in self.get_sub_controllers().values():
             await controller.attribute_initialise()
+
+    def _add_io_callbacks(self):
+        for attr in self.attributes.values():
+            io = self._attribute_ref_io_map[type(attr.io_ref)]
+            # is this the right access mode to own update and set?
+            if isinstance(attr, AttrR):
+                attr.add_update_callback(io.update)
+            if isinstance(attr, AttrW):
+                # is it on process or write_display?
+                attr.add_process_callback(io.send)
 
     @property
     def path(self) -> list[str]:

@@ -156,11 +156,7 @@ class AttrR(Attribute[T, AttributeIORefT]):
         self._on_set_callbacks: list[AttrCallback[T]] | None = None
         self._on_update_callbacks: list[AttrCallback[T]] | None = None
 
-        async def _updater_update(attr):  # TODO remove this when we get rid of handlers
-            await attr.updater.update(attr)
-
         self._updater = handler
-        self.add_update_callback(_updater_update)
 
     def get(self) -> T:
         return self._value
@@ -188,7 +184,9 @@ class AttrR(Attribute[T, AttributeIORefT]):
         return self._updater
 
     async def update(self):
-        await asyncio.gather(*[cb(self) for cb in self._on_update_callbacks])
+        print("22222", self._on_update_callbacks)
+        if self._on_update_callbacks is not None:
+            await asyncio.gather(*[cb(self) for cb in self._on_update_callbacks])
 
 
 class AttrW(Attribute[T, AttributeIORefT]):
