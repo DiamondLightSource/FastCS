@@ -5,7 +5,7 @@ from collections.abc import Callable, Coroutine
 from fastcs.cs_methods import Command, Put, Scan
 from fastcs.datatypes import T
 
-from .attributes import ONCE, AttrHandlerR, AttrHandlerW, AttrR, AttrW
+from .attributes import ONCE, AttrHandlerR, AttrR, AttrW
 from .controller import BaseController, Controller
 from .controller_api import ControllerAPI
 from .exceptions import FastCSError
@@ -36,7 +36,6 @@ class Backend:
     def _link_process_tasks(self):
         for controller_api in self.controller_api.walk_api():
             _link_put_tasks(controller_api)
-            _link_attribute_sender_class(controller_api)
 
     def __del__(self):
         self._stop_scan_tasks()
@@ -90,25 +89,6 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
                     f"Mode {attribute.access_mode} does not "
                     f"support put operations for {name}"
                 )
-
-
-def _link_attribute_sender_class(controller_api: ControllerAPI) -> None:
-    for attr_name, attribute in controller_api.attributes.items():
-        match attribute:
-            case AttrW(sender=AttrHandlerW()):
-                assert not attribute.has_process_callback(), (
-                    f"Cannot assign both put method and Sender object to {attr_name}"
-                )
-
-                callback = _create_sender_callback(attribute)
-                attribute.add_process_callback(callback)
-
-
-def _create_sender_callback(attribute):
-    async def callback(value):
-        await attribute.put(value)
-
-    return callback
 
 
 def _get_scan_and_initial_coros(
