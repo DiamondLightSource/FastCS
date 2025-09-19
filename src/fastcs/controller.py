@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Sequence
 from copy import deepcopy
 from typing import get_type_hints
 
+from fastcs.attribute_io import AttributeIO
 from fastcs.attributes import Attribute
 
 
@@ -16,7 +18,10 @@ class BaseController:
     description: str | None = None
 
     def __init__(
-        self, path: list[str] | None = None, description: str | None = None
+        self,
+        path: list[str] | None = None,
+        description: str | None = None,
+        ios: Sequence[AttributeIO] | None = None,
     ) -> None:
         if (
             description is not None
@@ -29,6 +34,11 @@ class BaseController:
         self.__sub_controller_tree: dict[str, Controller] = {}
 
         self._bind_attrs()
+
+        # TODO, should validation live inside the controller?
+        ios = ios or []
+        self._attribute_ref_io_map = {io.ref_type: io for io in ios}
+        self._validate_io()
 
     async def initialise(self):
         pass
@@ -98,6 +108,15 @@ class BaseController:
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
+    def _validate_io(self):
+        """Validate that each Attribute has an AttributeIORef for which the
+        controller has an associated AttributeIO class."""
+        for attr in self.attributes.values():
+            assert type(attr.io_ref) in self._attribute_ref_io_map, (
+                f"{self.__class__.__name__} does not have an AttributeIO to handle "
+                f"{attr.io_ref.__class__.__name__}"
+            )
+
     def register_sub_controller(self, name: str, sub_controller: Controller):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
@@ -131,8 +150,10 @@ class Controller(BaseController):
 
     root_attribute: Attribute | None = None
 
-    def __init__(self, description: str | None = None) -> None:
-        super().__init__(description=description)
+    def __init__(
+        self, description: str | None = None, ios: Sequence[AttributeIO] | None = None
+    ) -> None:
+        super().__init__(description=description, ios=ios)
 
     async def connect(self) -> None:
         pass
