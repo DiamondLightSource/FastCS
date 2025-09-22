@@ -184,7 +184,6 @@ class AttrR(Attribute[T, AttributeIORefT]):
         return self._updater
 
     async def update(self):
-        print("22222", self._on_update_callbacks)
         if self._on_update_callbacks is not None:
             await asyncio.gather(*[cb(self) for cb in self._on_update_callbacks])
 
