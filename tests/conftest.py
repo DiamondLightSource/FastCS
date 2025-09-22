@@ -21,12 +21,7 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.backend import build_controller_api
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.transport.tango.dsr import register_dev
-from tests.assertable_controller import (
-    MyTestController,
-    TestHandler,
-    TestSetter,
-    TestUpdater,
-)
+from tests.assertable_controller import MyTestAttributeIORef, MyTestController
 from tests.example_p4p_ioc import run as _run_p4p_ioc
 from tests.example_softioc import run as _run_softioc
 
@@ -37,11 +32,11 @@ def clear_softioc_records():
 
 
 class BackendTestController(MyTestController):
-    read_int: AttrR = AttrR(Int(), handler=TestUpdater())
-    read_write_int: AttrRW = AttrRW(Int(), handler=TestHandler())
+    read_int: AttrR = AttrR(Int(), io_ref=MyTestAttributeIORef())
+    read_write_int: AttrRW = AttrRW(Int(), io_ref=MyTestAttributeIORef())
     read_write_float: AttrRW = AttrRW(Float())
     read_bool: AttrR = AttrR(Bool())
-    write_bool: AttrW = AttrW(Bool(), handler=TestSetter())
+    write_bool: AttrW = AttrW(Bool(), io_ref=MyTestAttributeIORef())
     read_string: AttrRW = AttrRW(String())
 
 
