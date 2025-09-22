@@ -10,7 +10,6 @@ from fastcs.controller import Controller
 from fastcs.datatypes import Float, Int, T
 
 
-# async def test_attribute_io(mocker: MockerFixture):
 @pytest.mark.asyncio
 async def test_attribute_io():
     @dataclass
@@ -22,12 +21,6 @@ async def test_attribute_io():
             print("I am updating", self.ref_type, attr.io_ref.cool)
 
     class MyController(Controller):
-        # what if we hinted something like
-        # io_classes: MyAttributeIO | MyOtherAttributeIO
-        # and then we construct them in the __init__ per controller?
-        # I guess this is bad as we can't share between controllers
-        # i really just want to avoid making devs invoke super...
-        # or maybe that's not a big deal...
         my_attr = AttrR(Int(), io_ref=MyAttributeIORef(cool=5))
         your_attr = AttrR(Int(), io_ref=MyAttributeIORef(cool=10))
 
@@ -78,21 +71,27 @@ async def test_dynamic_attribute_io_specification():
 
     class DemoParameterAttributeIO(AttributeIO[T, DemoParameterAttributeIORef]):
         async def update(self, attr: AttrR[T]):
-            # assume the device is always incrementing every parameter by 1
+            # OK, so this doesn't really work when we have min and maxes...
             await attr.set(attr.get() + 1)
-            pass
 
         async def send(self, attr: AttrW[T], value) -> None:
-            # why does this not get called...
-            print(attr.ref.min, value)
             if (
-                attr.ref.read_only
+                attr.io_ref.read_only
             ):  # TODO, this isn't necessary as we can not call process on this anyway
-                raise RuntimeError(f"Could not set read only attribute {attr.ref.name}")
-
-            if attr.ref.min is not None and value < min:
                 raise RuntimeError(
-                    f"Could not set {attr.ref.name} to {value}, min is {attr.ref.min}"
+                    f"Could not set read only attribute {attr.io_ref.name}"
+                )
+
+            if (io_min := attr.io_ref.min) is not None and value < io_min:
+                raise RuntimeError(
+                    f"Could not set {attr.io_ref.name} to {value}, "
+                    f"min is {attr.io_ref.min}"
+                )
+
+            if (io_max := attr.io_ref.max) is not None and value > io_max:
+                raise RuntimeError(
+                    f"Could not set {attr.io_ref.name} to {value}, "
+                    f"max is {attr.io_ref.max}"
                 )
 
     class DemoParameterController(Controller):
@@ -128,10 +127,17 @@ async def test_dynamic_attribute_io_specification():
     await c.initialise()
     await c.attribute_initialise()
     await c.ro_int_parameter.update()
-    assert c.ro_int_parameter.get() == 6
-    # with
-    await c.int_parameter.process(-10)
+    assert c.ro_int_parameter.get() == 11
+    with pytest.raises(
+        RuntimeError, match="Could not set int_parameter to -10, min is 0"
+    ):
+        await c.int_parameter.process(-10)
+
+    with pytest.raises(
+        RuntimeError, match="Could not set int_parameter to 101, max is 100"
+    ):
+        await c.int_parameter.process(101)
 
 
-def test_update_period_respected():
-    raise NotImplementedError
+# def test_update_period_respected():
+# raise NotImplementedError
