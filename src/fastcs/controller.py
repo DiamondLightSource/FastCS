@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from copy import deepcopy
 from typing import get_type_hints
 
-from fastcs.attribute_io import AttributeIO
+from fastcs.attribute_io import AttributeIO, SimpleAttributeIO
 from fastcs.attributes import Attribute, AttrR, AttrW
 
 
@@ -36,7 +36,7 @@ class BaseController:
         self._bind_attrs()
 
         # TODO, should validation live inside the controller?
-        ios = ios or []
+        ios = ios or [SimpleAttributeIO()]
         self._attribute_ref_io_map = {io.ref_type: io for io in ios}
         self._validate_io()
 

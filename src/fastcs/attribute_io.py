@@ -22,7 +22,7 @@ class AttributeIO(Generic[T, AttributeIORefT]):
         raise NotImplementedError()
 
 
-class SimpleAttributeIO(AttributeIO):
+class SimpleAttributeIO(AttributeIO[T, AttributeIORef]):
     """IO for internal parameters"""
 
     async def send(self, attr: AttrRW[T], value) -> None:
