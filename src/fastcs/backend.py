@@ -2,10 +2,11 @@ import asyncio
 from collections import defaultdict
 from collections.abc import Callable, Coroutine
 
+from fastcs.attribute_io_ref import AttributeIORef
 from fastcs.cs_methods import Command, Put, Scan
 from fastcs.datatypes import T
 
-from .attributes import ONCE, AttrHandlerR, AttrR, AttrW
+from .attributes import ONCE, AttrR, AttrW
 from .controller import BaseController, Controller
 from .controller_api import ControllerAPI
 from .exceptions import FastCSError
@@ -119,7 +120,7 @@ def _add_attribute_updater_tasks(
 ):
     for attribute in controller_api.attributes.values():
         match attribute:
-            case AttrR(updater=AttrHandlerR(update_period=update_period)) as attribute:
+            case AttrR(io_ref=AttributeIORef(update_period=update_period)) as attribute:
                 callback = _create_updater_callback(attribute)
                 if update_period is ONCE:
                     initial_coros.append(callback)
