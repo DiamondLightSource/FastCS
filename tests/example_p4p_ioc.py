@@ -3,7 +3,7 @@ import enum
 
 import numpy as np
 
-from fastcs.attributes import AttrHandlerW, AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, Table, Waveform
 from fastcs.launch import FastCS
@@ -12,11 +12,6 @@ from fastcs.transport.epics.options import (
 )
 from fastcs.transport.epics.pva.transport import EpicsPVATransport
 from fastcs.wrappers import command, scan
-
-
-class SimpleAttributeSetter(AttrHandlerW):
-    async def put(self, attr, value):
-        await attr.update_display_without_process(value)
 
 
 class FEnum(enum.Enum):
@@ -30,7 +25,7 @@ class FEnum(enum.Enum):
 class ParentController(Controller):
     description = "some controller"
     a: AttrRW = AttrRW(Int(max=400_000, max_alarm=40_000))
-    b: AttrW = AttrW(Float(min=-1, min_alarm=-0.5), handler=SimpleAttributeSetter())
+    b: AttrW = AttrW(Float(min=-1, min_alarm=-0.5))
 
     table: AttrRW = AttrRW(
         Table([("A", np.int32), ("B", "i"), ("C", "?"), ("D", np.float64)])
@@ -39,7 +34,7 @@ class ParentController(Controller):
 
 class ChildController(Controller):
     fail_on_next_e = True
-    c: AttrW = AttrW(Int(), handler=SimpleAttributeSetter())
+    c: AttrW = AttrW(Int())
 
     @command()
     async def d(self):
