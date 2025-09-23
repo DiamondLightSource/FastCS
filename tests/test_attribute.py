@@ -52,7 +52,6 @@ async def test_simple_attibute_io_rw(mocker: MockerFixture):
     )
     attr.set = mocker.MagicMock(wraps=attr.set)
 
-    assert attr.sender
     # This is called by the transport when it receives a put
     await attr.process(1)
 

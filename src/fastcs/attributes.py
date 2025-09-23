@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Coroutine
 from enum import Enum
-from typing import Any, Generic, Self
+from typing import Generic, Self
 
 import fastcs
 from fastcs.attribute_io_ref import AttributeIORef, AttributeIORefT
@@ -22,47 +22,6 @@ class AttrMode(Enum):
     READ_WRITE = 3
 
 
-class _BaseAttrHandler:
-    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
-        pass
-
-
-class AttrHandlerW(_BaseAttrHandler):
-    """Protocol for setting the value of an ``Attribute``."""
-
-    async def put(self, attr: AttrW[T], value: T) -> None:
-        pass
-
-
-class AttrHandlerR(_BaseAttrHandler):
-    """Protocol for updating the cached readback value of an ``Attribute``."""
-
-    # If update period is None then the attribute will not be updated as a task.
-    update_period: float | None = None
-
-    async def update(self, attr: AttrR[T]) -> None:
-        pass
-
-
-class AttrHandlerRW(AttrHandlerR, AttrHandlerW):
-    """Protocol encapsulating both ``AttrHandlerR`` and ``AttHandlerW``."""
-
-    pass
-
-
-class SimpleAttrHandler(AttrHandlerRW):
-    """Handler for internal parameters"""
-
-    async def put(self, attr: AttrW[T], value: T) -> None:
-        await attr.update_display_without_process(value)
-
-        if isinstance(attr, AttrRW):
-            await attr.set(value)
-
-    async def update(self, attr: AttrR) -> None:
-        raise RuntimeError("SimpleHandler cannot update")
-
-
 class Attribute(Generic[T, AttributeIORefT]):
     """Base FastCS attribute.
 
@@ -75,7 +34,6 @@ class Attribute(Generic[T, AttributeIORefT]):
         access_mode: AttrMode,
         io_ref: AttributeIORefT | None = None,
         group: str | None = None,
-        handler: Any = None,
         description: str | None = None,
     ) -> None:
         assert issubclass(datatype.dtype, ATTRIBUTE_TYPES), (
@@ -86,7 +44,6 @@ class Attribute(Generic[T, AttributeIORefT]):
         self._datatype: DataType[T] = datatype
         self._access_mode: AttrMode = access_mode
         self._group = group
-        self._handler = handler
         self.enabled = True
         self.description = description
 
@@ -111,8 +68,7 @@ class Attribute(Generic[T, AttributeIORefT]):
         return self._group
 
     async def initialise(self, controller: fastcs.controller.BaseController) -> None:
-        if self._handler is not None:
-            await self._handler.initialise(controller)
+        pass
 
     def add_update_datatype_callback(
         self, callback: Callable[[DataType[T]], None]
@@ -138,7 +94,6 @@ class AttrR(Attribute[T, AttributeIORefT]):
         access_mode=AttrMode.READ,
         io_ref: AttributeIORefT | None = None,
         group: str | None = None,
-        handler: AttrHandlerR | None = None,
         initial_value: T | None = None,
         description: str | None = None,
     ) -> None:
@@ -147,7 +102,6 @@ class AttrR(Attribute[T, AttributeIORefT]):
             access_mode,
             io_ref,
             group,
-            handler,
             description=description,
         )
         self._value: T = (
@@ -155,8 +109,6 @@ class AttrR(Attribute[T, AttributeIORefT]):
         )
         self._on_set_callbacks: list[AttrCallback[T]] | None = None
         self._on_update_callbacks: list[AttrCallback[T]] | None = None
-
-        self._updater = handler
 
     def get(self) -> T:
         return self._value
@@ -179,10 +131,6 @@ class AttrR(Attribute[T, AttributeIORefT]):
             self._on_update_callbacks = []
         self._on_update_callbacks.append(callback)
 
-    @property
-    def updater(self) -> AttrHandlerR | None:
-        return self._updater
-
     async def update(self):
         if self._on_update_callbacks is not None:
             await asyncio.gather(*[cb(self) for cb in self._on_update_callbacks])
@@ -197,7 +145,6 @@ class AttrW(Attribute[T, AttributeIORefT]):
         access_mode=AttrMode.WRITE,
         io_ref: AttributeIORefT | None = None,
         group: str | None = None,
-        handler: AttrHandlerW | None = None,
         description: str | None = None,
     ) -> None:
         super().__init__(
@@ -205,12 +152,10 @@ class AttrW(Attribute[T, AttributeIORefT]):
             access_mode,
             io_ref,
             group,
-            handler,
             description=description,
         )
         self._process_callbacks: list[AttrCallback[T]] | None = None
         self._write_display_callbacks: list[AttrCallback[T]] | None = None
-        self._setter = handler
 
     async def process(self, value: T) -> None:
         await self.process_without_display_update(value)
@@ -239,12 +184,8 @@ class AttrW(Attribute[T, AttributeIORefT]):
             self._write_display_callbacks = []
         self._write_display_callbacks.append(callback)
 
-    @property
-    def sender(self) -> AttrHandlerW | None:
-        return self._setter
-
     async def put(self, value):
-        await self.sender.put(self, value)
+        await self.io_ref.send(self, value)
 
 
 class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
@@ -256,7 +197,6 @@ class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
         access_mode=AttrMode.READ_WRITE,
         io_ref: AttributeIORefT | None = None,
         group: str | None = None,
-        handler: AttrHandlerRW | None = None,
         initial_value: T | None = None,
         description: str | None = None,
     ) -> None:
@@ -265,7 +205,6 @@ class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
             access_mode,
             io_ref,
             group=group,
-            handler=handler if handler else SimpleAttrHandler(),
             initial_value=initial_value,
             description=description,
         )
