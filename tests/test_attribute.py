@@ -4,11 +4,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 from fastcs.attributes import (
-    AttrHandlerR,
-    AttrHandlerRW,
     AttrR,
     AttrRW,
-    AttrW,
 )
 from fastcs.datatypes import Int, String
 
@@ -41,7 +38,7 @@ async def test_attributes():
 
 
 @pytest.mark.asyncio
-async def test_simple_handler_rw(mocker: MockerFixture):
+async def test_simple_attibute_io_rw(mocker: MockerFixture):
     attr = AttrRW(Int())
 
     attr.update_display_without_process = mocker.MagicMock(
@@ -51,38 +48,9 @@ async def test_simple_handler_rw(mocker: MockerFixture):
 
     assert attr.sender
     # This is called by the transport when it receives a put
-    await attr.sender.put(attr, 1)
+    await attr.process(1)
 
-    # The Sender of the attribute should just set the value on the attribute
+    # SimpleAttributeIO attribute should just set the value on the attribute
     attr.update_display_without_process.assert_called_once_with(1)
     attr.set.assert_called_once_with(1)
     assert attr.get() == 1
-
-
-class SimpleUpdater(AttrHandlerR):
-    pass
-
-
-@pytest.mark.asyncio
-async def test_handler_initialise(mocker: MockerFixture):
-    handler = AttrHandlerRW()
-    handler_mock = mocker.patch.object(handler, "initialise")
-    attr = AttrR(Int(), handler=handler)
-
-    ctrlr = mocker.Mock()
-    await attr.initialise(ctrlr)
-
-    # The handler initialise method should be called from the attribute
-    handler_mock.assert_called_once_with(ctrlr)
-
-    handler = AttrHandlerRW()
-    attr = AttrW(Int(), handler=handler)
-
-    # Assert no error in calling initialise on the SimpleHandler default
-    await attr.initialise(mocker.ANY)
-
-    handler = SimpleUpdater()
-    attr = AttrR(Int(), handler=handler)
-
-    # Assert no error in calling initialise on the TestUpdater handler
-    await attr.initialise(mocker.ANY)
