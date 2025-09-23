@@ -87,7 +87,7 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
                 attribute.add_process_callback(method.fn)
             case _:
                 raise FastCSError(
-                    f"Mode {attribute.access_mode} does not "
+                    f"Attribute type {type(attribute)} does not "
                     f"support put operations for {name}"
                 )
 

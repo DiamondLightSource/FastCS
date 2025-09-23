@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Coroutine
-from enum import Enum
 from typing import Generic, Self
 
 import fastcs
@@ -14,14 +13,6 @@ ONCE = float("inf")
 """Special value to indicate that an attribute should be updated once on start up."""
 
 
-class AttrMode(Enum):
-    """Access mode of an ``Attribute``."""
-
-    READ = 1
-    WRITE = 2
-    READ_WRITE = 3
-
-
 class Attribute(Generic[T, AttributeIORefT]):
     """Base FastCS attribute.
 
@@ -31,7 +22,6 @@ class Attribute(Generic[T, AttributeIORefT]):
     def __init__(
         self,
         datatype: DataType[T],
-        access_mode: AttrMode,
         io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         description: str | None = None,
@@ -42,7 +32,6 @@ class Attribute(Generic[T, AttributeIORefT]):
         )
         self.io_ref = io_ref or AttributeIORef()
         self._datatype: DataType[T] = datatype
-        self._access_mode: AttrMode = access_mode
         self._group = group
         self.enabled = True
         self.description = description
@@ -58,10 +47,6 @@ class Attribute(Generic[T, AttributeIORefT]):
     @property
     def dtype(self) -> type[T]:
         return self._datatype.dtype
-
-    @property
-    def access_mode(self) -> AttrMode:
-        return self._access_mode
 
     @property
     def group(self) -> str | None:
@@ -91,7 +76,6 @@ class AttrR(Attribute[T, AttributeIORefT]):
     def __init__(
         self,
         datatype: DataType[T],
-        access_mode=AttrMode.READ,
         io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         initial_value: T | None = None,
@@ -99,7 +83,6 @@ class AttrR(Attribute[T, AttributeIORefT]):
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
-            access_mode,
             io_ref,
             group,
             description=description,
@@ -142,14 +125,12 @@ class AttrW(Attribute[T, AttributeIORefT]):
     def __init__(
         self,
         datatype: DataType[T],
-        access_mode=AttrMode.WRITE,
         io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         description: str | None = None,
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
-            access_mode,
             io_ref,
             group,
             description=description,
@@ -194,7 +175,6 @@ class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
     def __init__(
         self,
         datatype: DataType[T],
-        access_mode=AttrMode.READ_WRITE,
         io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         initial_value: T | None = None,
@@ -202,7 +182,6 @@ class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
     ) -> None:
         super().__init__(
             datatype,  # type: ignore
-            access_mode,
             io_ref,
             group=group,
             initial_value=initial_value,
