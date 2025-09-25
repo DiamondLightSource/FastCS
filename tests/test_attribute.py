@@ -67,7 +67,7 @@ async def test_attribute_io():
     class MyAttributeIORef(AttributeIORef):
         cool: int
 
-    class MyAttributeIO(AttributeIO[int, MyAttributeIORef]):
+    class MyAttributeIO(AttributeIO[MyAttributeIORef, int]):
         async def update(self, attr: AttrR[Int, MyAttributeIORef]):
             print("I am updating", self.ref_type, attr.io_ref.cool)
 
@@ -120,7 +120,7 @@ async def test_dynamic_attribute_io_specification():
         max: T | None = None
         read_only: bool = False
 
-    class DemoParameterAttributeIO(AttributeIO[T, DemoParameterAttributeIORef]):
+    class DemoParameterAttributeIO(AttributeIO[DemoParameterAttributeIORef, T]):
         async def update(self, attr: AttrR[T]):
             # OK, so this doesn't really work when we have min and maxes...
             await attr.set(attr.get() + 1)

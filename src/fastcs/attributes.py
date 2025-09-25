@@ -4,16 +4,23 @@ import asyncio
 from collections.abc import Callable, Coroutine
 from typing import Generic, Self
 
+from typing_extensions import TypeVar
+
 import fastcs
-from fastcs.attribute_io_ref import AttributeIORef, AttributeIORefT
+from fastcs.attribute_io_ref import AttributeIORef
 
 from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
+
+# TODO rename this: typevar with default
+AttributeIORefTD = TypeVar(
+    "AttributeIORefTD", bound=AttributeIORef, default=AttributeIORef, covariant=True
+)
 
 ONCE = float("inf")
 """Special value to indicate that an attribute should be updated once on start up."""
 
 
-class Attribute(Generic[T, AttributeIORefT]):
+class Attribute(Generic[T, AttributeIORefTD]):
     """Base FastCS attribute.
 
     Instances of this class added to a ``Controller`` will be used by the backend.
@@ -22,7 +29,7 @@ class Attribute(Generic[T, AttributeIORefT]):
     def __init__(
         self,
         datatype: DataType[T],
-        io_ref: AttributeIORefT | None = None,
+        io_ref: AttributeIORefTD | None = None,
         group: str | None = None,
         description: str | None = None,
     ) -> None:
@@ -70,13 +77,13 @@ class Attribute(Generic[T, AttributeIORefT]):
             callback(datatype)
 
 
-class AttrR(Attribute[T, AttributeIORefT]):
+class AttrR(Attribute[T, AttributeIORefTD]):
     """A read-only ``Attribute``."""
 
     def __init__(
         self,
         datatype: DataType[T],
-        io_ref: AttributeIORefT | None = None,
+        io_ref: AttributeIORefTD | None = None,
         group: str | None = None,
         initial_value: T | None = None,
         description: str | None = None,
@@ -119,13 +126,13 @@ class AttrR(Attribute[T, AttributeIORefT]):
             await asyncio.gather(*[cb(self) for cb in self._on_update_callbacks])
 
 
-class AttrW(Attribute[T, AttributeIORefT]):
+class AttrW(Attribute[T, AttributeIORefTD]):
     """A write-only ``Attribute``."""
 
     def __init__(
         self,
         datatype: DataType[T],
-        io_ref: AttributeIORefT | None = None,
+        io_ref: AttributeIORefTD | None = None,
         group: str | None = None,
         description: str | None = None,
     ) -> None:
@@ -169,13 +176,13 @@ class AttrW(Attribute[T, AttributeIORefT]):
         await self.io_ref.send(self, value)
 
 
-class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
+class AttrRW(AttrR[T, AttributeIORefTD], AttrW[T, AttributeIORefTD]):
     """A read-write ``Attribute``."""
 
     def __init__(
         self,
         datatype: DataType[T],
-        io_ref: AttributeIORefT | None = None,
+        io_ref: AttributeIORefTD | None = None,
         group: str | None = None,
         initial_value: T | None = None,
         description: str | None = None,

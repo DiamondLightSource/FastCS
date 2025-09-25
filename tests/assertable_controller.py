@@ -23,7 +23,7 @@ class MyTestAttributeIORef(AttributeIORef):
     update_period = 1
 
 
-class MyTestAttributeIO(AttributeIO[T, MyTestAttributeIORef]):
+class MyTestAttributeIO(AttributeIO[MyTestAttributeIORef, T]):
     async def update(self, attr: AttrR[T]):
         print(f"{self.controller} update {attr}")
 

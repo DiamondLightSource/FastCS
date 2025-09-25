@@ -32,19 +32,21 @@ class TemperatureControllerAttributeIORef(AttributeIORef):
 
 
 class TemperatureControllerAttributeIO(
-    AttributeIO[T, TemperatureControllerAttributeIORef]
+    AttributeIO[TemperatureControllerAttributeIORef, T]
 ):
     def __init__(self, connection: IPConnection, suffix: str):
         self._connection = connection
         self.suffix = suffix
 
-    async def send(self, attr: AttrW[T], value: T) -> None:
+    async def send(
+        self, attr: AttrW[T, TemperatureControllerAttributeIORef], value: T
+    ) -> None:
         await self._connection.send_command(
             f"{attr.io_ref.name}{self.suffix}={attr.dtype(value)}\r\n"
         )
 
-    async def update(self, attr: AttrR[T]) -> None:
-        response = await self.controller.connection.send_query(
+    async def update(self, attr: AttrR[T, TemperatureControllerAttributeIORef]) -> None:
+        response = await self._connection.send_query(
             f"{attr.io_ref.name}{self.suffix}?\r\n"
         )
         response = response.strip("\r\n")

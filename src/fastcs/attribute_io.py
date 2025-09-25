@@ -5,11 +5,11 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import T
 
 
-class AttributeIO(Generic[T, AttributeIORefT]):
+class AttributeIO(Generic[AttributeIORefT, T]):
     def __init_subclass__(cls) -> None:
         # sets ref_type from subclass generic args
         args = get_args(cls.__orig_bases__[0])
-        cls.ref_type = args[1]
+        cls.ref_type = args[0]
 
     async def update(self, attr: AttrR[T]) -> None:
         raise NotImplementedError()
@@ -22,7 +22,7 @@ class AttributeIO(Generic[T, AttributeIORefT]):
         raise NotImplementedError()
 
 
-class SimpleAttributeIO(AttributeIO[T, AttributeIORef]):
+class SimpleAttributeIO(AttributeIO[AttributeIORef, T]):
     """IO for internal parameters"""
 
     async def send(self, attr: AttrW[T], value) -> None:
@@ -35,4 +35,4 @@ class SimpleAttributeIO(AttributeIO[T, AttributeIORef]):
         raise RuntimeError("SimpleAttributeIO can't update")
 
 
-AnyAttributeIO = AttributeIO[T, AttributeIORef]
+AnyAttributeIO = AttributeIO[AttributeIORef, T]

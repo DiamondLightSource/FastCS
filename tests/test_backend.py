@@ -101,7 +101,7 @@ def test_update_periods():
         update_period: float | None
         _times_called = 0
 
-    class AttributeIOTimesCalled(AttributeIO[T, AttributeIORefTimesCalled]):
+    class AttributeIOTimesCalled(AttributeIO[AttributeIORefTimesCalled, T]):
         async def update(self, attr):
             attr.io_ref._times_called += 1
             await attr.set(attr.io_ref._times_called)
