@@ -11,12 +11,12 @@ class AttributeIO(Generic[AttributeIORefT, T]):
         args = get_args(cls.__orig_bases__[0])
         cls.ref_type = args[0]
 
-    async def update(self, attr: AttrR[T]) -> None:
+    async def update(self, attr: AttrR[T, AttributeIORefT]) -> None:
         raise NotImplementedError()
 
     async def send(
         self,
-        attr: AttrRW[T],
+        attr: AttrRW[T, AttributeIORefT],
         value,  # TODO, type this
     ) -> None:
         raise NotImplementedError()
@@ -25,13 +25,13 @@ class AttributeIO(Generic[AttributeIORefT, T]):
 class SimpleAttributeIO(AttributeIO[AttributeIORef, T]):
     """IO for internal parameters"""
 
-    async def send(self, attr: AttrW[T], value) -> None:
+    async def send(self, attr: AttrW[T, AttributeIORefT], value) -> None:
         await attr.update_display_without_process(value)
 
         if isinstance(attr, AttrRW):
             await attr.set(value)
 
-    async def update(self, attr: AttrR[T]) -> None:
+    async def update(self, attr: AttrR[T, AttributeIORefT]) -> None:
         raise RuntimeError("SimpleAttributeIO can't update")
 
 
