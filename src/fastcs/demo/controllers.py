@@ -108,6 +108,6 @@ class TemperatureRampController(Controller):
     def __init__(self, index: int, conn: IPConnection) -> None:
         suffix = f"{index:02d}"
         super().__init__(
-            f"Ramp{self.suffix}", ios=[TemperatureControllerAttributeIO(conn, suffix)]
+            f"Ramp{suffix}", ios=[TemperatureControllerAttributeIO(conn, suffix)]
         )
         self.connection = conn
