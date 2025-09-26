@@ -1,3 +1,5 @@
+import asyncio
+
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport import Transport
 
@@ -10,10 +12,15 @@ class RestTransport(Transport):
 
     def __init__(
         self,
-        controller_api: ControllerAPI,
         options: RestOptions | None = None,
     ):
         self._options = options or RestOptions()
+
+    def initialise(
+        self,
+        controller_api: ControllerAPI,
+        loop: asyncio.AbstractEventLoop | None = None,
+    ):
         self._server = RestServer(controller_api)
 
     @property

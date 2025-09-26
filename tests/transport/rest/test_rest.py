@@ -36,7 +36,9 @@ def rest_controller_api(class_mocker: MockerFixture):
 
 
 def create_test_client(rest_controller_api: ControllerAPI) -> TestClient:
-    return TestClient(RestTransport(rest_controller_api)._server._app)
+    rest_transport = RestTransport()
+    rest_transport.initialise(rest_controller_api)
+    return TestClient(rest_transport._server._app)
 
 
 class TestRestServer:
