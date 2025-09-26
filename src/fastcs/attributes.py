@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Coroutine
-from typing import Generic, Self
+from collections.abc import Callable
+from typing import Generic
 
 from typing_extensions import TypeVar
 
 import fastcs
 from fastcs.attribute_io_ref import AttributeIORef
 
-from .datatypes import ATTRIBUTE_TYPES, AttrCallback, DataType, T
+from .datatypes import ATTRIBUTE_TYPES, AttrSetCallback, AttrUpdateCallback, DataType, T
 
 # TODO rename this: typevar with default
 AttributeIORefTD = TypeVar(
@@ -97,8 +97,8 @@ class AttrR(Attribute[T, AttributeIORefTD]):
         self._value: T = (
             datatype.initial_value if initial_value is None else initial_value
         )
-        self._on_set_callbacks: list[AttrCallback[T]] | None = None
-        self._on_update_callbacks: list[AttrCallback[T]] | None = None
+        self._on_set_callbacks: list[AttrSetCallback[T]] | None = None
+        self._on_update_callbacks: list[AttrUpdateCallback] | None = None
 
     def get(self) -> T:
         return self._value
@@ -109,21 +109,19 @@ class AttrR(Attribute[T, AttributeIORefTD]):
         if self._on_set_callbacks is not None:
             await asyncio.gather(*[cb(self._value) for cb in self._on_set_callbacks])
 
-    def add_set_callback(self, callback: AttrCallback[T]) -> None:
+    def add_set_callback(self, callback: AttrSetCallback[T]) -> None:
         if self._on_set_callbacks is None:
             self._on_set_callbacks = []
         self._on_set_callbacks.append(callback)
 
-    def add_update_callback(
-        self, callback: Callable[[Self], Coroutine[None, None, None]]
-    ):
+    def add_update_callback(self, callback: AttrUpdateCallback):
         if self._on_update_callbacks is None:
             self._on_update_callbacks = []
         self._on_update_callbacks.append(callback)
 
     async def update(self):
         if self._on_update_callbacks is not None:
-            await asyncio.gather(*[cb(self) for cb in self._on_update_callbacks])
+            await asyncio.gather(*[cb() for cb in self._on_update_callbacks])
 
 
 class AttrW(Attribute[T, AttributeIORefTD]):
@@ -142,8 +140,8 @@ class AttrW(Attribute[T, AttributeIORefTD]):
             group,
             description=description,
         )
-        self._process_callbacks: list[AttrCallback[T]] | None = None
-        self._write_display_callbacks: list[AttrCallback[T]] | None = None
+        self._process_callbacks: list[AttrSetCallback[T]] | None = None
+        self._write_display_callbacks: list[AttrSetCallback[T]] | None = None
 
     async def process(self, value: T) -> None:
         await self.process_without_display_update(value)
@@ -159,7 +157,7 @@ class AttrW(Attribute[T, AttributeIORefTD]):
         if self._write_display_callbacks:
             await asyncio.gather(*[cb(value) for cb in self._write_display_callbacks])
 
-    def add_process_callback(self, callback: AttrCallback[T]) -> None:
+    def add_process_callback(self, callback: AttrSetCallback[T]) -> None:
         if self._process_callbacks is None:
             self._process_callbacks = []
         self._process_callbacks.append(callback)
@@ -167,7 +165,7 @@ class AttrW(Attribute[T, AttributeIORefTD]):
     def has_process_callback(self) -> bool:
         return bool(self._process_callbacks)
 
-    def add_write_display_callback(self, callback: AttrCallback[T]) -> None:
+    def add_write_display_callback(self, callback: AttrSetCallback[T]) -> None:
         if self._write_display_callbacks is None:
             self._write_display_callbacks = []
         self._write_display_callbacks.append(callback)

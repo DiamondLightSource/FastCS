@@ -7,7 +7,7 @@ from fastcs.attributes import ONCE, AttrR, AttrRW
 from fastcs.backend import Backend, build_controller_api
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
-from fastcs.datatypes import Int, T
+from fastcs.datatypes import Int
 from fastcs.exceptions import FastCSError
 from fastcs.wrappers import command, scan
 
@@ -98,13 +98,13 @@ def test_controller_api_methods():
 def test_update_periods():
     @dataclass
     class AttributeIORefTimesCalled(AttributeIORef):
-        update_period: float | None
+        update_period: float | None = None
         _times_called = 0
 
-    class AttributeIOTimesCalled(AttributeIO[AttributeIORefTimesCalled, T]):
-        async def update(self, attr):
-            attr.io_ref._times_called += 1
-            await attr.set(attr.io_ref._times_called)
+    class AttributeIOTimesCalled(AttributeIO[AttributeIORefTimesCalled, int]):
+        async def update(self, attr: AttrR[int], ref: AttributeIORefTimesCalled):
+            ref._times_called += 1
+            await attr.set(ref._times_called)
 
     class MyController(Controller):
         update_once = AttrR(Int(), io_ref=AttributeIORefTimesCalled(update_period=ONCE))

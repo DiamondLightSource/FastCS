@@ -39,16 +39,16 @@ class TemperatureControllerAttributeIO(
         self.suffix = suffix
 
     async def send(
-        self, attr: AttrW[T, TemperatureControllerAttributeIORef], value: T
+        self, attr: AttrW, ref: TemperatureControllerAttributeIORef, value: T
     ) -> None:
         await self._connection.send_command(
-            f"{attr.io_ref.name}{self.suffix}={attr.dtype(value)}\r\n"
+            f"{ref.name}{self.suffix}={attr.dtype(value)}\r\n"
         )
 
-    async def update(self, attr: AttrR[T, TemperatureControllerAttributeIORef]) -> None:
-        response = await self._connection.send_query(
-            f"{attr.io_ref.name}{self.suffix}?\r\n"
-        )
+    async def update(
+        self, attr: AttrR, ref: TemperatureControllerAttributeIORef
+    ) -> None:
+        response = await self._connection.send_query(f"{ref.name}{self.suffix}?\r\n")
         response = response.strip("\r\n")
 
         await attr.set(attr.dtype(response))

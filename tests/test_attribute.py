@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from functools import partial
-from typing import Generic
+from typing import Generic, TypeVar
 
 import pytest
 from pytest_mock import MockerFixture
@@ -13,7 +13,9 @@ from fastcs.attributes import (
     AttrW,
 )
 from fastcs.controller import Controller
-from fastcs.datatypes import Float, Int, String, T
+from fastcs.datatypes import Float, Int, String
+
+NumberT = TypeVar("NumberT", int, float)
 
 
 @pytest.mark.asyncio
@@ -68,8 +70,8 @@ async def test_attribute_io():
         cool: int
 
     class MyAttributeIO(AttributeIO[MyAttributeIORef, int]):
-        async def update(self, attr: AttrR[Int, MyAttributeIORef]):
-            print("I am updating", self.ref_type, attr.io_ref.cool)
+        async def update(self, attr: AttrR, ref: MyAttributeIORef):
+            print("I am updating", self.ref_type, ref.cool)
 
     class MyController(Controller):
         my_attr = AttrR(Int(), io_ref=MyAttributeIORef(cool=5))
@@ -114,38 +116,49 @@ async def test_dynamic_attribute_io_specification():
     ]
 
     @dataclass
-    class DemoParameterAttributeIORef(AttributeIORef, Generic[T]):
+    class DemoParameterAttributeIORef(AttributeIORef, Generic[NumberT]):
         name: str
-        min: T | None = None
-        max: T | None = None
+        # TODO, this is weird, we should just use the attributes's min and max fields
+        min: NumberT | None = None
+        max: NumberT | None = None
         read_only: bool = False
 
-    class DemoParameterAttributeIO(AttributeIO[DemoParameterAttributeIORef, T]):
-        async def update(self, attr: AttrR[T]):
+    class DemoParameterAttributeIO(AttributeIO[DemoParameterAttributeIORef, NumberT]):
+        async def update(
+            self,
+            attr: AttrR[NumberT],
+            ref: DemoParameterAttributeIORef,
+        ):
             # OK, so this doesn't really work when we have min and maxes...
             await attr.set(attr.get() + 1)
 
-        async def send(self, attr: AttrW[T], value) -> None:
+        async def send(
+            self,
+            attr: AttrW[NumberT, DemoParameterAttributeIORef],
+            ref: DemoParameterAttributeIORef,
+            value: NumberT,
+        ) -> None:
             if (
-                attr.io_ref.read_only
+                ref.read_only
             ):  # TODO, this isn't necessary as we can not call process on this anyway
+                raise RuntimeError(f"Could not set read only attribute {ref.name}")
+
+            if (io_min := ref.min) is not None and value < io_min:
                 raise RuntimeError(
-                    f"Could not set read only attribute {attr.io_ref.name}"
+                    f"Could not set {ref.name} to {value}, min is {ref.min}"
                 )
 
-            if (io_min := attr.io_ref.min) is not None and value < io_min:
+            if (io_max := ref.max) is not None and value > io_max:
                 raise RuntimeError(
-                    f"Could not set {attr.io_ref.name} to {value}, "
-                    f"min is {attr.io_ref.min}"
+                    f"Could not set {ref.name} to {value}, max is {ref.max}"
                 )
-
-            if (io_max := attr.io_ref.max) is not None and value > io_max:
-                raise RuntimeError(
-                    f"Could not set {attr.io_ref.name} to {value}, "
-                    f"max is {attr.io_ref.max}"
-                )
+            # TODO: we should always end send with a update_display_without_process...
 
     class DemoParameterController(Controller):
+        ro_int_parameter: AttrR
+        int_parameter: AttrRW
+        float_parameter: AttrRW  # hint to satisfy pyright
+
         async def initialise(self):
             dtype_mapping = {"int": Int(), "float": Float()}
             for parameter_response in example_introspection_response:

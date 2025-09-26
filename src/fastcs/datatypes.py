@@ -24,7 +24,8 @@ T = TypeVar(
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
 
 
-AttrCallback = Callable[[T], Awaitable[None]]
+AttrSetCallback = Callable[[T], Awaitable[None]]
+AttrUpdateCallback = Callable[[], Awaitable[None]]
 
 
 @dataclass(frozen=True)

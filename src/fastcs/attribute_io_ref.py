@@ -7,4 +7,4 @@ class AttributeIORef:
     update_period: float | None = None
 
 
-AttributeIORefT = TypeVar("AttributeIORefT", bound=AttributeIORef, covariant=True)
+AttributeIORefT = TypeVar("AttributeIORefT", bound=AttributeIORef)

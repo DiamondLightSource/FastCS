@@ -72,26 +72,29 @@ class BaseController:
 
             async def send_callback(value):
                 await attr.update_display_without_process(value)
-
                 if isinstance(attr, AttrRW):
                     await attr.set(value)
-
         else:
 
             async def send_callback(value):
-                await io.send(attr, value)
+                await io.send(attr, attr.io_ref, value)
+                # TODO, should we just then call the above send_callback here?
 
         return send_callback
 
     def _create_update_callback(self, io, attr):
         if io is None or attr.io_ref is None:
 
-            async def update_callback(attr):
+            async def error_callback():
                 raise RuntimeError("No AttributeIO registered to handle update")
 
-            return update_callback
+            return error_callback
         else:
-            return io.update
+
+            async def update_callback():
+                await io.update(attr, attr.io_ref)
+
+            return update_callback
 
     @property
     def path(self) -> list[str]:
