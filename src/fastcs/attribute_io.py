@@ -18,10 +18,7 @@ class AttributeIO(Generic[AttributeIORefT, T]):
         raise NotImplementedError()
 
     async def send(
-        self,
-        attr: AttrRW[T, AttributeIORefT],
-        ref: AttributeIORefT,
-        value,  # TODO, type this
+        self, attr: AttrRW[T, AttributeIORefT], ref: AttributeIORefT, value: T
     ) -> None:
         raise NotImplementedError()
 
