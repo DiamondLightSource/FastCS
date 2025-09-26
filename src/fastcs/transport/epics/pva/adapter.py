@@ -1,3 +1,5 @@
+import asyncio
+
 from fastcs.controller_api import ControllerAPI
 from fastcs.transport import Transport
 from fastcs.transport.epics.docs import EpicsDocs
@@ -10,13 +12,15 @@ from .ioc import P4PIOC
 class EpicsPVATransport(Transport):
     """PV access transport."""
 
-    def __init__(
+    def __init__(self, options: EpicsPVAOptions | None = None):
+        self._options = options or EpicsPVAOptions()
+
+    def initialise(
         self,
         controller_api: ControllerAPI,
-        options: EpicsPVAOptions | None = None,
+        loop: asyncio.AbstractEventLoop,
     ) -> None:
         self._controller_api = controller_api
-        self._options = options or EpicsPVAOptions()
         self._pv_prefix = self.options.pva_ioc.pv_prefix
         self._ioc = P4PIOC(self.options.pva_ioc.pv_prefix, controller_api)
 

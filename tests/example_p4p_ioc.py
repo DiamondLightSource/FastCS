@@ -10,6 +10,7 @@ from fastcs.launch import FastCS
 from fastcs.transport.epics.options import (
     EpicsIOCOptions,
 )
+from fastcs.transport.epics.pva.adapter import EpicsPVATransport
 from fastcs.transport.epics.pva.options import EpicsPVAOptions
 from fastcs.wrappers import command, scan
 
@@ -82,7 +83,7 @@ def run(pv_prefix="P4P_TEST_DEVICE"):
     controller.register_sub_controller(
         "Child2", ChildController(description="another sub controller")
     )
-    fastcs = FastCS(controller, [p4p_options])
+    fastcs = FastCS(controller, [EpicsPVATransport(p4p_options)])
     fastcs.run()
 
 
