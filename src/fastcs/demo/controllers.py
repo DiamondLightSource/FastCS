@@ -4,6 +4,7 @@ import asyncio
 import enum
 import json
 from dataclasses import dataclass
+from typing import TypeVar
 
 from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORef
@@ -12,6 +13,8 @@ from fastcs.connections import IPConnection, IPConnectionSettings
 from fastcs.controller import BaseController, Controller
 from fastcs.datatypes import Enum, Float, Int, T
 from fastcs.wrappers import command, scan
+
+NumberT = TypeVar("NumberT", int, float)
 
 
 class OnOffEnum(enum.StrEnum):
@@ -32,23 +35,25 @@ class TemperatureControllerAttributeIORef(AttributeIORef):
 
 
 class TemperatureControllerAttributeIO(
-    AttributeIO[TemperatureControllerAttributeIORef, T]
+    AttributeIO[TemperatureControllerAttributeIORef, NumberT]
 ):
     def __init__(self, connection: IPConnection, suffix: str):
         self._connection = connection
         self.suffix = suffix
 
     async def send(
-        self, attr: AttrW, ref: TemperatureControllerAttributeIORef, value: T
+        self, attr: AttrW[NumberT, TemperatureControllerAttributeIORef], value: NumberT
     ) -> None:
         await self._connection.send_command(
-            f"{ref.name}{self.suffix}={attr.dtype(value)}\r\n"
+            f"{attr.io_ref.name}{self.suffix}={attr.dtype(value)}\r\n"
         )
 
     async def update(
-        self, attr: AttrR, ref: TemperatureControllerAttributeIORef
+        self, attr: AttrR[NumberT, TemperatureControllerAttributeIORef]
     ) -> None:
-        response = await self._connection.send_query(f"{ref.name}{self.suffix}?\r\n")
+        response = await self._connection.send_query(
+            f"{attr.io_ref.name}{self.suffix}?\r\n"
+        )
         response = response.strip("\r\n")
 
         await attr.set(attr.dtype(response))
@@ -101,7 +106,9 @@ class TemperatureRampController(Controller):
     enabled = AttrRW(
         Enum(OnOffEnum), io_ref=TemperatureControllerAttributeIORef(name="N")
     )
-    target = AttrR(Float(prec=3), io_ref=TemperatureControllerAttributeIORef(name="T"))
+    target = AttrR(
+        Float(prec=3), io_ref=TemperatureControllerAttributeIORef(name="NumberT")
+    )
     actual = AttrR(Float(prec=3), io_ref=TemperatureControllerAttributeIORef(name="A"))
     voltage = AttrR(Float(prec=3))
 

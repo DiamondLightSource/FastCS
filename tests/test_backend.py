@@ -102,9 +102,9 @@ def test_update_periods():
         _times_called = 0
 
     class AttributeIOTimesCalled(AttributeIO[AttributeIORefTimesCalled, int]):
-        async def update(self, attr: AttrR[int], ref: AttributeIORefTimesCalled):
-            ref._times_called += 1
-            await attr.set(ref._times_called)
+        async def update(self, attr: AttrR[int, AttributeIORefTimesCalled]):
+            attr.io_ref._times_called += 1
+            await attr.set(attr.io_ref._times_called)
 
     class MyController(Controller):
         update_once = AttrR(Int(), io_ref=AttributeIORefTimesCalled(update_period=ONCE))

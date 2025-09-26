@@ -13,7 +13,7 @@ from fastcs.attributes import (
     AttrW,
 )
 from fastcs.controller import Controller
-from fastcs.datatypes import Float, Int, String
+from fastcs.datatypes import Float, Int, String, T
 
 NumberT = TypeVar("NumberT", int, float)
 
@@ -70,8 +70,8 @@ async def test_attribute_io():
         cool: int
 
     class MyAttributeIO(AttributeIO[MyAttributeIORef, int]):
-        async def update(self, attr: AttrR, ref: MyAttributeIORef):
-            print("I am updating", self.ref_type, ref.cool)
+        async def update(self, attr: AttrR[T, MyAttributeIORef]):
+            print("I am updating", self.ref_type, attr.io_ref.cool)
 
     class MyController(Controller):
         my_attr = AttrR(Int(), io_ref=MyAttributeIORef(cool=5))
@@ -127,7 +127,6 @@ async def test_dynamic_attribute_io_specification():
         async def update(
             self,
             attr: AttrR[NumberT],
-            ref: DemoParameterAttributeIORef,
         ):
             # OK, so this doesn't really work when we have min and maxes...
             await attr.set(attr.get() + 1)
@@ -135,22 +134,25 @@ async def test_dynamic_attribute_io_specification():
         async def send(
             self,
             attr: AttrW[NumberT, DemoParameterAttributeIORef],
-            ref: DemoParameterAttributeIORef,
             value: NumberT,
         ) -> None:
             if (
-                ref.read_only
+                attr.io_ref.read_only
             ):  # TODO, this isn't necessary as we can not call process on this anyway
-                raise RuntimeError(f"Could not set read only attribute {ref.name}")
-
-            if (io_min := ref.min) is not None and value < io_min:
                 raise RuntimeError(
-                    f"Could not set {ref.name} to {value}, min is {ref.min}"
+                    f"Could not set read only attribute {attr.io_ref.name}"
                 )
 
-            if (io_max := ref.max) is not None and value > io_max:
+            if (io_min := attr.io_ref.min) is not None and value < io_min:
                 raise RuntimeError(
-                    f"Could not set {ref.name} to {value}, max is {ref.max}"
+                    f"Could not set {attr.io_ref.name} to {value}, "
+                    "min is {attr.io_ref.min}"
+                )
+
+            if (io_max := attr.io_ref.max) is not None and value > io_max:
+                raise RuntimeError(
+                    f"Could not set {attr.io_ref.name} to {value}, "
+                    f"max is {attr.io_ref.max}"
                 )
             # TODO: we should always end send with a update_display_without_process...
 

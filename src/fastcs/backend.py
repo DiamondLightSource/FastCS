@@ -120,7 +120,9 @@ def _add_attribute_updater_tasks(
 ):
     for attribute in controller_api.attributes.values():
         match attribute:
-            case AttrR(io_ref=AttributeIORef(update_period=update_period)) as attribute:
+            case (
+                AttrR(_io_ref=AttributeIORef(update_period=update_period)) as attribute
+            ):
                 callback = _create_updater_callback(attribute)
                 if update_period is ONCE:
                     initial_coros.append(callback)

@@ -58,17 +58,16 @@ class BaseController:
 
     def _add_io_callbacks(self):
         for attr in self.attributes.values():
-            io = self._attribute_ref_io_map.get(type(attr.io_ref), None)
+            ref = attr.io_ref if attr.has_io_ref() else None
+            io = self._attribute_ref_io_map.get(type(ref), None)
             if isinstance(attr, AttrW):
                 # is it on process or write_display?
-                attr.add_process_callback(self._create_send_callback(io, attr))
-            if attr.io_ref is None or io is None:
-                continue
+                attr.add_process_callback(self._create_send_callback(io, attr, ref))
             if isinstance(attr, AttrR):
-                attr.add_update_callback(self._create_update_callback(io, attr))
+                attr.add_update_callback(self._create_update_callback(io, attr, ref))
 
-    def _create_send_callback(self, io, attr):
-        if attr.io_ref is None:
+    def _create_send_callback(self, io, attr, ref):
+        if ref is None:
 
             async def send_callback(value):
                 await attr.update_display_without_process(value)
@@ -77,13 +76,13 @@ class BaseController:
         else:
 
             async def send_callback(value):
-                await io.send(attr, attr.io_ref, value)
+                await io.send(attr, value)
                 # TODO, should we just then call the above send_callback here?
 
         return send_callback
 
-    def _create_update_callback(self, io, attr):
-        if io is None or attr.io_ref is None:
+    def _create_update_callback(self, io, attr, ref):
+        if io is None or ref is None:
 
             async def error_callback():
                 raise RuntimeError("No AttributeIO registered to handle update")
@@ -92,7 +91,7 @@ class BaseController:
         else:
 
             async def update_callback():
-                await io.update(attr, attr.io_ref)
+                await io.update(attr)
 
             return update_callback
 
@@ -154,7 +153,7 @@ class BaseController:
         """Validate that each Attribute has an AttributeIORef for which the
         controller has an associated AttributeIO class."""
         for attr in self.attributes.values():
-            if attr.io_ref is None:
+            if not attr.has_io_ref():
                 continue
             assert type(attr.io_ref) in self._attribute_ref_io_map, (
                 f"{self.__class__.__name__} does not have an AttributeIO to handle "

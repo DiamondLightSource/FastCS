@@ -37,7 +37,7 @@ class Attribute(Generic[T, AttributeIORefTD]):
             f"Attr type must be one of {ATTRIBUTE_TYPES}, "
             "received type {datatype.dtype}"
         )
-        self.io_ref = io_ref
+        self._io_ref = io_ref
         self._datatype: DataType[T] = datatype
         self._group = group
         self.enabled = True
@@ -46,6 +46,15 @@ class Attribute(Generic[T, AttributeIORefTD]):
         # A callback to use when setting the datatype to a different value, for example
         # changing the units on an int. This should be implemented in the backend.
         self._update_datatype_callbacks: list[Callable[[DataType[T]], None]] = []
+
+    @property
+    def io_ref(self) -> AttributeIORefTD:
+        if self._io_ref is None:
+            raise RuntimeError(f"{self} has no AttributeIORef")
+        return self._io_ref
+
+    def has_io_ref(self):
+        return self._io_ref is not None
 
     @property
     def datatype(self) -> DataType[T]:
