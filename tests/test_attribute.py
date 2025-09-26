@@ -55,7 +55,7 @@ async def test_simple_attibute_io_rw(mocker: MockerFixture):
     # This is called by the transport when it receives a put
     await attr.process(1)
 
-    # SimpleAttributeIO attribute should just set the value on the attribute
+    # without io/ref should just set the value on the attribute
     attr.update_display_without_process.assert_called_once_with(1)
     attr.set.assert_called_once_with(1)
     assert attr.get() == 1

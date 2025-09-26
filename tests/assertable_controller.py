@@ -5,7 +5,7 @@ from typing import Literal
 
 from pytest_mock import MockerFixture, MockType
 
-from fastcs.attribute_io import AttributeIO, SimpleAttributeIO
+from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORef
 from fastcs.attributes import AttrR, AttrW
 from fastcs.backend import build_controller_api
@@ -38,12 +38,12 @@ class TestSubController(Controller):
     read_int: AttrR = AttrR(Int(), io_ref=MyTestAttributeIORef())
 
     def __init__(self) -> None:
-        super().__init__(ios=[test_attribute_io, SimpleAttributeIO()])
+        super().__init__(ios=[test_attribute_io])
 
 
 class MyTestController(Controller):
     def __init__(self) -> None:
-        super().__init__(ios=[test_attribute_io, SimpleAttributeIO()])
+        super().__init__(ios=[test_attribute_io])
 
         self._sub_controllers: list[TestSubController] = []
         for index in range(1, 3):

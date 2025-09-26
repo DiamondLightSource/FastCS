@@ -37,7 +37,7 @@ class Attribute(Generic[T, AttributeIORefTD]):
             f"Attr type must be one of {ATTRIBUTE_TYPES}, "
             "received type {datatype.dtype}"
         )
-        self.io_ref = io_ref or AttributeIORef()
+        self.io_ref = io_ref
         self._datatype: DataType[T] = datatype
         self._group = group
         self.enabled = True
@@ -175,22 +175,6 @@ class AttrW(Attribute[T, AttributeIORefTD]):
 
 class AttrRW(AttrR[T, AttributeIORefTD], AttrW[T, AttributeIORefTD]):
     """A read-write ``Attribute``."""
-
-    def __init__(
-        self,
-        datatype: DataType[T],
-        io_ref: AttributeIORefTD | None = None,
-        group: str | None = None,
-        initial_value: T | None = None,
-        description: str | None = None,
-    ) -> None:
-        super().__init__(
-            datatype,  # type: ignore
-            io_ref,
-            group=group,
-            initial_value=initial_value,
-            description=description,
-        )
 
     async def process(self, value: T) -> None:
         await self.set(value)

@@ -5,8 +5,8 @@ from collections.abc import Sequence
 from copy import deepcopy
 from typing import get_type_hints
 
-from fastcs.attribute_io import AttributeIO, SimpleAttributeIO
-from fastcs.attributes import Attribute, AttrR, AttrW
+from fastcs.attribute_io import AttributeIO
+from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 
 
 class BaseController:
@@ -36,7 +36,7 @@ class BaseController:
         self._bind_attrs()
 
         # TODO, should validation live inside the controller?
-        ios = ios or [SimpleAttributeIO()]
+        ios = ios or []
         self._attribute_ref_io_map = {io.ref_type: io for io in ios}
         self._validate_io()
 
@@ -58,19 +58,40 @@ class BaseController:
 
     def _add_io_callbacks(self):
         for attr in self.attributes.values():
-            io = self._attribute_ref_io_map[type(attr.io_ref)]
-            # is this the right access mode to own update and set?
-            if isinstance(attr, AttrR):
-                attr.add_update_callback(io.update)
+            io = self._attribute_ref_io_map.get(type(attr.io_ref), None)
             if isinstance(attr, AttrW):
                 # is it on process or write_display?
                 attr.add_process_callback(self._create_send_callback(io, attr))
+            if attr.io_ref is None or io is None:
+                continue
+            if isinstance(attr, AttrR):
+                attr.add_update_callback(self._create_update_callback(io, attr))
 
     def _create_send_callback(self, io, attr):
-        async def send_callback(value):
-            await io.send(attr, value)
+        if attr.io_ref is None:
+
+            async def send_callback(value):
+                await attr.update_display_without_process(value)
+
+                if isinstance(attr, AttrRW):
+                    await attr.set(value)
+
+        else:
+
+            async def send_callback(value):
+                await io.send(attr, value)
 
         return send_callback
+
+    def _create_update_callback(self, io, attr):
+        if io is None or attr.io_ref is None:
+
+            async def update_callback(attr):
+                raise RuntimeError("No AttributeIO registered to handle update")
+
+            return update_callback
+        else:
+            return io.update
 
     @property
     def path(self) -> list[str]:
@@ -130,6 +151,8 @@ class BaseController:
         """Validate that each Attribute has an AttributeIORef for which the
         controller has an associated AttributeIO class."""
         for attr in self.attributes.values():
+            if attr.io_ref is None:
+                continue
             assert type(attr.io_ref) in self._attribute_ref_io_map, (
                 f"{self.__class__.__name__} does not have an AttributeIO to handle "
                 f"{attr.io_ref.__class__.__name__}"

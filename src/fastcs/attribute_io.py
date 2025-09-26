@@ -1,7 +1,7 @@
 from typing import Any, Generic, cast, get_args
 
 from fastcs.attribute_io_ref import AttributeIORef, AttributeIORefT
-from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.attributes import AttrR, AttrRW
 from fastcs.datatypes import T
 
 
@@ -21,19 +21,6 @@ class AttributeIO(Generic[AttributeIORefT, T]):
         value,  # TODO, type this
     ) -> None:
         raise NotImplementedError()
-
-
-class SimpleAttributeIO(AttributeIO[AttributeIORef, T]):
-    """IO for internal parameters"""
-
-    async def send(self, attr: AttrW[T, AttributeIORefT], value) -> None:
-        await attr.update_display_without_process(value)
-
-        if isinstance(attr, AttrRW):
-            await attr.set(value)
-
-    async def update(self, attr: AttrR[T, AttributeIORefT]) -> None:
-        raise RuntimeError("SimpleAttributeIO can't update")
 
 
 AnyAttributeIO = AttributeIO[AttributeIORef, T]
