@@ -172,10 +172,6 @@ class AttrW(Attribute[T, AttributeIORefTD]):
             self._write_display_callbacks = []
         self._write_display_callbacks.append(callback)
 
-    async def put(self, value):
-        # TODO, figure out if there's a difference between putting and processing...
-        await self.process(value)
-
 
 class AttrRW(AttrR[T, AttributeIORefTD], AttrW[T, AttributeIORefTD]):
     """A read-write ``Attribute``."""
