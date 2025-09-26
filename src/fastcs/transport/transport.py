@@ -1,9 +1,12 @@
+import asyncio
 from abc import ABC, abstractmethod
 from typing import Any
 
+from fastcs.controller_api import ControllerAPI
 
-class TransportAdapter(ABC):
-    """A base class for adapting a transport's implementation to
+
+class Transport(ABC):
+    """A base class for transport's implementation
     so it can be used in FastCS."""
 
     @property
@@ -26,3 +29,11 @@ class TransportAdapter(ABC):
     @property
     def context(self) -> dict[str, Any]:
         return {}
+
+    @abstractmethod
+    def initialise(
+        self,
+        controller_api: ControllerAPI,
+        loop: asyncio.AbstractEventLoop,
+    ) -> None:
+        pass

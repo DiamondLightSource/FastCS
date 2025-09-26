@@ -151,7 +151,7 @@ def test_error_if_identical_context_in_transports(mocker: MockerFixture, data):
     mocker.patch("fastcs.launch.FastCS.create_gui")
     mocker.patch("fastcs.launch.FastCS.create_docs")
     mocker.patch(
-        "fastcs.transport.adapter.TransportAdapter.context",
+        "fastcs.transport.Transport.context",
         new_callable=mocker.PropertyMock,
         return_value={"controller": "test"},
     )

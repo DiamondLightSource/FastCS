@@ -1,5 +1,5 @@
 from fastcs.controller_api import ControllerAPI
-from fastcs.transport.adapter import TransportAdapter
+from fastcs.transport import Transport
 from fastcs.transport.epics.docs import EpicsDocs
 from fastcs.transport.epics.gui import PvaEpicsGUI
 from fastcs.transport.epics.pva.options import EpicsPVAOptions
@@ -7,7 +7,7 @@ from fastcs.transport.epics.pva.options import EpicsPVAOptions
 from .ioc import P4PIOC
 
 
-class EpicsPVATransport(TransportAdapter):
+class EpicsPVATransport(Transport):
     """PV access transport."""
 
     def __init__(

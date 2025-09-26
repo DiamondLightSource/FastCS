@@ -9,3 +9,4 @@ from .rest.options import RestOptions as RestOptions
 from .rest.options import RestServerOptions as RestServerOptions
 from .tango.options import TangoDSROptions as TangoDSROptions
 from .tango.options import TangoOptions as TangoOptions
+from .transport import Transport as Transport

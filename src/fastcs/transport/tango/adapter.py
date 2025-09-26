@@ -1,13 +1,13 @@
 import asyncio
 
 from fastcs.controller_api import ControllerAPI
-from fastcs.transport.adapter import TransportAdapter
+from fastcs.transport import Transport
 
 from .dsr import TangoDSR
 from .options import TangoOptions
 
 
-class TangoTransport(TransportAdapter):
+class TangoTransport(Transport):
     """Tango transport."""
 
     def __init__(

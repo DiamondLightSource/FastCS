@@ -1,11 +1,11 @@
 from fastcs.controller_api import ControllerAPI
-from fastcs.transport.adapter import TransportAdapter
+from fastcs.transport import Transport
 
 from .options import RestOptions
 from .rest import RestServer
 
 
-class RestTransport(TransportAdapter):
+class RestTransport(Transport):
     """Rest Transport Adapter."""
 
     def __init__(

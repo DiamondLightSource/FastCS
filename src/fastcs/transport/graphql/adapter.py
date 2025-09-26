@@ -1,11 +1,11 @@
 from fastcs.controller_api import ControllerAPI
-from fastcs.transport.adapter import TransportAdapter
+from fastcs.transport import Transport
 
 from .graphql import GraphQLServer
 from .options import GraphQLOptions
 
 
-class GraphQLTransport(TransportAdapter):
+class GraphQLTransport(Transport):
     """GraphQL transport."""
 
     def __init__(
