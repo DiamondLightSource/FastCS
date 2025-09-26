@@ -22,7 +22,7 @@ class EpicsCATransport(Transport):
         controller_api: ControllerAPI,
         loop: asyncio.AbstractEventLoop | None = None,
     ) -> None:
-        if not loop:
+        if loop is None:
             raise ValueError("EpicsCATransport expects a non-None loop")
         self._controller_api = controller_api
         self._loop = loop

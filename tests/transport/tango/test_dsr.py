@@ -50,12 +50,14 @@ def tango_controller_api(class_mocker: MockerFixture) -> AssertableControllerAPI
 
 
 def create_test_context(tango_controller_api: AssertableControllerAPI):
-    device = TangoTransport(
+    tango_transport = TangoTransport()
+    tango_transport.initialise(
         tango_controller_api,
         # This is passed to enable instantiating the transport, but tests must avoid
         # using via patching of functions. It will raise NotImplementedError if used.
         asyncio.AbstractEventLoop(),
-    )._dsr._device
+    )
+    device = tango_transport._dsr._device
     # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
     with DeviceTestContext(device, debug=0) as proxy:
         yield proxy
