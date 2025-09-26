@@ -18,8 +18,11 @@ class EpicsPVATransport(Transport):
     def initialise(
         self,
         controller_api: ControllerAPI,
-        loop: asyncio.AbstractEventLoop,
+        loop: asyncio.AbstractEventLoop | None = None,
     ) -> None:
+        if not loop:
+            raise ValueError("EpicsPVATransport expects a non-None loop")
+
         self._controller_api = controller_api
         self._pv_prefix = self.options.pva_ioc.pv_prefix
         self._ioc = P4PIOC(self.options.pva_ioc.pv_prefix, controller_api)

@@ -66,7 +66,9 @@ def nest_response(path: list[str], value: Any) -> dict:
 
 
 def create_test_client(gql_controller_api: AssertableControllerAPI) -> TestClient:
-    return TestClient(GraphQLTransport(gql_controller_api)._server._app)
+    graphql_transport = GraphQLTransport()
+    graphql_transport.initialise(gql_controller_api)
+    return TestClient(graphql_transport._server._app)
 
 
 class TestGraphQLServer:

@@ -34,6 +34,6 @@ class Transport(ABC):
     def initialise(
         self,
         controller_api: ControllerAPI,
-        loop: asyncio.AbstractEventLoop,
+        loop: asyncio.AbstractEventLoop | None = None,
     ) -> None:
         pass

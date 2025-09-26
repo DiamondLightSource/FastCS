@@ -20,8 +20,10 @@ class EpicsCATransport(Transport):
     def initialise(
         self,
         controller_api: ControllerAPI,
-        loop: asyncio.AbstractEventLoop,
+        loop: asyncio.AbstractEventLoop | None = None,
     ) -> None:
+        if not loop:
+            raise ValueError("EpicsCATransport expects a non-None loop")
         self._controller_api = controller_api
         self._loop = loop
         self._pv_prefix = self._options.ca_ioc.pv_prefix
