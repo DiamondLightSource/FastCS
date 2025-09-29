@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.tango.adapter &#8212; FastCS 0.9.2.dev16+g9c2042a70 documentation</title>
+    <title>fastcs.transport.tango.adapter &#8212; FastCS 0.10.2.dev1+g08010b7a4 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=91eac263"></script>
+    <script src="../../../../_static/documentation_options.js?v=0460a6b0"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -452,7 +452,7 @@
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportAdapter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transport</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.dsr</span><span class="w"> </span><span class="kn">import</span> <span class="n">TangoDSR</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">TangoOptions</span>
@@ -460,16 +460,19 @@
 
 <div class="viewcode-block" id="TangoTransport">
 <a class="viewcode-back" href="../../../../_api/fastcs.transport.tango.adapter.html#fastcs.transport.tango.adapter.TangoTransport">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TangoTransport</span><span class="p">(</span><span class="n">TransportAdapter</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TangoTransport</span><span class="p">(</span><span class="n">Transport</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tango transport.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">TangoOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="n">TangoOptions</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialise</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">controller_api</span><span class="p">:</span> <span class="n">ControllerAPI</span><span class="p">,</span>
         <span class="n">loop</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">AbstractEventLoop</span><span class="p">,</span>
-        <span class="n">options</span><span class="p">:</span> <span class="n">TangoOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="n">TangoOptions</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">loop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;TangoTransport expects a non-None loop&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dsr</span> <span class="o">=</span> <span class="n">TangoDSR</span><span class="p">(</span><span class="n">controller_api</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
 
     <span class="nd">@property</span>

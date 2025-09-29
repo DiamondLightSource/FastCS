@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.transport &#8212; FastCS 0.9.2.dev16+g9c2042a70 documentation</title>
+    <title>fastcs.transport &#8212; FastCS 0.10.2.dev1+g08010b7a4 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=91eac263"></script>
+    <script src="../_static/documentation_options.js?v=0460a6b0"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -65,7 +65,7 @@
     <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fastcs.transport.adapter" href="fastcs.transport.adapter.html" />
+    <link rel="next" title="fastcs.transport.epics" href="fastcs.transport.epics.html" />
     <link rel="prev" title="fastcs.launch" href="fastcs.launch.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -427,7 +427,6 @@
 <li class="toctree-l2"><a class="reference internal" href="fastcs.exceptions.html"><code class="docutils literal notranslate"><span class="pre">fastcs.exceptions</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.launch.html"><code class="docutils literal notranslate"><span class="pre">fastcs.launch</span></code></a></li>
 <li class="toctree-l2 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.transport</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="fastcs.transport.adapter.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.adapter</span></code></a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.epics.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.ca.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.ca</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.docs</span></code></a></li>
@@ -456,6 +455,7 @@
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.util</span></code></a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.transport.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.transport</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.util</span></code></a></li>
@@ -532,19 +532,19 @@
 <p class="rubric">Submodules</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.adapter.html#module-fastcs.transport.adapter" title="fastcs.transport.adapter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adapter</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.epics.html#module-fastcs.transport.epics" title="fastcs.transport.epics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epics</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="fastcs.transport.epics.html#module-fastcs.transport.epics" title="fastcs.transport.epics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epics</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.transport.graphql.html#module-fastcs.transport.graphql" title="fastcs.transport.graphql"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphql</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.graphql.html#module-fastcs.transport.graphql" title="fastcs.transport.graphql"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphql</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.rest.html#module-fastcs.transport.rest" title="fastcs.transport.rest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rest</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="fastcs.transport.rest.html#module-fastcs.transport.rest" title="fastcs.transport.rest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rest</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.transport.tango.html#module-fastcs.transport.tango" title="fastcs.transport.tango"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tango</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.tango.html#module-fastcs.transport.tango" title="fastcs.transport.tango"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tango</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.transport.html#module-fastcs.transport.transport" title="fastcs.transport.transport"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transport</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -572,11 +572,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="fastcs.transport.adapter.html"
+       href="fastcs.transport.epics.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.adapter</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

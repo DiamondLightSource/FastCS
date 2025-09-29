@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; FastCS 0.9.2.dev16+g9c2042a70 documentation</title>
+    <title>Index &#8212; FastCS 0.10.2.dev1+g08010b7a4 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=91eac263"></script>
+    <script src="_static/documentation_options.js?v=0460a6b0"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -420,7 +420,6 @@
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.exceptions.html"><code class="docutils literal notranslate"><span class="pre">fastcs.exceptions</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.launch.html"><code class="docutils literal notranslate"><span class="pre">fastcs.launch</span></code></a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_api/fastcs.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="_api/fastcs.transport.adapter.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.adapter</span></code></a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_api/fastcs.transport.epics.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="_api/fastcs.transport.epics.ca.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.ca</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="_api/fastcs.transport.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.docs</span></code></a></li>
@@ -449,6 +448,7 @@
 <li class="toctree-l4"><a class="reference internal" href="_api/fastcs.transport.tango.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.util</span></code></a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="_api/fastcs.transport.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.transport</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.util</span></code></a></li>
@@ -778,13 +778,6 @@
 </li>
       </ul></li>
       <li>
-    fastcs.transport.adapter
-
-      <ul>
-        <li><a href="_api/fastcs.transport.adapter.html#module-fastcs.transport.adapter">module</a>
-</li>
-      </ul></li>
-      <li>
     fastcs.transport.epics
 
       <ul>
@@ -833,8 +826,6 @@
         <li><a href="_api/fastcs.transport.epics.docs.html#module-fastcs.transport.epics.docs">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     fastcs.transport.epics.gui
 
@@ -842,6 +833,8 @@
         <li><a href="_api/fastcs.transport.epics.gui.html#module-fastcs.transport.epics.gui">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     fastcs.transport.epics.options
 
@@ -990,6 +983,13 @@
 </li>
       </ul></li>
       <li>
+    fastcs.transport.transport
+
+      <ul>
+        <li><a href="_api/fastcs.transport.transport.html#module-fastcs.transport.transport">module</a>
+</li>
+      </ul></li>
+      <li>
     fastcs.util
 
       <ul>
@@ -1117,8 +1117,6 @@
 </li>
         <li><a href="_api/fastcs.transport.html#module-fastcs.transport">fastcs.transport</a>
 </li>
-        <li><a href="_api/fastcs.transport.adapter.html#module-fastcs.transport.adapter">fastcs.transport.adapter</a>
-</li>
         <li><a href="_api/fastcs.transport.epics.html#module-fastcs.transport.epics">fastcs.transport.epics</a>
 </li>
         <li><a href="_api/fastcs.transport.epics.ca.html#module-fastcs.transport.epics.ca">fastcs.transport.epics.ca</a>
@@ -1176,6 +1174,8 @@
         <li><a href="_api/fastcs.transport.tango.options.html#module-fastcs.transport.tango.options">fastcs.transport.tango.options</a>
 </li>
         <li><a href="_api/fastcs.transport.tango.util.html#module-fastcs.transport.tango.util">fastcs.transport.tango.util</a>
+</li>
+        <li><a href="_api/fastcs.transport.transport.html#module-fastcs.transport.transport">fastcs.transport.transport</a>
 </li>
         <li><a href="_api/fastcs.util.html#module-fastcs.util">fastcs.util</a>
 </li>
@@ -1314,7 +1314,7 @@
 </li>
       <li><a href="_api/fastcs.demo.controllers.html#fastcs.demo.controllers.TemperatureControllerSettings">TemperatureControllerSettings (class in fastcs.demo.controllers)</a>
 </li>
-      <li><a href="_api/fastcs.transport.adapter.html#fastcs.transport.adapter.TransportAdapter">TransportAdapter (class in fastcs.transport.adapter)</a>
+      <li><a href="_api/fastcs.transport.transport.html#fastcs.transport.transport.Transport">Transport (class in fastcs.transport.transport)</a>
 </li>
   </ul></td>
 </tr></table>
