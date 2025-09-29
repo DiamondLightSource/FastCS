@@ -106,9 +106,7 @@ class TemperatureRampController(Controller):
     enabled = AttrRW(
         Enum(OnOffEnum), io_ref=TemperatureControllerAttributeIORef(name="N")
     )
-    target = AttrR(
-        Float(prec=3), io_ref=TemperatureControllerAttributeIORef(name="NumberT")
-    )
+    target = AttrR(Float(prec=3), io_ref=TemperatureControllerAttributeIORef(name="T"))
     actual = AttrR(Float(prec=3), io_ref=TemperatureControllerAttributeIORef(name="A"))
     voltage = AttrR(Float(prec=3))
 
