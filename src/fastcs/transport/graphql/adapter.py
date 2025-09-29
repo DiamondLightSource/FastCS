@@ -16,7 +16,7 @@ class GraphQLTransport(Transport):
     def initialise(
         self,
         controller_api: ControllerAPI,
-        loop: asyncio.AbstractEventLoop | None = None,
+        loop: asyncio.AbstractEventLoop,
     ):
         self._server = GraphQLServer(controller_api)
 

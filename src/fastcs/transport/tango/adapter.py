@@ -16,7 +16,7 @@ class TangoTransport(Transport):
     def initialise(
         self,
         controller_api: ControllerAPI,
-        loop: asyncio.AbstractEventLoop | None = None,
+        loop: asyncio.AbstractEventLoop,
     ):
         if loop is None:
             raise ValueError("TangoTransport expects a non-None loop")

@@ -19,7 +19,7 @@ class RestTransport(Transport):
     def initialise(
         self,
         controller_api: ControllerAPI,
-        loop: asyncio.AbstractEventLoop | None = None,
+        loop: asyncio.AbstractEventLoop,
     ):
         self._server = RestServer(controller_api)
 

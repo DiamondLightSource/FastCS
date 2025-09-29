@@ -1,3 +1,4 @@
+import asyncio
 import copy
 import json
 from typing import Any
@@ -67,7 +68,7 @@ def nest_response(path: list[str], value: Any) -> dict:
 
 def create_test_client(gql_controller_api: AssertableControllerAPI) -> TestClient:
     graphql_transport = GraphQLTransport()
-    graphql_transport.initialise(gql_controller_api)
+    graphql_transport.initialise(gql_controller_api, asyncio.AbstractEventLoop())
     return TestClient(graphql_transport._server._app)
 
 
