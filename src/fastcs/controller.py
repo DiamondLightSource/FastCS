@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections import Counter
 from collections.abc import Sequence
 from copy import deepcopy
 from typing import get_type_hints
@@ -39,8 +40,18 @@ class BaseController:
 
         # TODO, should validation live inside the controller?
         ios = ios or []
+
+        self.__check_unique(ios)
+
         self._attribute_ref_io_map = {io.ref_type: io for io in ios}
         self._validate_io()
+
+    def __check_unique(self, ios: Sequence[AttributeIO[T, AttributeIORefT]]):
+        for ref_type, count in Counter([io.ref_type for io in ios]).items():
+            if count > 1:
+                raise RuntimeError(
+                    f"More than one AttributeIO class handles {ref_type.__name__}"
+                )
 
     async def initialise(self):
         pass
@@ -61,7 +72,7 @@ class BaseController:
     def _add_io_callbacks(self):
         for attr in self.attributes.values():
             ref = attr.io_ref if attr.has_io_ref() else None
-            io = self._attribute_ref_io_map.get(type(ref), None)
+            io = self._attribute_ref_io_map.get(type(ref))
             if isinstance(attr, AttrW):
                 # is it on process or write_display?
                 attr.add_process_callback(self._create_send_callback(io, attr, ref))
@@ -84,10 +95,10 @@ class BaseController:
         return send_callback
 
     def _create_update_callback(self, io, attr, ref):
-        if io is None or ref is None:
+        if ref is None:
 
             async def error_callback():
-                raise RuntimeError("No AttributeIO registered to handle update")
+                raise RuntimeError("Attributes without io_ref can not be updated")
 
             return error_callback
         else:

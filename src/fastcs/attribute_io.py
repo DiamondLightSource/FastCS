@@ -6,6 +6,8 @@ from fastcs.datatypes import T
 
 
 class AttributeIO(Generic[T, AttributeIORefT]):
+    ref_type = AttributeIORef
+
     def __init_subclass__(cls) -> None:
         # sets ref_type from subclass generic args
         # from python 3.12 we can use types.get_original_bases

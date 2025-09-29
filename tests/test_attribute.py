@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import Generic, TypeVar
+from unittest.mock import call
 
 import pytest
 from pytest_mock import MockerFixture
@@ -201,3 +202,66 @@ async def test_dynamic_attribute_io_specification():
         RuntimeError, match="Could not set int_parameter to 101, max is 100"
     ):
         await c.int_parameter.process(101)
+
+
+@pytest.mark.asyncio
+async def test_attribute_io_defaults(mocker: MockerFixture):
+    class MyController(Controller):
+        no_ref = AttrRW(Int())
+        base_class_ref = AttrRW(Int(), io_ref=AttributeIORef())
+
+    with pytest.raises(
+        AssertionError,
+        match="MyController does not have an AttributeIO to handle AttributeIORef",
+    ):
+        c = MyController()
+
+    class SimpleAttributeIO(AttributeIO[T, AttributeIORef]):
+        async def update(self, attr):
+            await attr.set(100)
+
+    with pytest.raises(
+        RuntimeError, match="More than one AttributeIO class handles AttributeIORef"
+    ):
+        MyController(ios=[AttributeIO(), SimpleAttributeIO()])
+
+    # we need to explicitly pass an AttributeIO if we want to handle instances of
+    # the AttributeIORef base class
+    c = MyController(ios=[AttributeIO()])
+    assert not c.no_ref.has_io_ref()
+    assert c.base_class_ref.has_io_ref()
+
+    await c.initialise()
+    await c.attribute_initialise()
+
+    with pytest.raises(NotImplementedError):
+        await c.base_class_ref.update()
+
+    with pytest.raises(NotImplementedError):
+        await c.base_class_ref.process(25)
+
+    # There is a difference between providing an AttributeIO for the default
+    # AttributeIORef class and not specifying the io_ref for an Attribute
+    # default callbacks are not provided by AttributeIO subclasses
+
+    with pytest.raises(
+        RuntimeError, match="Attributes without io_ref can not be updated"
+    ):  # TODO, we need a clearer error message for this
+        await c.no_ref.update()
+
+    process_spy = mocker.spy(c.no_ref, "update_display_without_process")
+    await c.no_ref.process(40)
+    process_spy.assert_called_with(40)
+
+    # this is correct, but we want to reconsider this logic, it seems wasteful to
+    # call update_display twice...
+    assert process_spy.call_args_list == [call(40), call(40)]
+
+    c2 = MyController(ios=[SimpleAttributeIO()])
+
+    await c2.initialise()
+    await c2.attribute_initialise()
+
+    assert c2.base_class_ref.get() == 0
+    await c2.base_class_ref.update()
+    assert c2.base_class_ref.get() == 100
