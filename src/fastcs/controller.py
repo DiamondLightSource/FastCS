@@ -6,7 +6,9 @@ from copy import deepcopy
 from typing import get_type_hints
 
 from fastcs.attribute_io import AttributeIO
+from fastcs.attribute_io_ref import AttributeIORefT
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.datatypes import T
 
 
 class BaseController:
@@ -21,7 +23,7 @@ class BaseController:
         self,
         path: list[str] | None = None,
         description: str | None = None,
-        ios: Sequence[AttributeIO] | None = None,
+        ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
     ) -> None:
         if (
             description is not None
@@ -194,7 +196,9 @@ class Controller(BaseController):
     root_attribute: Attribute | None = None
 
     def __init__(
-        self, description: str | None = None, ios: Sequence[AttributeIO] | None = None
+        self,
+        description: str | None = None,
+        ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
     ) -> None:
         super().__init__(description=description, ios=ios)
 

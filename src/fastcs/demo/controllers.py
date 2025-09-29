@@ -35,7 +35,7 @@ class TemperatureControllerAttributeIORef(AttributeIORef):
 
 
 class TemperatureControllerAttributeIO(
-    AttributeIO[TemperatureControllerAttributeIORef, NumberT]
+    AttributeIO[NumberT, TemperatureControllerAttributeIORef]
 ):
     def __init__(self, connection: IPConnection, suffix: str):
         self._connection = connection

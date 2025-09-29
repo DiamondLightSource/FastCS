@@ -4,23 +4,16 @@ import asyncio
 from collections.abc import Callable
 from typing import Generic
 
-from typing_extensions import TypeVar
-
 import fastcs
-from fastcs.attribute_io_ref import AttributeIORef
 
+from .attribute_io_ref import AttributeIORefT
 from .datatypes import ATTRIBUTE_TYPES, AttrSetCallback, AttrUpdateCallback, DataType, T
-
-# TODO rename this: typevar with default
-AttributeIORefTD = TypeVar(
-    "AttributeIORefTD", bound=AttributeIORef, default=AttributeIORef, covariant=True
-)
 
 ONCE = float("inf")
 """Special value to indicate that an attribute should be updated once on start up."""
 
 
-class Attribute(Generic[T, AttributeIORefTD]):
+class Attribute(Generic[T, AttributeIORefT]):
     """Base FastCS attribute.
 
     Instances of this class added to a ``Controller`` will be used by the backend.
@@ -29,7 +22,7 @@ class Attribute(Generic[T, AttributeIORefTD]):
     def __init__(
         self,
         datatype: DataType[T],
-        io_ref: AttributeIORefTD | None = None,
+        io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         description: str | None = None,
     ) -> None:
@@ -48,7 +41,7 @@ class Attribute(Generic[T, AttributeIORefTD]):
         self._update_datatype_callbacks: list[Callable[[DataType[T]], None]] = []
 
     @property
-    def io_ref(self) -> AttributeIORefTD:
+    def io_ref(self) -> AttributeIORefT:
         if self._io_ref is None:
             raise RuntimeError(f"{self} has no AttributeIORef")
         return self._io_ref
@@ -86,13 +79,13 @@ class Attribute(Generic[T, AttributeIORefTD]):
             callback(datatype)
 
 
-class AttrR(Attribute[T, AttributeIORefTD]):
+class AttrR(Attribute[T, AttributeIORefT]):
     """A read-only ``Attribute``."""
 
     def __init__(
         self,
         datatype: DataType[T],
-        io_ref: AttributeIORefTD | None = None,
+        io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         initial_value: T | None = None,
         description: str | None = None,
@@ -133,13 +126,13 @@ class AttrR(Attribute[T, AttributeIORefTD]):
             await asyncio.gather(*[cb() for cb in self._on_update_callbacks])
 
 
-class AttrW(Attribute[T, AttributeIORefTD]):
+class AttrW(Attribute[T, AttributeIORefT]):
     """A write-only ``Attribute``."""
 
     def __init__(
         self,
         datatype: DataType[T],
-        io_ref: AttributeIORefTD | None = None,
+        io_ref: AttributeIORefT | None = None,
         group: str | None = None,
         description: str | None = None,
     ) -> None:
@@ -180,7 +173,7 @@ class AttrW(Attribute[T, AttributeIORefTD]):
         self._write_display_callbacks.append(callback)
 
 
-class AttrRW(AttrR[T, AttributeIORefTD], AttrW[T, AttributeIORefTD]):
+class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
     """A read-write ``Attribute``."""
 
     async def process(self, value: T) -> None:

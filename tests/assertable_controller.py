@@ -23,11 +23,11 @@ class MyTestAttributeIORef(AttributeIORef):
     update_period = 1
 
 
-class MyTestAttributeIO(AttributeIO[MyTestAttributeIORef, T]):
-    async def update(self, attr: AttrR[T]):
+class MyTestAttributeIO(AttributeIO[T, MyTestAttributeIORef]):
+    async def update(self, attr: AttrR[T, MyTestAttributeIORef]):
         print(f"update {attr}")
 
-    async def send(self, attr: AttrW[T], value: T):
+    async def send(self, attr: AttrW[T, MyTestAttributeIORef], value: T):
         print(f"sending {attr} = {value}")
 
 

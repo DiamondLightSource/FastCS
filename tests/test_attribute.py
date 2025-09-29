@@ -69,7 +69,7 @@ async def test_attribute_io():
     class MyAttributeIORef(AttributeIORef):
         cool: int
 
-    class MyAttributeIO(AttributeIO[MyAttributeIORef, int]):
+    class MyAttributeIO(AttributeIO[int, MyAttributeIORef]):
         async def update(self, attr: AttrR[T, MyAttributeIORef]):
             print("I am updating", self.ref_type, attr.io_ref.cool)
 
@@ -123,10 +123,10 @@ async def test_dynamic_attribute_io_specification():
         max: NumberT | None = None
         read_only: bool = False
 
-    class DemoParameterAttributeIO(AttributeIO[DemoParameterAttributeIORef, NumberT]):
+    class DemoParameterAttributeIO(AttributeIO[NumberT, DemoParameterAttributeIORef]):
         async def update(
             self,
-            attr: AttrR[NumberT],
+            attr: AttrR[NumberT, DemoParameterAttributeIORef],
         ):
             # OK, so this doesn't really work when we have min and maxes...
             await attr.set(attr.get() + 1)
@@ -145,14 +145,12 @@ async def test_dynamic_attribute_io_specification():
 
             if (io_min := attr.io_ref.min) is not None and value < io_min:
                 raise RuntimeError(
-                    f"Could not set {attr.io_ref.name} to {value}, "
-                    "min is {attr.io_ref.min}"
+                    f"Could not set {attr.io_ref.name} to {value}, min is {io_min}"
                 )
 
             if (io_max := attr.io_ref.max) is not None and value > io_max:
                 raise RuntimeError(
-                    f"Could not set {attr.io_ref.name} to {value}, "
-                    f"max is {attr.io_ref.max}"
+                    f"Could not set {attr.io_ref.name} to {value}, max is {io_max}"
                 )
             # TODO: we should always end send with a update_display_without_process...
 
