@@ -1,22 +1,25 @@
 import asyncio
 
 from fastcs.controller_api import ControllerAPI
-from fastcs.transport.adapter import TransportAdapter
+from fastcs.transport import Transport
 
 from .dsr import TangoDSR
 from .options import TangoOptions
 
 
-class TangoTransport(TransportAdapter):
+class TangoTransport(Transport):
     """Tango transport."""
 
-    def __init__(
+    def __init__(self, options: TangoOptions | None = None):
+        self._options = options or TangoOptions()
+
+    def initialise(
         self,
         controller_api: ControllerAPI,
         loop: asyncio.AbstractEventLoop,
-        options: TangoOptions | None = None,
     ):
-        self._options = options or TangoOptions()
+        if loop is None:
+            raise ValueError("TangoTransport expects a non-None loop")
         self._dsr = TangoDSR(controller_api, loop)
 
     @property

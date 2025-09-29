@@ -564,7 +564,7 @@ def test_update_datatype(mocker: MockerFixture):
 
 
 def test_ca_context_contains_softioc_commands(mocker: MockerFixture):
-    transport = EpicsCATransport(mocker.MagicMock(), mocker.MagicMock())
+    transport = EpicsCATransport(mocker.MagicMock())
 
     softioc_commands = {
         command: getattr(softioc, command) for command in softioc.command_names

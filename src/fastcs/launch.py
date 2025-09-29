@@ -17,7 +17,7 @@ from fastcs import __version__
 from .backend import Backend
 from .controller import Controller
 from .exceptions import LaunchError
-from .transport.adapter import TransportAdapter
+from .transport import Transport
 from .transport.epics.ca.options import EpicsCAOptions
 from .transport.epics.pva.options import EpicsPVAOptions
 from .transport.graphql.options import GraphQLOptions
@@ -33,57 +33,15 @@ TransportOptions: TypeAlias = list[
 class FastCS:
     """For launching a controller with given transport(s)."""
 
-    def __init__(
-        self,
-        controller: Controller,
-        transport_options: TransportOptions,
-    ):
+    def __init__(self, controller: Controller, transports: list[Transport]):
         self._loop = asyncio.get_event_loop()
         self._controller = controller
         self._backend = Backend(controller, self._loop)
-        transport: TransportAdapter
-        self._transports: list[TransportAdapter] = []
-        for option in transport_options:
-            match option:
-                case EpicsPVAOptions():
-                    from .transport.epics.pva.adapter import EpicsPVATransport
-
-                    transport = EpicsPVATransport(
-                        self._backend.controller_api,
-                        option,
-                    )
-                case EpicsCAOptions():
-                    from .transport.epics.ca.adapter import EpicsCATransport
-
-                    transport = EpicsCATransport(
-                        self._backend.controller_api,
-                        self._loop,
-                        option,
-                    )
-                case TangoOptions():
-                    from .transport.tango.adapter import TangoTransport
-
-                    transport = TangoTransport(
-                        self._backend.controller_api,
-                        self._loop,
-                        option,
-                    )
-                case RestOptions():
-                    from .transport.rest.adapter import RestTransport
-
-                    transport = RestTransport(
-                        self._backend.controller_api,
-                        option,
-                    )
-                case GraphQLOptions():
-                    from .transport.graphql.adapter import GraphQLTransport
-
-                    transport = GraphQLTransport(
-                        self._backend.controller_api,
-                        option,
-                    )
-
-            self._transports.append(transport)
+        self._transports = transports
+        for transport in self._transports:
+            transport.initialise(
+                controller_api=self._backend.controller_api, loop=self._loop
+            )
 
     def create_docs(self) -> None:
         for transport in self._transports:
