@@ -17,11 +17,7 @@ dependencies = [
     "fastapi[standard]",
     "numpy",
     "pydantic",
-    "pvi~=0.11.0",
-    "pytango",
-    "softioc>=4.5.0",
-    "strawberry-graphql",
-    "p4p",
+    "ruamel.yaml",
     "IPython",
 ]
 dynamic = ["version"]
@@ -30,8 +26,18 @@ readme = "README.md"
 requires-python = ">=3.11"
 
 [project.optional-dependencies]
+demo = ["tickit~=0.4.3"]
+epicsca = ["pvi~=0.11.0", "softioc>=4.5.0"]
+epicspva = ["p4p", "pvi~=0.11.0"]
+epics = ["fastcs[epicsca]", "fastcs[epicspca]"]
+tango = ["pytango"]
+graphql = ["strawberry-graphql", "uvicorn[standard]>=0.12.0"]
+rest = ["fastapi[standard]", "numpy", "uvicorn[standard]>=0.12.0"]
+all = ["fastcs[epics]", "fastcs[tango]", "fastcs[graphql]", "fastcs[rest]"]
 dev = [
     "copier",
+    "fastcs[all]",
+    "fastcs[demo]",
     "myst-parser",
     "pipdeptree",
     "pre-commit",
@@ -50,14 +56,10 @@ dev = [
     "sphinx-design",
     "tox-direct",
     "types-mock",
-    "setuptools>=70.1", # https://github.com/DiamondLightSource/aioca/issues/71
+    "setuptools>=70.1",          # https://github.com/DiamondLightSource/aioca/issues/71
     "aioca",
     "p4p",
     "httpx",
-    "tickit~=0.4.3",
-]
-demo = [
-    "tickit~=0.4.3",
 ]
 
 [project.scripts]
