@@ -29,3 +29,8 @@ class ControllerAPI:
         yield self
         for api in self.sub_apis.values():
             yield from api.walk_api()
+
+    def __repr__(self):
+        return f"""\
+ControllerAPI(path={self.path}, sub_apis=[{", ".join(self.sub_apis.keys())}])\
+"""

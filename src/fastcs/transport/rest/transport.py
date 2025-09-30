@@ -23,3 +23,6 @@ class RestTransport(Transport):
 
     async def serve(self) -> None:
         await self._server.serve(self.rest)
+
+    def __repr__(self) -> str:
+        return f"RestTransport({self.rest.host}:{self.rest.port})"

@@ -82,6 +82,9 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
         for callback in self._update_datatype_callbacks:
             callback(datatype)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self._datatype})"
+
 
 class AttrR(Attribute[T, AttributeIORefT]):
     """A read-only ``Attribute``."""

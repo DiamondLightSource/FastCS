@@ -185,6 +185,11 @@ class BaseController(Tracer):
     def get_sub_controllers(self) -> dict[str, Controller]:
         return self.__sub_controller_tree
 
+    def __repr__(self):
+        return f"""\
+{type(self).__name__}({self.path}, {list(self.__sub_controller_tree.keys())})\
+"""
+
 
 class Controller(BaseController):
     """Top-level controller for a device.

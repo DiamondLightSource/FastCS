@@ -54,3 +54,6 @@ class EpicsCATransport(Transport):
             for command_name in softioc.command_names
             if command_name != "exit"
         }
+
+    def __repr__(self):
+        return f"EpicsCATransport({self._pv_prefix})"

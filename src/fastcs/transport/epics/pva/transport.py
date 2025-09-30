@@ -43,3 +43,6 @@ class EpicsPVATransport(Transport):
 
     def create_gui(self) -> None:
         PvaEpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
+
+    def __repr__(self):
+        return f"EpicsPVATransport({self._pv_prefix})"
