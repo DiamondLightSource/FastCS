@@ -1,6 +1,6 @@
 {
   "$defs": {
-    "EpicsCAOptions": {
+    "EpicsCATransport": {
       "properties": {
         "docs": {
           "$ref": "#/$defs/EpicsDocsOptions"
@@ -12,7 +12,7 @@
           "$ref": "#/$defs/EpicsIOCOptions"
         }
       },
-      "title": "EpicsCAOptions",
+      "title": "EpicsCATransport",
       "type": "object"
     },
     "EpicsDocsOptions": {
@@ -80,7 +80,7 @@
       "title": "EpicsIOCOptions",
       "type": "object"
     },
-    "EpicsPVAOptions": {
+    "EpicsPVATransport": {
       "properties": {
         "docs": {
           "$ref": "#/$defs/EpicsDocsOptions"
@@ -92,16 +92,7 @@
           "$ref": "#/$defs/EpicsIOCOptions"
         }
       },
-      "title": "EpicsPVAOptions",
-      "type": "object"
-    },
-    "GraphQLOptions": {
-      "properties": {
-        "gql": {
-          "$ref": "#/$defs/GraphQLServerOptions"
-        }
-      },
-      "title": "GraphQLOptions",
+      "title": "EpicsPVATransport",
       "type": "object"
     },
     "GraphQLServerOptions": {
@@ -125,13 +116,13 @@
       "title": "GraphQLServerOptions",
       "type": "object"
     },
-    "RestOptions": {
+    "GraphQLTransport": {
       "properties": {
-        "rest": {
-          "$ref": "#/$defs/RestServerOptions"
+        "graphql": {
+          "$ref": "#/$defs/GraphQLServerOptions"
         }
       },
-      "title": "RestOptions",
+      "title": "GraphQLTransport",
       "type": "object"
     },
     "RestServerOptions": {
@@ -153,6 +144,15 @@
         }
       },
       "title": "RestServerOptions",
+      "type": "object"
+    },
+    "RestTransport": {
+      "properties": {
+        "rest": {
+          "$ref": "#/$defs/RestServerOptions"
+        }
+      },
+      "title": "RestTransport",
       "type": "object"
     },
     "SomeConfig": {
@@ -189,13 +189,13 @@
       "title": "TangoDSROptions",
       "type": "object"
     },
-    "TangoOptions": {
+    "TangoTransport": {
       "properties": {
         "dsr": {
           "$ref": "#/$defs/TangoDSROptions"
         }
       },
-      "title": "TangoOptions",
+      "title": "TangoTransport",
       "type": "object"
     }
   },
@@ -208,19 +208,19 @@
       "items": {
         "anyOf": [
           {
-            "$ref": "#/$defs/EpicsPVAOptions"
+            "$ref": "#/$defs/EpicsPVATransport"
           },
           {
-            "$ref": "#/$defs/EpicsCAOptions"
+            "$ref": "#/$defs/EpicsCATransport"
           },
           {
-            "$ref": "#/$defs/TangoOptions"
+            "$ref": "#/$defs/TangoTransport"
           },
           {
-            "$ref": "#/$defs/RestOptions"
+            "$ref": "#/$defs/RestTransport"
           },
           {
-            "$ref": "#/$defs/GraphQLOptions"
+            "$ref": "#/$defs/GraphQLTransport"
           }
         ]
       },

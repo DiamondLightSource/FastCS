@@ -18,8 +18,7 @@ from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import EpicsIOCOptions
-from fastcs.transport.epics.pva.adapter import EpicsPVATransport
-from fastcs.transport.epics.pva.options import EpicsPVAOptions
+from fastcs.transport.epics.pva.transport import EpicsPVATransport
 from fastcs.wrappers import command
 
 
@@ -227,8 +226,9 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
 
 
 def make_fastcs(pv_prefix: str, controller: Controller) -> FastCS:
-    epics_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
-    return FastCS(controller, [EpicsPVATransport(epics_options)])
+    return FastCS(
+        controller, [EpicsPVATransport(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))]
+    )
 
 
 def test_read_signal_set():

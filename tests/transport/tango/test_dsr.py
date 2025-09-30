@@ -16,7 +16,7 @@ from tests.assertable_controller import (
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
-from fastcs.transport.tango.adapter import TangoTransport
+from fastcs.transport.tango.transport import TangoTransport
 
 
 async def patch_run_threadsafe_blocking(coro, loop):

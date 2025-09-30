@@ -2,7 +2,7 @@ import asyncio
 import inspect
 import json
 import signal
-from collections.abc import Coroutine
+from collections.abc import Coroutine, Sequence
 from functools import partial
 from pathlib import Path
 from typing import Annotated, Any, Optional, TypeAlias, get_type_hints
@@ -13,27 +13,31 @@ from pydantic import BaseModel, create_model
 from ruamel.yaml import YAML
 
 from fastcs import __version__
+from fastcs.transport.epics.ca.transport import EpicsCATransport
+from fastcs.transport.epics.pva.transport import EpicsPVATransport
+from fastcs.transport.graphql.transport import GraphQLTransport
+from fastcs.transport.rest.transport import RestTransport
+from fastcs.transport.tango.transport import TangoTransport
 
 from .backend import Backend
 from .controller import Controller
 from .exceptions import LaunchError
 from .transport import Transport
-from .transport.epics.ca.options import EpicsCAOptions
-from .transport.epics.pva.options import EpicsPVAOptions
-from .transport.graphql.options import GraphQLOptions
-from .transport.rest.options import RestOptions
-from .transport.tango.options import TangoOptions
 
 # Define a type alias for transport options
-TransportOptions: TypeAlias = list[
-    EpicsPVAOptions | EpicsCAOptions | TangoOptions | RestOptions | GraphQLOptions
+TransportList: TypeAlias = list[
+    EpicsPVATransport
+    | EpicsCATransport
+    | TangoTransport
+    | RestTransport
+    | GraphQLTransport
 ]
 
 
 class FastCS:
     """For launching a controller with given transport(s)."""
 
-    def __init__(self, controller: Controller, transports: list[Transport]):
+    def __init__(self, controller: Controller, transports: Sequence[Transport]):
         self._loop = asyncio.get_event_loop()
         self._controller = controller
         self._backend = Backend(controller, self._loop)
@@ -45,13 +49,11 @@ class FastCS:
 
     def create_docs(self) -> None:
         for transport in self._transports:
-            if hasattr(transport.options, "docs"):
-                transport.create_docs()
+            transport.create_docs()
 
     def create_gui(self) -> None:
         for transport in self._transports:
-            if hasattr(transport.options, "gui"):
-                transport.create_gui()
+            transport.create_gui()
 
     def run(self):
         serve = asyncio.ensure_future(self.serve())
@@ -231,7 +233,7 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
     if len(args) == 1:
         fastcs_options = create_model(
             f"{controller_class.__name__}",
-            transport=(TransportOptions, ...),
+            transport=(TransportList, ...),
             __config__={"extra": "forbid"},
         )
     elif len(args) == 2:
@@ -248,7 +250,7 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
         fastcs_options = create_model(
             f"{controller_class.__name__}",
             controller=(options_type, ...),
-            transport=(TransportOptions, ...),
+            transport=(TransportList, ...),
             __config__={"extra": "forbid"},
         )
     else:

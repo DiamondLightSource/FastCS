@@ -16,7 +16,7 @@ from tests.assertable_controller import (
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
-from fastcs.transport.rest.adapter import RestTransport
+from fastcs.transport.rest.transport import RestTransport
 
 
 class RestController(MyTestController):
