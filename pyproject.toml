@@ -17,6 +17,7 @@ dependencies = [
     "fastapi[standard]",
     "numpy",
     "pydantic",
+    "ruamel.yaml",
     "IPython",
 ]
 dynamic = ["version"]
