@@ -13,10 +13,9 @@
         :template: custom-module-template.rst
         :recursive:
     
-        adapter
         ioc
-        options
         pvi_tree
+        transport
         types
     
     

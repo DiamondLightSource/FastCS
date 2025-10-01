@@ -13,9 +13,9 @@
         :template: custom-module-template.rst
         :recursive:
     
-        adapter
         options
         rest
+        transport
         util
     
     

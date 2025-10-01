@@ -1,7 +1,6 @@
 ``fastcs.transport.tango.options``
 ==================================
         
-        
 
 .. automodule:: fastcs.transport.tango.options
     :members:
@@ -18,6 +17,5 @@
         :nosignatures:
     
         TangoDSROptions
-        TangoOptions
     
     

@@ -1,7 +1,6 @@
 ``fastcs.transport.rest.options``
 =================================
         
-        
 
 .. automodule:: fastcs.transport.rest.options
     :members:
@@ -17,7 +16,6 @@
     .. autosummary::
         :nosignatures:
     
-        RestOptions
         RestServerOptions
     
     

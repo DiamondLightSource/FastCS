@@ -1,7 +1,6 @@
 ``fastcs.transport.graphql.options``
 ====================================
         
-        
 
 .. automodule:: fastcs.transport.graphql.options
     :members:
@@ -17,7 +16,6 @@
     .. autosummary::
         :nosignatures:
     
-        GraphQLOptions
         GraphQLServerOptions
     
     

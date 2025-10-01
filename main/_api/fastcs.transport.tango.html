@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.transport.tango &#8212; FastCS 0.10.2.dev2+g5ceea05df documentation</title>
+    <title>fastcs.transport.tango &#8212; FastCS 0.10.2.dev3+gcc114925a documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=485a6656"></script>
+    <script src="../_static/documentation_options.js?v=a9b86ac0"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -65,7 +65,7 @@
     <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fastcs.transport.tango.adapter" href="fastcs.transport.tango.adapter.html" />
+    <link rel="next" title="fastcs.transport.tango.dsr" href="fastcs.transport.tango.dsr.html" />
     <link rel="prev" title="fastcs.transport.rest.util" href="fastcs.transport.rest.util.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -436,22 +436,22 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.adapter.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.adapter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.graphql</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.transport</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.adapter.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.adapter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.options</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.rest</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.transport</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.util</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.adapter.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.adapter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.dsr.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.dsr</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.transport</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.util</span></code></a></li>
 </ul>
 </details></li>
@@ -535,13 +535,13 @@
 <p class="rubric">Submodules</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.tango.adapter.html#module-fastcs.transport.tango.adapter" title="fastcs.transport.tango.adapter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adapter</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.tango.dsr.html#module-fastcs.transport.tango.dsr" title="fastcs.transport.tango.dsr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dsr</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="fastcs.transport.tango.dsr.html#module-fastcs.transport.tango.dsr" title="fastcs.transport.tango.dsr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dsr</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.transport.tango.options.html#module-fastcs.transport.tango.options" title="fastcs.transport.tango.options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">options</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.tango.options.html#module-fastcs.transport.tango.options" title="fastcs.transport.tango.options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">options</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.transport.tango.transport.html#module-fastcs.transport.tango.transport" title="fastcs.transport.tango.transport"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transport</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="fastcs.transport.tango.util.html#module-fastcs.transport.tango.util" title="fastcs.transport.tango.util"><code class="xref py py-obj docutils literal notranslate"><span class="pre">util</span></code></a></p></td>
@@ -572,11 +572,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="fastcs.transport.tango.adapter.html"
+       href="fastcs.transport.tango.dsr.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.adapter</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.dsr</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
