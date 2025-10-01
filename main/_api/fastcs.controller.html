@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.controller &#8212; FastCS 0.10.2.dev3+gcc114925a documentation</title>
+    <title>fastcs.controller &#8212; FastCS 0.10.2.dev8+g58000ca7e documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=a9b86ac0"></script>
+    <script src="../_static/documentation_options.js?v=87370c5d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -538,9 +538,6 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#fastcs.controller.Controller" title="fastcs.controller.Controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Controller</span></code></a></p></td>
 <td><p>Top-level controller for a device.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.controller.SubController" title="fastcs.controller.SubController"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SubController</span></code></a></p></td>
-<td><p>A subordinate to a <code class="docutils literal notranslate"><span class="pre">Controller</span></code> for managing a subset of a device.</p></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -570,14 +567,6 @@
 this class can be loaded into a backend to access its <code class="docutils literal notranslate"><span class="pre">Attribute``s.</span> <span class="pre">The</span> <span class="pre">backend</span>
 <span class="pre">can</span> <span class="pre">then</span> <span class="pre">perform</span> <span class="pre">a</span> <span class="pre">specific</span> <span class="pre">function</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">set</span> <span class="pre">of</span> <span class="pre">``Attributes</span></code>, such as
 generating a UI or creating parameters for a control system.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.controller.SubController">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.controller.</span></span><span class="sig-name descname"><span class="pre">SubController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/controller.html#SubController"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controller.SubController" title="Link to this definition">#</a></dt>
-<dd><p>A subordinate to a <code class="docutils literal notranslate"><span class="pre">Controller</span></code> for managing a subset of a device.</p>
-<p>An instance of this class can be registered with a parent <code class="docutils literal notranslate"><span class="pre">Controller</span></code> to include
-it as part of a larger device.</p>
 </dd></dl>
 
 </section>
@@ -635,7 +624,6 @@ it as part of a larger device.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.SubController"><code class="docutils literal notranslate"><span class="pre">SubController</span></code></a></li>
 </ul>
   </nav></div>
 

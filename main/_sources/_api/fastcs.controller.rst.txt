@@ -2,7 +2,6 @@
 =====================
         
         
-        
 
 .. automodule:: fastcs.controller
     :members:
@@ -20,6 +19,5 @@
     
         BaseController
         Controller
-        SubController
     
     
