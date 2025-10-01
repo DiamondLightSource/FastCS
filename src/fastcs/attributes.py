@@ -4,8 +4,6 @@ import asyncio
 from collections.abc import Callable
 from typing import Generic
 
-import fastcs
-
 from .attribute_io_ref import AttributeIORefT
 from .datatypes import ATTRIBUTE_TYPES, AttrSetCallback, AttrUpdateCallback, DataType, T
 
@@ -60,9 +58,6 @@ class Attribute(Generic[T, AttributeIORefT]):
     @property
     def group(self) -> str | None:
         return self._group
-
-    async def initialise(self, controller: fastcs.controller.BaseController) -> None:
-        pass
 
     def add_update_datatype_callback(
         self, callback: Callable[[DataType[T]], None]

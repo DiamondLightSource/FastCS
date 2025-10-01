@@ -14,9 +14,6 @@ from fastcs.controller_api import ControllerAPI
 from fastcs.datatypes import Int, T
 from fastcs.wrappers import command, scan
 
-# TODO: do we want to have separater ref and AttributeIO classes
-# for R and RW/W attributes?
-
 
 @dataclass
 class MyTestAttributeIORef(AttributeIORef):

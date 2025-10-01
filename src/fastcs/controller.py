@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from collections import Counter
 from collections.abc import Sequence
 from copy import deepcopy
@@ -58,12 +57,6 @@ class BaseController:
 
     async def attribute_initialise(self) -> None:
         # Initialise any registered handlers for attributes
-        coros = [attr.initialise(self) for attr in self.attributes.values()]
-        try:
-            await asyncio.gather(*coros)
-        except asyncio.CancelledError:
-            pass
-
         self._add_io_callbacks()
 
         for controller in self.get_sub_controllers().values():
