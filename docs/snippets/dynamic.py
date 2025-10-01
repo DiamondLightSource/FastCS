@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from fastcs.attributes import AttrHandlerRW, Attribute, AttrR, AttrRW, AttrW
 from fastcs.connections import IPConnection, IPConnectionSettings
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller
 from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.options import EpicsCAOptions
@@ -76,7 +76,7 @@ class TemperatureControllerHandler(AttrHandlerRW):
         )
 
 
-class TemperatureRampController(SubController):
+class TemperatureRampController(Controller):
     def __init__(self, index: int, connection: IPConnection):
         super().__init__(f"Ramp {index}")
 

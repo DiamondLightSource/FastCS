@@ -4,7 +4,7 @@ import enum
 import numpy as np
 
 from fastcs.attributes import AttrHandlerW, AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import (
@@ -37,7 +37,7 @@ class ParentController(Controller):
     )
 
 
-class ChildController(SubController):
+class ChildController(Controller):
     fail_on_next_e = True
     c: AttrW = AttrW(Int(), handler=SimpleAttributeSetter())
 

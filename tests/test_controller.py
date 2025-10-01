@@ -1,14 +1,14 @@
 import pytest
 
 from fastcs.attributes import AttrR
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller
 from fastcs.datatypes import Int
 
 
 def test_controller_nesting():
     controller = Controller()
-    sub_controller = SubController()
-    sub_sub_controller = SubController()
+    sub_controller = Controller()
+    sub_sub_controller = Controller()
 
     controller.register_sub_controller("a", sub_controller)
     sub_controller.register_sub_controller("b", sub_sub_controller)
@@ -21,7 +21,7 @@ def test_controller_nesting():
     with pytest.raises(
         ValueError, match=r"Controller .* already has a SubController registered as .*"
     ):
-        controller.register_sub_controller("a", SubController())
+        controller.register_sub_controller("a", Controller())
 
     with pytest.raises(
         ValueError, match=r"SubController is already registered under .*"
@@ -29,7 +29,7 @@ def test_controller_nesting():
         controller.register_sub_controller("c", sub_controller)
 
 
-class SomeSubController(SubController):
+class SomeSubController(Controller):
     def __init__(self):
         super().__init__()
 
@@ -44,7 +44,7 @@ class SomeController(Controller):
     equal_attr = AttrR(Int())
     annotated_and_equal_attr: AttrR[int] = AttrR(Int())
 
-    def __init__(self, sub_controller: SubController):
+    def __init__(self, sub_controller: Controller):
         self.attributes = {}
 
         self.annotated_attr = AttrR(Int())

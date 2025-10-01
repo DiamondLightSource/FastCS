@@ -1,5 +1,5 @@
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller
 from fastcs.datatypes import Int
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.transport import EpicsCATransport
@@ -12,7 +12,7 @@ class ParentController(Controller):
     b: AttrRW = AttrRW(Int())
 
 
-class ChildController(SubController):
+class ChildController(Controller):
     c: AttrW = AttrW(Int())
 
     @command()

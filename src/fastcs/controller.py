@@ -26,7 +26,7 @@ class BaseController:
         if not hasattr(self, "attributes"):
             self.attributes = {}
         self._path: list[str] = path or []
-        self.__sub_controller_tree: dict[str, SubController] = {}
+        self.__sub_controller_tree: dict[str, Controller] = {}
 
         self._bind_attrs()
 
@@ -98,7 +98,7 @@ class BaseController:
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
-    def register_sub_controller(self, name: str, sub_controller: SubController):
+    def register_sub_controller(self, name: str, sub_controller: Controller):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
                 f"Controller {self} already has a SubController registered as {name}"
@@ -116,7 +116,7 @@ class BaseController:
                 )
             self.attributes[name] = sub_controller.root_attribute
 
-    def get_sub_controllers(self) -> dict[str, SubController]:
+    def get_sub_controllers(self) -> dict[str, Controller]:
         return self.__sub_controller_tree
 
 
@@ -136,16 +136,3 @@ class Controller(BaseController):
 
     async def connect(self) -> None:
         pass
-
-
-class SubController(BaseController):
-    """A subordinate to a ``Controller`` for managing a subset of a device.
-
-    An instance of this class can be registered with a parent ``Controller`` to include
-    it as part of a larger device.
-    """
-
-    root_attribute: Attribute | None = None
-
-    def __init__(self, description: str | None = None) -> None:
-        super().__init__(description=description)

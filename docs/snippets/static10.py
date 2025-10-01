@@ -6,7 +6,7 @@ from typing import Any
 
 from fastcs.attributes import AttrHandlerRW, AttrR, AttrRW, AttrW
 from fastcs.connections import IPConnection, IPConnectionSettings
-from fastcs.controller import BaseController, Controller, SubController
+from fastcs.controller import BaseController, Controller
 from fastcs.datatypes import Float, Int, String
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.options import EpicsCAOptions
@@ -44,7 +44,7 @@ class TemperatureControllerHandler(AttrHandlerRW):
         )
 
 
-class TemperatureRampController(SubController):
+class TemperatureRampController(Controller):
     start = AttrRW(Int(), handler=TemperatureControllerHandler("S"))
     end = AttrRW(Int(), handler=TemperatureControllerHandler("E"))
 
