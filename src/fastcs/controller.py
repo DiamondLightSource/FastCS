@@ -26,7 +26,7 @@ class BaseController:
         if not hasattr(self, "attributes"):
             self.attributes = {}
         self._path: list[str] = path or []
-        self.__sub_controller_tree: dict[str, SubController] = {}
+        self.__sub_controller_tree: dict[str, Controller] = {}
 
         self._bind_attrs()
 
@@ -51,7 +51,7 @@ class BaseController:
 
     def set_path(self, path: list[str]):
         if self._path:
-            raise ValueError(f"SubController is already registered under {self.path}")
+            raise ValueError(f"sub controller is already registered under {self.path}")
 
         self._path = path
 
@@ -98,10 +98,10 @@ class BaseController:
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
-    def register_sub_controller(self, name: str, sub_controller: SubController):
+    def register_sub_controller(self, name: str, sub_controller: Controller):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
-                f"Controller {self} already has a SubController registered as {name}"
+                f"Controller {self} already has a sub controller registered as {name}"
             )
 
         self.__sub_controller_tree[name] = sub_controller
@@ -110,13 +110,13 @@ class BaseController:
         if isinstance(sub_controller.root_attribute, Attribute):
             if name in self.attributes:
                 raise TypeError(
-                    f"Cannot set SubController `{name}` root attribute "
+                    f"Cannot set sub controller `{name}` root attribute "
                     f"on the parent controller `{type(self).__name__}` "
                     f"as it already has an attribute of that name."
                 )
             self.attributes[name] = sub_controller.root_attribute
 
-    def get_sub_controllers(self) -> dict[str, SubController]:
+    def get_sub_controllers(self) -> dict[str, Controller]:
         return self.__sub_controller_tree
 
 
@@ -129,21 +129,10 @@ class Controller(BaseController):
     generating a UI or creating parameters for a control system.
     """
 
+    root_attribute: Attribute | None = None
+
     def __init__(self, description: str | None = None) -> None:
         super().__init__(description=description)
 
     async def connect(self) -> None:
         pass
-
-
-class SubController(BaseController):
-    """A subordinate to a ``Controller`` for managing a subset of a device.
-
-    An instance of this class can be registered with a parent ``Controller`` to include
-    it as part of a larger device.
-    """
-
-    root_attribute: Attribute | None = None
-
-    def __init__(self, description: str | None = None) -> None:
-        super().__init__(description=description)

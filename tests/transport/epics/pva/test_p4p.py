@@ -14,7 +14,7 @@ from p4p.client.thread import Context as ThreadContext
 from p4p.nt import NTTable
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import EpicsIOCOptions
@@ -272,11 +272,11 @@ def test_read_signal_set():
 
 
 def test_pvi_grouping():
-    class ChildChildController(SubController):
+    class ChildChildController(Controller):
         attr_e: AttrRW = AttrRW(Int())
         attr_f: AttrR = AttrR(String())
 
-    class ChildController(SubController):
+    class ChildController(Controller):
         attr_c: AttrW = AttrW(Bool(), description="Some bool")
         attr_d: AttrW = AttrW(String())
 

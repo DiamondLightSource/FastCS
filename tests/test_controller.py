@@ -1,14 +1,14 @@
 import pytest
 
 from fastcs.attributes import AttrR
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller
 from fastcs.datatypes import Int
 
 
 def test_controller_nesting():
     controller = Controller()
-    sub_controller = SubController()
-    sub_sub_controller = SubController()
+    sub_controller = Controller()
+    sub_sub_controller = Controller()
 
     controller.register_sub_controller("a", sub_controller)
     sub_controller.register_sub_controller("b", sub_sub_controller)
@@ -19,17 +19,17 @@ def test_controller_nesting():
     assert sub_controller.get_sub_controllers() == {"b": sub_sub_controller}
 
     with pytest.raises(
-        ValueError, match=r"Controller .* already has a SubController registered as .*"
+        ValueError, match=r"Controller .* already has a sub controller registered as .*"
     ):
-        controller.register_sub_controller("a", SubController())
+        controller.register_sub_controller("a", Controller())
 
     with pytest.raises(
-        ValueError, match=r"SubController is already registered under .*"
+        ValueError, match=r"sub controller is already registered under .*"
     ):
         controller.register_sub_controller("c", sub_controller)
 
 
-class SomeSubController(SubController):
+class SomeSubController(Controller):
     def __init__(self):
         super().__init__()
 
@@ -44,7 +44,7 @@ class SomeController(Controller):
     equal_attr = AttrR(Int())
     annotated_and_equal_attr: AttrR[int] = AttrR(Int())
 
-    def __init__(self, sub_controller: SubController):
+    def __init__(self, sub_controller: Controller):
         self.attributes = {}
 
         self.annotated_attr = AttrR(Int())
@@ -106,7 +106,7 @@ def test_root_attribute():
     with pytest.raises(
         TypeError,
         match=(
-            "Cannot set SubController `sub_controller` root attribute "
+            "Cannot set sub controller `sub_controller` root attribute "
             "on the parent controller `FailingController` as it already "
             "has an attribute of that name."
         ),

@@ -29,7 +29,7 @@ requires-python = ">=3.11"
 demo = ["tickit~=0.4.3"]
 epicsca = ["pvi~=0.11.0", "softioc>=4.5.0"]
 epicspva = ["p4p", "pvi~=0.11.0"]
-epics = ["fastcs[epicsca]", "fastcs[epicspca]"]
+epics = ["fastcs[epicsca]", "fastcs[epicspva]"]
 tango = ["pytango"]
 graphql = ["strawberry-graphql", "uvicorn[standard]>=0.12.0"]
 rest = ["fastapi[standard]", "numpy", "uvicorn[standard]>=0.12.0"]

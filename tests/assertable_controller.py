@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture, MockType
 
 from fastcs.attributes import AttrHandlerR, AttrHandlerRW, AttrHandlerW, AttrR
 from fastcs.backend import build_controller_api
-from fastcs.controller import Controller, SubController
+from fastcs.controller import Controller
 from fastcs.controller_api import ControllerAPI
 from fastcs.datatypes import Int
 from fastcs.wrappers import command, scan
@@ -34,7 +34,7 @@ class TestHandler(AttrHandlerRW, TestUpdater, TestSetter):
     pass
 
 
-class TestSubController(SubController):
+class TestSubController(Controller):
     read_int: AttrR = AttrR(Int(), handler=TestUpdater())
 
 
@@ -110,7 +110,7 @@ class AssertableControllerAPI(ControllerAPI):
         """
         queue = copy.deepcopy(path)
 
-        # Navigate to subcontroller
+        # Navigate to sub controller
         controller_api = self
         item_name = queue.pop(-1)
         for item in queue:
