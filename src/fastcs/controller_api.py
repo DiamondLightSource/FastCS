@@ -7,7 +7,7 @@ from fastcs.cs_methods import Command, Put, Scan
 
 @dataclass
 class ControllerAPI:
-    """Attributes, bound methods and sub APIs of a `Controller` / `SubController`"""
+    """Attributes, bound methods and sub APIs of a `Controller`"""
 
     path: list[str] = field(default_factory=list)
     """Path within controller tree (empty if this is the root)"""

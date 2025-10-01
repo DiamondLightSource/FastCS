@@ -110,7 +110,7 @@ class AssertableControllerAPI(ControllerAPI):
         """
         queue = copy.deepcopy(path)
 
-        # Navigate to subcontroller
+        # Navigate to sub controller
         controller_api = self
         item_name = queue.pop(-1)
         for item in queue:

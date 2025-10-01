@@ -51,7 +51,7 @@ class BaseController:
 
     def set_path(self, path: list[str]):
         if self._path:
-            raise ValueError(f"SubController is already registered under {self.path}")
+            raise ValueError(f"sub controller is already registered under {self.path}")
 
         self._path = path
 
@@ -101,7 +101,7 @@ class BaseController:
     def register_sub_controller(self, name: str, sub_controller: Controller):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
-                f"Controller {self} already has a SubController registered as {name}"
+                f"Controller {self} already has a sub controller registered as {name}"
             )
 
         self.__sub_controller_tree[name] = sub_controller
@@ -110,7 +110,7 @@ class BaseController:
         if isinstance(sub_controller.root_attribute, Attribute):
             if name in self.attributes:
                 raise TypeError(
-                    f"Cannot set SubController `{name}` root attribute "
+                    f"Cannot set sub controller `{name}` root attribute "
                     f"on the parent controller `{type(self).__name__}` "
                     f"as it already has an attribute of that name."
                 )

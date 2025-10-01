@@ -19,12 +19,12 @@ def test_controller_nesting():
     assert sub_controller.get_sub_controllers() == {"b": sub_sub_controller}
 
     with pytest.raises(
-        ValueError, match=r"Controller .* already has a SubController registered as .*"
+        ValueError, match=r"Controller .* already has a sub controller registered as .*"
     ):
         controller.register_sub_controller("a", Controller())
 
     with pytest.raises(
-        ValueError, match=r"SubController is already registered under .*"
+        ValueError, match=r"sub controller is already registered under .*"
     ):
         controller.register_sub_controller("c", sub_controller)
 
@@ -106,7 +106,7 @@ def test_root_attribute():
     with pytest.raises(
         TypeError,
         match=(
-            "Cannot set SubController `sub_controller` root attribute "
+            "Cannot set sub controller `sub_controller` root attribute "
             "on the parent controller `FailingController` as it already "
             "has an attribute of that name."
         ),
