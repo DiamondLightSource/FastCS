@@ -129,6 +129,8 @@ class Controller(BaseController):
     generating a UI or creating parameters for a control system.
     """
 
+    root_attribute: Attribute | None = None
+
     def __init__(self, description: str | None = None) -> None:
         super().__init__(description=description)
 
