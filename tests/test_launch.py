@@ -13,7 +13,7 @@ from fastcs.attributes import AttrR
 from fastcs.controller import Controller
 from fastcs.datatypes import Int
 from fastcs.exceptions import LaunchError
-from fastcs.launch import TransportOptions, _launch, get_controller_schema, launch
+from fastcs.launch import TransportList, _launch, get_controller_schema, launch
 
 
 @dataclass
@@ -49,7 +49,7 @@ runner = CliRunner()
 def test_single_arg_schema():
     target_model = create_model(
         "SingleArg",
-        transport=(TransportOptions, ...),
+        transport=(TransportList, ...),
         __config__={"extra": "forbid"},
     )
     target_dict = target_model.model_json_schema()
@@ -66,7 +66,7 @@ def test_is_hinted_schema(data):
     target_model = create_model(
         "IsHinted",
         controller=(SomeConfig, ...),
-        transport=(TransportOptions, ...),
+        transport=(TransportList, ...),
         __config__={"extra": "forbid"},
     )
     target_dict = target_model.model_json_schema()

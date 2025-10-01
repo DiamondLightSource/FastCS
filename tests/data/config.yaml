@@ -3,8 +3,11 @@ transport:
   - ca_ioc: {}
     docs: {}
     gui: {}
+  - pva_ioc: {}
+    docs: {}
+    gui: {}
   - rest: {}
   - dsr: {}
-  - gql: {}
+  - graphql: {}
 controller:
   name: controller-name

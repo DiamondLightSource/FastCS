@@ -20,7 +20,6 @@ from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSError
-from fastcs.transport.epics.ca.adapter import EpicsCATransport
 from fastcs.transport.epics.ca.ioc import (
     EPICS_MAX_NAME_LENGTH,
     EpicsCAIOC,
@@ -31,6 +30,7 @@ from fastcs.transport.epics.ca.ioc import (
     _create_and_link_write_pv,
     _make_record,
 )
+from fastcs.transport.epics.ca.transport import EpicsCATransport
 from fastcs.transport.epics.ca.util import (
     record_metadata_from_attribute,
     record_metadata_from_datatype,

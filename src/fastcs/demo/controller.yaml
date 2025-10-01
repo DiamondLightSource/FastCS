@@ -5,7 +5,7 @@ controller:
     port: 25565
   num_ramp_controllers: 4
 transport:
-  - gql:
+  - graphql:
       host: localhost
       port: 8083
       log_level: info
