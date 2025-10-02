@@ -18,8 +18,8 @@ from aioca import purge_channel_caches
 from softioc import builder
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.backend import build_controller_api
 from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.launch import build_controller_api
 from fastcs.transport.tango.dsr import register_dev
 from tests.assertable_controller import MyTestAttributeIORef, MyTestController
 from tests.example_p4p_ioc import run as _run_p4p_ioc

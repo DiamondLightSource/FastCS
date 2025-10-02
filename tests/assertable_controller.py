@@ -8,10 +8,10 @@ from pytest_mock import MockerFixture, MockType
 from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORef
 from fastcs.attributes import AttrR, AttrW
-from fastcs.backend import build_controller_api
 from fastcs.controller import Controller
 from fastcs.controller_api import ControllerAPI
 from fastcs.datatypes import Int, T
+from fastcs.launch import build_controller_api
 from fastcs.wrappers import command, scan
 
 
