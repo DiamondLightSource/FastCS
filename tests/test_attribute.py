@@ -88,8 +88,7 @@ async def test_attribute_io():
 
     with pytest.raises(AssertionError, match="does not have an AttributeIO"):
         ControllerNoIO()
-    # TODO, is it okay that we need to initialise the controller
-    # before the callbacks get assigned?
+
     await c.initialise()
     await c.attribute_initialise()
     await c.my_attr.update()
@@ -245,8 +244,8 @@ async def test_attribute_io_defaults(mocker: MockerFixture):
     # default callbacks are not provided by AttributeIO subclasses
 
     with pytest.raises(
-        RuntimeError, match="Attributes without io_ref can not be updated"
-    ):  # TODO, we need a clearer error message for this
+        RuntimeError, match="Can't call update on Attributes without an io_ref"
+    ):
         await c.no_ref.update()
 
     process_spy = mocker.spy(c.no_ref, "update_display_without_process")

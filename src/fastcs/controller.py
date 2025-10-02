@@ -45,7 +45,8 @@ class BaseController:
         pass
 
     async def attribute_initialise(self) -> None:
-        # Initialise any registered handlers for attributes
+        """Register update and send callbacks for attributes on this controller
+        and all subcontrollers"""
         self._add_io_callbacks()
 
         for controller in self.get_sub_controllers().values():
@@ -56,7 +57,6 @@ class BaseController:
             ref = attr.io_ref if attr.has_io_ref() else None
             io = self._attribute_ref_io_map.get(type(ref))
             if isinstance(attr, AttrW):
-                # is it on process or write_display?
                 attr.add_process_callback(self._create_send_callback(io, attr, ref))
             if isinstance(attr, AttrR):
                 attr.add_update_callback(self._create_update_callback(io, attr, ref))
@@ -72,7 +72,6 @@ class BaseController:
 
             async def send_callback(value):
                 await io.send(attr, value)
-                # TODO, should we just then call the above send_callback here?
 
         return send_callback
 
@@ -80,7 +79,7 @@ class BaseController:
         if ref is None:
 
             async def error_callback():
-                raise RuntimeError("Attributes without io_ref can not be updated")
+                raise RuntimeError("Can't call update on Attributes without an io_ref")
 
             return error_callback
         else:
