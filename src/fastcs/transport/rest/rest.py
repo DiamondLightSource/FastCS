@@ -8,6 +8,7 @@ from pydantic import create_model
 from fastcs.attributes import AttrR, AttrRW, AttrW, T
 from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import CommandCallback
+from fastcs.logging import intercept_std_logger
 
 from .options import RestServerOptions
 from .util import (
@@ -44,6 +45,10 @@ class RestServer:
                 log_level=options.log_level,
             )
         )
+        intercept_std_logger("uvicorn.error")
+        intercept_std_logger("uvicorn.access")
+        intercept_std_logger("uvicorn.asgi")
+
         await self._server.serve()
 
 

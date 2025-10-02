@@ -1,3 +1,5 @@
+import logging
+
 from loguru import logger as _logger
 
 from ._graylog import GraylogEndpoint as GraylogEndpoint
@@ -84,3 +86,28 @@ def configure_logging(
 
 # Configure logger with defaults - INFO level and disabled
 configure_logging()
+
+
+class _StdLoggingInterceptHandler(logging.Handler):
+    """A std logging handler to forward messages to loguru with nice formatting."""
+
+    def emit(self, record: logging.LogRecord):
+        logger.bind(logger_name=self.name).log(record.levelname, record.getMessage())
+
+
+def intercept_std_logger(logger_name: str):
+    """Intercept std logging messages from the given logger
+
+    To find the correct ``logger_name`` for a message. Add a breakpoint in
+    ``logging.Logger.callHandlers``, debug and run until the log message appears as
+    ``record.msg``. The logger name will be in ``self.name``.
+
+    :param logger_name: Name of the logger to intercept
+
+    """
+    handler = _StdLoggingInterceptHandler()
+    handler.set_name(logger_name)
+
+    std_logger = logging.getLogger(logger_name)
+    std_logger.handlers = [handler]
+    std_logger.propagate = False
