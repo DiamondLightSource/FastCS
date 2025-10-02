@@ -37,20 +37,9 @@ class BaseController:
 
         self._bind_attrs()
 
-        # TODO, should validation live inside the controller?
         ios = ios or []
-
-        self.__check_unique(ios)
-
         self._attribute_ref_io_map = {io.ref_type: io for io in ios}
-        self._validate_io()
-
-    def __check_unique(self, ios: Sequence[AttributeIO[T, AttributeIORefT]]):
-        for ref_type, count in Counter([io.ref_type for io in ios]).items():
-            if count > 1:
-                raise RuntimeError(
-                    f"More than one AttributeIO class handles {ref_type.__name__}"
-                )
+        self._validate_io(ios)
 
     async def initialise(self):
         pass
@@ -155,9 +144,16 @@ class BaseController:
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
-    def _validate_io(self):
+    def _validate_io(self, ios: Sequence[AttributeIO[T, AttributeIORefT]]):
         """Validate that each Attribute has an AttributeIORef for which the
-        controller has an associated AttributeIO class."""
+        controller has an associated AttributeIO class, and that no two AttributeIO
+        classes handle the same AttributeIORef type"""
+        for ref_type, count in Counter([io.ref_type for io in ios]).items():
+            if count > 1:
+                raise RuntimeError(
+                    f"More than one AttributeIO class handles {ref_type.__name__}"
+                )
+
         for attr in self.attributes.values():
             if not attr.has_io_ref():
                 continue
