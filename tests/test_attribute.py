@@ -144,6 +144,8 @@ class DummyConnection:
         elif uri == "status/float_parameter":
             value = self._float_value
             self._float_value += 1
+        else:
+            raise RuntimeError()
         return value
 
     async def set(self, uri: str, value: float | int):
@@ -174,7 +176,7 @@ async def test_dynamic_attribute_io_specification():
             attr: AttrR[NumberT, DemoParameterAttributeIORef],
         ):
             value = await attr.io_ref.connection.get(attr.io_ref.uri)
-            await attr.set(value)
+            await attr.set(value)  # type: ignore
 
         async def send(
             self,
@@ -182,7 +184,8 @@ async def test_dynamic_attribute_io_specification():
             value: NumberT,
         ) -> None:
             await attr.io_ref.connection.set(attr.io_ref.uri, value)
-            await self.update(attr)
+            if isinstance(attr, AttrRW):
+                await self.update(attr)
 
     class DemoParameterController(Controller):
         ro_int_parameter: AttrR
@@ -196,6 +199,7 @@ async def test_dynamic_attribute_io_specification():
             example_introspection_response = await self._connection.get(
                 "config/introspect_api"
             )
+            assert isinstance(example_introspection_response, list)
             for parameter_response in example_introspection_response:
                 try:
                     ro = parameter_response["read_only"]
@@ -250,7 +254,9 @@ async def test_attribute_io_defaults(mocker: MockerFixture):
 
     class SimpleAttributeIO(AttributeIO[T, AttributeIORef]):
         async def update(self, attr):
-            await attr.set(100)
+            match attr:
+                case AttrR(datatype=Int()):
+                    await attr.set(100)
 
     with pytest.raises(
         RuntimeError, match="More than one AttributeIO class handles AttributeIORef"
