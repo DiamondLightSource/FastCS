@@ -71,7 +71,7 @@ async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
     e_values = asyncio.Queue()
 
     # While the scan method will update every 0.1 seconds, it takes around that
-    # time for the p4p backends to update, broadcast, get.
+    # time for the p4p transport to update, broadcast, get.
     latency = 1e8
 
     e_monitor = ctxt.monitor(f"{pv_prefix}:Child1:E", e_values.put)
