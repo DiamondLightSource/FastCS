@@ -2,7 +2,8 @@ import asyncio
 import inspect
 import json
 import signal
-from collections.abc import Coroutine, Sequence
+from collections import defaultdict
+from collections.abc import Callable, Coroutine, Sequence
 from functools import partial
 from pathlib import Path
 from typing import Annotated, Any, Optional, TypeAlias, get_type_hints
@@ -13,16 +14,21 @@ from pydantic import BaseModel, create_model
 from ruamel.yaml import YAML
 
 from fastcs import __version__
+from fastcs.attribute_io_ref import AttributeIORef
 from fastcs.transport.epics.ca.transport import EpicsCATransport
 from fastcs.transport.epics.pva.transport import EpicsPVATransport
 from fastcs.transport.graphql.transport import GraphQLTransport
 from fastcs.transport.rest.transport import RestTransport
 from fastcs.transport.tango.transport import TangoTransport
 
-from .backend import Backend
-from .controller import Controller
-from .exceptions import LaunchError
+from .attributes import ONCE, AttrR, AttrW
+from .controller import BaseController, Controller
+from .controller_api import ControllerAPI
+from .cs_methods import Command, Put, Scan
+from .datatypes import T
+from .exceptions import FastCSError, LaunchError
 from .transport import Transport
+from .util import validate_hinted_attributes
 
 # Define a type alias for transport options
 TransportList: TypeAlias = list[
@@ -35,17 +41,31 @@ TransportList: TypeAlias = list[
 
 
 class FastCS:
-    """For launching a controller with given transport(s)."""
+    """For launching a controller with given transport(s) and keeping
+    track of tasks during serving."""
 
-    def __init__(self, controller: Controller, transports: Sequence[Transport]):
-        self._loop = asyncio.get_event_loop()
+    def __init__(
+        self,
+        controller: Controller,
+        transports: Sequence[Transport],
+        loop: asyncio.AbstractEventLoop | None = None,
+    ):
+        self._loop = loop or asyncio.get_event_loop()
         self._controller = controller
-        self._backend = Backend(controller, self._loop)
+
+        self._initial_coros = [controller.connect]
+        self._scan_tasks: set[asyncio.Task] = set()
+
+        # these initialise the controller & build its APIs
+        self._loop.run_until_complete(controller.initialise())
+        self._loop.run_until_complete(controller.attribute_initialise())
+        validate_hinted_attributes(controller)
+        self.controller_api = build_controller_api(controller)
+        self._link_process_tasks()
+
         self._transports = transports
         for transport in self._transports:
-            transport.initialise(
-                controller_api=self._backend.controller_api, loop=self._loop
-            )
+            transport.initialise(controller_api=self.controller_api, loop=self._loop)
 
     def create_docs(self) -> None:
         for transport in self._transports:
@@ -62,11 +82,54 @@ class FastCS:
         self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
         self._loop.run_until_complete(serve)
 
+    def _link_process_tasks(self):
+        for controller_api in self.controller_api.walk_api():
+            _link_put_tasks(controller_api)
+
+    def __del__(self):
+        self._stop_scan_tasks()
+
+    async def serve_routines(self):
+        scans, initials = _get_scan_and_initial_coros(self.controller_api)
+        self._initial_coros += initials
+        await self._run_initial_coros()
+        await self._start_scan_tasks(scans)
+
+    async def _run_initial_coros(self):
+        for coro in self._initial_coros:
+            await coro()
+
+    async def _start_scan_tasks(
+        self, coros: list[Callable[[], Coroutine[None, None, None]]]
+    ):
+        self._scan_tasks = {self._loop.create_task(coro()) for coro in coros}
+
+        for task in self._scan_tasks:
+            task.add_done_callback(self._scan_done)
+
+    def _scan_done(self, task: asyncio.Task):
+        try:
+            task.result()
+        except Exception as e:
+            raise FastCSError(
+                "Exception raised in scan method of "
+                f"{self._controller.__class__.__name__}"
+            ) from e
+
+    def _stop_scan_tasks(self):
+        for task in self._scan_tasks:
+            if not task.done():
+                try:
+                    task.cancel()
+                except asyncio.CancelledError:
+                    pass
+
     async def serve(self) -> None:
-        coros = [self._backend.serve()]
+        coros = [self.serve_routines()]
+
         context = {
             "controller": self._controller,
-            "controller_api": self._backend.controller_api,
+            "controller_api": self.controller_api,
             "transports": [
                 transport.__class__.__name__ for transport in self._transports
             ],
@@ -116,6 +179,125 @@ class FastCS:
         stop_event = asyncio.Event()
         self._loop.create_task(interactive_shell(context, stop_event))
         await stop_event.wait()
+
+
+def _link_put_tasks(controller_api: ControllerAPI) -> None:
+    for name, method in controller_api.put_methods.items():
+        name = name.removeprefix("put_")
+
+        attribute = controller_api.attributes[name]
+        match attribute:
+            case AttrW():
+                attribute.add_process_callback(method.fn)
+            case _:
+                raise FastCSError(
+                    f"Attribute type {type(attribute)} does not"
+                    f"support put operations for {name}"
+                )
+
+
+def _get_scan_and_initial_coros(
+    root_controller_api: ControllerAPI,
+) -> tuple[list[Callable], list[Callable]]:
+    scan_dict: dict[float, list[Callable]] = defaultdict(list)
+    initial_coros: list[Callable] = []
+
+    for controller_api in root_controller_api.walk_api():
+        _add_scan_method_tasks(scan_dict, controller_api)
+        _add_attribute_updater_tasks(scan_dict, initial_coros, controller_api)
+
+    scan_coros = _get_periodic_scan_coros(scan_dict)
+    return scan_coros, initial_coros
+
+
+def _add_scan_method_tasks(
+    scan_dict: dict[float, list[Callable]], controller_api: ControllerAPI
+):
+    for method in controller_api.scan_methods.values():
+        scan_dict[method.period].append(method.fn)
+
+
+def _add_attribute_updater_tasks(
+    scan_dict: dict[float, list[Callable]],
+    initial_coros: list[Callable],
+    controller_api: ControllerAPI,
+):
+    for attribute in controller_api.attributes.values():
+        match attribute:
+            case (
+                AttrR(_io_ref=AttributeIORef(update_period=update_period)) as attribute
+            ):
+                callback = _create_updater_callback(attribute)
+                if update_period is ONCE:
+                    initial_coros.append(callback)
+                elif update_period is not None:
+                    scan_dict[update_period].append(callback)
+
+
+def _create_updater_callback(attribute: AttrR[T]):
+    async def callback():
+        try:
+            await attribute.update()
+        except Exception as e:
+            print(f"Update loop in {attribute} stopped:\n{e.__class__.__name__}: {e}")
+            raise
+
+    return callback
+
+
+def _get_periodic_scan_coros(scan_dict: dict[float, list[Callable]]) -> list[Callable]:
+    periodic_scan_coros: list[Callable] = []
+    for period, methods in scan_dict.items():
+        periodic_scan_coros.append(_create_periodic_scan_coro(period, methods))
+
+    return periodic_scan_coros
+
+
+def _create_periodic_scan_coro(period, methods: list[Callable]) -> Callable:
+    async def _sleep():
+        await asyncio.sleep(period)
+
+    methods.append(_sleep)  # Create periodic behavior
+
+    async def scan_coro() -> None:
+        while True:
+            await asyncio.gather(*[method() for method in methods])
+
+    return scan_coro
+
+
+def build_controller_api(controller: Controller) -> ControllerAPI:
+    return _build_controller_api(controller, [])
+
+
+def _build_controller_api(controller: BaseController, path: list[str]) -> ControllerAPI:
+    scan_methods: dict[str, Scan] = {}
+    put_methods: dict[str, Put] = {}
+    command_methods: dict[str, Command] = {}
+    for attr_name in dir(controller):
+        attr = getattr(controller, attr_name)
+        match attr:
+            case Put(enabled=True):
+                put_methods[attr_name] = attr
+            case Scan(enabled=True):
+                scan_methods[attr_name] = attr
+            case Command(enabled=True):
+                command_methods[attr_name] = attr
+            case _:
+                pass
+
+    return ControllerAPI(
+        path=path,
+        attributes=controller.attributes,
+        scan_methods=scan_methods,
+        put_methods=put_methods,
+        command_methods=command_methods,
+        sub_apis={
+            name: _build_controller_api(sub_controller, path + [name])
+            for name, sub_controller in controller.get_sub_controllers().items()
+        },
+        description=controller.description,
+    )
 
 
 def launch(
@@ -218,6 +400,7 @@ def _launch(
         instance = FastCS(
             controller,
             instance_options.transport,
+            loop=asyncio.get_event_loop(),
         )
 
         instance.create_gui()

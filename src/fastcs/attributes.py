@@ -14,7 +14,7 @@ ONCE = float("inf")
 class Attribute(Generic[T, AttributeIORefT]):
     """Base FastCS attribute.
 
-    Instances of this class added to a ``Controller`` will be used by the backend.
+    Instances of this class added to a ``Controller`` will be used by the FastCS class.
     """
 
     def __init__(

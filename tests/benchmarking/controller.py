@@ -1,3 +1,5 @@
+import asyncio
+
 from fastcs import FastCS
 from fastcs.attributes import AttrR, AttrW
 from fastcs.controller import Controller
@@ -23,10 +25,7 @@ def run():
         ),
         TangoTransport(dsr=TangoDSROptions(dev_name="MY/BENCHMARK/DEVICE")),
     ]
-    instance = FastCS(
-        MyTestController(),
-        transport_options,
-    )
+    instance = FastCS(MyTestController(), transport_options, asyncio.get_event_loop())
     instance.run()
 
 

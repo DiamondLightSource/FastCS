@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 from dataclasses import dataclass
@@ -9,11 +10,22 @@ from ruamel.yaml import YAML
 from typer.testing import CliRunner
 
 from fastcs import __version__
-from fastcs.attributes import AttrR
+from fastcs.attribute_io import AttributeIO
+from fastcs.attribute_io_ref import AttributeIORef
+from fastcs.attributes import ONCE, AttrR, AttrRW
 from fastcs.controller import Controller
+from fastcs.cs_methods import Command
 from fastcs.datatypes import Int
-from fastcs.exceptions import LaunchError
-from fastcs.launch import TransportList, _launch, get_controller_schema, launch
+from fastcs.exceptions import FastCSError, LaunchError
+from fastcs.launch import (
+    FastCS,
+    TransportList,
+    _launch,
+    build_controller_api,
+    get_controller_schema,
+    launch,
+)
+from fastcs.wrappers import command, scan
 
 
 @dataclass
@@ -159,3 +171,169 @@ def test_error_if_identical_context_in_transports(mocker: MockerFixture, data):
     result = runner.invoke(app, ["run", str(data / "config.yaml")])
     assert isinstance(result.exception, RuntimeError)
     assert "Duplicate context keys found" in result.exception.args[0]
+
+
+def test_fastcs(controller):
+    loop = asyncio.get_event_loop()
+    transport_options = []
+    fastcs = FastCS(controller, transport_options, loop)
+
+    # Controller should be initialised by FastCS and not connected
+    assert controller.initialised
+    assert not controller.connected
+
+    # Controller Attributes with a Sender should have a _process_callback created
+    assert controller.read_write_int.has_process_callback()
+
+    async def test_wrapper():
+        loop.create_task(fastcs.serve_routines())
+        await asyncio.sleep(0)  # Yield to task
+
+        # Controller should have been connected by 'Backend' Logic
+        assert controller.connected
+
+        # Scan tasks should be running
+        for _ in range(3):
+            count = controller.count
+            await asyncio.sleep(0.01)
+            assert controller.count > count
+        fastcs._stop_scan_tasks()
+
+    loop.run_until_complete(test_wrapper())
+
+
+def test_controller_api():
+    class MyTestController(Controller):
+        attr1: AttrRW[int] = AttrRW(Int())
+
+        def __init__(self):
+            super().__init__(description="Controller for testing")
+
+            self.attributes["attr2"] = AttrRW(Int())
+
+        @command()
+        async def do_nothing(self):
+            pass
+
+        @scan(1.0)
+        async def scan_nothing(self):
+            pass
+
+    controller = MyTestController()
+    api = build_controller_api(controller)
+
+    assert api.description == controller.description
+    assert list(api.attributes) == ["attr1", "attr2"]
+    assert list(api.command_methods) == ["do_nothing"]
+    assert list(api.scan_methods) == ["scan_nothing"]
+
+
+def test_controller_api_methods():
+    class MyTestController(Controller):
+        def __init__(self):
+            super().__init__()
+
+        async def initialise(self):
+            async def do_nothing_dynamic() -> None:
+                pass
+
+            self.do_nothing_dynamic = Command(do_nothing_dynamic)
+
+        @command()
+        async def do_nothing_static(self):
+            pass
+
+    controller = MyTestController()
+    loop = asyncio.get_event_loop()
+    transport_options = []
+    fastcs = FastCS(controller, transport_options, loop)
+
+    async def test_wrapper():
+        await controller.do_nothing_static()
+        await controller.do_nothing_dynamic()
+
+        await fastcs.controller_api.command_methods["do_nothing_static"]()
+        await fastcs.controller_api.command_methods["do_nothing_dynamic"]()
+
+    loop.run_until_complete(test_wrapper())
+
+
+def test_update_periods():
+    @dataclass
+    class AttributeIORefTimesCalled(AttributeIORef):
+        update_period: float | None = None
+        _times_called = 0
+
+    class AttributeIOTimesCalled(AttributeIO[int, AttributeIORefTimesCalled]):
+        async def update(self, attr: AttrR[int, AttributeIORefTimesCalled]):
+            attr.io_ref._times_called += 1
+            await attr.set(attr.io_ref._times_called)
+
+    class MyController(Controller):
+        update_once = AttrR(Int(), io_ref=AttributeIORefTimesCalled(update_period=ONCE))
+        update_quickly = AttrR(
+            Int(), io_ref=AttributeIORefTimesCalled(update_period=0.1)
+        )
+        update_never = AttrR(
+            Int(), io_ref=AttributeIORefTimesCalled(update_period=None)
+        )
+
+    controller = MyController(ios=[AttributeIOTimesCalled()])
+    loop = asyncio.get_event_loop()
+    transport_options = []
+
+    fastcs = FastCS(controller, transport_options, loop)
+
+    assert controller.update_quickly.get() == 0
+    assert controller.update_once.get() == 0
+    assert controller.update_never.get() == 0
+
+    async def test_wrapper():
+        loop.create_task(fastcs.serve_routines())
+        await asyncio.sleep(1)
+
+    loop.run_until_complete(test_wrapper())
+    assert controller.update_quickly.get() > 1
+    assert controller.update_once.get() == 1
+    assert controller.update_never.get() == 0
+
+    assert len(fastcs._scan_tasks) == 1
+    assert len(fastcs._initial_coros) == 2
+
+
+def test_scan_raises_exception_via_callback():
+    class MyTestController(Controller):
+        def __init__(self):
+            super().__init__()
+
+        @scan(0.1)
+        async def raise_exception(self):
+            raise ValueError("Scan Exception")
+
+    controller = MyTestController()
+    loop = asyncio.get_event_loop()
+    transport_options = []
+    fastcs = FastCS(controller, transport_options, loop)
+
+    exception_info = {}
+    # This will intercept the exception raised in _scan_done
+    loop.set_exception_handler(
+        lambda _loop, context: exception_info.update(
+            {"exception": context.get("exception")}
+        )
+    )
+
+    async def test_scan_wrapper():
+        await fastcs.serve_routines()
+        # This allows scan time to run
+        await asyncio.sleep(0.2)
+        # _scan_done should raise an exception
+        assert isinstance(exception_info["exception"], FastCSError)
+        for task in fastcs._scan_tasks:
+            internal_exception = task.exception()
+            assert internal_exception
+            # The task exception comes from scan method raise_exception
+            assert isinstance(internal_exception, ValueError)
+            assert "Scan Exception" == str(internal_exception)
+
+    loop.run_until_complete(test_scan_wrapper())
