@@ -208,19 +208,19 @@
       "items": {
         "anyOf": [
           {
-            "$ref": "#/$defs/EpicsPVATransport"
-          },
-          {
             "$ref": "#/$defs/EpicsCATransport"
           },
           {
-            "$ref": "#/$defs/TangoTransport"
+            "$ref": "#/$defs/EpicsPVATransport"
+          },
+          {
+            "$ref": "#/$defs/GraphQLTransport"
           },
           {
             "$ref": "#/$defs/RestTransport"
           },
           {
-            "$ref": "#/$defs/GraphQLTransport"
+            "$ref": "#/$defs/TangoTransport"
           }
         ]
       },
