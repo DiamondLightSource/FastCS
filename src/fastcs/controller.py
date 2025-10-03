@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-import asyncio
+from collections import Counter
+from collections.abc import Sequence
 from copy import deepcopy
 from typing import get_type_hints
 
-from fastcs.attributes import Attribute
+from fastcs.attribute_io import AttributeIO
+from fastcs.attribute_io_ref import AttributeIORefT
+from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.datatypes import T
 
 
 class BaseController:
@@ -16,7 +20,10 @@ class BaseController:
     description: str | None = None
 
     def __init__(
-        self, path: list[str] | None = None, description: str | None = None
+        self,
+        path: list[str] | None = None,
+        description: str | None = None,
+        ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
     ) -> None:
         if (
             description is not None
@@ -30,19 +37,57 @@ class BaseController:
 
         self._bind_attrs()
 
+        ios = ios or []
+        self._attribute_ref_io_map = {io.ref_type: io for io in ios}
+        self._validate_io(ios)
+
     async def initialise(self):
         pass
 
     async def attribute_initialise(self) -> None:
-        # Initialise any registered handlers for attributes
-        coros = [attr.initialise(self) for attr in self.attributes.values()]
-        try:
-            await asyncio.gather(*coros)
-        except asyncio.CancelledError:
-            pass
+        """Register update and send callbacks for attributes on this controller
+        and all subcontrollers"""
+        self._add_io_callbacks()
 
         for controller in self.get_sub_controllers().values():
             await controller.attribute_initialise()
+
+    def _add_io_callbacks(self):
+        for attr in self.attributes.values():
+            ref = attr.io_ref if attr.has_io_ref() else None
+            io = self._attribute_ref_io_map.get(type(ref))
+            if isinstance(attr, AttrW):
+                attr.add_process_callback(self._create_send_callback(io, attr, ref))
+            if isinstance(attr, AttrR):
+                attr.add_update_callback(self._create_update_callback(io, attr, ref))
+
+    def _create_send_callback(self, io, attr, ref):
+        if ref is None:
+
+            async def send_callback(value):
+                await attr.update_display_without_process(value)
+                if isinstance(attr, AttrRW):
+                    await attr.set(value)
+        else:
+
+            async def send_callback(value):
+                await io.send(attr, value)
+
+        return send_callback
+
+    def _create_update_callback(self, io, attr, ref):
+        if ref is None:
+
+            async def error_callback():
+                raise RuntimeError("Can't call update on Attributes without an io_ref")
+
+            return error_callback
+        else:
+
+            async def update_callback():
+                await io.update(attr)
+
+            return update_callback
 
     @property
     def path(self) -> list[str]:
@@ -98,6 +143,24 @@ class BaseController:
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
+    def _validate_io(self, ios: Sequence[AttributeIO[T, AttributeIORefT]]):
+        """Validate that there is exactly one AttributeIO class registered to the
+        controller for each type of AttributeIORef belonging to the attributes of the
+        controller"""
+        for ref_type, count in Counter([io.ref_type for io in ios]).items():
+            if count > 1:
+                raise RuntimeError(
+                    f"More than one AttributeIO class handles {ref_type.__name__}"
+                )
+
+        for attr in self.attributes.values():
+            if not attr.has_io_ref():
+                continue
+            assert type(attr.io_ref) in self._attribute_ref_io_map, (
+                f"{self.__class__.__name__} does not have an AttributeIO to handle "
+                f"{attr.io_ref.__class__.__name__}"
+            )
+
     def register_sub_controller(self, name: str, sub_controller: Controller):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
@@ -131,8 +194,12 @@ class Controller(BaseController):
 
     root_attribute: Attribute | None = None
 
-    def __init__(self, description: str | None = None) -> None:
-        super().__init__(description=description)
+    def __init__(
+        self,
+        description: str | None = None,
+        ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
+    ) -> None:
+        super().__init__(description=description, ios=ios)
 
     async def connect(self) -> None:
         pass

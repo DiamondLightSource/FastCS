@@ -165,7 +165,7 @@ def _create_and_link_read_pv(
     record = _make_record(f"{pv_prefix}:{pv_name}", attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
-    attribute.add_update_callback(async_record_set)
+    attribute.add_set_callback(async_record_set)
 
 
 def _make_record(

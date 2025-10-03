@@ -2,10 +2,11 @@ import asyncio
 from collections import defaultdict
 from collections.abc import Callable, Coroutine
 
+from fastcs.attribute_io_ref import AttributeIORef
 from fastcs.cs_methods import Command, Put, Scan
 from fastcs.datatypes import T
 
-from .attributes import ONCE, AttrHandlerR, AttrHandlerW, AttrR, AttrW
+from .attributes import ONCE, AttrR, AttrW
 from .controller import BaseController, Controller
 from .controller_api import ControllerAPI
 from .exceptions import FastCSError
@@ -36,7 +37,6 @@ class Backend:
     def _link_process_tasks(self):
         for controller_api in self.controller_api.walk_api():
             _link_put_tasks(controller_api)
-            _link_attribute_sender_class(controller_api)
 
     def __del__(self):
         self._stop_scan_tasks()
@@ -87,28 +87,9 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
                 attribute.add_process_callback(method.fn)
             case _:
                 raise FastCSError(
-                    f"Mode {attribute.access_mode} does not "
+                    f"Attribute type {type(attribute)} does not "
                     f"support put operations for {name}"
                 )
-
-
-def _link_attribute_sender_class(controller_api: ControllerAPI) -> None:
-    for attr_name, attribute in controller_api.attributes.items():
-        match attribute:
-            case AttrW(sender=AttrHandlerW()):
-                assert not attribute.has_process_callback(), (
-                    f"Cannot assign both put method and Sender object to {attr_name}"
-                )
-
-                callback = _create_sender_callback(attribute)
-                attribute.add_process_callback(callback)
-
-
-def _create_sender_callback(attribute):
-    async def callback(value):
-        await attribute.sender.put(attribute, value)
-
-    return callback
 
 
 def _get_scan_and_initial_coros(
@@ -139,7 +120,9 @@ def _add_attribute_updater_tasks(
 ):
     for attribute in controller_api.attributes.values():
         match attribute:
-            case AttrR(updater=AttrHandlerR(update_period=update_period)) as attribute:
+            case (
+                AttrR(_io_ref=AttributeIORef(update_period=update_period)) as attribute
+            ):
                 callback = _create_updater_callback(attribute)
                 if update_period is ONCE:
                     initial_coros.append(callback)
@@ -148,14 +131,11 @@ def _add_attribute_updater_tasks(
 
 
 def _create_updater_callback(attribute: AttrR[T]):
-    updater = attribute.updater
-    assert updater is not None
-
     async def callback():
         try:
-            await updater.update(attribute)
+            await attribute.update()
         except Exception as e:
-            print(f"Update loop in {updater} stopped:\n{e.__class__.__name__}: {e}")
+            print(f"Update loop in {attribute} stopped:\n{e.__class__.__name__}: {e}")
             raise
 
     return callback

@@ -1,46 +1,46 @@
 import copy
 from contextlib import contextmanager
+from dataclasses import dataclass
 from typing import Literal
 
 from pytest_mock import MockerFixture, MockType
 
-from fastcs.attributes import AttrHandlerR, AttrHandlerRW, AttrHandlerW, AttrR
+from fastcs.attribute_io import AttributeIO
+from fastcs.attribute_io_ref import AttributeIORef
+from fastcs.attributes import AttrR, AttrW
 from fastcs.backend import build_controller_api
 from fastcs.controller import Controller
 from fastcs.controller_api import ControllerAPI
-from fastcs.datatypes import Int
+from fastcs.datatypes import Int, T
 from fastcs.wrappers import command, scan
 
 
-class TestUpdater(AttrHandlerR):
+@dataclass
+class MyTestAttributeIORef(AttributeIORef):
     update_period = 1
 
-    async def initialise(self, controller) -> None:
-        self.controller = controller
 
-    async def update(self, attr):
-        print(f"{self.controller} update {attr}")
+class MyTestAttributeIO(AttributeIO[T, MyTestAttributeIORef]):
+    async def update(self, attr: AttrR[T, MyTestAttributeIORef]):
+        print(f"update {attr}")
 
-
-class TestSetter(AttrHandlerW):
-    async def initialise(self, controller) -> None:
-        self.controller = controller
-
-    async def put(self, attr, value):
-        print(f"{self.controller}: {attr} = {value}")
+    async def send(self, attr: AttrW[T, MyTestAttributeIORef], value: T):
+        print(f"sending {attr} = {value}")
 
 
-class TestHandler(AttrHandlerRW, TestUpdater, TestSetter):
-    pass
+test_attribute_io = MyTestAttributeIO()  # instance
 
 
 class TestSubController(Controller):
-    read_int: AttrR = AttrR(Int(), handler=TestUpdater())
+    read_int: AttrR = AttrR(Int(), io_ref=MyTestAttributeIORef())
+
+    def __init__(self) -> None:
+        super().__init__(ios=[test_attribute_io])
 
 
 class MyTestController(Controller):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(ios=[test_attribute_io])
 
         self._sub_controllers: list[TestSubController] = []
         for index in range(1, 3):

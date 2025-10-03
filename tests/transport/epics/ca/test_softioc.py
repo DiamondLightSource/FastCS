@@ -7,10 +7,8 @@ from pytest_mock import MockerFixture
 from softioc import softioc
 from tests.assertable_controller import (
     AssertableControllerAPI,
+    MyTestAttributeIORef,
     MyTestController,
-    TestHandler,
-    TestSetter,
-    TestUpdater,
 )
 from tests.util import ColourEnum
 
@@ -53,7 +51,7 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
     record = make_record.return_value
 
     attribute = AttrR(Int())
-    attribute.add_update_callback = mocker.MagicMock()
+    attribute.add_set_callback = mocker.MagicMock()
 
     _create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
 
@@ -61,8 +59,8 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "r")
 
     # Extract the callback generated and set in the function and call it
-    attribute.add_update_callback.assert_called_once_with(mocker.ANY)
-    record_set_callback = attribute.add_update_callback.call_args[0][0]
+    attribute.add_set_callback.assert_called_once_with(mocker.ANY)
+    record_set_callback = attribute.add_set_callback.call_args[0][0]
     await record_set_callback(1)
 
     record.set.assert_called_once_with(1)
@@ -211,11 +209,11 @@ def test_get_output_record_raises(mocker: MockerFixture):
 
 
 class EpicsController(MyTestController):
-    read_int = AttrR(Int(), handler=TestUpdater())
-    read_write_int = AttrRW(Int(), handler=TestHandler())
+    read_int = AttrR(Int(), io_ref=MyTestAttributeIORef())
+    read_write_int = AttrRW(Int(), io_ref=MyTestAttributeIORef())
     read_write_float = AttrRW(Float())
     read_bool = AttrR(Bool())
-    write_bool = AttrW(Bool(), handler=TestSetter())
+    write_bool = AttrW(Bool(), io_ref=MyTestAttributeIORef())
     read_string = AttrRW(String())
     enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
     one_d_waveform = AttrRW(Waveform(np.int32, (10,)))

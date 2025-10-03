@@ -4,13 +4,17 @@ import asyncio
 import enum
 import json
 from dataclasses import dataclass
-from typing import Any
+from typing import TypeVar
 
-from fastcs.attributes import AttrHandlerRW, AttrR, AttrRW, AttrW
+from fastcs.attribute_io import AttributeIO
+from fastcs.attribute_io_ref import AttributeIORef
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.connections import IPConnection, IPConnectionSettings
-from fastcs.controller import BaseController, Controller
+from fastcs.controller import Controller
 from fastcs.datatypes import Enum, Float, Int
 from fastcs.wrappers import command, scan
+
+NumberT = TypeVar("NumberT", int, float)
 
 
 class OnOffEnum(enum.StrEnum):
@@ -24,31 +28,31 @@ class TemperatureControllerSettings:
     ip_settings: IPConnectionSettings
 
 
-@dataclass
-class TemperatureControllerHandler(AttrHandlerRW):
+@dataclass(kw_only=True)
+class TemperatureControllerAttributeIORef(AttributeIORef):
     name: str
     update_period: float | None = 0.2
-    _controller: TemperatureController | TemperatureRampController | None = None
 
-    async def initialise(self, controller: BaseController):
-        assert isinstance(controller, TemperatureController | TemperatureRampController)
-        self._controller = controller
 
-    @property
-    def controller(self) -> TemperatureController | TemperatureRampController:
-        if self._controller is None:
-            raise RuntimeError("Handler not initialised")
+class TemperatureControllerAttributeIO(
+    AttributeIO[NumberT, TemperatureControllerAttributeIORef]
+):
+    def __init__(self, connection: IPConnection, suffix: str):
+        self._connection = connection
+        self.suffix = suffix
 
-        return self._controller
-
-    async def put(self, attr: AttrW, value: Any) -> None:
-        await self.controller.connection.send_command(
-            f"{self.name}{self.controller.suffix}={attr.dtype(value)}\r\n"
+    async def send(
+        self, attr: AttrW[NumberT, TemperatureControllerAttributeIORef], value: NumberT
+    ) -> None:
+        await self._connection.send_command(
+            f"{attr.io_ref.name}{self.suffix}={attr.dtype(value)}\r\n"
         )
 
-    async def update(self, attr: AttrR) -> None:
-        response = await self.controller.connection.send_query(
-            f"{self.name}{self.controller.suffix}?\r\n"
+    async def update(
+        self, attr: AttrR[NumberT, TemperatureControllerAttributeIORef]
+    ) -> None:
+        response = await self._connection.send_query(
+            f"{attr.io_ref.name}{self.suffix}?\r\n"
         )
         response = response.strip("\r\n")
 
@@ -56,15 +60,17 @@ class TemperatureControllerHandler(AttrHandlerRW):
 
 
 class TemperatureController(Controller):
-    ramp_rate = AttrRW(Float(), handler=TemperatureControllerHandler("R"))
-    power = AttrR(Float(), handler=TemperatureControllerHandler("P"))
+    ramp_rate = AttrRW(Float(), io_ref=TemperatureControllerAttributeIORef(name="R"))
+    power = AttrR(Float(), io_ref=TemperatureControllerAttributeIORef(name="P"))
 
     def __init__(self, settings: TemperatureControllerSettings) -> None:
-        super().__init__()
-
-        self.suffix = ""
-        self._settings = settings
         self.connection = IPConnection()
+        self.suffix = ""
+        super().__init__(
+            ios=[TemperatureControllerAttributeIO(self.connection, self.suffix)]
+        )
+
+        self._settings = settings
 
         self._ramp_controllers: list[TemperatureRampController] = []
         for index in range(1, settings.num_ramp_controllers + 1):
@@ -95,14 +101,18 @@ class TemperatureController(Controller):
 
 
 class TemperatureRampController(Controller):
-    start = AttrRW(Int(), handler=TemperatureControllerHandler("S"))
-    end = AttrRW(Int(), handler=TemperatureControllerHandler("E"))
-    enabled = AttrRW(Enum(OnOffEnum), handler=TemperatureControllerHandler("N"))
-    target = AttrR(Float(prec=3), handler=TemperatureControllerHandler("T"))
-    actual = AttrR(Float(prec=3), handler=TemperatureControllerHandler("A"))
+    start = AttrRW(Int(), io_ref=TemperatureControllerAttributeIORef(name="S"))
+    end = AttrRW(Int(), io_ref=TemperatureControllerAttributeIORef(name="E"))
+    enabled = AttrRW(
+        Enum(OnOffEnum), io_ref=TemperatureControllerAttributeIORef(name="N")
+    )
+    target = AttrR(Float(prec=3), io_ref=TemperatureControllerAttributeIORef(name="T"))
+    actual = AttrR(Float(prec=3), io_ref=TemperatureControllerAttributeIORef(name="A"))
     voltage = AttrR(Float(prec=3))
 
     def __init__(self, index: int, conn: IPConnection) -> None:
-        self.suffix = f"{index:02d}"
-        super().__init__(f"Ramp{self.suffix}")
+        suffix = f"{index:02d}"
+        super().__init__(
+            f"Ramp{suffix}", ios=[TemperatureControllerAttributeIO(conn, suffix)]
+        )
         self.connection = conn

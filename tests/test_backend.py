@@ -1,7 +1,9 @@
 import asyncio
 from dataclasses import dataclass
 
-from fastcs.attributes import ONCE, AttrHandlerR, AttrR, AttrRW
+from fastcs.attribute_io import AttributeIO
+from fastcs.attribute_io_ref import AttributeIORef
+from fastcs.attributes import ONCE, AttrR, AttrRW
 from fastcs.backend import Backend, build_controller_api
 from fastcs.controller import Controller
 from fastcs.cs_methods import Command
@@ -95,20 +97,25 @@ def test_controller_api_methods():
 
 def test_update_periods():
     @dataclass
-    class AttrHandlerTimesCalled(AttrHandlerR):
-        update_period: float | None
+    class AttributeIORefTimesCalled(AttributeIORef):
+        update_period: float | None = None
         _times_called = 0
 
-        async def update(self, attr):
-            self._times_called += 1
-            await attr.set(self._times_called)
+    class AttributeIOTimesCalled(AttributeIO[int, AttributeIORefTimesCalled]):
+        async def update(self, attr: AttrR[int, AttributeIORefTimesCalled]):
+            attr.io_ref._times_called += 1
+            await attr.set(attr.io_ref._times_called)
 
     class MyController(Controller):
-        update_once = AttrR(Int(), handler=AttrHandlerTimesCalled(update_period=ONCE))
-        update_quickly = AttrR(Int(), handler=AttrHandlerTimesCalled(update_period=0.1))
-        update_never = AttrR(Int(), handler=AttrHandlerTimesCalled(update_period=None))
+        update_once = AttrR(Int(), io_ref=AttributeIORefTimesCalled(update_period=ONCE))
+        update_quickly = AttrR(
+            Int(), io_ref=AttributeIORefTimesCalled(update_period=0.1)
+        )
+        update_never = AttrR(
+            Int(), io_ref=AttributeIORefTimesCalled(update_period=None)
+        )
 
-    controller = MyController()
+    controller = MyController(ios=[AttributeIOTimesCalled()])
     loop = asyncio.get_event_loop()
 
     backend = Backend(controller, loop)
