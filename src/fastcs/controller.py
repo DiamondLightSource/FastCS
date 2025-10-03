@@ -80,6 +80,8 @@ class BaseController(Tracer):
             raise ValueError(f"sub controller is already registered under {self.path}")
 
         self._path = path
+        for attribute in self.attributes.values():
+            attribute.set_path(path)
 
     def _bind_attrs(self) -> None:
         """Search for `Attributes` and `Methods` to bind them to this instance.
@@ -136,6 +138,7 @@ class BaseController(Tracer):
             )
 
         attribute.set_name(name)
+        attribute.set_path(self.path)
         self.attributes[name] = attribute
         super().__setattr__(name, attribute)
 

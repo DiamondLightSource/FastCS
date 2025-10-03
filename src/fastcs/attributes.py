@@ -44,8 +44,9 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
         # changing the units on an int.
         self._update_datatype_callbacks: list[Callable[[DataType[T]], None]] = []
 
-        # Name to be filled in by Controller when the Attribute is bound
-        self._name = None
+        # Path and name to be filled in by Controller it is bound to
+        self._name = ""
+        self._path = []
 
     @property
     def io_ref(self) -> AttributeIORefT:
@@ -68,6 +69,14 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
     def group(self) -> str | None:
         return self._group
 
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def path(self) -> list[str]:
+        return self._path
+
     def add_update_datatype_callback(
         self, callback: Callable[[DataType[T]], None]
     ) -> None:
@@ -82,16 +91,28 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
         for callback in self._update_datatype_callbacks:
             callback(datatype)
 
-    def set_name(self, name: list[str]):
+    def set_name(self, name: str):
         if self._name:
-            raise ValueError(
+            raise RuntimeError(
                 f"Attribute is already registered with a controller as {self._name}"
             )
 
         self._name = name
 
+    def set_path(self, path: list[str]):
+        if self._path:
+            raise RuntimeError(
+                f"Attribute is already registered with a controller at {self._path}"
+            )
+
+        self._path = path
+
     def __repr__(self):
-        return f"{self.__class__.__name__}({self._name}, {self._datatype})"
+        name = self.__class__.__name__
+        path = ".".join(self._path + [self._name]) or None
+        datatype = self._datatype.__class__.__name__
+
+        return f"{name}(path={path}, datatype={datatype}, io_ref={self._io_ref})"
 
 
 AttrIOUpdateCallback = Callable[["AttrR[T, Any]"], Awaitable[None]]
