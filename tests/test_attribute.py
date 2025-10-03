@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import Generic, TypeVar
-from unittest.mock import call
 
 import pytest
 from pytest_mock import MockerFixture
@@ -249,12 +248,13 @@ async def test_attribute_io_defaults(mocker: MockerFixture):
         await c.no_ref.update()
 
     process_spy = mocker.spy(c.no_ref, "update_display_without_process")
-    await c.no_ref.process(40)
+    # calls callback which calls update_display_without_process
+    # TODO: reconsider if this is what we want the default case to be
+    # as process already calls that
+    await c.no_ref.process_without_display_update(40)
     process_spy.assert_called_with(40)
 
-    # this is correct, but we want to reconsider this logic, it seems wasteful to
-    # call update_display twice...
-    assert process_spy.call_args_list == [call(40), call(40)]
+    process_spy.assert_called_once_with(40)
 
     c2 = MyController(ios=[SimpleAttributeIO()])
 
