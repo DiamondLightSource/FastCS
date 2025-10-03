@@ -6,11 +6,11 @@ from collections import defaultdict
 from collections.abc import Callable, Coroutine, Sequence
 from functools import partial
 from pathlib import Path
-from typing import Annotated, Any, Optional, TypeAlias, get_type_hints
+from typing import Annotated, Any, Optional, get_type_hints
 
 import typer
 from IPython.terminal.embed import InteractiveShellEmbed
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, ValidationError, create_model
 from ruamel.yaml import YAML
 
 from fastcs import __version__
@@ -26,11 +26,6 @@ from fastcs.logging import (
 )
 from fastcs.logging import logger as _fastcs_logger
 from fastcs.tracer import Tracer
-from fastcs.transport.epics.ca.transport import EpicsCATransport
-from fastcs.transport.epics.pva.transport import EpicsPVATransport
-from fastcs.transport.graphql.transport import GraphQLTransport
-from fastcs.transport.rest.transport import RestTransport
-from fastcs.transport.tango.transport import TangoTransport
 
 from .attributes import ONCE, AttrR, AttrW
 from .controller import BaseController, Controller
@@ -40,15 +35,6 @@ from .datatypes import T
 from .exceptions import FastCSError, LaunchError
 from .transport import Transport
 from .util import validate_hinted_attributes
-
-# Define a type alias for transport options
-TransportList: TypeAlias = list[
-    EpicsPVATransport
-    | EpicsCATransport
-    | TangoTransport
-    | RestTransport
-    | GraphQLTransport
-]
 
 tracer = Tracer(name=__name__)
 logger = _fastcs_logger.bind(logger_name=__name__)
@@ -440,8 +426,19 @@ def _launch(
 
         yaml = YAML(typ="safe")
         options_yaml = yaml.load(config)
-        # To do: Handle a k8s "values.yaml" file
-        instance_options = fastcs_options.model_validate(options_yaml)
+
+        try:
+            instance_options = fastcs_options.model_validate(options_yaml)
+        except ValidationError as e:
+            if any("transport" in error["loc"] for error in json.loads(e.json())):
+                raise LaunchError(
+                    "Failed to validate transports. "
+                    "Are the correct fastcs extras installed? "
+                    f"Available transports:\n{Transport.subclasses}",
+                ) from e
+
+            raise LaunchError("Failed to validate config") from e
+
         if hasattr(instance_options, "controller"):
             controller = controller_class(instance_options.controller)
         else:
@@ -466,7 +463,7 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
     if len(args) == 1:
         fastcs_options = create_model(
             f"{controller_class.__name__}",
-            transport=(TransportList, ...),
+            transport=(list[Transport.union()], ...),
             __config__={"extra": "forbid"},
         )
     elif len(args) == 2:
@@ -483,7 +480,7 @@ def _extract_options_model(controller_class: type[Controller]) -> type[BaseModel
         fastcs_options = create_model(
             f"{controller_class.__name__}",
             controller=(options_type, ...),
-            transport=(TransportList, ...),
+            transport=(list[Transport.union()], ...),
             __config__={"extra": "forbid"},
         )
     else:
