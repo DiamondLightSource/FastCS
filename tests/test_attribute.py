@@ -93,65 +93,96 @@ async def test_attribute_io():
     await c.my_attr.update()
 
 
+class DummyConnection:
+    def __init__(self):
+        self._connected = False
+        self._int_value = 5
+        self._ro_int_value = 10
+        self._float_value = 7.5
+
+    async def connect(self):
+        self._connected = True
+
+    async def get(self, uri: str):
+        if not self._connected:
+            raise TimeoutError("No response from DummyConnection")
+        if uri == "config/introspect_api":
+            return [
+                {
+                    "name": "int_parameter",
+                    "subsystem": "status",
+                    "dtype": "int",
+                    "min": 0,
+                    "max": 100,
+                    "value": self._int_value,
+                    "read_only": False,
+                },
+                {
+                    "name": "ro_int_parameter",
+                    "subsystem": "status",
+                    "dtype": "int",
+                    "value": self._ro_int_value,
+                    "read_only": True,
+                },
+                {
+                    "name": "float_parameter",
+                    "subsystem": "status",
+                    "dtype": "float",
+                    "max": 1000.0,
+                    "value": self._float_value,
+                    "read_only": False,
+                },
+            ]
+
+        # increment after getting
+        elif uri == "status/int_parameter":
+            value = self._int_value
+            self._int_value += 1
+        elif uri == "status/ro_int_parameter":
+            value = self._ro_int_value
+            self._ro_int_value += 1
+        elif uri == "status/float_parameter":
+            value = self._float_value
+            self._float_value += 1
+        return value
+
+    async def set(self, uri: str, value: float | int):
+        if uri == "status/int_parameter":
+            self._int_value = value
+        elif uri == "status/ro_int_parameter":
+            # don't update read only parameter
+            pass
+        elif uri == "status/float_parameter":
+            self._float_value = value
+
+
 @pytest.mark.asyncio()
 async def test_dynamic_attribute_io_specification():
-    example_introspection_response = [
-        {
-            "name": "int_parameter",
-            "dtype": "int",
-            "min": 0,
-            "max": 100,
-            "value": 5,
-            "read_only": False,
-        },
-        {"name": "ro_int_parameter", "dtype": "int", "value": 10, "read_only": True},
-        {
-            "name": "float_parameter",
-            "dtype": "float",
-            "max": 1000.0,
-            "value": 7.5,
-            "read_only": False,
-        },
-    ]
-
     @dataclass
     class DemoParameterAttributeIORef(AttributeIORef, Generic[NumberT]):
         name: str
-        # TODO, this is weird, we should just use the attributes's min and max fields
-        min: NumberT | None = None
-        max: NumberT | None = None
-        read_only: bool = False
+        subsystem: str
+        connection: DummyConnection
+
+        @property
+        def uri(self):
+            return f"{self.subsystem}/{self.name}"
 
     class DemoParameterAttributeIO(AttributeIO[NumberT, DemoParameterAttributeIORef]):
         async def update(
             self,
             attr: AttrR[NumberT, DemoParameterAttributeIORef],
         ):
-            # OK, so this doesn't really work when we have min and maxes...
-            await attr.set(attr.get() + 1)
+            value = await attr.io_ref.connection.get(attr.io_ref.uri)
+            await attr.set(value)
 
         async def send(
             self,
             attr: AttrW[NumberT, DemoParameterAttributeIORef],
             value: NumberT,
         ) -> None:
-            if (
-                attr.io_ref.read_only
-            ):  # TODO, this isn't necessary as we can not call process on this anyway
-                raise RuntimeError(
-                    f"Could not set read only attribute {attr.io_ref.name}"
-                )
-
-            if (io_min := attr.io_ref.min) is not None and value < io_min:
-                raise RuntimeError(
-                    f"Could not set {attr.io_ref.name} to {value}, min is {io_min}"
-                )
-
-            if (io_max := attr.io_ref.max) is not None and value > io_max:
-                raise RuntimeError(
-                    f"Could not set {attr.io_ref.name} to {value}, max is {io_max}"
-                )
-            # TODO: we should always end send with a update_display_without_process...
+            await attr.io_ref.connection.set(attr.io_ref.uri, value)
+            await self.update(attr)
 
     class DemoParameterController(Controller):
         ro_int_parameter: AttrR
@@ -159,19 +190,26 @@ async def test_dynamic_attribute_io_specification():
         float_parameter: AttrRW  # hint to satisfy pyright
 
         async def initialise(self):
-            dtype_mapping = {"int": Int(), "float": Float()}
+            self._connection = DummyConnection()
+            await self._connection.connect()
+            dtype_mapping = {"int": Int, "float": Float}
+            example_introspection_response = await self._connection.get(
+                "config/introspect_api"
+            )
             for parameter_response in example_introspection_response:
                 try:
                     ro = parameter_response["read_only"]
                     ref = DemoParameterAttributeIORef(
                         name=parameter_response["name"],
-                        min=parameter_response.get("min", None),
-                        max=parameter_response.get("max", None),
-                        read_only=ro,
+                        subsystem=parameter_response["subsystem"],
+                        connection=self._connection,
                     )
                     attr_class = AttrR if ro else AttrRW
                     attr = attr_class(
-                        datatype=dtype_mapping[parameter_response["dtype"]],
+                        datatype=dtype_mapping[parameter_response["dtype"]](
+                            min=parameter_response.get("min", None),
+                            max=parameter_response.get("max", None),
+                        ),
                         io_ref=ref,
                         initial_value=parameter_response.get("value", None),
                     )
@@ -190,16 +228,12 @@ async def test_dynamic_attribute_io_specification():
     await c.initialise()
     await c.attribute_initialise()
     await c.ro_int_parameter.update()
+    assert c.ro_int_parameter.get() == 10
+    await c.ro_int_parameter.update()
     assert c.ro_int_parameter.get() == 11
-    with pytest.raises(
-        RuntimeError, match="Could not set int_parameter to -10, min is 0"
-    ):
-        await c.int_parameter.process(-10)
 
-    with pytest.raises(
-        RuntimeError, match="Could not set int_parameter to 101, max is 100"
-    ):
-        await c.int_parameter.process(101)
+    await c.int_parameter.process(20)
+    assert c.int_parameter.get() == 20
 
 
 @pytest.mark.asyncio
