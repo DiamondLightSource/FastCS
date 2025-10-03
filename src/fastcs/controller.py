@@ -144,9 +144,9 @@ class BaseController:
                 setattr(self, attr_name, attr.bind(self))
 
     def _validate_io(self, ios: Sequence[AttributeIO[T, AttributeIORefT]]):
-        """Validate that each Attribute has an AttributeIORef for which the
-        controller has an associated AttributeIO class, and that no two AttributeIO
-        classes handle the same AttributeIORef type"""
+        """Validate that there is exactly one AttributeIO class registered to the
+        controller for each type of AttributeIORef belonging to the attributes of the
+        controller"""
         for ref_type, count in Counter([io.ref_type for io in ios]).items():
             if count > 1:
                 raise RuntimeError(
