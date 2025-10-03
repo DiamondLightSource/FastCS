@@ -1,6 +1,8 @@
 import asyncio
 from dataclasses import dataclass
 
+from fastcs.tracer import Tracer
+
 
 class DisconnectedError(Exception):
     """Raised if the ip connection is disconnected."""
@@ -44,10 +46,11 @@ class StreamConnection:
         await self.writer.wait_closed()
 
 
-class IPConnection:
+class IPConnection(Tracer):
     """For connecting to an ip using a `StreamConnection`."""
 
     def __init__(self):
+        super().__init__()
         self.__connection = None
 
     @property
@@ -61,14 +64,20 @@ class IPConnection:
         reader, writer = await asyncio.open_connection(settings.ip, settings.port)
         self.__connection = StreamConnection(reader, writer)
 
-    async def send_command(self, message) -> None:
+    async def send_command(self, message: str) -> None:
         async with self._connection as connection:
             await connection.send_message(message)
 
-    async def send_query(self, message) -> str:
+    async def send_query(self, message: str) -> str:
         async with self._connection as connection:
             await connection.send_message(message)
-            return await connection.receive_response()
+            response = await connection.receive_response()
+            self.log_event(
+                "Received query response",
+                query=message.strip(),
+                response=response.strip(),
+            )
+            return response
 
     async def close(self):
         async with self._connection as connection:

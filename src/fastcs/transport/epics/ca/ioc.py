@@ -8,7 +8,10 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
+from fastcs.cs_methods import Command
 from fastcs.datatypes import DataType, T
+from fastcs.logging import logger as _fastcs_logger
+from fastcs.tracer import Tracer
 from fastcs.transport.epics.ca.util import (
     builder_callable_from_attribute,
     cast_from_epics_type,
@@ -20,6 +23,10 @@ from fastcs.transport.epics.options import EpicsIOCOptions
 from fastcs.util import snake_to_pascal
 
 EPICS_MAX_NAME_LENGTH = 60
+
+
+tracer = Tracer(name=__name__)
+logger = _fastcs_logger.bind(logger_name=__name__)
 
 
 class EpicsCAIOC:
@@ -159,10 +166,14 @@ def _create_and_link_attribute_pvs(
 def _create_and_link_read_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrR[T]
 ) -> None:
+    pv = f"{pv_prefix}:{pv_name}"
+
     async def async_record_set(value: T):
+        tracer.log_event("PV set from attribute", topic=attribute, pv=pv, value=value)
+
         record.set(cast_to_epics_type(attribute.datatype, value))
 
-    record = _make_record(f"{pv_prefix}:{pv_name}", attribute)
+    record = _make_record(pv, attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
     attribute.add_set_callback(async_record_set)
@@ -197,12 +208,20 @@ def _make_record(
 def _create_and_link_write_pv(
     pv_prefix: str, pv_name: str, attr_name: str, attribute: AttrW[T]
 ) -> None:
+    pv = f"{pv_prefix}:{pv_name}"
+
     async def on_update(value):
+        logger.info("PV put: {pv} = {value}", pv=pv, value=value)
+
         await attribute.process_without_display_update(
             cast_from_epics_type(attribute.datatype, value)
         )
 
     async def async_write_display(value: T):
+        tracer.log_event(
+            "PV setpoint set from attribute", topic=attribute, pv=pv, value=value
+        )
+
         record.set(cast_to_epics_type(attribute.datatype, value), process=False)
 
     record = _make_record(
@@ -233,15 +252,19 @@ def _create_and_link_command_pvs(
                     _pv_prefix,
                     pv_name,
                     attr_name,
-                    method.fn,
+                    method,
                 )
 
 
 def _create_and_link_command_pv(
-    pv_prefix: str, pv_name: str, attr_name: str, method: Callable
+    pv_prefix: str, pv_name: str, attr_name: str, method: Command
 ) -> None:
+    pv = f"{pv_prefix}:{pv_name}"
+
     async def wrapped_method(_: Any):
-        await method()
+        tracer.log_event("Command PV put", topic=method, pv=pv)
+
+        await method.fn()
 
     record = builder.Action(
         f"{pv_prefix}:{pv_name}",

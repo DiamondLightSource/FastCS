@@ -23,3 +23,6 @@ class GraphQLTransport(Transport):
 
     async def serve(self) -> None:
         await self._server.serve(self.graphql)
+
+    def __repr__(self) -> str:
+        return f"GraphQLTransport({self.graphql.host}:{self.graphql.port})"

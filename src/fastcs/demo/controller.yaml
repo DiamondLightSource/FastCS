@@ -10,7 +10,7 @@ transport:
       port: 8083
       log_level: info
   - ca_ioc:
-      pv_prefix: DEMO
+      pv_prefix: GARYDEMO
     gui:
       title: Temperature Controller Demo
       output_path: ./demo.bob

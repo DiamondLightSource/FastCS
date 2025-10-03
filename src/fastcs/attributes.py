@@ -4,14 +4,21 @@ import asyncio
 from collections.abc import Callable
 from typing import Generic
 
-from .attribute_io_ref import AttributeIORefT
-from .datatypes import ATTRIBUTE_TYPES, AttrSetCallback, AttrUpdateCallback, DataType, T
+from fastcs.attribute_io_ref import AttributeIORefT
+from fastcs.datatypes import (
+    ATTRIBUTE_TYPES,
+    AttrSetCallback,
+    AttrUpdateCallback,
+    DataType,
+    T,
+)
+from fastcs.tracer import Tracer
 
 ONCE = float("inf")
 """Special value to indicate that an attribute should be updated once on start up."""
 
 
-class Attribute(Generic[T, AttributeIORefT]):
+class Attribute(Generic[T, AttributeIORefT], Tracer):
     """Base FastCS attribute.
 
     Instances of this class added to a ``Controller`` will be used by the FastCS class.
@@ -24,6 +31,8 @@ class Attribute(Generic[T, AttributeIORefT]):
         group: str | None = None,
         description: str | None = None,
     ) -> None:
+        super().__init__()
+
         assert issubclass(datatype.dtype, ATTRIBUTE_TYPES), (
             f"Attr type must be one of {ATTRIBUTE_TYPES}, "
             "received type {datatype.dtype}"
@@ -73,6 +82,9 @@ class Attribute(Generic[T, AttributeIORefT]):
         for callback in self._update_datatype_callbacks:
             callback(datatype)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self._datatype})"
+
 
 class AttrR(Attribute[T, AttributeIORefT]):
     """A read-only ``Attribute``."""
@@ -101,6 +113,8 @@ class AttrR(Attribute[T, AttributeIORefT]):
         return self._value
 
     async def set(self, value: T) -> None:
+        self.log_event("Attribute set", attribute=self, value=value)
+
         self._value = self._datatype.validate(value)
 
         if self._on_set_callbacks is not None:

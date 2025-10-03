@@ -10,6 +10,7 @@ from strawberry.types.field import StrawberryField
 from fastcs.attributes import AttrR, AttrRW, AttrW, T
 from fastcs.controller_api import ControllerAPI
 from fastcs.exceptions import FastCSError
+from fastcs.logging import intercept_std_logger
 
 from .options import GraphQLServerOptions
 
@@ -41,6 +42,10 @@ class GraphQLServer:
                 log_level=options.log_level,
             )
         )
+        intercept_std_logger("uvicorn.error")
+        intercept_std_logger("uvicorn.access")
+        intercept_std_logger("uvicorn.asgi")
+
         await self._server.serve()
 
 

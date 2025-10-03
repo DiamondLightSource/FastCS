@@ -9,9 +9,10 @@ from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORefT
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.datatypes import T
+from fastcs.tracer import Tracer
 
 
-class BaseController:
+class BaseController(Tracer):
     """Base class for controller."""
 
     #: Attributes passed from the device at runtime.
@@ -25,6 +26,8 @@ class BaseController:
         description: str | None = None,
         ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
     ) -> None:
+        super().__init__()
+
         if (
             description is not None
         ):  # Use the argument over the one class defined description.
@@ -181,6 +184,11 @@ class BaseController:
 
     def get_sub_controllers(self) -> dict[str, Controller]:
         return self.__sub_controller_tree
+
+    def __repr__(self):
+        return f"""\
+{type(self).__name__}({self.path}, {list(self.__sub_controller_tree.keys())})\
+"""
 
 
 class Controller(BaseController):

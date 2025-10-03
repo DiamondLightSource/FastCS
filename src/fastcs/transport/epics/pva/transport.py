@@ -2,6 +2,7 @@ import asyncio
 from dataclasses import dataclass, field
 
 from fastcs.controller_api import ControllerAPI
+from fastcs.logging import logger as _fastcs_logger
 from fastcs.transport.epics.docs import EpicsDocs
 from fastcs.transport.epics.gui import PvaEpicsGUI
 from fastcs.transport.epics.options import (
@@ -12,6 +13,8 @@ from fastcs.transport.epics.options import (
 from fastcs.transport.transport import Transport
 
 from .ioc import P4PIOC
+
+logger = _fastcs_logger.bind(logger_name=__name__)
 
 
 @dataclass
@@ -32,7 +35,7 @@ class EpicsPVATransport(Transport):
         self._ioc = P4PIOC(self.pva_ioc.pv_prefix, controller_api)
 
     async def serve(self) -> None:
-        print(f"Running FastCS IOC: {self._pv_prefix}")
+        logger.info("Running IOC", pv_prefix=self._pv_prefix)
         await self._ioc.run()
 
     def create_docs(self) -> None:
@@ -40,3 +43,6 @@ class EpicsPVATransport(Transport):
 
     def create_gui(self) -> None:
         PvaEpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
+
+    def __repr__(self):
+        return f"EpicsPVATransport({self._pv_prefix})"
