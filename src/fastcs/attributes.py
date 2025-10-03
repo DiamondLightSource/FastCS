@@ -41,7 +41,7 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
         self.description = description
 
         # A callback to use when setting the datatype to a different value, for example
-        # changing the units on an int. This should be implemented in the backend.
+        # changing the units on an int.
         self._update_datatype_callbacks: list[Callable[[DataType[T]], None]] = []
 
         # Name to be filled in by Controller when the Attribute is bound

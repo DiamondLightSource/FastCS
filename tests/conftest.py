@@ -150,7 +150,7 @@ def run_ioc_as_subprocess(
         if not error_queue.empty():
             raise error_queue.get()
 
-        # close backend caches before the event loop
+        # close ca caches before the event loop
         purge_channel_caches()
 
         error_queue.close()
@@ -224,7 +224,7 @@ def test_controller(tango_system, register_device):
         if time.monotonic() - start_time > timeout:
             raise TimeoutError("Controller did not start in time")
 
-    # close backend caches before the event loop
+    # close ca caches before the event loop
     purge_channel_caches()
 
     # Stop buffer from getting full and blocking the subprocess

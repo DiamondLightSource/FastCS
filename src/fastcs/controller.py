@@ -179,9 +179,9 @@ class Controller(BaseController):
     """Top-level controller for a device.
 
     This is the primary class for implementing device support in FastCS. Instances of
-    this class can be loaded into a backend to access its ``Attribute``s. The backend
-    can then perform a specific function with the set of ``Attributes``, such as
-    generating a UI or creating parameters for a control system.
+    this class can be loaded into a FastCS to expose its ``Attribute``s to the transport
+    layer, which can then perform a specific function with the set of ``Attributes``,
+    such as generating a UI or creating parameters for a control system.
     """
 
     root_attribute: Attribute | None = None
