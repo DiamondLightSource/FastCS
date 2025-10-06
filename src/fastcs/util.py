@@ -50,7 +50,7 @@ def validate_hinted_attributes(controller: BaseController):
             attr_dtype = None
         else:
             attr_class = get_origin(hint)
-            (attr_dtype,) = get_args(hint)
+            attr_dtype = get_args(hint)[0]
         if not issubclass(attr_class, Attribute):
             continue
 
