@@ -19,12 +19,13 @@ class Tracer:
     Note: The global logger level must be set to ``TRACE`` for the messages to be logged
 
     Example usage:
-    >>> controller.ramp_rate.enable_tracing()
-    >>> controller.ramp_rate.disable_tracing()
-    >>> controller.connection.enable_tracing()
-    >>> controller.connection.add_tracing_filter("query", "V?")
-    >>> controller.connection.remove_tracing_filter("query", "V?")
-    >>> controller.connection.disable_tracing()
+    .. code-block:: python
+        controller.ramp_rate.enable_tracing()
+        controller.ramp_rate.disable_tracing()
+        controller.connection.enable_tracing()
+        controller.connection.add_tracing_filter("query", "V?")
+        controller.connection.remove_tracing_filter("query", "V?")
+        controller.connection.disable_tracing()
 
     :param name: The name of the logger. Attached to log messages as ``logger_name``.
 
