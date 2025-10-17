@@ -40,13 +40,11 @@ method. To create a module logger with its name
 
     logger = _logger.bind(logger_name=__name__)
 
-
 or to create a class logger with its name
 
 .. code-block:: python
 
     self.logger = _logger.bind(logger_name=__class__.__name__)
-
 
 As standard ``loguru`` supports ``trace`` level monitoring, but it should not be used in
 fastcs. Instead there is a ``Tracer`` class for verbose logging with fine-grained

@@ -20,6 +20,7 @@ class Tracer:
 
     Example usage:
     .. code-block:: python
+
         controller.ramp_rate.enable_tracing()
         controller.ramp_rate.disable_tracing()
         controller.connection.enable_tracing()
