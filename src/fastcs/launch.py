@@ -121,8 +121,10 @@ class FastCS:
             if not task.done():
                 try:
                     task.cancel()
-                except asyncio.CancelledError:
+                except (asyncio.CancelledError, RuntimeError):
                     pass
+                except Exception as e:
+                    raise RuntimeError("Unhandled exception in stop scan tasks") from e
 
     async def serve(self) -> None:
         coros = [self.serve_routines()]
@@ -159,6 +161,8 @@ class FastCS:
             await asyncio.gather(*coros)
         except asyncio.CancelledError:
             pass
+        except Exception as e:
+            raise RuntimeError("Unhandled exception in serve") from e
 
     async def _interactive_shell(self, context: dict[str, Any]):
         """Spawn interactive shell in another thread and wait for it to complete."""
