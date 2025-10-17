@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.ca.ioc &#8212; FastCS 0.10.2.dev8+g58000ca7e documentation</title>
+    <title>fastcs.transport.epics.ca.ioc &#8212; FastCS 0.10.2.dev19+g71e1a2e83 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=87370c5d"></script>
+    <script src="../../../../../_static/documentation_options.js?v=46b2b418"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -459,7 +459,10 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.cs_methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">T</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">_fastcs_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">builder_callable_from_attribute</span><span class="p">,</span>
     <span class="n">cast_from_epics_type</span><span class="p">,</span>
@@ -471,6 +474,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">snake_to_pascal</span>
 
 <span class="n">EPICS_MAX_NAME_LENGTH</span> <span class="o">=</span> <span class="mi">60</span>
+
+
+<span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">_fastcs_logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="EpicsCAIOC">
@@ -613,13 +620,17 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_create_and_link_read_pv</span><span class="p">(</span>
     <span class="n">pv_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pv_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">pv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">pv_name</span><span class="si">}</span><span class="s2">&quot;</span>
+
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">async_record_set</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span>
+        <span class="n">tracer</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;PV set from attribute&quot;</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="n">attribute</span><span class="p">,</span> <span class="n">pv</span><span class="o">=</span><span class="n">pv</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
         <span class="n">record</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cast_to_epics_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
-    <span class="n">record</span> <span class="o">=</span> <span class="n">_make_record</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">_make_record</span><span class="p">(</span><span class="n">pv</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
     <span class="n">_add_attr_pvi_info</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">pv_prefix</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
-    <span class="n">attribute</span><span class="o">.</span><span class="n">add_update_callback</span><span class="p">(</span><span class="n">async_record_set</span><span class="p">)</span>
+    <span class="n">attribute</span><span class="o">.</span><span class="n">add_set_callback</span><span class="p">(</span><span class="n">async_record_set</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_make_record</span><span class="p">(</span>
@@ -651,12 +662,20 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_create_and_link_write_pv</span><span class="p">(</span>
     <span class="n">pv_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pv_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">pv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">pv_name</span><span class="si">}</span><span class="s2">&quot;</span>
+
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">on_update</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;PV put: </span><span class="si">{pv}</span><span class="s2"> = </span><span class="si">{value}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">pv</span><span class="o">=</span><span class="n">pv</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
         <span class="k">await</span> <span class="n">attribute</span><span class="o">.</span><span class="n">process_without_display_update</span><span class="p">(</span>
             <span class="n">cast_from_epics_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">async_write_display</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span>
+        <span class="n">tracer</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span>
+            <span class="s2">&quot;PV setpoint set from attribute&quot;</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="n">attribute</span><span class="p">,</span> <span class="n">pv</span><span class="o">=</span><span class="n">pv</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span>
+        <span class="p">)</span>
+
         <span class="n">record</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cast_to_epics_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="n">process</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="n">record</span> <span class="o">=</span> <span class="n">_make_record</span><span class="p">(</span>
@@ -687,15 +706,19 @@
                     <span class="n">_pv_prefix</span><span class="p">,</span>
                     <span class="n">pv_name</span><span class="p">,</span>
                     <span class="n">attr_name</span><span class="p">,</span>
-                    <span class="n">method</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span>
+                    <span class="n">method</span><span class="p">,</span>
                 <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_create_and_link_command_pv</span><span class="p">(</span>
-    <span class="n">pv_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pv_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Callable</span>
+    <span class="n">pv_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pv_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Command</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">pv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">pv_name</span><span class="si">}</span><span class="s2">&quot;</span>
+
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_method</span><span class="p">(</span><span class="n">_</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-        <span class="k">await</span> <span class="n">method</span><span class="p">()</span>
+        <span class="n">tracer</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Command PV put&quot;</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">pv</span><span class="o">=</span><span class="n">pv</span><span class="p">)</span>
+
+        <span class="k">await</span> <span class="n">method</span><span class="o">.</span><span class="n">fn</span><span class="p">()</span>
 
     <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">Action</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>

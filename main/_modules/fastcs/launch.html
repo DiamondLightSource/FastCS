@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.launch &#8212; FastCS 0.10.2.dev8+g58000ca7e documentation</title>
+    <title>fastcs.launch &#8212; FastCS 0.10.2.dev19+g71e1a2e83 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=87370c5d"></script>
+    <script src="../../_static/documentation_options.js?v=46b2b418"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -453,52 +453,72 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">signal</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Coroutine</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Coroutine</span><span class="p">,</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeAlias</span><span class="p">,</span> <span class="n">get_type_hints</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">get_type_hints</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">typer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.terminal.embed</span><span class="w"> </span><span class="kn">import</span> <span class="n">InteractiveShellEmbed</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">create_model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">create_model</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ruamel.yaml</span><span class="w"> </span><span class="kn">import</span> <span class="n">YAML</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.pva.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsPVATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.graphql.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphQLTransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.rest.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">RestTransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.tango.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">TangoTransport</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GraylogEndpoint</span><span class="p">,</span>
+    <span class="n">GraylogEnvFields</span><span class="p">,</span>
+    <span class="n">GraylogStaticFields</span><span class="p">,</span>
+    <span class="n">LogLevel</span><span class="p">,</span>
+    <span class="n">configure_logging</span><span class="p">,</span>
+    <span class="n">parse_graylog_env_fields</span><span class="p">,</span>
+    <span class="n">parse_graylog_static_fields</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">_fastcs_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">Backend</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaunchError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">ONCE</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.cs_methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span><span class="p">,</span> <span class="n">Put</span><span class="p">,</span> <span class="n">Scan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">T</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCSError</span><span class="p">,</span> <span class="n">LaunchError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transport</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_hinted_attributes</span>
 
-<span class="c1"># Define a type alias for transport options</span>
-<span class="n">TransportList</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">list</span><span class="p">[</span>
-    <span class="n">EpicsPVATransport</span>
-    <span class="o">|</span> <span class="n">EpicsCATransport</span>
-    <span class="o">|</span> <span class="n">TangoTransport</span>
-    <span class="o">|</span> <span class="n">RestTransport</span>
-    <span class="o">|</span> <span class="n">GraphQLTransport</span>
-<span class="p">]</span>
+<span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">_fastcs_logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FastCS">
 <a class="viewcode-back" href="../../_api/fastcs.launch.html#fastcs.launch.FastCS">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FastCS</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;For launching a controller with given transport(s).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;For launching a controller with given transport(s) and keeping</span>
+<span class="sd">    track of tasks during serving.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">,</span> <span class="n">transports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Transport</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">,</span>
+        <span class="n">transports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Transport</span><span class="p">],</span>
+        <span class="n">loop</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">AbstractEventLoop</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span> <span class="o">=</span> <span class="n">loop</span> <span class="ow">or</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span> <span class="o">=</span> <span class="n">controller</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">Backend</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_coros</span> <span class="o">=</span> <span class="p">[</span><span class="n">controller</span><span class="o">.</span><span class="n">connect</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scan_tasks</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="c1"># these initialise the controller &amp; build its APIs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">controller</span><span class="o">.</span><span class="n">initialise</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">controller</span><span class="o">.</span><span class="n">attribute_initialise</span><span class="p">())</span>
+        <span class="n">validate_hinted_attributes</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span> <span class="o">=</span> <span class="n">build_controller_api</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_link_process_tasks</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_transports</span> <span class="o">=</span> <span class="n">transports</span>
         <span class="k">for</span> <span class="n">transport</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transports</span><span class="p">:</span>
-            <span class="n">transport</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span>
-                <span class="n">controller_api</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">controller_api</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span>
-            <span class="p">)</span>
+            <span class="n">transport</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="n">controller_api</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">create_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">transport</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transports</span><span class="p">:</span>
@@ -515,11 +535,56 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">add_signal_handler</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">serve</span><span class="o">.</span><span class="n">cancel</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">serve</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_link_process_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">controller_api</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span><span class="o">.</span><span class="n">walk_api</span><span class="p">():</span>
+            <span class="n">_link_put_tasks</span><span class="p">(</span><span class="n">controller_api</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop_scan_tasks</span><span class="p">()</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">serve_routines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">scans</span><span class="p">,</span> <span class="n">initials</span> <span class="o">=</span> <span class="n">_get_scan_and_initial_coros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_coros</span> <span class="o">+=</span> <span class="n">initials</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_initial_coros</span><span class="p">()</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_scan_tasks</span><span class="p">(</span><span class="n">scans</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_run_initial_coros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">coro</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_coros</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">coro</span><span class="p">()</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_start_scan_tasks</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">coros</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">Coroutine</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]]</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scan_tasks</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">coro</span><span class="p">())</span> <span class="k">for</span> <span class="n">coro</span> <span class="ow">in</span> <span class="n">coros</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan_tasks</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scan_done</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scan_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span>
+                <span class="s2">&quot;Exception raised in scan method of &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stop_scan_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan_tasks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+                <span class="k">except</span> <span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unhandled exception in stop scan tasks&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">serve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">coros</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">serve</span><span class="p">()]</span>
+        <span class="n">coros</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">serve_routines</span><span class="p">()]</span>
+
         <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;controller&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="p">,</span>
-            <span class="s2">&quot;controller_api&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">controller_api</span><span class="p">,</span>
+            <span class="s2">&quot;controller_api&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span><span class="p">,</span>
             <span class="s2">&quot;transports&quot;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">transport</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">transport</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transports</span>
             <span class="p">],</span>
@@ -539,10 +604,18 @@
 
         <span class="n">coros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interactive_shell</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
 
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Starting FastCS&quot;</span><span class="p">,</span>
+            <span class="n">controller</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="p">,</span>
+            <span class="n">transports</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">_transports</span><span class="p">)</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">coros</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
             <span class="k">pass</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unhandled exception in serve&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_interactive_shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Spawn interactive shell in another thread and wait for it to complete.&quot;&quot;&quot;</span>
@@ -570,6 +643,126 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">interactive_shell</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">stop_event</span><span class="p">))</span>
         <span class="k">await</span> <span class="n">stop_event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_link_put_tasks</span><span class="p">(</span><span class="n">controller_api</span><span class="p">:</span> <span class="n">ControllerAPI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">put_methods</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;put_&quot;</span><span class="p">)</span>
+
+        <span class="n">attribute</span> <span class="o">=</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">match</span> <span class="n">attribute</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">AttrW</span><span class="p">():</span>
+                <span class="n">attribute</span><span class="o">.</span><span class="n">add_process_callback</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Attribute type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span><span class="si">}</span><span class="s2"> does not&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;support put operations for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_scan_and_initial_coros</span><span class="p">(</span>
+    <span class="n">root_controller_api</span><span class="p">:</span> <span class="n">ControllerAPI</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]]:</span>
+    <span class="n">scan_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">initial_coros</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">controller_api</span> <span class="ow">in</span> <span class="n">root_controller_api</span><span class="o">.</span><span class="n">walk_api</span><span class="p">():</span>
+        <span class="n">_add_scan_method_tasks</span><span class="p">(</span><span class="n">scan_dict</span><span class="p">,</span> <span class="n">controller_api</span><span class="p">)</span>
+        <span class="n">_add_attribute_updater_tasks</span><span class="p">(</span><span class="n">scan_dict</span><span class="p">,</span> <span class="n">initial_coros</span><span class="p">,</span> <span class="n">controller_api</span><span class="p">)</span>
+
+    <span class="n">scan_coros</span> <span class="o">=</span> <span class="n">_get_periodic_scan_coros</span><span class="p">(</span><span class="n">scan_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">scan_coros</span><span class="p">,</span> <span class="n">initial_coros</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_scan_method_tasks</span><span class="p">(</span>
+    <span class="n">scan_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]],</span> <span class="n">controller_api</span><span class="p">:</span> <span class="n">ControllerAPI</span>
+<span class="p">):</span>
+    <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">scan_methods</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">scan_dict</span><span class="p">[</span><span class="n">method</span><span class="o">.</span><span class="n">period</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_attribute_updater_tasks</span><span class="p">(</span>
+    <span class="n">scan_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]],</span>
+    <span class="n">initial_coros</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">],</span>
+    <span class="n">controller_api</span><span class="p">:</span> <span class="n">ControllerAPI</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">match</span> <span class="n">attribute</span><span class="p">:</span>
+            <span class="k">case</span> <span class="p">(</span>
+                <span class="n">AttrR</span><span class="p">(</span><span class="n">_io_ref</span><span class="o">=</span><span class="n">AttributeIORef</span><span class="p">(</span><span class="n">update_period</span><span class="o">=</span><span class="n">update_period</span><span class="p">))</span> <span class="k">as</span> <span class="n">attribute</span>
+            <span class="p">):</span>
+                <span class="n">callback</span> <span class="o">=</span> <span class="n">_create_updater_callback</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">update_period</span> <span class="ow">is</span> <span class="n">ONCE</span><span class="p">:</span>
+                    <span class="n">initial_coros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">update_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">scan_dict</span><span class="p">[</span><span class="n">update_period</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_updater_callback</span><span class="p">(</span><span class="n">attribute</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">callback</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tracer</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Call attribute updater&quot;</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="n">attribute</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">attribute</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Update loop failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="n">attribute</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">return</span> <span class="n">callback</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_periodic_scan_coros</span><span class="p">(</span><span class="n">scan_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]:</span>
+    <span class="n">periodic_scan_coros</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">period</span><span class="p">,</span> <span class="n">methods</span> <span class="ow">in</span> <span class="n">scan_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">periodic_scan_coros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_create_periodic_scan_coro</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">methods</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">periodic_scan_coros</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_periodic_scan_coro</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">methods</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_sleep</span><span class="p">():</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+
+    <span class="n">methods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_sleep</span><span class="p">)</span>  <span class="c1"># Create periodic behavior</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">scan_coro</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">method</span><span class="p">()</span> <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">scan_coro</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_controller_api</span><span class="p">(</span><span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ControllerAPI</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_build_controller_api</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="p">[])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_controller_api</span><span class="p">(</span><span class="n">controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ControllerAPI</span><span class="p">:</span>
+    <span class="n">scan_methods</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Scan</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">put_methods</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Put</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">command_methods</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Command</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">controller</span><span class="p">):</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+        <span class="k">match</span> <span class="n">attr</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">Put</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">put_methods</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr</span>
+            <span class="k">case</span> <span class="n">Scan</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">scan_methods</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr</span>
+            <span class="k">case</span> <span class="n">Command</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">command_methods</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr</span>
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">ControllerAPI</span><span class="p">(</span>
+        <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+        <span class="n">attributes</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">attributes</span><span class="p">,</span>
+        <span class="n">scan_methods</span><span class="o">=</span><span class="n">scan_methods</span><span class="p">,</span>
+        <span class="n">put_methods</span><span class="o">=</span><span class="n">put_methods</span><span class="p">,</span>
+        <span class="n">command_methods</span><span class="o">=</span><span class="n">command_methods</span><span class="p">,</span>
+        <span class="n">sub_apis</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">_build_controller_api</span><span class="p">(</span><span class="n">sub_controller</span><span class="p">,</span> <span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sub_controller</span> <span class="ow">in</span> <span class="n">controller</span><span class="o">.</span><span class="n">get_sub_controllers</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="launch">
@@ -656,17 +849,57 @@
                 <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;A yaml file matching the </span><span class="si">{</span><span class="n">controller_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> schema&quot;</span>
             <span class="p">),</span>
         <span class="p">],</span>
+        <span class="n">log_level</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+            <span class="n">Optional</span><span class="p">[</span><span class="n">LogLevel</span><span class="p">],</span>  <span class="c1"># noqa: UP045</span>
+            <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(),</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">graylog_endpoint</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+            <span class="n">Optional</span><span class="p">[</span><span class="n">GraylogEndpoint</span><span class="p">],</span>  <span class="c1"># noqa: UP045</span>
+            <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Endpoint for graylog logging - &#39;&lt;host&gt;:&lt;port&gt;&#39;&quot;</span><span class="p">,</span>
+                <span class="n">parser</span><span class="o">=</span><span class="n">GraylogEndpoint</span><span class="o">.</span><span class="n">parse_graylog_endpoint</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">graylog_static_fields</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+            <span class="n">Optional</span><span class="p">[</span><span class="n">GraylogStaticFields</span><span class="p">],</span>  <span class="c1"># noqa: UP045</span>
+            <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Fields to add to graylog messages with static values&quot;</span><span class="p">,</span>
+                <span class="n">parser</span><span class="o">=</span><span class="n">parse_graylog_static_fields</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">graylog_env_fields</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+            <span class="n">Optional</span><span class="p">[</span><span class="n">GraylogEnvFields</span><span class="p">],</span>  <span class="c1"># noqa: UP045</span>
+            <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Fields to add to graylog messages from environment variables&quot;</span><span class="p">,</span>
+                <span class="n">parser</span><span class="o">=</span><span class="n">parse_graylog_env_fields</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Start the controller</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">configure_logging</span><span class="p">(</span>
+            <span class="n">log_level</span><span class="p">,</span> <span class="n">graylog_endpoint</span><span class="p">,</span> <span class="n">graylog_static_fields</span><span class="p">,</span> <span class="n">graylog_env_fields</span>
+        <span class="p">)</span>
+
         <span class="n">controller_class</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">controller_class</span>
         <span class="n">fastcs_options</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">fastcs_options</span>
 
         <span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">(</span><span class="n">typ</span><span class="o">=</span><span class="s2">&quot;safe&quot;</span><span class="p">)</span>
         <span class="n">options_yaml</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-        <span class="c1"># To do: Handle a k8s &quot;values.yaml&quot; file</span>
-        <span class="n">instance_options</span> <span class="o">=</span> <span class="n">fastcs_options</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">options_yaml</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">instance_options</span> <span class="o">=</span> <span class="n">fastcs_options</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">options_yaml</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;transport&quot;</span> <span class="ow">in</span> <span class="n">error</span><span class="p">[</span><span class="s2">&quot;loc&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">json</span><span class="p">())):</span>
+                <span class="k">raise</span> <span class="n">LaunchError</span><span class="p">(</span>
+                    <span class="s2">&quot;Failed to validate transports. &quot;</span>
+                    <span class="s2">&quot;Are the correct fastcs extras installed? &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Available transports:</span><span class="se">\n</span><span class="si">{</span><span class="n">Transport</span><span class="o">.</span><span class="n">subclasses</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+            <span class="k">raise</span> <span class="n">LaunchError</span><span class="p">(</span><span class="s2">&quot;Failed to validate config&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance_options</span><span class="p">,</span> <span class="s2">&quot;controller&quot;</span><span class="p">):</span>
             <span class="n">controller</span> <span class="o">=</span> <span class="n">controller_class</span><span class="p">(</span><span class="n">instance_options</span><span class="o">.</span><span class="n">controller</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -675,6 +908,7 @@
         <span class="n">instance</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span>
             <span class="n">controller</span><span class="p">,</span>
             <span class="n">instance_options</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span>
+            <span class="n">loop</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">(),</span>
         <span class="p">)</span>
 
         <span class="n">instance</span><span class="o">.</span><span class="n">create_gui</span><span class="p">()</span>
@@ -690,7 +924,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">fastcs_options</span> <span class="o">=</span> <span class="n">create_model</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">controller_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">transport</span><span class="o">=</span><span class="p">(</span><span class="n">TransportList</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span>
+            <span class="n">transport</span><span class="o">=</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="n">Transport</span><span class="o">.</span><span class="n">union</span><span class="p">()],</span> <span class="o">...</span><span class="p">),</span>
             <span class="n">__config__</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;extra&quot;</span><span class="p">:</span> <span class="s2">&quot;forbid&quot;</span><span class="p">},</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -707,7 +941,7 @@
         <span class="n">fastcs_options</span> <span class="o">=</span> <span class="n">create_model</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">controller_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">controller</span><span class="o">=</span><span class="p">(</span><span class="n">options_type</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span>
-            <span class="n">transport</span><span class="o">=</span><span class="p">(</span><span class="n">TransportList</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span>
+            <span class="n">transport</span><span class="o">=</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="n">Transport</span><span class="o">.</span><span class="n">union</span><span class="p">()],</span> <span class="o">...</span><span class="p">),</span>
             <span class="n">__config__</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;extra&quot;</span><span class="p">:</span> <span class="s2">&quot;forbid&quot;</span><span class="p">},</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

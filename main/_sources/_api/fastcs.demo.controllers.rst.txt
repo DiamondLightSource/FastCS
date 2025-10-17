@@ -5,6 +5,7 @@
         
         
         
+        
 
 .. automodule:: fastcs.demo.controllers
     :members:
@@ -22,7 +23,8 @@
     
         OnOffEnum
         TemperatureController
-        TemperatureControllerHandler
+        TemperatureControllerAttributeIO
+        TemperatureControllerAttributeIORef
         TemperatureControllerSettings
         TemperatureRampController
     

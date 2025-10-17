@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.cs_methods &#8212; FastCS 0.10.2.dev8+g58000ca7e documentation</title>
+    <title>fastcs.cs_methods &#8212; FastCS 0.10.2.dev19+g71e1a2e83 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=87370c5d"></script>
+    <script src="../../_static/documentation_options.js?v=46b2b418"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -456,6 +456,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCSError</span>
 
@@ -484,10 +485,12 @@
 
 <div class="viewcode-block" id="Method">
 <a class="viewcode-back" href="../../_api/fastcs.cs_methods.html#fastcs.cs_methods.Method">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">],</span> <span class="n">Tracer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic base class for all FastCS Controller methods.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">MethodCallback</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span> <span class="o">=</span> <span class="n">getdoc</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
 
         <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">eval_str</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

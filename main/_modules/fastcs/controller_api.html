@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.controller_api &#8212; FastCS 0.10.2.dev8+g58000ca7e documentation</title>
+    <title>fastcs.controller_api &#8212; FastCS 0.10.2.dev19+g71e1a2e83 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=87370c5d"></script>
+    <script src="../../_static/documentation_options.js?v=46b2b418"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -484,7 +484,12 @@
         <span class="k">yield</span> <span class="bp">self</span>
         <span class="k">for</span> <span class="n">api</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_apis</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">yield from</span> <span class="n">api</span><span class="o">.</span><span class="n">walk_api</span><span class="p">()</span></div>
-</div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">ControllerAPI(path=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">, sub_apis=[</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_apis</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">])</span><span class="se">\</span>
+<span class="s2">&quot;&quot;&quot;</span></div>
 
 </pre></div>
 

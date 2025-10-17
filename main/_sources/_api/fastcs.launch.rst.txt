@@ -3,6 +3,7 @@
         
         
         
+        
 
 .. automodule:: fastcs.launch
     :members:
@@ -19,6 +20,7 @@
         :nosignatures:
     
         FastCS
+        build_controller_api
         get_controller_schema
         launch
     

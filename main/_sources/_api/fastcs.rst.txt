@@ -13,8 +13,9 @@
         :template: custom-module-template.rst
         :recursive:
     
+        attribute_io
+        attribute_io_ref
         attributes
-        backend
         connections
         controller
         controller_api
@@ -23,6 +24,8 @@
         demo
         exceptions
         launch
+        logging
+        tracer
         transport
         util
         wrappers

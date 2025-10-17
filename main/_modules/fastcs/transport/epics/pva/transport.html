@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.pva.transport &#8212; FastCS 0.10.2.dev8+g58000ca7e documentation</title>
+    <title>fastcs.transport.epics.pva.transport &#8212; FastCS 0.10.2.dev19+g71e1a2e83 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=87370c5d"></script>
+    <script src="../../../../../_static/documentation_options.js?v=46b2b418"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -453,6 +453,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">_fastcs_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.docs</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsDocs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.gui</span><span class="w"> </span><span class="kn">import</span> <span class="n">PvaEpicsGUI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -463,6 +464,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transport</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ioc</span><span class="w"> </span><span class="kn">import</span> <span class="n">P4PIOC</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">_fastcs_logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="EpicsPVATransport">
@@ -485,14 +488,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ioc</span> <span class="o">=</span> <span class="n">P4PIOC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pva_ioc</span><span class="o">.</span><span class="n">pv_prefix</span><span class="p">,</span> <span class="n">controller_api</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">serve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running FastCS IOC: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_pv_prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running IOC&quot;</span><span class="p">,</span> <span class="n">pv_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pv_prefix</span><span class="p">)</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ioc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">create_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">EpicsDocs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller_api</span><span class="p">)</span><span class="o">.</span><span class="n">create_docs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">create_gui</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">PvaEpicsGUI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller_api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_prefix</span><span class="p">)</span><span class="o">.</span><span class="n">create_gui</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="p">)</span></div>
+        <span class="n">PvaEpicsGUI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller_api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pv_prefix</span><span class="p">)</span><span class="o">.</span><span class="n">create_gui</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;EpicsPVATransport(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_pv_prefix</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 </pre></div>
 
