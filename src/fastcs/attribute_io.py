@@ -7,6 +7,17 @@ from fastcs.tracer import Tracer
 
 
 class AttributeIO(Generic[T, AttributeIORefT], Tracer):
+    """Base class for performing IO for an ``Attribute``
+
+    This class should be inherited to implement reading and writing values from
+    ``Attributes`` via some API. For read, ``Attribute``s implement the ``update``
+    method and for write, ``Attribute`` implement the ``send`` method.
+
+    Concrete implementations of this class must be parameterised with a specific
+    ``AttributeIORef`` that defines exactly what part of the API the ``Attribute``
+    corresponds to. See the docstring for ``AttributeIORef`` for more information.
+    """
+
     ref_type = AttributeIORef
 
     def __init_subclass__(cls) -> None:
