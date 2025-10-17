@@ -15,13 +15,12 @@ from uuid import uuid4
 
 import pytest
 from aioca import purge_channel_caches
-from loguru import logger as _logger
 from softioc import builder
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.launch import build_controller_api
-from fastcs.logging import LogLevel, configure_logging
+from fastcs.logging import logger
 from fastcs.transport.tango.dsr import register_dev
 from tests.assertable_controller import MyTestAttributeIORef, MyTestController
 from tests.example_p4p_ioc import run as _run_p4p_ioc
@@ -88,10 +87,11 @@ def _run_ioc_as_subprocess(
     error_queue: multiprocessing.Queue,
     stdout_queue: multiprocessing.Queue,
 ):
-    configure_logging(LogLevel.INFO)
+    # configure_logging(LogLevel.INFO)
     # we need to capture log messages from transport
-    logger = _logger.bind(logger_name="fastcs.transport.epics.ca.transport")
+    # logger = _logger.bind(logger_name="fastcs.transport.epics.ca.transport")
     logger.add(print)  # forward log messages to stdout
+    logger.enable("fastcs")
 
     try:
         from pytest_cov.embed import cleanup_on_sigterm
