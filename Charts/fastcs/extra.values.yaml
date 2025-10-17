@@ -13,3 +13,12 @@ extraContainers:
       - command
       - arg1
       - arg2
+
+global:
+  env:
+    - name: example
+      value: example
+
+env:
+  - name: example
+    value: example
