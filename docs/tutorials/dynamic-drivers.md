@@ -43,29 +43,26 @@ implement an `initialise` method to create these dynamically instead.
 Create a pydantic model to validate the response from the device
 
 :::{literalinclude} /snippets/dynamic.py
-:lines: 3-5,14-33
+:lines: 5,18-35
 :::
 
-Create a function to parse the dictionary and validate the entries against the model
+Create a function to parse the dictionary, validate the entries against the model and
+create `Attributes`.
 
 :::{literalinclude} /snippets/dynamic.py
-:lines: 36-54
+:lines: 38-56
 :::
 
 Update the controllers to not define attributes statically and implement initialise
 methods to create these attributes dynamically.
 
 :::{literalinclude} /snippets/dynamic.py
-:lines: 76,81-83
-:::
-
-:::{literalinclude} /snippets/dynamic.py
-:lines: 86,95-109
+:lines: 91-131
 :::
 
 The `suffix` field should also be removed from `TemperatureController` and
-`TemperatureRampController` and then not used in `TemperatureControllerHandler` because
-the `command` field on `TemperatureControllerParameter` includes this.
+`TemperatureRampController` and then not used in `TemperatureControllerAttributeIO`
+because the `command` field on `TemperatureControllerParameter` includes this.
 
 TODO: Add `enabled` back in to `TemperatureRampController` and recreate `disable_all` to
 demonstrate validation of introspected Attributes.

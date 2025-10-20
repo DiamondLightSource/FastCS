@@ -7,4 +7,6 @@ class TemperatureController(Controller):
 
 
 fastcs = FastCS(TemperatureController(), [])
-# fastcs.run() # Commented as this will block
+
+if __name__ == "__main__":
+    fastcs.run()
