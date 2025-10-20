@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Install helm
-        uses: Azure/setup-helm@v3
+        uses: Azure/setup-helm@v4
         with:
           version: ${{ env.HELM_VERSION_TO_INSTALL }}
 
