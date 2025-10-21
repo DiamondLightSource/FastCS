@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import asyncio
 import enum
 import json
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TypeVar
 
 from fastcs.attribute_io import AttributeIO
@@ -28,20 +26,19 @@ class TemperatureControllerSettings:
     ip_settings: IPConnectionSettings
 
 
-@dataclass(kw_only=True)
+@dataclass
 class TemperatureControllerAttributeIORef(AttributeIORef):
     name: str
+    _: KW_ONLY
     update_period: float | None = 0.2
-
-    def __post_init__(self):
-        # Call __init__ of non-dataclass parent
-        super().__init__()
 
 
 class TemperatureControllerAttributeIO(
     AttributeIO[NumberT, TemperatureControllerAttributeIORef]
 ):
     def __init__(self, connection: IPConnection, suffix: str):
+        super().__init__()
+
         self._connection = connection
         self.suffix = suffix
 
@@ -56,7 +53,7 @@ class TemperatureControllerAttributeIO(
         self, attr: AttrR[NumberT, TemperatureControllerAttributeIORef]
     ) -> None:
         query = f"{attr.io_ref.name}{self.suffix}?"
-        response = await self._connection.send_query(f"{query}?\r\n")
+        response = await self._connection.send_query(f"{query}\r\n")
         response = response.strip("\r\n")
         self.log_event(
             "Query for attribute",

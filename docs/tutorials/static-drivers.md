@@ -3,8 +3,8 @@
 ## Demo Simulation
 
 Within FastCS there is a tickit simulation of a temperature controller. Clone the FastCS
-repository and open it in VS Code. The simulation can be run with the 
-`Temp Controller Sim` launch config by typing `Ctrl+P debug ` (note the trailing 
+repository and open it in VS Code. The simulation can be run with the
+`Temp Controller Sim` launch config by typing `Ctrl+P debug ` (note the trailing
 whitespace), selecting the launch config and pressing enter. The simulation will then
 sit and wait for commands to be sent. When it receives commands, it will log them to the
 console to show what it is doing.
@@ -44,13 +44,13 @@ along with an empty list of transports (for now).
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static02.py
-:emphasize-lines: 2,9,10
+:emphasize-lines: 2,9,11-12
 :::
 
 ::::
 
 Now the application runs, but it still doesn't expose any API because the `Controller`
-is empty. It also completes immediately.
+is empty.
 
 ## FastCS Attributes
 
@@ -69,9 +69,25 @@ is a string, so `String` should be used.
 
 ::::
 
-Now the controller has a property that will appear in the API, but the application still
-completes immediately because there are no transports being run on the event loop to
-expose an API.
+Now the controller has a property that will appear in the API, but there are no
+transports being run on the event loop to expose that API. The controller can be
+interacted with in the console, but note that it hasn't populated any values because it
+doesn't have a connection.
+
+::::{admonition} Interactive Shell
+:class: dropdown, hint
+
+:::
+In [1]: controller.device_id
+
+Out[1]: AttrR(String())
+
+In [2]: controller.device_id.get()
+
+Out[2]: ''
+:::
+
+::::
 
 ## FastCS Transports
 
@@ -85,7 +101,7 @@ following transports are currently supported
 - HTTP (using `fastapi`)
 
 One or more of these can be loaded into the application and run in parallel. Add the
-EPICS CA transport to the application by creating an `EPICSCAOptions` instance and
+EPICS CA transport to the application by creating an `EPICSCATransport` instance and
 passing it in.
 
 ::::{admonition} Code 4
@@ -97,14 +113,9 @@ passing it in.
 
 ::::
 
-:::{warning}
-In the above snippet and all hereafter, the final line is commented out. This is done to 
-avoid blocking our unit tests - in your own code, it should remain uncommented.
-:::
-
-The application will now run until it is stopped. There will also be a `DEMO:DeviceId`
-PV being served by the application. However, the record is unset because the
-`Controller` is not yet querying the simulator for the value.
+There will now be a `DEMO:DeviceId` PV being served by the application. However, the
+record is unset because the `Controller` is not yet querying the simulator for the
+value.
 
 ```bash
 ❯ caget -S DEMO:DeviceId
@@ -118,7 +129,7 @@ options to the transport options and generate a `demo.bob` file to use with Phoe
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static05.py
-:emphasize-lines: 1,7,15-21,24
+:emphasize-lines: 1,7,16-20,22
 :::
 
 ::::
@@ -128,9 +139,8 @@ The `demo.bob` will have been created in the directory the application was run f
 ## FastCS Device Connection
 
 The `Attributes` of a FastCS `Controller` need some IO with the device in order to get
-and set values. This is implemented with handlers and connections. There are three types
-of handler - `Sender`, `Updater` and `Handler` (which implements both). Generally each
-driver implements its own connection logic, but there are some built in options.
+and set values. This is implemented with `AttributeIO`s and connections. Generally each
+driver implements its own IO and connection logic, but there are some built in options.
 
 Update the controller to create an `IPConnection` to communicate with the simulator over
 TCP and implement a `connect` method that establishes the connection. The `connect`
@@ -145,7 +155,7 @@ The simulator control connection is on port 25565.
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static06.py
-:emphasize-lines: 4,15-22,32-33
+:emphasize-lines: 4,15-22,29-30
 :::
 
 ::::
@@ -155,10 +165,11 @@ The application will now fail to connect if the demo simulation is not running.
 :::
 
 The `Controller` has now established a connection with the simulator. This connection
-can be passed to an `Updater` to enable it to query the device API and update the value
-in the `device_id` attribute. Create an `Updater` child class and implement the method
-to send a query to the device and set the value of the attribute, and then pass an
-instance of the `Updater` to the `device_id` attribute.
+can be passed to an `AttributeIO` to enable it to query the device API and update the
+value in the `device_id` attribute. Create a `TemperatureControllerAttributeIO` child
+class and implement the `update` method to query the device and set the value of the
+attribute, and create a `TemperatureControllerAttributeIORef` and pass an instance of
+it to the `device_id` attribute to tell the controller what io to use to update it.
 
 :::{note}
 The `update_period` property tells the base class how often to call `update`
@@ -168,7 +179,7 @@ The `update_period` property tells the base class how often to call `update`
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static07.py
-:emphasize-lines: 1-3,6,8,15-35,39
+:emphasize-lines: 1,3,5-6,15-33,37,43
 :::
 
 ::::
@@ -190,13 +201,12 @@ DEMO:DeviceId SIMTCONT123
 
 The simulator supports many other commands, for example it reports the total power
 currently being drawn with the `P` command. This can be exposed by adding another
-`AttrR` with a `Float` datatype, but the `IDUpdater` only supports the `ID` command to
-get the device ID. This new attribute could have its own updater, but it would be better
-to create common updater that can be configured with the command to send so that they
-can share the same code.
+`AttrR` with a `Float` datatype, but the IO only supports the `ID` command to get the
+device ID. This new attribute could have its own IO, but it is similar enough that the
+existing IO can be support both.
 
-Modify the handler to take a `command_name` string and use it to create a new attribute
-to read the power usage.
+Modify the IO ref to take a `name` string and update the IO to use it in the query
+string sent to the device. Create a new attribute to read the power usage using this.
 
 :::{note}
 All responses from the `IPConnection` are strings. This is fine for the `ID` command
@@ -210,7 +220,7 @@ etc.
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static08.py
-:emphasize-lines: 9,16-17,33-35,38,42-43
+:emphasize-lines: 10,19-21,33-38,42-43
 :::
 
 ::::
@@ -219,12 +229,11 @@ Now the IOC has two PVs being polled periodically. The new PV will be visible in
 Phoebus UI on refresh (right-click). `DEMO:Power` will read as `0` because the simulator
 is not currently running a ramp. To do that the controller needs to be able to set
 values on the device, as well as read them back. The ramp rate of the temperature can be
-read with the `R` command and set with the `R=...` command. This means the controller
-also needs a `Sender` handler that implements `put` to send values to the device.
+read with the `R` command and set with the `R=...` command. This means the IO also needs
+a `send` method to send values to the device.
 
-Update the existing handler to support both `update` and `put`, making it a `Handler`
-(which implements both `Updater` and `Sender`). Then add a new `AttrRW` with type
-`Float` to get and set the ramp rate.
+Update the IO to implement `send` and then add a new `AttrRW` with type `Float` to get
+and set the ramp rate.
 
 :::{note}
 The set commands do not return a response, so use the `send_command` method instead of
@@ -235,7 +244,7 @@ The set commands do not return a response, so use the `send_command` method inst
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static09.py
-:emphasize-lines: 5,7,17,41-44, 48-50
+:emphasize-lines: 7,40-44,48-50
 :::
 
 ::::
@@ -270,17 +279,16 @@ has. This can be done with the use of sub controllers. Controllers can be arbitr
 nested to match the structure of a device and this structure is then mirrored to the
 transport layer for the visibility of the user.
 
-Create a `TemperatureRampController` with `AttrRW`s to get and set the ramp start and
-end, update the `TemperatureControllerHandler` to include an optional suffix for the
-commands so that it can be shared between the parent `TemperatureController` and add an
-argument to define how many ramps there are, which is used to register the correct
-number of ramp controllers with the parent.
+Create a `TemperatureRampController` with two `AttrRW`s the ramp start and end, update
+the IO to include an optional suffix for the commands so that it can be shared with
+the parent `TemperatureController` and add an argument to define how many ramps there
+are, which is used to register the correct number of ramp controllers with the parent.
 
 ::::{admonition} Code 10
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static10.py
-:emphasize-lines: 9,10,20,23,27,35,43,47-56,64,66,72-76,90
+:emphasize-lines: 10,28,32,35,44,48-56,64,70-74,85
 :::
 
 ::::
@@ -305,7 +313,7 @@ Add an `AttrRW` to the `TemperatureRampController`s with an `Enum` type, using a
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static11.py
-:emphasize-lines: 3,11,48-50,56
+:emphasize-lines: 1,11,49-51,57
 :::
 
 ::::
@@ -347,10 +355,10 @@ The applied voltage for each ramp is also available with the `V?` command, but t
 is an array with each element corresponding to a ramp. Here it will be simplest to
 manually fetch the array in the parent controller and pass each value into ramp
 controller. This can be done with a `scan` method - these are called at a defined rate,
-similar to the `update` method of handlers.
+similar to the `update` method of an `AttributeIO`.
 
-Add an `AttrR` for the voltage to the `TemperatureRampController`, but do not pass it a
-handler. Then add a method to the `TemperatureController` with a `@scan` decorator that
+Add an `AttrR` for the voltage to the `TemperatureRampController`, but do not pass it an
+IO ref. Then add a method to the `TemperatureController` with a `@scan` decorator that
 gets the array of voltages and sets each ramp controller with its value. Also add
 `AttrR`s for the target and actual temperature for each ramp as described above.
 
@@ -358,14 +366,14 @@ gets the array of voltages and sets each ramp controller with its value. Also ad
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static12.py
-:emphasize-lines: 4,16,59-61,93-99
+:emphasize-lines: 2,16,60-62,91-97
 :::
 
 ::::
 
 Creating attributes is intended to be a simple API covering most use cases, but where
 more flexibility is needed wrapped controller methods can be useful to avoid adding
-complexity to the handlers to handle a small subset of attributes. It is also useful for
+complexity to the IO to handle a small subset of attributes. It is also useful for
 implementing higher level logic on top of the attributes that expose the API of a device
 directly. For example, it would be useful to have a single button to stop all of the
 ramps at the same time. This can be done with a `command` method. These are similar to
@@ -379,7 +387,7 @@ controller.
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static13.py
-:emphasize-lines: 3,17,102-108
+:emphasize-lines: 1,17,100-105
 :::
 
 ::::
@@ -401,4 +409,4 @@ DEMO:R1:Enabled_RBV            Off
 
 This demonstrates some of the simple use cases for a statically defined FastCS driver.
 It is also possible to instantiate a driver dynamically by instantiating a device during
-startup. See the next tutorial for how to do this (TODO).
+startup. See the next tutorial for how to do this.

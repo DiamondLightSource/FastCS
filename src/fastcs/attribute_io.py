@@ -26,6 +26,9 @@ class AttributeIO(Generic[T, AttributeIORefT], Tracer):
         args = get_args(cast(Any, cls).__orig_bases__[0])
         cls.ref_type = args[1]
 
+    def __init__(self):
+        super().__init__()
+
     async def update(self, attr: AttrR[T, AttributeIORefT]) -> None:
         raise NotImplementedError()
 
