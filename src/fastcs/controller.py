@@ -131,18 +131,7 @@ class BaseController(Tracer):
 
             attr = getattr(self, attr_name, None)
             if isinstance(attr, Attribute):
-                if (
-                    attr_name in self.attributes
-                    and self.attributes[attr_name] is not attr
-                ):
-                    raise ValueError(
-                        f"`{type(self).__name__}` has conflicting attribute "
-                        f"`{attr_name}` already present in the attributes dict."
-                    )
-
-                new_attribute = deepcopy(attr)
-                setattr(self, attr_name, new_attribute)
-                self.attributes[attr_name] = new_attribute
+                setattr(self, attr_name, deepcopy(attr))
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
@@ -163,6 +152,22 @@ class BaseController(Tracer):
                 f"{self.__class__.__name__} does not have an AttributeIO to handle "
                 f"{attr.io_ref.__class__.__name__}"
             )
+
+    def add_attribute(self, name, attribute: Attribute):
+        if name in self.attributes and attribute is not self.attributes[name]:
+            raise ValueError(
+                f"Cannot add attribute {name}. "
+                f"Controller {self} has has existing attribute {name}"
+            )
+        elif name in self.__sub_controller_tree.keys():
+            raise ValueError(
+                f"Cannot add attribute {name}. "
+                f"Controller {self} has existing sub controller {name}"
+            )
+
+        attribute.set_name(name)
+        self.attributes[name] = attribute
+        super().__setattr__(name, attribute)
 
     def register_sub_controller(self, name: str, sub_controller: Controller):
         if name in self.__sub_controller_tree.keys():
@@ -189,6 +194,12 @@ class BaseController(Tracer):
         return f"""\
 {type(self).__name__}({self.path}, {list(self.__sub_controller_tree.keys())})\
 """
+
+    def __setattr__(self, name, value):
+        if isinstance(value, Attribute):
+            self.add_attribute(name, value)
+        else:
+            super().__setattr__(name, value)
 
 
 class Controller(BaseController):

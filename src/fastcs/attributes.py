@@ -47,6 +47,9 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
         # changing the units on an int. This should be implemented in the backend.
         self._update_datatype_callbacks: list[Callable[[DataType[T]], None]] = []
 
+        # Name to be filled in by Controller when the Attribute is bound
+        self._name = None
+
     @property
     def io_ref(self) -> AttributeIORefT:
         if self._io_ref is None:
@@ -82,8 +85,16 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
         for callback in self._update_datatype_callbacks:
             callback(datatype)
 
+    def set_name(self, name: list[str]):
+        if self._name:
+            raise ValueError(
+                f"Attribute is already registered with a controller as {self._name}"
+            )
+
+        self._name = name
+
     def __repr__(self):
-        return f"{self.__class__.__name__}({self._datatype})"
+        return f"{self.__class__.__name__}({self._name}, {self._datatype})"
 
 
 class AttrR(Attribute[T, AttributeIORefT]):

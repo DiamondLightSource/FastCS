@@ -39,21 +39,18 @@ class SomeSubController(Controller):
 
 
 class SomeController(Controller):
-    annotated_attr: AttrR
     annotated_attr_not_defined_in_init: AttrR[int]
     equal_attr = AttrR(Int())
     annotated_and_equal_attr: AttrR[int] = AttrR(Int())
 
     def __init__(self, sub_controller: Controller):
-        self.attributes = {}
+        super().__init__()
 
-        self.annotated_attr = AttrR(Int())
         self.attr_on_object = AttrR(Int())
 
         self.attributes["_attributes_attr"] = AttrR(Int())
         self.attributes["_attributes_attr_equal"] = self.equal_attr
 
-        super().__init__()
         self.register_sub_controller("sub_controller", sub_controller)
 
 
@@ -63,7 +60,7 @@ def test_attribute_parsing():
 
     assert set(controller.attributes.keys()) == {
         "_attributes_attr",
-        "annotated_attr",
+        "attr_on_object",
         "_attributes_attr_equal",
         "annotated_and_equal_attr",
         "equal_attr",
@@ -81,21 +78,15 @@ def test_attribute_parsing():
     }
 
 
-def test_attribute_in_both_class_and_get_attributes():
+def test_attribute_in_both_class_and_get_attributes_fails():
     class FailingController(Controller):
         duplicate_attribute = AttrR(Int())
 
         def __init__(self):
-            self.attributes = {"duplicate_attribute": AttrR(Int())}
             super().__init__()
+            self.duplicate_attribute = AttrR(Int())
 
-    with pytest.raises(
-        ValueError,
-        match=(
-            "`FailingController` has conflicting attribute `duplicate_attribute` "
-            "already present in the attributes dict."
-        ),
-    ):
+    with pytest.raises(ValueError, match="existing attribute"):
         FailingController()
 
 
