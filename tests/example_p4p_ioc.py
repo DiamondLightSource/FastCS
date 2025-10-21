@@ -70,12 +70,9 @@ class ChildController(Controller):
 
 def run(pv_prefix="P4P_TEST_DEVICE"):
     controller = ParentController()
-    controller.register_sub_controller(
-        "Child1", ChildController(description="some sub controller")
-    )
-    controller.register_sub_controller(
-        "Child2", ChildController(description="another sub controller")
-    )
+    controller.child1 = ChildController(description="some sub controller")
+    controller.child2 = ChildController(description="another sub controller")
+
     fastcs = FastCS(
         controller, [EpicsPVATransport(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))]
     )

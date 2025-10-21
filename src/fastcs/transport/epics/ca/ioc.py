@@ -114,7 +114,7 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: ControllerAPI):
     parent_pvi = ":".join([pv_prefix] + parent.path + ["PVI"])
 
     for child in parent.sub_apis.values():
-        child_pvi = ":".join([pv_prefix] + child.path + ["PVI"])
+        child_pvi = ":".join([pv_prefix] + _controller_pv_prefix(child.path) + ["PVI"])
         child_name = child.path[-1].lower()
 
         _add_pvi_info(child_pvi, parent_pvi, child_name)
@@ -123,14 +123,14 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: ControllerAPI):
 
 
 def _create_and_link_attribute_pvs(
-    pv_prefix: str, root_controller_api: ControllerAPI
+    root_pv_prefix: str, root_controller_api: ControllerAPI
 ) -> None:
     for controller_api in root_controller_api.walk_api():
         path = controller_api.path
         for attr_name, attribute in controller_api.attributes.items():
             pv_name = snake_to_pascal(attr_name)
-            _pv_prefix = ":".join([pv_prefix] + path)
-            full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
+            pv_prefix = ":".join([root_pv_prefix] + _controller_pv_prefix(path))
+            full_pv_name_length = len(f"{pv_prefix}:{pv_name}")
 
             if full_pv_name_length > EPICS_MAX_NAME_LENGTH:
                 attribute.enabled = False
@@ -152,15 +152,15 @@ def _create_and_link_attribute_pvs(
                         attribute.enabled = False
                     else:
                         _create_and_link_read_pv(
-                            _pv_prefix, f"{pv_name}_RBV", attr_name, attribute
+                            pv_prefix, f"{pv_name}_RBV", attr_name, attribute
                         )
                         _create_and_link_write_pv(
-                            _pv_prefix, pv_name, attr_name, attribute
+                            pv_prefix, pv_name, attr_name, attribute
                         )
                 case AttrR():
-                    _create_and_link_read_pv(_pv_prefix, pv_name, attr_name, attribute)
+                    _create_and_link_read_pv(pv_prefix, pv_name, attr_name, attribute)
                 case AttrW():
-                    _create_and_link_write_pv(_pv_prefix, pv_name, attr_name, attribute)
+                    _create_and_link_write_pv(pv_prefix, pv_name, attr_name, attribute)
 
 
 def _create_and_link_read_pv(
@@ -234,14 +234,14 @@ def _create_and_link_write_pv(
 
 
 def _create_and_link_command_pvs(
-    pv_prefix: str, root_controller_api: ControllerAPI
+    root_pv_prefix: str, root_controller_api: ControllerAPI
 ) -> None:
     for controller_api in root_controller_api.walk_api():
         path = controller_api.path
         for attr_name, method in controller_api.command_methods.items():
             pv_name = snake_to_pascal(attr_name)
-            _pv_prefix = ":".join([pv_prefix] + path)
-            if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
+            pv_prefix = ":".join([root_pv_prefix] + _controller_pv_prefix(path))
+            if len(f"{pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
                 print(
                     f"Not creating PV for {attr_name} as full name would exceed"
                     f" {EPICS_MAX_NAME_LENGTH} characters"
@@ -249,7 +249,7 @@ def _create_and_link_command_pvs(
                 method.enabled = False
             else:
                 _create_and_link_command_pv(
-                    _pv_prefix,
+                    pv_prefix,
                     pv_name,
                     attr_name,
                     method,
@@ -302,3 +302,7 @@ def _add_attr_pvi_info(
             }
         },
     )
+
+
+def _controller_pv_prefix(controller_path: list[str]) -> list[str]:
+    return [snake_to_pascal(node) for node in controller_path]

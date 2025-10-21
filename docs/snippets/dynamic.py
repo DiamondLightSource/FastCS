@@ -126,7 +126,7 @@ class TemperatureController(Controller):
                 idx + 1, ramp_parameters, self._io
             )
             await ramp_controller.initialise()
-            self.register_sub_controller(f"Ramp{idx + 1:02d}", ramp_controller)
+            self.add_sub_controller(f"Ramp{idx + 1:02d}", ramp_controller)
 
         await self._connection.close()
 
