@@ -34,6 +34,10 @@
             "description": "command to run for the production container",
             "type": "array"
         },
+        "configFolder": {
+            "description": "path to the location of config folder",
+            "type": "string"
+        },
         "debugCommand": {
             "description": "command to run for the debugging (non- autostart) container",
             "type": "array",
@@ -44,6 +48,21 @@
         "editable": {
             "description": "editable and autostart are used for debugging and development in-cluster",
             "type": "boolean"
+        },
+        "env": {
+            "description": "Add environment to individual services",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "extraContainers": {
             "description": "Add arbitrary containers to the pod",
@@ -71,6 +90,23 @@
         "global": {
             "description": "shared values for all services",
             "type": "object",
+            "properties": {
+                "env": {
+                    "description": "Add environment to all services",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
             "additionalProperties": true
         },
         "hostNetwork": {
@@ -99,9 +135,9 @@
                 "type": "string"
             }
         },
-        "iocConfig": {
-            "description": "path to the location of config folder (defaults to be the same as C++ IOCs)",
-            "type": "string"
+        "is_ioc": {
+            "description": "set to true of IOCs in services repos",
+            "type": "boolean"
         },
         "livenessProbe": {
             "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/container.json#/properties/livenessProbe",
@@ -110,6 +146,14 @@
         "nodeSelector": {
             "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.3/podspec.json#/properties/nodeSelector",
             "type": "object"
+        },
+        "opisClaim": {
+            "description": "name of the PVC to use to store opi files, leave blank for IOCs - will then default to ixx-epics-opis",
+            "type": "string"
+        },
+        "opisMountPoint": {
+            "description": "where to mount the opis volume inside the container",
+            "type": "string"
         },
         "podAnnotations": {
             "description": "Add annotations to the pod",
