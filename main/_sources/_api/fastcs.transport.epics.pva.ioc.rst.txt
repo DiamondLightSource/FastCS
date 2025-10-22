@@ -2,7 +2,6 @@
 ==================================
         
         
-        
 
 .. automodule:: fastcs.transport.epics.pva.ioc
     :members:
@@ -19,7 +18,6 @@
         :nosignatures:
     
         P4PIOC
-        get_pv_name
         parse_attributes
     
     

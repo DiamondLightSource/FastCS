@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.transport.epics.pva.ioc &#8212; FastCS 0.10.2.dev23+gc70ae18eb documentation</title>
+    <title>fastcs.transport.epics.pva.ioc &#8212; FastCS 0.10.2.dev27+g019ae1532 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=12757b4b"></script>
+    <script src="../_static/documentation_options.js?v=be926d3e"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -436,6 +436,7 @@
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.gui.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.gui</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.options</span></code></a></li>
 <li class="toctree-l4 current active"><a class="reference internal" href="fastcs.transport.epics.pva.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.util</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -547,21 +548,12 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.ioc.P4PIOC" title="fastcs.transport.epics.pva.ioc.P4PIOC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">P4PIOC</span></code></a></p></td>
 <td><p>A P4P IOC which handles a controller.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.ioc.get_pv_name" title="fastcs.transport.epics.pva.ioc.get_pv_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pv_name</span></code></a></p></td>
-<td><p>Converts from an attribute name to a pv name.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.ioc.parse_attributes" title="fastcs.transport.epics.pva.ioc.parse_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_attributes</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.ioc.parse_attributes" title="fastcs.transport.epics.pva.ioc.parse_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_attributes</span></code></a></p></td>
 <td><p>Parses <a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> s into p4p signals in handlers.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transport.epics.pva.ioc.get_pv_name">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transport.epics.pva.ioc.</span></span><span class="sig-name descname"><span class="pre">get_pv_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pv_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">attribute_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/fastcs/transport/epics/pva/ioc.html#get_pv_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transport.epics.pva.ioc.get_pv_name" title="Link to this definition">#</a></dt>
-<dd><p>Converts from an attribute name to a pv name.</p>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="fastcs.transport.epics.pva.ioc.parse_attributes">
 <em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.transport.epics.pva.ioc.</span></span><span class="sig-name descname"><span class="pre">parse_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_pv_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_controller_api</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.controller_api.html#fastcs.controller_api.ControllerAPI" title="fastcs.controller_api.ControllerAPI"><span class="pre">ControllerAPI</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">StaticProvider</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/fastcs/transport/epics/pva/ioc.html#parse_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transport.epics.pva.ioc.parse_attributes" title="Link to this definition">#</a></dt>
@@ -624,7 +616,6 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.ioc.get_pv_name"><code class="docutils literal notranslate"><span class="pre">get_pv_name()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.ioc.parse_attributes"><code class="docutils literal notranslate"><span class="pre">parse_attributes()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.ioc.P4PIOC"><code class="docutils literal notranslate"><span class="pre">P4PIOC</span></code></a></li>
 </ul>

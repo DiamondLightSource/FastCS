@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Creating a FastCS Driver &#8212; FastCS 0.10.2.dev23+gc70ae18eb documentation</title>
+    <title>Creating a FastCS Driver &#8212; FastCS 0.10.2.dev27+g019ae1532 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=12757b4b"></script>
+    <script src="../_static/documentation_options.js?v=be926d3e"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1070,7 +1070,7 @@ are, which is used to register the correct number of ramp controllers with the p
 </span><span class="hll">        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
 </span><span class="hll">            <span class="n">controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)</span>
 </span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
-</span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
+</span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">add_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
 </span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
@@ -1186,7 +1186,7 @@ enable (and disable) the ramping.</p>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
@@ -1331,7 +1331,7 @@ gets the array of voltages and sets each ramp controller with its value. Also ad
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
@@ -1457,7 +1457,7 @@ controller.</p>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>

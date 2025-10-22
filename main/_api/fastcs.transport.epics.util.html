@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.transport.epics.pva.types &#8212; FastCS 0.10.2.dev27+g019ae1532 documentation</title>
+    <title>fastcs.transport.epics.util &#8212; FastCS 0.10.2.dev27+g019ae1532 documentation</title>
   
   
   
@@ -54,7 +54,7 @@
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_api/fastcs.transport.epics.pva.types';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_api/fastcs.transport.epics.util';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://DiamondLightSource.github.io/FastCS/switcher.json';
@@ -65,8 +65,8 @@
     <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fastcs.transport.epics.util" href="fastcs.transport.epics.util.html" />
-    <link rel="prev" title="fastcs.transport.epics.pva.transport" href="fastcs.transport.epics.pva.transport.html" />
+    <link rel="next" title="fastcs.transport.graphql" href="fastcs.transport.graphql.html" />
+    <link rel="prev" title="fastcs.transport.epics.pva.types" href="fastcs.transport.epics.pva.types.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="main" />
@@ -435,8 +435,8 @@
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.docs</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.gui.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.gui</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.options</span></code></a></li>
-<li class="toctree-l4 current active"><a class="reference internal" href="fastcs.transport.epics.pva.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.util</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.pva.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva</span></code></a></li>
+<li class="toctree-l4 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.util</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -520,10 +520,7 @@
     
     <li class="breadcrumb-item"><a href="fastcs.transport.epics.html" class="nav-link"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics</span></code></a></li>
     
-    
-    <li class="breadcrumb-item"><a href="fastcs.transport.epics.pva.html" class="nav-link"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva</span></code></a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva.types</span></code></span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.util</span></code></span></li>
   </ul>
 </nav>
 </div>
@@ -540,69 +537,17 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-fastcs.transport.epics.pva.types">
-<span id="fastcs-transport-epics-pva-types"></span><h1><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva.types</span></code><a class="headerlink" href="#module-fastcs.transport.epics.pva.types" title="Link to this heading">#</a></h1>
+  <section id="module-fastcs.transport.epics.util">
+<span id="fastcs-transport-epics-util"></span><h1><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.util</span></code><a class="headerlink" href="#module-fastcs.transport.epics.util" title="Link to this heading">#</a></h1>
 <p class="rubric">Members</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.types.cast_from_p4p_value" title="fastcs.transport.epics.pva.types.cast_from_p4p_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_from_p4p_value</span></code></a></p></td>
-<td><p>Converts from a p4p value to a FastCS <a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> value.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.types.cast_to_p4p_value" title="fastcs.transport.epics.pva.types.cast_to_p4p_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_to_p4p_value</span></code></a></p></td>
-<td><p>Converts a FastCS <a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> value to a p4p value, including metadata and alarm states.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.types.make_p4p_type" title="fastcs.transport.epics.pva.types.make_p4p_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_p4p_type</span></code></a></p></td>
-<td><p>Creates a p4p type for a given <a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> s <a class="reference internal" href="fastcs.datatypes.html#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">fastcs.datatypes.DataType</span></code></a>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.types.p4p_alarm_states" title="fastcs.transport.epics.pva.types.p4p_alarm_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">p4p_alarm_states</span></code></a></p></td>
-<td><p>Returns the p4p alarm structure for a given severity, status, and message.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.types.p4p_display" title="fastcs.transport.epics.pva.types.p4p_display"><code class="xref py py-obj docutils literal notranslate"><span class="pre">p4p_display</span></code></a></p></td>
-<td><p>Gets the p4p display structure for a given attribute.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.transport.epics.pva.types.p4p_timestamp_now" title="fastcs.transport.epics.pva.types.p4p_timestamp_now"><code class="xref py py-obj docutils literal notranslate"><span class="pre">p4p_timestamp_now</span></code></a></p></td>
-<td><p>The p4p timestamp structure for the current time.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">controller_pv_prefix</span></code></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transport.epics.pva.types.make_p4p_type">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transport.epics.pva.types.</span></span><span class="sig-name descname"><span class="pre">make_p4p_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><span class="pre">Attribute</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NTScalar</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NTEnum</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NTNDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NTTable</span></span></span><a class="reference internal" href="../_modules/fastcs/transport/epics/pva/types.html#make_p4p_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transport.epics.pva.types.make_p4p_type" title="Link to this definition">#</a></dt>
-<dd><p>Creates a p4p type for a given <a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> s <a class="reference internal" href="fastcs.datatypes.html#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">fastcs.datatypes.DataType</span></code></a>.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transport.epics.pva.types.cast_from_p4p_value">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transport.epics.pva.types.</span></span><span class="sig-name descname"><span class="pre">cast_from_p4p_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><span class="pre">Attribute</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="fastcs.attribute_io_ref.html#fastcs.attribute_io_ref.AttributeIORef" title="fastcs.attribute_io_ref.AttributeIORef"><span class="pre">AttributeIORef</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span></span></span><a class="reference internal" href="../_modules/fastcs/transport/epics/pva/types.html#cast_from_p4p_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transport.epics.pva.types.cast_from_p4p_value" title="Link to this definition">#</a></dt>
-<dd><p>Converts from a p4p value to a FastCS <a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transport.epics.pva.types.p4p_alarm_states">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transport.epics.pva.types.</span></span><span class="sig-name descname"><span class="pre">p4p_alarm_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">severity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/fastcs/transport/epics/pva/types.html#p4p_alarm_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transport.epics.pva.types.p4p_alarm_states" title="Link to this definition">#</a></dt>
-<dd><p>Returns the p4p alarm structure for a given severity, status, and message.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transport.epics.pva.types.p4p_timestamp_now">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transport.epics.pva.types.</span></span><span class="sig-name descname"><span class="pre">p4p_timestamp_now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/fastcs/transport/epics/pva/types.html#p4p_timestamp_now"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transport.epics.pva.types.p4p_timestamp_now" title="Link to this definition">#</a></dt>
-<dd><p>The p4p timestamp structure for the current time.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transport.epics.pva.types.p4p_display">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transport.epics.pva.types.</span></span><span class="sig-name descname"><span class="pre">p4p_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><span class="pre">Attribute</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/fastcs/transport/epics/pva/types.html#p4p_display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transport.epics.pva.types.p4p_display" title="Link to this definition">#</a></dt>
-<dd><p>Gets the p4p display structure for a given attribute.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transport.epics.pva.types.cast_to_p4p_value">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transport.epics.pva.types.</span></span><span class="sig-name descname"><span class="pre">cast_to_p4p_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><span class="pre">Attribute</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="fastcs.attribute_io_ref.html#fastcs.attribute_io_ref.AttributeIORef" title="fastcs.attribute_io_ref.AttributeIORef"><span class="pre">AttributeIORef</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a></span></span><a class="reference internal" href="../_modules/fastcs/transport/epics/pva/types.html#cast_to_p4p_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transport.epics.pva.types.cast_to_p4p_value" title="Link to this definition">#</a></dt>
-<dd><p>Converts a FastCS <a class="reference internal" href="fastcs.attributes.html#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> value to a p4p value,
-including metadata and alarm states.</p>
-</dd></dl>
-
 </section>
 
 
@@ -616,20 +561,20 @@ including metadata and alarm states.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="fastcs.transport.epics.pva.transport.html"
+       href="fastcs.transport.epics.pva.types.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva.transport</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva.types</span></code></p>
       </div>
     </a>
     <a class="right-next"
-       href="fastcs.transport.epics.util.html"
+       href="fastcs.transport.graphql.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.util</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -645,27 +590,10 @@ including metadata and alarm states.</p>
 
 
   <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.types.make_p4p_type"><code class="docutils literal notranslate"><span class="pre">make_p4p_type()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.types.cast_from_p4p_value"><code class="docutils literal notranslate"><span class="pre">cast_from_p4p_value()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.types.p4p_alarm_states"><code class="docutils literal notranslate"><span class="pre">p4p_alarm_states()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.types.p4p_timestamp_now"><code class="docutils literal notranslate"><span class="pre">p4p_timestamp_now()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.types.p4p_display"><code class="docutils literal notranslate"><span class="pre">p4p_display()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transport.epics.pva.types.cast_to_p4p_value"><code class="docutils literal notranslate"><span class="pre">cast_to_p4p_value()</span></code></a></li>
-</ul>
-  </nav></div>
-
-  <div class="sidebar-secondary-item">
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/DiamondLightSource/FastCS/edit/main/docs/_api/fastcs.transport.epics.pva.types.rst">
+    <a href="https://github.com/DiamondLightSource/FastCS/edit/main/docs/_api/fastcs.transport.epics.util.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -681,7 +609,7 @@ including metadata and alarm states.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/_api/fastcs.transport.epics.pva.types.rst.txt"
+      <li><a href="../_sources/_api/fastcs.transport.epics.util.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>
