@@ -4,6 +4,7 @@ from p4p.server import Server, StaticProvider
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
+from fastcs.transport.epics.util import controller_pv_prefix
 from fastcs.util import snake_to_pascal
 
 from ._pv_handlers import (
@@ -26,12 +27,6 @@ def _attribute_to_access(attribute: Attribute) -> AccessModeType:
             raise ValueError(f"Unknown attribute type {type(attribute)}")
 
 
-def get_pv_name(pv_prefix: str, *attribute_names: str) -> str:
-    """Converts from an attribute name to a pv name."""
-    pv_formatted = ":".join([snake_to_pascal(attr) for attr in attribute_names])
-    return f"{pv_prefix}:{pv_formatted}" if pv_formatted else pv_prefix
-
-
 async def parse_attributes(
     root_pv_prefix: str, root_controller_api: ControllerAPI
 ) -> list[StaticProvider]:
@@ -40,33 +35,33 @@ async def parse_attributes(
     provider = StaticProvider(root_pv_prefix)
 
     for controller_api in root_controller_api.walk_api():
-        pv_prefix = get_pv_name(root_pv_prefix, *controller_api.path)
+        pv_prefix = controller_pv_prefix(root_pv_prefix, controller_api)
 
         pvi_tree.add_sub_device(pv_prefix, controller_api.description)
 
         for attr_name, attribute in controller_api.attributes.items():
-            pv_name = get_pv_name(pv_prefix, attr_name)
+            full_pv_name = f"{pv_prefix}:{snake_to_pascal(attr_name)}"
             match attribute:
                 case AttrRW():
                     attribute_pv = make_shared_write_pv(attribute)
                     attribute_pv_rbv = make_shared_read_pv(attribute)
-                    provider.add(pv_name, attribute_pv)
-                    provider.add(f"{pv_name}_RBV", attribute_pv_rbv)
-                    pvi_tree.add_signal(pv_name, "rw")
+                    provider.add(f"{full_pv_name}", attribute_pv)
+                    provider.add(f"{full_pv_name}_RBV", attribute_pv_rbv)
+                    pvi_tree.add_signal(f"{full_pv_name}", "rw")
                 case AttrR():
                     attribute_pv = make_shared_read_pv(attribute)
-                    provider.add(pv_name, attribute_pv)
-                    pvi_tree.add_signal(pv_name, "r")
+                    provider.add(f"{full_pv_name}", attribute_pv)
+                    pvi_tree.add_signal(f"{full_pv_name}", "r")
                 case AttrW():
                     attribute_pv = make_shared_write_pv(attribute)
-                    provider.add(pv_name, attribute_pv)
-                    pvi_tree.add_signal(pv_name, "w")
+                    provider.add(f"{full_pv_name}", attribute_pv)
+                    pvi_tree.add_signal(f"{full_pv_name}", "w")
 
         for attr_name, method in controller_api.command_methods.items():
-            pv_name = get_pv_name(pv_prefix, attr_name)
+            full_pv_name = f"{pv_prefix}:{snake_to_pascal(attr_name)}"
             command_pv = make_command_pv(method.fn)
-            provider.add(pv_name, command_pv)
-            pvi_tree.add_signal(pv_name, "x")
+            provider.add(f"{full_pv_name}", command_pv)
+            pvi_tree.add_signal(f"{full_pv_name}", "x")
 
     return [provider, pvi_tree.make_provider()]
 

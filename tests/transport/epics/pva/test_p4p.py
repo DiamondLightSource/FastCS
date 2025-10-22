@@ -287,27 +287,28 @@ def test_pvi_grouping():
         another_attr_0: AttrRW = AttrRW(Int())
         another_attr_1000: AttrRW = AttrRW(Int())
         a_third_attr: AttrW = AttrW(Int())
-        child_attribute_same_name: AttrR = AttrR(Int())
 
     controller = SomeController()
 
     sub_controller = ChildController()
-    controller.register_sub_controller("Child0", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
+    controller.child0 = sub_controller
+    sub_controller.child_child = ChildChildController()
+
     sub_controller = ChildController()
-    controller.register_sub_controller("Child1", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
+    controller.child1 = sub_controller
+    sub_controller.child_child = ChildChildController()
+
     sub_controller = ChildController()
-    controller.register_sub_controller("Child2", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
+    controller.child2 = sub_controller
+    sub_controller.child_child = ChildChildController()
+
     sub_controller = ChildController()
-    controller.register_sub_controller("another_child", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
+    controller.another_child = sub_controller
+    sub_controller.child_child = ChildChildController()
+
     sub_controller = ChildController()
-    controller.register_sub_controller("AdditionalChild", sub_controller)
-    sub_controller.register_sub_controller("ChildChild", ChildChildController())
-    sub_controller = ChildController()
-    controller.register_sub_controller("child_attribute_same_name", sub_controller)
+    controller.additional_child = sub_controller
+    sub_controller.child_child = ChildChildController()
 
     pv_prefix = str(uuid4())
     fastcs = make_fastcs(pv_prefix, controller)
@@ -358,10 +359,6 @@ def test_pvi_grouping():
                         "v1": f"{pv_prefix}:Child1:PVI",
                         "v2": f"{pv_prefix}:Child2:PVI",
                     }
-                },
-                "child_attribute_same_name": {
-                    "d": f"{pv_prefix}:ChildAttributeSameName:PVI",
-                    "r": f"{pv_prefix}:ChildAttributeSameName",
                 },
             },
         }

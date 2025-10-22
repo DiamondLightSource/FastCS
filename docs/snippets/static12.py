@@ -83,7 +83,7 @@ class TemperatureController(Controller):
         for index in range(1, ramp_count + 1):
             controller = TemperatureRampController(index, self._connection)
             self._ramp_controllers.append(controller)
-            self.register_sub_controller(f"R{index}", controller)
+            self.add_sub_controller(f"R{index}", controller)
 
     async def connect(self):
         await self._connection.connect(self._ip_settings)

@@ -46,7 +46,7 @@ class MyTestController(Controller):
         for index in range(1, 3):
             controller = TestSubController()
             self._sub_controllers.append(controller)
-            self.register_sub_controller(f"SubController{index:02d}", controller)
+            self.add_sub_controller(f"SubController{index:02d}", controller)
 
     initialised = False
     connected = False

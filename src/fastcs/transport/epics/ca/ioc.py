@@ -20,6 +20,7 @@ from fastcs.transport.epics.ca.util import (
     record_metadata_from_datatype,
 )
 from fastcs.transport.epics.options import EpicsIOCOptions
+from fastcs.transport.epics.util import controller_pv_prefix
 from fastcs.util import snake_to_pascal
 
 EPICS_MAX_NAME_LENGTH = 60
@@ -111,27 +112,26 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: ControllerAPI):
         parent: Controller to add PVI refs for
 
     """
-    parent_pvi = ":".join([pv_prefix] + parent.path + ["PVI"])
+    parent_pvi = f"{controller_pv_prefix(pv_prefix, parent)}:PVI"
 
     for child in parent.sub_apis.values():
-        child_pvi = ":".join([pv_prefix] + child.path + ["PVI"])
+        child_pvi = f"{controller_pv_prefix(pv_prefix, child)}:PVI"
         child_name = child.path[-1].lower()
 
         _add_pvi_info(child_pvi, parent_pvi, child_name)
-
         _add_sub_controller_pvi_info(pv_prefix, child)
 
 
 def _create_and_link_attribute_pvs(
-    pv_prefix: str, root_controller_api: ControllerAPI
+    root_pv_prefix: str, root_controller_api: ControllerAPI
 ) -> None:
     for controller_api in root_controller_api.walk_api():
-        path = controller_api.path
+        pv_prefix = controller_pv_prefix(root_pv_prefix, controller_api)
+
         for attr_name, attribute in controller_api.attributes.items():
             pv_name = snake_to_pascal(attr_name)
-            _pv_prefix = ":".join([pv_prefix] + path)
-            full_pv_name_length = len(f"{_pv_prefix}:{pv_name}")
 
+            full_pv_name_length = len(f"{pv_prefix}:{pv_name}")
             if full_pv_name_length > EPICS_MAX_NAME_LENGTH:
                 attribute.enabled = False
                 print(
@@ -152,15 +152,15 @@ def _create_and_link_attribute_pvs(
                         attribute.enabled = False
                     else:
                         _create_and_link_read_pv(
-                            _pv_prefix, f"{pv_name}_RBV", attr_name, attribute
+                            pv_prefix, f"{pv_name}_RBV", attr_name, attribute
                         )
                         _create_and_link_write_pv(
-                            _pv_prefix, pv_name, attr_name, attribute
+                            pv_prefix, pv_name, attr_name, attribute
                         )
                 case AttrR():
-                    _create_and_link_read_pv(_pv_prefix, pv_name, attr_name, attribute)
+                    _create_and_link_read_pv(pv_prefix, pv_name, attr_name, attribute)
                 case AttrW():
-                    _create_and_link_write_pv(_pv_prefix, pv_name, attr_name, attribute)
+                    _create_and_link_write_pv(pv_prefix, pv_name, attr_name, attribute)
 
 
 def _create_and_link_read_pv(
@@ -224,9 +224,7 @@ def _create_and_link_write_pv(
 
         record.set(cast_to_epics_type(attribute.datatype, value), process=False)
 
-    record = _make_record(
-        f"{pv_prefix}:{pv_name}", attribute, on_update=on_update, out_record=True
-    )
+    record = _make_record(pv, attribute, on_update=on_update, out_record=True)
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
@@ -234,14 +232,15 @@ def _create_and_link_write_pv(
 
 
 def _create_and_link_command_pvs(
-    pv_prefix: str, root_controller_api: ControllerAPI
+    root_pv_prefix: str, root_controller_api: ControllerAPI
 ) -> None:
     for controller_api in root_controller_api.walk_api():
-        path = controller_api.path
+        pv_prefix = controller_pv_prefix(root_pv_prefix, controller_api)
+
         for attr_name, method in controller_api.command_methods.items():
             pv_name = snake_to_pascal(attr_name)
-            _pv_prefix = ":".join([pv_prefix] + path)
-            if len(f"{_pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
+
+            if len(f"{pv_prefix}:{pv_name}") > EPICS_MAX_NAME_LENGTH:
                 print(
                     f"Not creating PV for {attr_name} as full name would exceed"
                     f" {EPICS_MAX_NAME_LENGTH} characters"
@@ -249,7 +248,7 @@ def _create_and_link_command_pvs(
                 method.enabled = False
             else:
                 _create_and_link_command_pv(
-                    _pv_prefix,
+                    pv_prefix,
                     pv_name,
                     attr_name,
                     method,

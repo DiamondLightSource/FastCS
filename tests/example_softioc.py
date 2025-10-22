@@ -22,7 +22,7 @@ class ChildController(Controller):
 
 def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
     controller = ParentController()
-    controller.register_sub_controller("Child", ChildController())
+    controller.child = ChildController()
     fastcs = FastCS(
         controller, [EpicsCATransport(ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))]
     )

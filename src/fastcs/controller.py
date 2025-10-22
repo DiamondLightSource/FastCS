@@ -131,18 +131,7 @@ class BaseController(Tracer):
 
             attr = getattr(self, attr_name, None)
             if isinstance(attr, Attribute):
-                if (
-                    attr_name in self.attributes
-                    and self.attributes[attr_name] is not attr
-                ):
-                    raise ValueError(
-                        f"`{type(self).__name__}` has conflicting attribute "
-                        f"`{attr_name}` already present in the attributes dict."
-                    )
-
-                new_attribute = deepcopy(attr)
-                setattr(self, attr_name, new_attribute)
-                self.attributes[attr_name] = new_attribute
+                setattr(self, attr_name, deepcopy(attr))
             elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
@@ -164,22 +153,39 @@ class BaseController(Tracer):
                 f"{attr.io_ref.__class__.__name__}"
             )
 
-    def register_sub_controller(self, name: str, sub_controller: Controller):
-        if name in self.__sub_controller_tree.keys():
+    def add_attribute(self, name, attribute: Attribute):
+        if name in self.attributes and attribute is not self.attributes[name]:
             raise ValueError(
-                f"Controller {self} already has a sub controller registered as {name}"
+                f"Cannot add attribute {name}. "
+                f"Controller {self} has has existing attribute {name}"
+            )
+        elif name in self.__sub_controller_tree.keys():
+            raise ValueError(
+                f"Cannot add attribute {name}. "
+                f"Controller {self} has existing sub controller {name}"
             )
 
-        self.__sub_controller_tree[name] = sub_controller
+        attribute.set_name(name)
+        self.attributes[name] = attribute
+        super().__setattr__(name, attribute)
+
+    def add_sub_controller(self, name: str, sub_controller: Controller):
+        if name in self.__sub_controller_tree.keys():
+            raise ValueError(
+                f"Cannot add sub controller {name}. "
+                f"Controller {self} has existing sub controller {name}"
+            )
+        elif name in self.attributes:
+            raise ValueError(
+                f"Cannot add sub controller {name}. "
+                f"Controller {self} has existing attribute {name}"
+            )
+
         sub_controller.set_path(self.path + [name])
+        self.__sub_controller_tree[name] = sub_controller
+        super().__setattr__(name, sub_controller)
 
         if isinstance(sub_controller.root_attribute, Attribute):
-            if name in self.attributes:
-                raise TypeError(
-                    f"Cannot set sub controller `{name}` root attribute "
-                    f"on the parent controller `{type(self).__name__}` "
-                    f"as it already has an attribute of that name."
-                )
             self.attributes[name] = sub_controller.root_attribute
 
     def get_sub_controllers(self) -> dict[str, Controller]:
@@ -189,6 +195,14 @@ class BaseController(Tracer):
         return f"""\
 {type(self).__name__}({self.path}, {list(self.__sub_controller_tree.keys())})\
 """
+
+    def __setattr__(self, name, value):
+        if isinstance(value, Attribute):
+            self.add_attribute(name, value)
+        elif isinstance(value, Controller):
+            self.add_sub_controller(name, value)
+        else:
+            super().__setattr__(name, value)
 
 
 class Controller(BaseController):

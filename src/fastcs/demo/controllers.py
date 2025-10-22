@@ -82,7 +82,7 @@ class TemperatureController(Controller):
         for index in range(1, settings.num_ramp_controllers + 1):
             controller = TemperatureRampController(index, self.connection)
             self._ramp_controllers.append(controller)
-            self.register_sub_controller(f"R{index}", controller)
+            self.add_sub_controller(f"R{index}", controller)
 
     @command()
     async def cancel_all(self) -> None:
