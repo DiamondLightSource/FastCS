@@ -9,6 +9,7 @@ from p4p.server.asyncio import SharedPV
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.cs_methods import CommandCallback
 from fastcs.datatypes import Table
+from fastcs.tracer import Tracer
 
 from .types import (
     MAJOR_ALARM_SEVERITY,
@@ -19,6 +20,8 @@ from .types import (
     p4p_alarm_states,
     p4p_timestamp_now,
 )
+
+tracer = Tracer(name=__name__)
 
 
 class WritePvHandler:
@@ -43,7 +46,8 @@ class WritePvHandler:
 
         cast_value = cast_from_p4p_value(self._attr_w, raw_value)
 
-        await self._attr_w.process_without_display_update(cast_value)
+        tracer.log_event("PV put", topic=self._attr_w, pv=pv, value=cast_value)
+        await self._attr_w.put(cast_value)
         op.done()
 
 
@@ -115,10 +119,11 @@ def make_shared_read_pv(attribute: AttrR) -> SharedPV:
         **_make_shared_pv_arguments(attribute),
     )
 
-    async def on_update(value):
+    async def set_readback(value):
+        tracer.log_event("PV set readback", topic=attribute, value=value)
         shared_pv.post(cast_to_p4p_value(attribute, value))
 
-    attribute.add_set_callback(on_update)
+    attribute.add_on_update_callback(set_readback)
 
     return shared_pv
 
@@ -130,10 +135,11 @@ def make_shared_write_pv(attribute: AttrW) -> SharedPV:
         **_make_shared_pv_arguments(attribute),
     )
 
-    async def async_write_display(value):
+    async def set_setpoint(value):
+        tracer.log_event("PV set setpoint", topic=attribute, value=value)
         shared_pv.post(cast_to_p4p_value(attribute, value))
 
-    attribute.add_write_display_callback(async_write_display)
+    attribute.add_sync_setpoint_callback(set_setpoint)
 
     return shared_pv
 

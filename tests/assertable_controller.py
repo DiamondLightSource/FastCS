@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture, MockType
 
 from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORef
-from fastcs.attributes import AttrR, AttrW
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 from fastcs.controller_api import ControllerAPI
 from fastcs.datatypes import Int, T
@@ -26,6 +26,8 @@ class MyTestAttributeIO(AttributeIO[T, MyTestAttributeIORef]):
 
     async def send(self, attr: AttrW[T, MyTestAttributeIORef], value: T):
         print(f"sending {attr} = {value}")
+        if isinstance(attr, AttrRW):
+            await attr.update(value)
 
 
 test_attribute_io = MyTestAttributeIO()  # instance
@@ -96,13 +98,13 @@ class AssertableControllerAPI(ControllerAPI):
 
     @contextmanager
     def assert_write_here(self, path: list[str]):
-        yield from self._assert_method(path, "process")
+        yield from self._assert_method(path, "put")
 
     @contextmanager
     def assert_execute_here(self, path: list[str]):
         yield from self._assert_method(path, "")
 
-    def _assert_method(self, path: list[str], method: Literal["get", "process", ""]):
+    def _assert_method(self, path: list[str], method: Literal["get", "put", ""]):
         """
         This context manager can be used to confirm that a fastcs
         controller's respective attribute or command methods are called

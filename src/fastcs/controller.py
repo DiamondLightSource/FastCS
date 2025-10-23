@@ -7,7 +7,11 @@ from typing import get_type_hints
 
 from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORefT
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.attributes import (
+    Attribute,
+    AttrR,
+    AttrW,
+)
 from fastcs.datatypes import T
 from fastcs.tracer import Tracer
 
@@ -58,39 +62,20 @@ class BaseController(Tracer):
     def _add_io_callbacks(self):
         for attr in self.attributes.values():
             ref = attr.io_ref if attr.has_io_ref() else None
+            if ref is None:
+                continue
+
             io = self._attribute_ref_io_map.get(type(ref))
+            if io is None:
+                raise ValueError(
+                    f"{self.__class__.__name__} does not have an AttributeIO "
+                    f"to handle {attr.io_ref.__class__.__name__}"
+                )
+
             if isinstance(attr, AttrW):
-                attr.add_process_callback(self._create_send_callback(io, attr, ref))
+                attr.set_on_put_callback(io.send)
             if isinstance(attr, AttrR):
-                attr.add_update_callback(self._create_update_callback(io, attr, ref))
-
-    def _create_send_callback(self, io, attr, ref):
-        if ref is None:
-
-            async def send_callback(value):
-                await attr.update_display_without_process(value)
-                if isinstance(attr, AttrRW):
-                    await attr.set(value)
-        else:
-
-            async def send_callback(value):
-                await io.send(attr, value)
-
-        return send_callback
-
-    def _create_update_callback(self, io, attr, ref):
-        if ref is None:
-
-            async def error_callback():
-                raise RuntimeError("Can't call update on Attributes without an io_ref")
-
-            return error_callback
-        else:
-
-            async def update_callback():
-                await io.update(attr)
-
-            return update_callback
+                attr.set_update_callback(io.update)
 
     @property
     def path(self) -> list[str]:
@@ -144,14 +129,6 @@ class BaseController(Tracer):
                 raise RuntimeError(
                     f"More than one AttributeIO class handles {ref_type.__name__}"
                 )
-
-        for attr in self.attributes.values():
-            if not attr.has_io_ref():
-                continue
-            assert type(attr.io_ref) in self._attribute_ref_io_map, (
-                f"{self.__class__.__name__} does not have an AttributeIO to handle "
-                f"{attr.io_ref.__class__.__name__}"
-            )
 
     def add_attribute(self, name, attribute: Attribute):
         if name in self.attributes and attribute is not self.attributes[name]:

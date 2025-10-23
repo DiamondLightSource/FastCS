@@ -10,7 +10,7 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
 from fastcs.datatypes import DataType, T
-from fastcs.logging import logger as _fastcs_logger
+from fastcs.logging import logger as _logger
 from fastcs.tracer import Tracer
 from fastcs.transport.epics.ca.util import (
     builder_callable_from_attribute,
@@ -27,7 +27,7 @@ EPICS_MAX_NAME_LENGTH = 60
 
 
 tracer = Tracer(name=__name__)
-logger = _fastcs_logger.bind(logger_name=__name__)
+logger = _logger.bind(logger_name=__name__)
 
 
 class EpicsCAIOC:
@@ -176,7 +176,7 @@ def _create_and_link_read_pv(
     record = _make_record(pv, attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
-    attribute.add_set_callback(async_record_set)
+    attribute.add_on_update_callback(async_record_set)
 
 
 def _make_record(
@@ -213,11 +213,9 @@ def _create_and_link_write_pv(
     async def on_update(value):
         logger.info("PV put: {pv} = {value}", pv=pv, value=value)
 
-        await attribute.process_without_display_update(
-            cast_from_epics_type(attribute.datatype, value)
-        )
+        await attribute.put(cast_from_epics_type(attribute.datatype, value))
 
-    async def async_write_display(value: T):
+    async def set_setpoint_without_process(value: T):
         tracer.log_event(
             "PV setpoint set from attribute", topic=attribute, pv=pv, value=value
         )
@@ -228,7 +226,7 @@ def _create_and_link_write_pv(
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
-    attribute.add_write_display_callback(async_write_display)
+    attribute.add_sync_setpoint_callback(set_setpoint_without_process)
 
 
 def _create_and_link_command_pvs(

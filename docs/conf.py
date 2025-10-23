@@ -88,6 +88,8 @@ nitpick_ignore = [
     ("py:class", "p4p.nt.ndarray.NTNDArray"),
     ("py:class", "p4p.nt.NTTable"),
     # Problems in FastCS itself
+    ("py:class", "T"),
+    ("py:class", "AttrIOUpdateCallback"),
     ("py:class", "fastcs.transport.epics.pva.pvi_tree._PviSignalInfo"),
     ("py:class", "fastcs.logging._logging.LogLevel"),
     ("py:class", "fastcs.logging._graylog.GraylogEndpoint"),
@@ -102,6 +104,7 @@ nitpick_ignore = [
 ]
 nitpick_ignore_regex = [
     ("py:class", "fastcs.*.T"),
+    ("py:obj", "fastcs.*.T"),
     (r"py:.*", r"fastcs\.demo.*"),
     (r"py:.*", r"tickit.*"),
 ]

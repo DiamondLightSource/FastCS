@@ -182,8 +182,8 @@ def test_fastcs(controller):
     assert controller.initialised
     assert not controller.connected
 
-    # Controller Attributes with a Sender should have a _process_callback created
-    assert controller.read_write_int.has_process_callback()
+    # Controller Attributes with an IO _send_callback created
+    assert controller.read_write_int._on_put_callback is not None
 
     async def test_wrapper():
         loop.create_task(fastcs.serve_routines())
@@ -267,7 +267,7 @@ def test_update_periods():
     class AttributeIOTimesCalled(AttributeIO[int, AttributeIORefTimesCalled]):
         async def update(self, attr: AttrR[int, AttributeIORefTimesCalled]):
             attr.io_ref._times_called += 1
-            await attr.set(attr.io_ref._times_called)
+            await attr.update(attr.io_ref._times_called)
 
     class MyController(Controller):
         update_once = AttrR(Int(), io_ref=AttributeIORefTimesCalled(update_period=ONCE))

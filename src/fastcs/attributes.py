@@ -1,21 +1,18 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
-from typing import Generic
+from collections.abc import Awaitable, Callable
+from typing import Any, Generic
 
 from fastcs.attribute_io_ref import AttributeIORefT
-from fastcs.datatypes import (
-    ATTRIBUTE_TYPES,
-    AttrSetCallback,
-    AttrUpdateCallback,
-    DataType,
-    T,
-)
+from fastcs.datatypes import ATTRIBUTE_TYPES, DataType, T
+from fastcs.logging import logger as _logger
 from fastcs.tracer import Tracer
 
 ONCE = float("inf")
 """Special value to indicate that an attribute should be updated once on start up."""
+
+logger = _logger.bind(logger_name=__name__)
 
 
 class Attribute(Generic[T, AttributeIORefT], Tracer):
@@ -97,6 +94,14 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
         return f"{self.__class__.__name__}({self._name}, {self._datatype})"
 
 
+AttrIOUpdateCallback = Callable[["AttrR[T, Any]"], Awaitable[None]]
+"""An AttributeIO callback that takes an AttrR and updates its value"""
+AttrUpdateCallback = Callable[[], Awaitable[None]]
+"""A callback to be called periodically to update an attribute"""
+AttrOnUpdateCallback = Callable[[T], Awaitable[None]]
+"""A callback to be called when the value of the attribute is updated"""
+
+
 class AttrR(Attribute[T, AttributeIORefT]):
     """A read-only ``Attribute``."""
 
@@ -108,42 +113,80 @@ class AttrR(Attribute[T, AttributeIORefT]):
         initial_value: T | None = None,
         description: str | None = None,
     ) -> None:
-        super().__init__(
-            datatype,  # type: ignore
-            io_ref,
-            group,
-            description=description,
-        )
+        super().__init__(datatype, io_ref, group, description=description)
         self._value: T = (
             datatype.initial_value if initial_value is None else initial_value
         )
-        self._on_set_callbacks: list[AttrSetCallback[T]] | None = None
-        self._on_update_callbacks: list[AttrUpdateCallback] | None = None
+        self._update_callback: AttrIOUpdateCallback[T] | None = None
+        """Callback to update the value of the attribute with an IO to the source"""
+        self._on_update_callbacks: list[AttrOnUpdateCallback[T]] | None = None
+        """Callbacks to publish changes to the value of the attribute"""
 
     def get(self) -> T:
+        """Get the cached value of the attribute."""
         return self._value
 
-    async def set(self, value: T) -> None:
+    async def update(self, value: T) -> None:
+        """Update the value of the attibute
+
+        This sets the cached value of the attribute presented in the API. It should
+        generally only be called from an IO or a controller that is updating the value
+        from some underlying source.
+
+        To request a change to the setpoint of the attribute, use the ``put`` method,
+        which will attempt to apply the change to the underlying source.
+
+        """
         self.log_event("Attribute set", attribute=self, value=value)
 
         self._value = self._datatype.validate(value)
 
-        if self._on_set_callbacks is not None:
-            await asyncio.gather(*[cb(self._value) for cb in self._on_set_callbacks])
+        if self._on_update_callbacks is not None:
+            await asyncio.gather(*[cb(self._value) for cb in self._on_update_callbacks])
 
-    def add_set_callback(self, callback: AttrSetCallback[T]) -> None:
-        if self._on_set_callbacks is None:
-            self._on_set_callbacks = []
-        self._on_set_callbacks.append(callback)
+    def add_on_update_callback(self, callback: AttrOnUpdateCallback[T]) -> None:
+        """Add a callback to be called when the value of the attribute is updated
 
-    def add_update_callback(self, callback: AttrUpdateCallback):
+        The callback will be called with the updated value.
+
+        """
         if self._on_update_callbacks is None:
             self._on_update_callbacks = []
         self._on_update_callbacks.append(callback)
 
-    async def update(self):
-        if self._on_update_callbacks is not None:
-            await asyncio.gather(*[cb() for cb in self._on_update_callbacks])
+    def set_update_callback(self, callback: AttrIOUpdateCallback[T]):
+        """Set the callback to update the value of the attribute from the source
+
+        The callback will be converted to an async task and called periodically.
+
+        """
+        if self._update_callback is not None:
+            raise RuntimeError("Attribute already has an IO update callback")
+
+        self._update_callback = callback
+
+    def bind_update_callback(self) -> AttrUpdateCallback:
+        """Bind self into the registered IO update callback"""
+        if self._update_callback is None:
+            raise RuntimeError("Attribute has no update callback")
+        else:
+            update_callback = self._update_callback
+
+        async def update_attribute():
+            try:
+                self.log_event("Update attribute", topic=self)
+                await update_callback(self)
+            except Exception:
+                logger.opt(exception=True).error("Update loop failed", attribute=self)
+                raise
+
+        return update_attribute
+
+
+AttrOnPutCallback = Callable[["AttrW[T, Any]", T], Awaitable[None]]
+"""Callbacks to be called when the setpoint of an attribute is changed"""
+AttrSyncSetpointCallback = Callable[[T], Awaitable[None]]
+"""Callbacks to be called when the setpoint of an attribute is changed"""
 
 
 class AttrW(Attribute[T, AttributeIORefT]):
@@ -162,41 +205,83 @@ class AttrW(Attribute[T, AttributeIORefT]):
             group,
             description=description,
         )
-        self._process_callbacks: list[AttrSetCallback[T]] | None = None
-        self._write_display_callbacks: list[AttrSetCallback[T]] | None = None
+        self._on_put_callback: AttrOnPutCallback[T] | None = None
+        """Callback to action a change to the setpoint of the attribute"""
+        self._sync_setpoint_callbacks: list[AttrSyncSetpointCallback[T]] = []
+        """Callbacks to publish changes to the setpoint of the attribute"""
 
-    async def process(self, value: T) -> None:
-        await self.process_without_display_update(value)
-        await self.update_display_without_process(value)
+    async def put(self, setpoint: T, sync_setpoint: bool = False) -> None:
+        """Set the setpoint of the attribute
 
-    async def process_without_display_update(self, value: T) -> None:
-        value = self._datatype.validate(value)
-        if self._process_callbacks:
-            await asyncio.gather(*[cb(value) for cb in self._process_callbacks])
+        This should be called by clients to the attribute such as transports to apply a
+        change to the attribute. The ``_on_put_callback`` will be called with this new
+        setpoint, which may or may not take effect depending on the validity of the new
+        value. For example, if the attribute has an IO to some device, the value might
+        be rejected.
 
-    async def update_display_without_process(self, value: T) -> None:
-        value = self._datatype.validate(value)
-        if self._write_display_callbacks:
-            await asyncio.gather(*[cb(value) for cb in self._write_display_callbacks])
+        To directly change the value of the attribute, for example from an update loop
+        that has read a new value from some underlying source, call the ``set`` method.
 
-    def add_process_callback(self, callback: AttrSetCallback[T]) -> None:
-        if self._process_callbacks is None:
-            self._process_callbacks = []
-        self._process_callbacks.append(callback)
+        """
+        setpoint = self._datatype.validate(setpoint)
+        if self._on_put_callback is not None:
+            await self._on_put_callback(self, setpoint)
 
-    def has_process_callback(self) -> bool:
-        return bool(self._process_callbacks)
+        if sync_setpoint:
+            await self._call_sync_setpoint_callbacks(setpoint)
 
-    def add_write_display_callback(self, callback: AttrSetCallback[T]) -> None:
-        if self._write_display_callbacks is None:
-            self._write_display_callbacks = []
-        self._write_display_callbacks.append(callback)
+    async def _call_sync_setpoint_callbacks(self, setpoint: T) -> None:
+        if self._sync_setpoint_callbacks:
+            await asyncio.gather(
+                *[cb(setpoint) for cb in self._sync_setpoint_callbacks]
+            )
+
+    def set_on_put_callback(self, callback: AttrOnPutCallback[T]) -> None:
+        """Set the callback to call when the setpoint is changed
+
+        The callback will be called with the attribute and the new setpoint.
+
+        """
+        if self._on_put_callback is not None:
+            raise RuntimeError("Attribute already has an on put callback")
+
+        self._on_put_callback = callback
+
+    def add_sync_setpoint_callback(self, callback: AttrSyncSetpointCallback[T]) -> None:
+        """Add a callback to publish changes to the setpoint of the attribute
+
+        The callback will be called with the new setpoint.
+
+        """
+        self._sync_setpoint_callbacks.append(callback)
 
 
 class AttrRW(AttrR[T, AttributeIORefT], AttrW[T, AttributeIORefT]):
     """A read-write ``Attribute``."""
 
-    async def process(self, value: T) -> None:
-        await self.set(value)
+    def __init__(
+        self,
+        datatype: DataType[T],
+        io_ref: AttributeIORefT | None = None,
+        group: str | None = None,
+        initial_value: T | None = None,
+        description: str | None = None,
+    ):
+        super().__init__(datatype, io_ref, group, initial_value, description)
 
-        await super().process(value)  # type: ignore
+        self._setpoint_initialised = False
+
+        if io_ref is None:
+            self.set_on_put_callback(self._internal_update)
+
+    async def _internal_update(self, attr: AttrW[T, AttributeIORefT], value: T):
+        """Update value directly when Attribute has no IO"""
+        assert attr is self
+        await self.update(value)
+
+    async def update(self, value: T):
+        await super().update(value)
+
+        if not self._setpoint_initialised:
+            await self._call_sync_setpoint_callbacks(value)
+            self._setpoint_initialised = True

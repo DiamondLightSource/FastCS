@@ -62,7 +62,7 @@ class TemperatureControllerAttributeIO(
             response=response,
         )
 
-        await attr.set(attr.dtype(response))
+        await attr.update(attr.dtype(response))
 
 
 class TemperatureController(Controller):
@@ -87,7 +87,7 @@ class TemperatureController(Controller):
     @command()
     async def cancel_all(self) -> None:
         for rc in self._ramp_controllers:
-            await rc.enabled.process(OnOffEnum.Off)
+            await rc.enabled.put(OnOffEnum.Off, sync_setpoint=True)
             # TODO: The requests all get concatenated and the sim doesn't handle it
             await asyncio.sleep(0.1)
 
@@ -110,7 +110,7 @@ class TemperatureController(Controller):
                 query=query,
                 response=voltages,
             )
-            await controller.voltage.set(float(voltages[index]))
+            await controller.voltage.update(float(voltages[index]))
 
 
 class TemperatureRampController(Controller):

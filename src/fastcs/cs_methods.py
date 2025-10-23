@@ -22,7 +22,7 @@ UnboundPutCallback = Callable[[Controller_T, Any], Coroutine[None, None, None]]
 CommandCallback = Callable[[], Coroutine[None, None, None]]
 """A Command callback that is bound and can be called without `self`"""
 ScanCallback = Callable[[], Coroutine[None, None, None]]
-"""A Scan callback that is bound and can be called withous `self`"""
+"""A Scan callback that is bound and can be called without `self`"""
 PutCallback = Callable[[Any], Coroutine[None, None, None]]
 """A Put callback that is bound and can be called without `self`"""
 
