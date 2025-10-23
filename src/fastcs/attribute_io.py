@@ -1,7 +1,7 @@
 from typing import Any, Generic, cast, get_args
 
 from fastcs.attribute_io_ref import AttributeIORef, AttributeIORefT
-from fastcs.attributes import AttrR, AttrRW
+from fastcs.attributes import AttrR, AttrW
 from fastcs.datatypes import T
 from fastcs.tracer import Tracer
 
@@ -32,7 +32,7 @@ class AttributeIO(Generic[T, AttributeIORefT], Tracer):
     async def update(self, attr: AttrR[T, AttributeIORefT]) -> None:
         raise NotImplementedError()
 
-    async def send(self, attr: AttrRW[T, AttributeIORefT], value: T) -> None:
+    async def send(self, attr: AttrW[T, AttributeIORefT], value: T) -> None:
         raise NotImplementedError()
 
 

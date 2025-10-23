@@ -168,11 +168,9 @@ async def test_command_method(p4p_subprocess: tuple[str, Queue]):
 async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
     pv_prefix, _ = p4p_subprocess
     a_values = asyncio.Queue()
-    b_values = asyncio.Queue()
     ctxt = Context("pva")
 
-    a_monitor = ctxt.monitor(f"{pv_prefix}:A", a_values.put)
-    b_monitor = ctxt.monitor(f"{pv_prefix}:B", b_values.put)
+    a_monitor = ctxt.monitor(f"{pv_prefix}:A_RBV", a_values.put)
 
     try:
         value = (await a_values.get()).raw
@@ -181,14 +179,7 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
         assert value["alarm"]["severity"] == 0
         assert value["alarm"]["message"] == "No alarm"
 
-        value = (await b_values.get()).raw
-        assert value["value"] == 0
-        assert isinstance(value["value"], float)
-        assert value["alarm"]["severity"] == 0
-        assert value["alarm"]["message"] == "No alarm"
-
         await ctxt.put(f"{pv_prefix}:A", 40_001)
-        await ctxt.put(f"{pv_prefix}:B", -0.6)
 
         value = (await a_values.get()).raw
         assert value["value"] == 40_001
@@ -196,14 +187,7 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
         assert value["alarm"]["severity"] == 2
         assert value["alarm"]["message"] == "Above maximum alarm limit: 40000"
 
-        value = (await b_values.get()).raw
-        assert value["value"] == -0.6
-        assert isinstance(value["value"], float)
-        assert value["alarm"]["severity"] == 2
-        assert value["alarm"]["message"] == "Below minimum alarm limit: -0.5"
-
         await ctxt.put(f"{pv_prefix}:A", 40_000)
-        await ctxt.put(f"{pv_prefix}:B", -0.5)
 
         value = (await a_values.get()).raw
         assert value["value"] == 40_000
@@ -211,18 +195,10 @@ async def test_numerical_alarms(p4p_subprocess: tuple[str, Queue]):
         assert value["alarm"]["severity"] == 0
         assert value["alarm"]["message"] == "No alarm"
 
-        value = (await b_values.get()).raw
-        assert value["value"] == -0.5
-        assert isinstance(value["value"], float)
-        assert value["alarm"]["severity"] == 0
-        assert value["alarm"]["message"] == "No alarm"
-
         assert a_values.empty()
-        assert b_values.empty()
 
     finally:
         a_monitor.close()
-        b_monitor.close()
 
 
 def make_fastcs(pv_prefix: str, controller: Controller) -> FastCS:

@@ -5,11 +5,7 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 from pytest_mock import MockerFixture
-from tests.assertable_controller import (
-    AssertableControllerAPI,
-    MyTestAttributeIORef,
-    MyTestController,
-)
+from tests.assertable_controller import AssertableControllerAPI, MyTestController
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
@@ -18,11 +14,11 @@ from fastcs.transport.rest.transport import RestTransport
 
 
 class RestController(MyTestController):
-    read_int = AttrR(Int(), io_ref=MyTestAttributeIORef())
-    read_write_int = AttrRW(Int(), io_ref=MyTestAttributeIORef())
+    read_int = AttrR(Int())
+    read_write_int = AttrRW(Int())
     read_write_float = AttrRW(Float())
     read_bool = AttrR(Bool())
-    write_bool = AttrW(Bool(), io_ref=MyTestAttributeIORef())
+    write_bool = AttrW(Bool())
     read_string = AttrRW(String())
     enum = AttrRW(Enum(enum.IntEnum("Enum", {"RED": 0, "GREEN": 1, "BLUE": 2})))
     one_d_waveform = AttrRW(Waveform(np.int32, (10,)))

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import enum
 from abc import abstractmethod
-from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Generic, TypeVar
@@ -22,10 +21,6 @@ T = TypeVar(
 )
 
 ATTRIBUTE_TYPES: tuple[type] = T.__constraints__  # type: ignore
-
-
-AttrSetCallback = Callable[[T], Awaitable[None]]
-AttrUpdateCallback = Callable[[], Awaitable[None]]
 
 
 @dataclass(frozen=True)

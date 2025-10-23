@@ -124,7 +124,7 @@ def _wrap_attr_set(
     """Wrap an attribute in a function with annotations for strawberry"""
 
     async def _dynamic_f(value):
-        await attribute.process(value)
+        await attribute.put(value)
         return value
 
     # Add type annotations for validation, schema, conversions

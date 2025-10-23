@@ -20,5 +20,5 @@ class AttributeIORef:
 
 
 AttributeIORefT = TypeVar(
-    "AttributeIORefT", bound=AttributeIORef, default=AttributeIORef
+    "AttributeIORefT", bound=AttributeIORef, default=AttributeIORef, covariant=True
 )

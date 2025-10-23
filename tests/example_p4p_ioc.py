@@ -70,6 +70,7 @@ class ChildController(Controller):
 
 def run(pv_prefix="P4P_TEST_DEVICE"):
     controller = ParentController()
+    controller.a.enable_tracing()
     controller.child1 = ChildController(description="some sub controller")
     controller.child2 = ChildController(description="another sub controller")
 

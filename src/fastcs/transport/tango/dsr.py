@@ -50,7 +50,7 @@ def _wrap_updater_fset(
 ) -> Callable[[Any, Any], Any]:
     async def fset(tango_device: Device, value):
         tango_device.info_stream(f"called fset method: {attr_name}")
-        coro = attribute.process(cast_from_tango_type(attribute.datatype, value))
+        coro = attribute.put(cast_from_tango_type(attribute.datatype, value))
         await _run_threadsafe_blocking(coro, loop)
 
     return fset
