@@ -20,7 +20,8 @@ from softioc import builder
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.launch import build_controller_api
-from fastcs.logging import logger
+from fastcs.logging import configure_logging, logger
+from fastcs.logging._logging import LogLevel
 from fastcs.transport.tango.dsr import register_dev
 from tests.assertable_controller import MyTestAttributeIORef, MyTestController
 from tests.example_p4p_ioc import run as _run_p4p_ioc
@@ -87,11 +88,8 @@ def _run_ioc_as_subprocess(
     error_queue: multiprocessing.Queue,
     stdout_queue: multiprocessing.Queue,
 ):
-    # configure_logging(LogLevel.INFO)
-    # we need to capture log messages from transport
-    # logger = _logger.bind(logger_name="fastcs.transport.epics.ca.transport")
-    logger.add(print)  # forward log messages to stdout
-    logger.enable("fastcs")
+    configure_logging(LogLevel.TRACE)
+    logger.add(print)  # forward log messages to stdout for start up detection in tests
 
     try:
         from pytest_cov.embed import cleanup_on_sigterm

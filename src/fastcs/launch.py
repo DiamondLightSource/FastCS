@@ -198,7 +198,7 @@ def _link_put_tasks(controller_api: ControllerAPI) -> None:
         attribute = controller_api.attributes[name]
         match attribute:
             case AttrW():
-                attribute.add_process_callback(method.fn)
+                attribute.set_on_put_callback(method.fn)
             case _:
                 raise FastCSError(
                     f"Attribute type {type(attribute)} does not"
@@ -214,7 +214,7 @@ def _get_scan_and_initial_coros(
 
     for controller_api in root_controller_api.walk_api():
         _add_scan_method_tasks(scan_dict, controller_api)
-        _add_attribute_updater_tasks(scan_dict, initial_coros, controller_api)
+        _add_attribute_update_tasks(scan_dict, initial_coros, controller_api)
 
     scan_coros = _get_periodic_scan_coros(scan_dict)
     return scan_coros, initial_coros
@@ -227,7 +227,7 @@ def _add_scan_method_tasks(
         scan_dict[method.period].append(method.fn)
 
 
-def _add_attribute_updater_tasks(
+def _add_attribute_update_tasks(
     scan_dict: dict[float, list[Callable]],
     initial_coros: list[Callable],
     controller_api: ControllerAPI,
@@ -237,17 +237,17 @@ def _add_attribute_updater_tasks(
             case (
                 AttrR(_io_ref=AttributeIORef(update_period=update_period)) as attribute
             ):
-                callback = _create_updater_callback(attribute)
+                callback = _create_update_callback(attribute)
                 if update_period is ONCE:
                     initial_coros.append(callback)
                 elif update_period is not None:
                     scan_dict[update_period].append(callback)
 
 
-def _create_updater_callback(attribute: AttrR[T]):
+def _create_update_callback(attribute: AttrR[T]):
     async def callback():
         try:
-            tracer.log_event("Call attribute updater", topic=attribute)
+            tracer.log_event("Call attribute update", topic=attribute)
             await attribute.update()
         except Exception:
             logger.opt(exception=True).error("Update loop failed", attribute=attribute)

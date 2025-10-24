@@ -182,8 +182,8 @@ def test_fastcs(controller):
     assert controller.initialised
     assert not controller.connected
 
-    # Controller Attributes with a Sender should have a _process_callback created
-    assert controller.read_write_int.has_process_callback()
+    # Controller Attributes with an IO _send_callback created
+    assert controller.read_write_int._on_put_callback is not None
 
     async def test_wrapper():
         loop.create_task(fastcs.serve_routines())
