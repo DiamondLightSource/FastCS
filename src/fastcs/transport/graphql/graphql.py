@@ -16,10 +16,7 @@ from .options import GraphQLServerOptions
 
 
 class GraphQLServer:
-    """A GraphQL server which handles a controller.
-
-    Avoid running directly, instead use `fastcs.launch.FastCS`.
-    """
+    """A GraphQL server which handles a controller"""
 
     def __init__(self, controller_api: ControllerAPI):
         self._controller_api = controller_api
