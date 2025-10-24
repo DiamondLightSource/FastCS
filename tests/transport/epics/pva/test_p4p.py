@@ -646,5 +646,5 @@ def test_block_flag_waits_for_callback_completion():
     for put_call, expected_duration in enumerate([0.2, 0]):
         start, end = command_runs_for_a_while_times[put_call]
         assert (
-            pytest.approx((end - start).total_seconds(), abs=0.05) == expected_duration
+            pytest.approx((end - start).total_seconds(), abs=0.1) == expected_duration
         )

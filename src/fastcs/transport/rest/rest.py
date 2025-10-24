@@ -19,10 +19,7 @@ from .util import (
 
 
 class RestServer:
-    """A Rest Server which handles a controller.
-
-    Avoid running directly, instead use `fastcs.launch.FastCS`.
-    """
+    """A Rest Server which handles a controller"""
 
     def __init__(self, controller_api: ControllerAPI):
         self._controller_api = controller_api

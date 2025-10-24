@@ -95,7 +95,7 @@ nitpick_ignore = [
     ("py:class", "fastcs.logging._graylog.GraylogEndpoint"),
     ("py:class", "fastcs.logging._graylog.GraylogStaticFields"),
     ("py:class", "fastcs.logging._graylog.GraylogEnvFields"),
-    ("py:obj", "fastcs.launch.build_controller_api"),
+    ("py:obj", "fastcs.control_system.build_controller_api"),
     ("py:obj", "fastcs.transport.epics.util.controller_pv_prefix"),
     ("docutils", "fastcs.demo.controllers.TemperatureControllerSettings"),
     # TypeVar without docstrings still give warnings

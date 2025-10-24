@@ -67,10 +67,7 @@ async def parse_attributes(
 
 
 class P4PIOC:
-    """A P4P IOC which handles a controller.
-
-    Avoid running directly, instead use `fastcs.launch.FastCS`.
-    """
+    """A P4P IOC which handles a controller"""
 
     def __init__(self, pv_prefix: str, controller_api: ControllerAPI):
         self.pv_prefix = pv_prefix

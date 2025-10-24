@@ -168,10 +168,7 @@ def _collect_dsr_args(options: TangoDSROptions) -> list[str]:
 
 
 class TangoDSR:
-    """For controlling a controller with tango.
-
-    Avoid running directly, instead use `fastcs.launch.FastCS`.
-    """
+    """For controlling a controller with tango"""
 
     def __init__(
         self,
