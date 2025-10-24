@@ -31,10 +31,7 @@ logger = _fastcs_logger.bind(logger_name=__name__)
 
 
 class EpicsCAIOC:
-    """A softioc which handles a controller.
-
-    Avoid running directly, instead use `fastcs.launch.FastCS`.
-    """
+    """A softioc which handles a controller"""
 
     def __init__(
         self,
