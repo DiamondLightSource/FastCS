@@ -1,6 +1,8 @@
 import asyncio
 from dataclasses import dataclass
 
+import pytest
+
 from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORef
 from fastcs.attributes import ONCE, AttrR, AttrRW
@@ -12,30 +14,19 @@ from fastcs.exceptions import FastCSError
 from fastcs.wrappers import command, scan
 
 
-def test_scan_tasks(controller):
+@pytest.mark.asyncio
+async def test_scan_tasks(controller):
     loop = asyncio.get_event_loop()
     transport_options = []
     fastcs = FastCS(controller, transport_options, loop)
 
-    # Controller should be initialised by FastCS and not connected
-    assert controller.initialised
-    assert not controller.connected
+    asyncio.create_task(fastcs.serve(interactive=False))
+    await asyncio.sleep(0.1)
 
-    # Controller Attributes with an IO _send_callback created
-    assert controller.read_write_int._on_put_callback is not None
-
-    async def test_wrapper():
-        await fastcs._run_initial_coros()
-        assert controller.connected
-
-        await fastcs._start_scan_tasks()
-        for _ in range(3):
-            count = controller.count
-            await asyncio.sleep(0.01)
-            assert controller.count > count
-        fastcs._stop_scan_tasks()
-
-    loop.run_until_complete(test_wrapper())
+    for _ in range(3):
+        count = controller.count
+        await asyncio.sleep(controller.counter.period + 0.01)
+        assert controller.count > count
 
 
 def test_controller_api():
@@ -64,7 +55,8 @@ def test_controller_api():
     assert list(api.scan_methods) == ["scan_nothing"]
 
 
-def test_controller_api_methods():
+@pytest.mark.asyncio
+async def test_controller_api_methods():
     class MyTestController(Controller):
         def __init__(self):
             super().__init__()
@@ -84,17 +76,18 @@ def test_controller_api_methods():
     transport_options = []
     fastcs = FastCS(controller, transport_options, loop)
 
-    async def test_wrapper():
-        await controller.do_nothing_static()
-        await controller.do_nothing_dynamic()
+    asyncio.create_task(fastcs.serve(interactive=False))
+    await asyncio.sleep(0.1)
 
-        await fastcs.controller_api.command_methods["do_nothing_static"]()
-        await fastcs.controller_api.command_methods["do_nothing_dynamic"]()
+    await controller.do_nothing_static()
+    await controller.do_nothing_dynamic()
 
-    loop.run_until_complete(test_wrapper())
+    await fastcs.controller_api.command_methods["do_nothing_static"]()
+    await fastcs.controller_api.command_methods["do_nothing_dynamic"]()
 
 
-def test_update_periods():
+@pytest.mark.asyncio
+async def test_update_periods():
     @dataclass
     class AttributeIORefTimesCalled(AttributeIORef):
         update_period: float | None = None
@@ -124,21 +117,19 @@ def test_update_periods():
     assert controller.update_once.get() == 0
     assert controller.update_never.get() == 0
 
-    async def test_wrapper():
-        await fastcs._run_initial_coros()
-        await fastcs._start_scan_tasks()
-        await asyncio.sleep(0.5)
+    asyncio.create_task(fastcs.serve(interactive=False))
+    await asyncio.sleep(0.5)
 
-    loop.run_until_complete(test_wrapper())
     assert controller.update_quickly.get() > 1
     assert controller.update_once.get() == 1
     assert controller.update_never.get() == 0
 
     assert len(fastcs._scan_tasks) == 1
-    assert len(fastcs._initial_coros) == 2
+    assert len(fastcs._initial_coros) == 1
 
 
-def test_scan_raises_exception_via_callback():
+@pytest.mark.asyncio
+async def test_scan_raises_exception_via_callback():
     class MyTestController(Controller):
         def __init__(self):
             super().__init__()
@@ -160,17 +151,46 @@ def test_scan_raises_exception_via_callback():
         )
     )
 
-    async def test_scan_wrapper():
-        await fastcs._start_scan_tasks()
-        # This allows scan time to run
-        await asyncio.sleep(0.2)
-        # _scan_done should raise an exception
-        assert isinstance(exception_info["exception"], FastCSError)
-        for task in fastcs._scan_tasks:
-            internal_exception = task.exception()
-            assert internal_exception
-            # The task exception comes from scan method raise_exception
-            assert isinstance(internal_exception, ValueError)
-            assert "Scan Exception" == str(internal_exception)
+    task = asyncio.create_task(fastcs.serve(interactive=False))
+    # This allows scan time to run
+    await asyncio.sleep(0.2)
+    # _scan_done should raise an exception
+    assert isinstance(exception_info["exception"], FastCSError)
+    for task in fastcs._scan_tasks:
+        internal_exception = task.exception()
+        assert internal_exception
+        # The task exception comes from scan method raise_exception
+        assert isinstance(internal_exception, ValueError)
+        assert "Scan Exception" == str(internal_exception)
 
-    loop.run_until_complete(test_scan_wrapper())
+
+@pytest.mark.asyncio
+async def test_controller_connect_disconnect():
+    class MyTestController(Controller):
+        def __init__(self):
+            super().__init__()
+
+            self.connected = False
+
+        async def connect(self):
+            self.connected = True
+
+        async def disconnect(self):
+            self.connected = False
+
+    controller = MyTestController()
+
+    loop = asyncio.get_event_loop()
+    fastcs = FastCS(controller, [], loop)
+
+    task = asyncio.create_task(fastcs.serve(interactive=False))
+
+    # connect is called at the start of serve
+    await asyncio.sleep(0.1)
+    assert controller.connected
+
+    task.cancel()
+
+    # disconnect is called at the end of serve
+    await asyncio.sleep(0.1)
+    assert not controller.connected

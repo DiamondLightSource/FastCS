@@ -14,7 +14,7 @@ class GraphQLTransport(Transport):
 
     graphql: GraphQLServerOptions = field(default_factory=GraphQLServerOptions)
 
-    def initialise(
+    def connect(
         self,
         controller_api: ControllerAPI,
         loop: asyncio.AbstractEventLoop,

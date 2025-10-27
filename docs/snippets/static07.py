@@ -53,7 +53,5 @@ epics_ca = EpicsCATransport(gui=gui_options, ca_ioc=EpicsIOCOptions(pv_prefix="D
 connection_settings = IPConnectionSettings("localhost", 25565)
 fastcs = FastCS(TemperatureController(connection_settings), [epics_ca])
 
-fastcs.create_gui()
-
 if __name__ == "__main__":
     fastcs.run()

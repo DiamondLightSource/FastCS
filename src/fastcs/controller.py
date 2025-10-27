@@ -7,11 +7,7 @@ from typing import get_type_hints
 
 from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORefT
-from fastcs.attributes import (
-    Attribute,
-    AttrR,
-    AttrW,
-)
+from fastcs.attributes import Attribute, AttrR, AttrW
 from fastcs.datatypes import T
 from fastcs.tracer import Tracer
 
@@ -49,17 +45,11 @@ class BaseController(Tracer):
         self._validate_io(ios)
 
     async def initialise(self):
+        """Hook to dynamically add attributes before building the API"""
         pass
 
-    async def attribute_initialise(self) -> None:
-        """Register update and send callbacks for attributes on this controller
-        and all subcontrollers"""
-        self._add_io_callbacks()
-
-        for controller in self.get_sub_controllers().values():
-            await controller.attribute_initialise()
-
-    def _add_io_callbacks(self):
+    def connect_attribute_ios(self) -> None:
+        """Connect ``Attribute`` callbacks to ``AttributeIO``s"""
         for attr in self.attributes.values():
             ref = attr.io_ref if attr.has_io_ref() else None
             if ref is None:
@@ -76,6 +66,9 @@ class BaseController(Tracer):
                 attr.set_on_put_callback(io.send)
             if isinstance(attr, AttrR):
                 attr.set_update_callback(io.update)
+
+        for controller in self.get_sub_controllers().values():
+            controller.connect_attribute_ios()
 
     @property
     def path(self) -> list[str]:
@@ -201,4 +194,7 @@ class Controller(BaseController):
         super().__init__(description=description, ios=ios)
 
     async def connect(self) -> None:
+        pass
+
+    async def disconnect(self) -> None:
         pass

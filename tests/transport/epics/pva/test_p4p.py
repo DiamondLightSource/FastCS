@@ -230,7 +230,7 @@ def test_read_signal_set():
     a_values, b_values = [], []
     a_monitor = ctxt.monitor(f"{pv_prefix}:A_RBV", a_values.append)
     b_monitor = ctxt.monitor(f"{pv_prefix}:B", b_values.append)
-    serve = asyncio.ensure_future(fastcs.serve())
+    serve = asyncio.ensure_future(fastcs.serve(interactive=False))
     wait_and_set_attr_r = asyncio.ensure_future(_wait_and_set_attr_r())
     try:
         asyncio.get_event_loop().run_until_complete(
@@ -299,7 +299,7 @@ def test_pvi_grouping():
     child_child_controller_monitor = ctxt.monitor(
         f"{pv_prefix}:Child0:ChildChild:PVI", child_child_controller_pvi.append
     )
-    serve = asyncio.ensure_future(fastcs.serve())
+    serve = asyncio.ensure_future(fastcs.serve(interactive=False))
 
     try:
         asyncio.get_event_loop().run_until_complete(
@@ -448,7 +448,7 @@ def test_more_exotic_dataypes():
         enum_values.append,
     )
 
-    serve = asyncio.ensure_future(fastcs.serve())
+    serve = asyncio.ensure_future(fastcs.serve(interactive=False))
     wait_and_set_attrs = asyncio.ensure_future(_wait_and_set_attrs())
     wait_and_put_pvs = asyncio.ensure_future(_wait_and_put_pvs())
     try:
@@ -563,7 +563,7 @@ def test_command_method_put_twice(caplog):
         )
         assert expected_error_string in caplog.text
 
-    serve = asyncio.ensure_future(fastcs.serve())
+    serve = asyncio.ensure_future(fastcs.serve(interactive=False))
     try:
         asyncio.get_event_loop().run_until_complete(
             asyncio.wait_for(
@@ -629,7 +629,7 @@ def test_block_flag_waits_for_callback_completion():
             )
             command_runs_for_a_while_times.append((start_time, datetime.now()))
 
-    serve = asyncio.ensure_future(fastcs.serve())
+    serve = asyncio.ensure_future(fastcs.serve(interactive=False))
     try:
         asyncio.get_event_loop().run_until_complete(
             asyncio.wait_for(

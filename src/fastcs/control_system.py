@@ -8,7 +8,7 @@ from IPython.terminal.embed import InteractiveShellEmbed
 
 from fastcs.controller import BaseController, Controller
 from fastcs.controller_api import ControllerAPI
-from fastcs.cs_methods import Command, Scan
+from fastcs.cs_methods import Command, Scan, ScanCallback
 from fastcs.exceptions import FastCSError
 from fastcs.logging import logger as _fastcs_logger
 from fastcs.tracer import Tracer
@@ -36,36 +36,17 @@ class FastCS:
         transports: Sequence[Transport],
         loop: asyncio.AbstractEventLoop | None = None,
     ):
-        self._loop = loop or asyncio.get_event_loop()
         self._controller = controller
+        self._transports = transports
+        self._loop = loop or asyncio.get_event_loop()
+
+        self._scan_coros: list[ScanCallback] = []
+        self._initial_coros: list[ScanCallback] = []
 
         self._scan_tasks: set[asyncio.Task] = set()
 
-        # these initialise the controller & build its APIs
-        self._loop.run_until_complete(controller.initialise())
-        self._loop.run_until_complete(controller.attribute_initialise())
-        validate_hinted_attributes(controller)
-        self.controller_api = build_controller_api(controller)
-
-        self._scan_coros, self._initial_coros = (
-            self.controller_api.get_scan_and_initial_coros()
-        )
-        self._initial_coros.append(controller.connect)
-
-        self._transports = transports
-        for transport in self._transports:
-            transport.initialise(controller_api=self.controller_api, loop=self._loop)
-
-    def create_docs(self) -> None:
-        for transport in self._transports:
-            transport.create_docs()
-
-    def create_gui(self) -> None:
-        for transport in self._transports:
-            transport.create_gui()
-
-    def run(self):
-        serve = asyncio.ensure_future(self.serve())
+    def run(self, interactive: bool = True):
+        serve = asyncio.ensure_future(self.serve(interactive=interactive))
 
         self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
         self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
@@ -100,7 +81,18 @@ class FastCS:
                 except Exception as e:
                     raise RuntimeError("Unhandled exception in stop scan tasks") from e
 
-    async def serve(self) -> None:
+        self._scan_tasks.clear()
+
+    async def serve(self, interactive: bool = True) -> None:
+        await self._controller.initialise()
+        validate_hinted_attributes(self._controller)
+        self._controller.connect_attribute_ios()
+
+        self.controller_api = build_controller_api(self._controller)
+        self._scan_coros, self._initial_coros = (
+            self.controller_api.get_scan_and_initial_coros()
+        )
+
         context = {
             "controller": self._controller,
             "controller_api": self.controller_api,
@@ -109,8 +101,9 @@ class FastCS:
             ],
         }
 
-        coros = []
+        coros: list[Coroutine] = []
         for transport in self._transports:
+            transport.connect(controller_api=self.controller_api, loop=self._loop)
             coros.append(transport.serve())
             common_context = context.keys() & transport.context.keys()
             if common_context:
@@ -122,7 +115,15 @@ class FastCS:
                 )
             context.update(transport.context)
 
-        coros.append(self._interactive_shell(context))
+        if interactive:
+            coros.append(self._interactive_shell(context))
+        else:
+
+            async def block_forever():
+                while True:
+                    await asyncio.sleep(1)
+
+            coros.append(block_forever())
 
         logger.info(
             "Starting FastCS",
@@ -130,6 +131,7 @@ class FastCS:
             transports=f"[{', '.join(str(t) for t in self._transports)}]",
         )
 
+        await self._controller.connect()
         await self._run_initial_coros()
         await self._start_scan_tasks()
 
@@ -139,6 +141,10 @@ class FastCS:
             pass
         except Exception as e:
             raise RuntimeError("Unhandled exception in serve") from e
+        finally:
+            logger.info("Shutting down FastCS")
+            self._stop_scan_tasks()
+            await self._controller.disconnect()
 
     async def _interactive_shell(self, context: dict[str, Any]):
         """Spawn interactive shell in another thread and wait for it to complete."""

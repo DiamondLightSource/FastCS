@@ -76,10 +76,10 @@ async def test_attribute_io():
 
     with pytest.raises(ValueError, match="does not have an AttributeIO to handle"):
         controller = MissingIOController()
-        controller._add_io_callbacks()
+        controller.connect_attribute_ios()
 
     await c.initialise()
-    await c.attribute_initialise()
+    c.connect_attribute_ios()
     await c.my_attr.bind_update_callback()()
 
 
@@ -220,7 +220,7 @@ async def test_dynamic_attribute_io_specification():
 
     c = DemoParameterController(ios=[DemoParameterAttributeIO()])
     await c.initialise()
-    await c.attribute_initialise()
+    c.connect_attribute_ios()
     await c.ro_int_parameter.bind_update_callback()()
     assert c.ro_int_parameter.get() == 10
     await c.ro_int_parameter.bind_update_callback()()
@@ -241,7 +241,7 @@ async def test_attribute_no_io(mocker: MockerFixture):
         match="MyController does not have an AttributeIO to handle AttributeIORef",
     ):
         c = MyController()
-        await c.attribute_initialise()
+        c.connect_attribute_ios()
 
     class SimpleAttributeIO(AttributeIO[T, AttributeIORef]):
         async def update(self, attr):
@@ -261,7 +261,7 @@ async def test_attribute_no_io(mocker: MockerFixture):
     assert c.base_class_ref.has_io_ref()
 
     await c.initialise()
-    await c.attribute_initialise()
+    c.connect_attribute_ios()
 
     # There is a difference between providing an AttributeIO for the default
     # AttributeIORef class and not specifying the io_ref for an Attribute
@@ -280,7 +280,7 @@ async def test_attribute_no_io(mocker: MockerFixture):
     c2 = MyController(ios=[SimpleAttributeIO()])
 
     await c2.initialise()
-    await c2.attribute_initialise()
+    c2.connect_attribute_ios()
 
     assert c2.base_class_ref.get() == 0
     await c2.base_class_ref.bind_update_callback()()

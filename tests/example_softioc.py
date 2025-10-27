@@ -26,7 +26,7 @@ def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
     fastcs = FastCS(
         controller, [EpicsCATransport(ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))]
     )
-    fastcs.run()
+    fastcs.run(interactive=False)
 
 
 if __name__ == "__main__":

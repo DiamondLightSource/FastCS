@@ -1,4 +1,3 @@
-import asyncio
 import enum
 
 import numpy as np
@@ -9,8 +8,11 @@ from pydantic import ValidationError
 from fastcs.attributes import AttrR, AttrRW
 from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, String
-from fastcs.launch import FastCS
-from fastcs.util import numpy_to_fastcs_datatype, snake_to_pascal
+from fastcs.util import (
+    numpy_to_fastcs_datatype,
+    snake_to_pascal,
+    validate_hinted_attributes,
+)
 
 
 def test_snake_to_pascal():
@@ -64,19 +66,19 @@ def test_numpy_to_fastcs_datatype(numpy_type, fastcs_datatype):
     assert fastcs_datatype == numpy_to_fastcs_datatype(numpy_type)
 
 
-def test_hinted_attributes_verified():
-    loop = asyncio.get_event_loop()
-    transport_options = []
-
+@pytest.mark.asyncio
+async def test_hinted_attributes_verified():
     class ControllerWithWrongType(Controller):
         hinted_wrong_type: AttrR[int]
 
         async def initialise(self):
             self.hinted_wrong_type = AttrR(Float())  # type: ignore
-            self.attributes["hinted_wrong_type"] = self.hinted_wrong_type
 
+    controller = ControllerWithWrongType()
+    await controller.initialise()
     with pytest.raises(RuntimeError) as excinfo:
-        FastCS(ControllerWithWrongType(), transport_options, loop)
+        validate_hinted_attributes(controller)
+
     assert str(excinfo.value) == (
         "Controller 'ControllerWithWrongType' introspection of hinted attribute "
         "'hinted_wrong_type' does not match defined datatype. "
@@ -86,8 +88,11 @@ def test_hinted_attributes_verified():
     class ControllerWithMissingAttr(Controller):
         hinted_int_missing: AttrR[int]
 
+    controller = ControllerWithMissingAttr()
+    await controller.initialise()
     with pytest.raises(RuntimeError) as excinfo:
-        FastCS(ControllerWithMissingAttr(), transport_options, loop)
+        validate_hinted_attributes(controller)
+
     assert str(excinfo.value) == (
         "Controller `ControllerWithMissingAttr` failed to introspect hinted attribute "
         "`hinted_int_missing` during initialisation"
@@ -100,8 +105,11 @@ def test_hinted_attributes_verified():
             self.hinted = AttrRW(Int())
             self.attributes["hinted"] = self.hinted
 
+    controller = ControllerAttrWrongAccessMode()
+    await controller.initialise()
     with pytest.raises(RuntimeError) as excinfo:
-        FastCS(ControllerAttrWrongAccessMode(), transport_options, loop)
+        validate_hinted_attributes(controller)
+
     assert str(excinfo.value) == (
         "Controller 'ControllerAttrWrongAccessMode' introspection of hinted attribute "
         "'hinted' does not match defined access mode. Expected 'AttrR', got 'AttrRW'."
@@ -118,8 +126,11 @@ def test_hinted_attributes_verified():
     class ControllerWrongEnumClass(Controller):
         hinted_enum: AttrRW[MyEnum] = AttrRW(Enum(MyEnum2))
 
+    controller = ControllerWrongEnumClass()
+    await controller.initialise()
     with pytest.raises(RuntimeError) as excinfo:
-        FastCS(ControllerWrongEnumClass(), transport_options, loop)
+        validate_hinted_attributes(controller)
+
     assert str(excinfo.value) == (
         "Controller 'ControllerWrongEnumClass' introspection of hinted attribute "
         "'hinted_enum' does not match defined datatype. "
