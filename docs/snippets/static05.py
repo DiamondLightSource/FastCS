@@ -19,7 +19,5 @@ gui_options = EpicsGUIOptions(
 epics_ca = EpicsCATransport(gui=gui_options, ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"))
 fastcs = FastCS(TemperatureController(), [epics_ca])
 
-fastcs.create_gui()
-
 if __name__ == "__main__":
     fastcs.run()

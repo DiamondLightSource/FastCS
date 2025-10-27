@@ -162,13 +162,9 @@ def _launch(
             controller = controller_class()
 
         instance = FastCS(
-            controller,
-            instance_options.transport,
-            loop=asyncio.get_event_loop(),
+            controller, instance_options.transport, loop=asyncio.get_event_loop()
         )
 
-        instance.create_gui()
-        instance.create_docs()
         instance.run()
 
     return launch_typer

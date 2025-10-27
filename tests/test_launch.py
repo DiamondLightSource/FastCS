@@ -130,16 +130,12 @@ def test_no_version():
 
 def test_launch(mocker: MockerFixture, data):
     run = mocker.patch("fastcs.launch.FastCS.run")
-    gui = mocker.patch("fastcs.launch.FastCS.create_gui")
-    docs = mocker.patch("fastcs.launch.FastCS.create_docs")
 
     app = _launch(IsHinted)
     result = runner.invoke(app, ["run", str(data / "config.yaml")])
     assert result.exit_code == 0
 
     run.assert_called_once()
-    gui.assert_called_once()
-    docs.assert_called_once()
 
 
 def test_get_schema(data):
@@ -153,8 +149,6 @@ def test_get_schema(data):
 
 
 def test_error_if_identical_context_in_transports(mocker: MockerFixture, data):
-    mocker.patch("fastcs.launch.FastCS.create_gui")
-    mocker.patch("fastcs.launch.FastCS.create_docs")
     mocker.patch(
         "fastcs.transport.Transport.context",
         new_callable=mocker.PropertyMock,

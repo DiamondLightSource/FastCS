@@ -48,7 +48,7 @@ def tango_controller_api(class_mocker: MockerFixture) -> AssertableControllerAPI
 
 def create_test_context(tango_controller_api: AssertableControllerAPI):
     tango_transport = TangoTransport()
-    tango_transport.initialise(
+    tango_transport.connect(
         tango_controller_api,
         # This is passed to enable instantiating the transport, but tests must avoid
         # using via patching of functions. It will raise NotImplementedError if used.

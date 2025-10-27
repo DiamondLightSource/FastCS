@@ -14,7 +14,7 @@ class RestTransport(Transport):
 
     rest: RestServerOptions = field(default_factory=RestServerOptions)
 
-    def initialise(
+    def connect(
         self,
         controller_api: ControllerAPI,
         loop: asyncio.AbstractEventLoop,

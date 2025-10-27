@@ -77,7 +77,7 @@ def run(pv_prefix="P4P_TEST_DEVICE"):
     fastcs = FastCS(
         controller, [EpicsPVATransport(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))]
     )
-    fastcs.run()
+    fastcs.run(interactive=False)
 
 
 if __name__ == "__main__":

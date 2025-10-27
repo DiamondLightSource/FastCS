@@ -2,14 +2,30 @@
   "$defs": {
     "EpicsCATransport": {
       "properties": {
-        "docs": {
-          "$ref": "#/$defs/EpicsDocsOptions"
-        },
-        "gui": {
-          "$ref": "#/$defs/EpicsGUIOptions"
-        },
         "ca_ioc": {
           "$ref": "#/$defs/EpicsIOCOptions"
+        },
+        "docs": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpicsDocsOptions"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "gui": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpicsGUIOptions"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "title": "EpicsCATransport",
@@ -82,14 +98,30 @@
     },
     "EpicsPVATransport": {
       "properties": {
-        "docs": {
-          "$ref": "#/$defs/EpicsDocsOptions"
-        },
-        "gui": {
-          "$ref": "#/$defs/EpicsGUIOptions"
-        },
         "pva_ioc": {
           "$ref": "#/$defs/EpicsIOCOptions"
+        },
+        "docs": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpicsDocsOptions"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "gui": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpicsGUIOptions"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "title": "EpicsPVATransport",

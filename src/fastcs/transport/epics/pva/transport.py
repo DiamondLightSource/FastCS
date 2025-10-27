@@ -21,11 +21,11 @@ logger = _fastcs_logger.bind(logger_name=__name__)
 class EpicsPVATransport(Transport):
     """PV access transport."""
 
-    docs: EpicsDocsOptions = field(default_factory=EpicsDocsOptions)
-    gui: EpicsGUIOptions = field(default_factory=EpicsGUIOptions)
     pva_ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
+    docs: EpicsDocsOptions | None = None
+    gui: EpicsGUIOptions | None = None
 
-    def initialise(
+    def connect(
         self,
         controller_api: ControllerAPI,
         loop: asyncio.AbstractEventLoop,
@@ -34,15 +34,15 @@ class EpicsPVATransport(Transport):
         self._pv_prefix = self.pva_ioc.pv_prefix
         self._ioc = P4PIOC(self.pva_ioc.pv_prefix, controller_api)
 
+        if self.docs is not None:
+            EpicsDocs(self._controller_api).create_docs(self.docs)
+
+        if self.gui is not None:
+            PvaEpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
+
     async def serve(self) -> None:
         logger.info("Running IOC", pv_prefix=self._pv_prefix)
         await self._ioc.run()
-
-    def create_docs(self) -> None:
-        EpicsDocs(self._controller_api).create_docs(self.docs)
-
-    def create_gui(self) -> None:
-        PvaEpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
 
     def __repr__(self):
         return f"EpicsPVATransport({self._pv_prefix})"

@@ -23,11 +23,11 @@ logger = _fastcs_logger.bind(logger_name=__name__)
 class EpicsCATransport(Transport):
     """Channel access transport."""
 
-    docs: EpicsDocsOptions = field(default_factory=EpicsDocsOptions)
-    gui: EpicsGUIOptions = field(default_factory=EpicsGUIOptions)
     ca_ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
+    docs: EpicsDocsOptions | None = None
+    gui: EpicsGUIOptions | None = None
 
-    def initialise(
+    def connect(
         self,
         controller_api: ControllerAPI,
         loop: asyncio.AbstractEventLoop,
@@ -37,11 +37,11 @@ class EpicsCATransport(Transport):
         self._pv_prefix = self.ca_ioc.pv_prefix
         self._ioc = EpicsCAIOC(self.ca_ioc.pv_prefix, controller_api, self.ca_ioc)
 
-    def create_docs(self) -> None:
-        EpicsDocs(self._controller_api).create_docs(self.docs)
+        if self.docs is not None:
+            EpicsDocs(self._controller_api).create_docs(self.docs)
 
-    def create_gui(self) -> None:
-        EpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
+        if self.gui is not None:
+            EpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
 
     async def serve(self) -> None:
         logger.info("Running IOC", pv_prefix=self._pv_prefix)

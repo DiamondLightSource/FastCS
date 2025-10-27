@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 
 from fastcs.attribute_io_ref import AttributeIORef
 from fastcs.attributes import ONCE, Attribute, AttrR
-from fastcs.cs_methods import Command, Scan
+from fastcs.cs_methods import Command, Scan, ScanCallback
 from fastcs.logging import logger as _fastcs_logger
 from fastcs.tracer import Tracer
 
@@ -42,7 +42,9 @@ class ControllerAPI:
 ControllerAPI(path={self.path}, sub_apis=[{", ".join(self.sub_apis.keys())}])\
 """
 
-    def get_scan_and_initial_coros(self) -> tuple[list[Callable], list[Callable]]:
+    def get_scan_and_initial_coros(
+        self,
+    ) -> tuple[list[ScanCallback], list[ScanCallback]]:
         scan_dict: dict[float, list[Callable]] = defaultdict(list)
         initial_coros: list[Callable] = []
 
@@ -77,19 +79,21 @@ def _add_attribute_update_tasks(
                     scan_dict[update_period].append(attribute.bind_update_callback())
 
 
-def _get_periodic_scan_coros(scan_dict: dict[float, list[Callable]]) -> list[Callable]:
-    periodic_scan_coros: list[Callable] = []
+def _get_periodic_scan_coros(
+    scan_dict: dict[float, list[Scan]],
+) -> list[ScanCallback]:
+    periodic_scan_coros: list[ScanCallback] = []
     for period, methods in scan_dict.items():
         periodic_scan_coros.append(_create_periodic_scan_coro(period, methods))
 
     return periodic_scan_coros
 
 
-def _create_periodic_scan_coro(period, methods: list[Callable]) -> Callable:
+def _create_periodic_scan_coro(period: float, scans: list[Scan]) -> ScanCallback:
     async def _sleep():
         await asyncio.sleep(period)
 
-    methods.append(_sleep)  # Create periodic behavior
+    methods = [_sleep] + scans  # Create periodic behavior
 
     async def scan_coro() -> None:
         while True:

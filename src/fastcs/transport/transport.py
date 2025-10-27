@@ -24,13 +24,9 @@ class Transport:
         return Union[tuple(cls.subclasses)]  # noqa: UP007
 
     @abstractmethod
-    async def serve(self) -> None:
-        pass
-
-    def create_docs(self) -> None:
-        pass
-
-    def create_gui(self) -> None:
+    def connect(
+        self, controller_api: ControllerAPI, loop: asyncio.AbstractEventLoop
+    ) -> None:
         pass
 
     @property
@@ -38,9 +34,5 @@ class Transport:
         return {}
 
     @abstractmethod
-    def initialise(
-        self,
-        controller_api: ControllerAPI,
-        loop: asyncio.AbstractEventLoop,
-    ) -> None:
+    async def serve(self) -> None:
         pass

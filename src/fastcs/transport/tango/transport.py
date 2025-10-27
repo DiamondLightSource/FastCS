@@ -13,7 +13,7 @@ class TangoTransport(Transport):
 
     dsr: TangoDSROptions = field(default_factory=TangoDSROptions)
 
-    def initialise(
+    def connect(
         self,
         controller_api: ControllerAPI,
         loop: asyncio.AbstractEventLoop,
