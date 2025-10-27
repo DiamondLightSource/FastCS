@@ -17,6 +17,7 @@
         attribute_io_ref
         attributes
         connections
+        control_system
         controller
         controller_api
         cs_methods

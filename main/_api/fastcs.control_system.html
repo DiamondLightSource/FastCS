@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.controller_api &#8212; FastCS 0.10.2.dev31+g3da35f05f documentation</title>
+    <title>fastcs.control_system &#8212; FastCS 0.10.2.dev31+g3da35f05f documentation</title>
   
   
   
@@ -54,7 +54,7 @@
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_api/fastcs.controller_api';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_api/fastcs.control_system';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://DiamondLightSource.github.io/FastCS/switcher.json';
@@ -65,8 +65,8 @@
     <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fastcs.cs_methods" href="fastcs.cs_methods.html" />
-    <link rel="prev" title="fastcs.controller" href="fastcs.controller.html" />
+    <link rel="next" title="fastcs.controller" href="fastcs.controller.html" />
+    <link rel="prev" title="fastcs.connections.serial_connection" href="fastcs.connections.serial_connection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="main" />
@@ -413,9 +413,9 @@
 <li class="toctree-l3"><a class="reference internal" href="fastcs.connections.serial_connection.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections.serial_connection</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.control_system.html"><code class="docutils literal notranslate"><span class="pre">fastcs.control_system</span></code></a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.control_system</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controller</span></code></a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.controller_api</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="fastcs.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controller_api</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.cs_methods.html"><code class="docutils literal notranslate"><span class="pre">fastcs.cs_methods</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.datatypes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes</span></code></a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.demo.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -515,7 +515,7 @@
     
     <li class="breadcrumb-item"><a href="fastcs.html" class="nav-link"><code class="docutils literal notranslate"><span class="pre">fastcs</span></code></a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">fastcs.controller_api</span></code></span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">fastcs.control_system</span></code></span></li>
   </ul>
 </nav>
 </div>
@@ -532,41 +532,37 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-fastcs.controller_api">
-<span id="fastcs-controller-api"></span><h1><code class="docutils literal notranslate"><span class="pre">fastcs.controller_api</span></code><a class="headerlink" href="#module-fastcs.controller_api" title="Link to this heading">#</a></h1>
+  <section id="module-fastcs.control_system">
+<span id="fastcs-control-system"></span><h1><code class="docutils literal notranslate"><span class="pre">fastcs.control_system</span></code><a class="headerlink" href="#module-fastcs.control_system" title="Link to this heading">#</a></h1>
 <p class="rubric">Members</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.controller_api.ControllerAPI" title="fastcs.controller_api.ControllerAPI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ControllerAPI</span></code></a></p></td>
-<td><p>Attributes, bound methods and sub APIs of a <a class="reference internal" href="fastcs.controller.html#fastcs.controller.Controller" title="fastcs.controller.Controller"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Controller</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.control_system.FastCS" title="fastcs.control_system.FastCS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FastCS</span></code></a></p></td>
+<td><p>Entrypoint for a FastCS application.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_controller_api</span></code></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="fastcs.controller_api.ControllerAPI">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.controller_api.</span></span><span class="sig-name descname"><span class="pre">ControllerAPI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path:</span> <span class="pre">list[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~fastcs.attributes.Attribute]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command_methods:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~fastcs.cs_methods.Command]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">put_methods:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~fastcs.cs_methods.Put]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scan_methods:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~fastcs.cs_methods.Scan]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_apis:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~fastcs.controller_api.ControllerAPI]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/controller_api.html#ControllerAPI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controller_api.ControllerAPI" title="Link to this definition">#</a></dt>
-<dd><p>Attributes, bound methods and sub APIs of a <a class="reference internal" href="fastcs.controller.html#fastcs.controller.Controller" title="fastcs.controller.Controller"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Controller</span></code></a></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="fastcs.controller_api.ControllerAPI.path">
-<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fastcs.controller_api.ControllerAPI.path" title="Link to this definition">#</a></dt>
-<dd><p>Path within controller tree (empty if this is the root)</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="fastcs.controller_api.ControllerAPI.sub_apis">
-<span class="sig-name descname"><span class="pre">sub_apis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#fastcs.controller_api.ControllerAPI" title="fastcs.controller_api.ControllerAPI"><span class="pre">ControllerAPI</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fastcs.controller_api.ControllerAPI.sub_apis" title="Link to this definition">#</a></dt>
-<dd><p>APIs of the sub controllers of the <a class="reference internal" href="fastcs.controller.html#fastcs.controller.Controller" title="fastcs.controller.Controller"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Controller</span></code></a> this API was built from</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.controller_api.ControllerAPI.walk_api">
-<span class="sig-name descname"><span class="pre">walk_api</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator" title="(in Python v3.14)"><span class="pre">Iterator</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#fastcs.controller_api.ControllerAPI" title="fastcs.controller_api.ControllerAPI"><span class="pre">ControllerAPI</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/fastcs/controller_api.html#ControllerAPI.walk_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controller_api.ControllerAPI.walk_api" title="Link to this definition">#</a></dt>
-<dd><p>Walk through all the nested <a class="reference internal" href="#fastcs.controller_api.ControllerAPI" title="fastcs.controller_api.ControllerAPI"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ControllerAPI</span></code></a> s of this <a class="reference internal" href="#fastcs.controller_api.ControllerAPI" title="fastcs.controller_api.ControllerAPI"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ControllerAPI</span></code></a>.</p>
-<p>Yields the <a class="reference internal" href="#fastcs.controller_api.ControllerAPI" title="fastcs.controller_api.ControllerAPI"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ControllerAPI</span></code></a> s from a depth-first traversal of the tree,
-including self.</p>
-</dd></dl>
-
+<dt class="sig sig-object py" id="fastcs.control_system.FastCS">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.control_system.</span></span><span class="sig-name descname"><span class="pre">FastCS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.controller.html#fastcs.controller.Controller" title="fastcs.controller.Controller"><span class="pre">Controller</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">transports</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="fastcs.transport.transport.html#fastcs.transport.transport.Transport" title="fastcs.transport.transport.Transport"><span class="pre">Transport</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AbstractEventLoop</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/control_system.html#FastCS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.control_system.FastCS" title="Link to this definition">#</a></dt>
+<dd><p>Entrypoint for a FastCS application.</p>
+<p>This class takes a <code class="docutils literal notranslate"><span class="pre">Controller</span></code>, creates asyncio tasks to run its update loops and
+builds its API to serve over the given transports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p>controller: The controller to serve in the control system</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>transports: A list of transports to serve the API over</p>
+</dd>
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p>loop: Optional event loop to run the control system in</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -582,20 +578,20 @@ including self.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="fastcs.controller.html"
+       href="fastcs.connections.serial_connection.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.controller</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.connections.serial_connection</span></code></p>
       </div>
     </a>
     <a class="right-next"
-       href="fastcs.cs_methods.html"
+       href="fastcs.controller.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.cs_methods</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.controller</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -618,12 +614,7 @@ including self.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller_api.ControllerAPI"><code class="docutils literal notranslate"><span class="pre">ControllerAPI</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller_api.ControllerAPI.path"><code class="docutils literal notranslate"><span class="pre">ControllerAPI.path</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller_api.ControllerAPI.sub_apis"><code class="docutils literal notranslate"><span class="pre">ControllerAPI.sub_apis</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller_api.ControllerAPI.walk_api"><code class="docutils literal notranslate"><span class="pre">ControllerAPI.walk_api()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.control_system.FastCS"><code class="docutils literal notranslate"><span class="pre">FastCS</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -631,7 +622,7 @@ including self.</p>
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/DiamondLightSource/FastCS/edit/main/docs/_api/fastcs.controller_api.rst">
+    <a href="https://github.com/DiamondLightSource/FastCS/edit/main/docs/_api/fastcs.control_system.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -647,7 +638,7 @@ including self.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/_api/fastcs.controller_api.rst.txt"
+      <li><a href="../_sources/_api/fastcs.control_system.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

@@ -1,9 +1,9 @@
-``fastcs.launch``
-=================
+``fastcs.control_system``
+=========================
         
         
 
-.. automodule:: fastcs.launch
+.. automodule:: fastcs.control_system
     :members:
 
     
@@ -17,7 +17,7 @@
     .. autosummary::
         :nosignatures:
     
-        get_controller_schema
-        launch
+        FastCS
+        build_controller_api
     
     
