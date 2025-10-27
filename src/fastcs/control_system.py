@@ -144,6 +144,7 @@ class FastCS:
         finally:
             logger.info("Shutting down FastCS")
             self._stop_scan_tasks()
+            await self._controller.disconnect()
 
     async def _interactive_shell(self, context: dict[str, Any]):
         """Spawn interactive shell in another thread and wait for it to complete."""

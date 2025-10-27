@@ -61,6 +61,9 @@ class MyTestController(Controller):
     async def connect(self) -> None:
         self.connected = True
 
+    async def disconnect(self) -> None:
+        self.connected = False
+
     @command()
     async def go(self):
         pass

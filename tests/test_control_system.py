@@ -162,3 +162,35 @@ async def test_scan_raises_exception_via_callback():
         # The task exception comes from scan method raise_exception
         assert isinstance(internal_exception, ValueError)
         assert "Scan Exception" == str(internal_exception)
+
+
+@pytest.mark.asyncio
+async def test_controller_connect_disconnect():
+    class MyTestController(Controller):
+        def __init__(self):
+            super().__init__()
+
+            self.connected = False
+
+        async def connect(self):
+            self.connected = True
+
+        async def disconnect(self):
+            self.connected = False
+
+    controller = MyTestController()
+
+    loop = asyncio.get_event_loop()
+    fastcs = FastCS(controller, [], loop)
+
+    task = asyncio.create_task(fastcs.serve(interactive=False))
+
+    # connect is called at the start of serve
+    await asyncio.sleep(0.1)
+    assert controller.connected
+
+    task.cancel()
+
+    # disconnect is called at the end of serve
+    await asyncio.sleep(0.1)
+    assert not controller.connected

@@ -195,3 +195,6 @@ class Controller(BaseController):
 
     async def connect(self) -> None:
         pass
+
+    async def disconnect(self) -> None:
+        pass
