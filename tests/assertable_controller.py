@@ -82,7 +82,6 @@ class AssertableControllerAPI(ControllerAPI):
         # Copy its fields
         self.attributes = controller_api.attributes
         self.command_methods = controller_api.command_methods
-        self.put_methods = controller_api.put_methods
         self.scan_methods = controller_api.scan_methods
         self.sub_apis = controller_api.sub_apis
 

@@ -8,7 +8,7 @@ from IPython.terminal.embed import InteractiveShellEmbed
 
 from fastcs.controller import BaseController, Controller
 from fastcs.controller_api import ControllerAPI
-from fastcs.cs_methods import Command, Put, Scan
+from fastcs.cs_methods import Command, Scan
 from fastcs.exceptions import FastCSError
 from fastcs.logging import logger as _fastcs_logger
 from fastcs.tracer import Tracer
@@ -46,7 +46,6 @@ class FastCS:
         self._loop.run_until_complete(controller.attribute_initialise())
         validate_hinted_attributes(controller)
         self.controller_api = build_controller_api(controller)
-        self._link_process_tasks()
 
         self._scan_coros, self._initial_coros = (
             self.controller_api.get_scan_and_initial_coros()
@@ -71,10 +70,6 @@ class FastCS:
         self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
         self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
         self._loop.run_until_complete(serve)
-
-    def _link_process_tasks(self):
-        for controller_api in self.controller_api.walk_api():
-            controller_api.link_put_tasks()
 
     async def _run_initial_coros(self):
         for coro in self._initial_coros:
@@ -181,13 +176,10 @@ def build_controller_api(controller: Controller) -> ControllerAPI:
 
 def _build_controller_api(controller: BaseController, path: list[str]) -> ControllerAPI:
     scan_methods: dict[str, Scan] = {}
-    put_methods: dict[str, Put] = {}
     command_methods: dict[str, Command] = {}
     for attr_name in dir(controller):
         attr = getattr(controller, attr_name)
         match attr:
-            case Put(enabled=True):
-                put_methods[attr_name] = attr
             case Scan(enabled=True):
                 scan_methods[attr_name] = attr
             case Command(enabled=True):
@@ -199,7 +191,6 @@ def _build_controller_api(controller: BaseController, path: list[str]) -> Contro
         path=path,
         attributes=controller.attributes,
         scan_methods=scan_methods,
-        put_methods=put_methods,
         command_methods=command_methods,
         sub_apis={
             name: _build_controller_api(sub_controller, path + [name])

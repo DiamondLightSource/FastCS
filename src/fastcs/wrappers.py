@@ -4,8 +4,6 @@ from .cs_methods import (
     Controller_T,
     UnboundCommand,
     UnboundCommandCallback,
-    UnboundPut,
-    UnboundPutCallback,
     UnboundScan,
     UnboundScanCallback,
 )
@@ -24,11 +22,6 @@ def scan(
         return UnboundScan(fn, period)
 
     return wrapper
-
-
-def put(fn: UnboundPutCallback[Controller_T]) -> UnboundPut[Controller_T]:
-    """Sets up a put over the wrapped method."""
-    return UnboundPut(fn)
 
 
 def command(

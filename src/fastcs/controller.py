@@ -100,7 +100,7 @@ class BaseController(Tracer):
 
         """
         # Lazy import to avoid circular references
-        from fastcs.cs_methods import UnboundCommand, UnboundPut, UnboundScan
+        from fastcs.cs_methods import UnboundCommand, UnboundScan
 
         # Using a dictionary instead of a set to maintain order.
         class_dir = {key: None for key in dir(type(self)) if not key.startswith("_")}
@@ -117,7 +117,7 @@ class BaseController(Tracer):
             attr = getattr(self, attr_name, None)
             if isinstance(attr, Attribute):
                 setattr(self, attr_name, deepcopy(attr))
-            elif isinstance(attr, UnboundPut | UnboundScan | UnboundCommand):
+            elif isinstance(attr, UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
     def _validate_io(self, ios: Sequence[AttributeIO[T, AttributeIORefT]]):

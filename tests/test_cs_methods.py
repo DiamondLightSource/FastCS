@@ -1,15 +1,7 @@
 import pytest
 
 from fastcs.controller import Controller
-from fastcs.cs_methods import (
-    Command,
-    Method,
-    Put,
-    Scan,
-    UnboundCommand,
-    UnboundPut,
-    UnboundScan,
-)
+from fastcs.cs_methods import Command, Method, Scan, UnboundCommand, UnboundScan
 from fastcs.exceptions import FastCSError
 
 
@@ -90,28 +82,3 @@ async def test_unbound_scan():
     assert scan.period == 1.0
 
     await scan()
-
-
-@pytest.mark.asyncio
-async def test_unbound_put():
-    class TestController(Controller):
-        async def put_value(self, value):
-            pass
-
-        async def put_no_value(self):
-            pass
-
-    unbound_put = UnboundPut(TestController.put_value)
-
-    with pytest.raises(NotImplementedError):
-        await unbound_put()
-
-    with pytest.raises(FastCSError):
-        UnboundPut(TestController.put_no_value)  # type: ignore
-
-    with pytest.raises(FastCSError):
-        Put(TestController().put_no_value)  # type: ignore
-
-    put = unbound_put.bind(TestController())
-
-    await put(1)
