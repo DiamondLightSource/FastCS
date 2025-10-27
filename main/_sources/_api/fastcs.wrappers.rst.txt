@@ -2,7 +2,6 @@
 ===================
         
         
-        
 
 .. automodule:: fastcs.wrappers
     :members:
@@ -19,7 +18,6 @@
         :nosignatures:
     
         command
-        put
         scan
     
     

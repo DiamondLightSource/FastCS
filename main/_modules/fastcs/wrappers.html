@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.wrappers &#8212; FastCS 0.10.2.dev31+g3da35f05f documentation</title>
+    <title>fastcs.wrappers &#8212; FastCS 0.10.2.dev32+g15b1a6699 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=9b7edeeb"></script>
+    <script src="../../_static/documentation_options.js?v=ce4066f3"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -455,8 +455,6 @@
     <span class="n">Controller_T</span><span class="p">,</span>
     <span class="n">UnboundCommand</span><span class="p">,</span>
     <span class="n">UnboundCommandCallback</span><span class="p">,</span>
-    <span class="n">UnboundPut</span><span class="p">,</span>
-    <span class="n">UnboundPutCallback</span><span class="p">,</span>
     <span class="n">UnboundScan</span><span class="p">,</span>
     <span class="n">UnboundScanCallback</span><span class="p">,</span>
 <span class="p">)</span>
@@ -477,14 +475,6 @@
         <span class="k">return</span> <span class="n">UnboundScan</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">wrapper</span></div>
-
-
-
-<div class="viewcode-block" id="put">
-<a class="viewcode-back" href="../../_api/fastcs.wrappers.html#fastcs.wrappers.put">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">UnboundPutCallback</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">UnboundPut</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets up a put over the wrapped method.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">UnboundPut</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span></div>
 
 
 

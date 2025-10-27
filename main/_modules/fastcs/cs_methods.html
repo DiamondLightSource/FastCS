@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.cs_methods &#8212; FastCS 0.10.2.dev31+g3da35f05f documentation</title>
+    <title>fastcs.cs_methods &#8212; FastCS 0.10.2.dev32+g15b1a6699 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=9b7edeeb"></script>
+    <script src="../../_static/documentation_options.js?v=ce4066f3"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -585,25 +585,6 @@
 
 
 
-<div class="viewcode-block" id="Put">
-<a class="viewcode-back" href="../../_api/fastcs.cs_methods.html#fastcs.cs_methods.Put">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Put</span><span class="p">(</span><span class="n">Method</span><span class="p">[</span><span class="n">BaseController</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Why don&#39;t know what this is for.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">PutCallback</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">PutCallback</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span><span class="s2">&quot;Put method can only take one argument&quot;</span><span class="p">)</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fn</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
-
-
-
 <div class="viewcode-block" id="UnboundCommand">
 <a class="viewcode-back" href="../../_api/fastcs.cs_methods.html#fastcs.cs_methods.UnboundCommand">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UnboundCommand</span><span class="p">(</span><span class="n">Method</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]):</span>
@@ -666,28 +647,6 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Controller_T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Scan</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Scan</span><span class="p">(</span><span class="n">MethodType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span> <span class="n">controller</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">method_not_bound_error</span></div>
-
-
-
-<div class="viewcode-block" id="UnboundPut">
-<a class="viewcode-back" href="../../_api/fastcs.cs_methods.html#fastcs.cs_methods.UnboundPut">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">UnboundPut</span><span class="p">(</span><span class="n">Method</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unbound version of `Put`.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">UnboundPutCallback</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">UnboundPutCallback</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span><span class="s2">&quot;Put method can only take one argument&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Controller_T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Put</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Put</span><span class="p">(</span><span class="n">MethodType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span> <span class="n">controller</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">method_not_bound_error</span></div>
