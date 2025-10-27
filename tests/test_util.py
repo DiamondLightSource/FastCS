@@ -6,7 +6,7 @@ import pytest
 from pvi.device import SignalR
 from pydantic import ValidationError
 
-from fastcs.attributes import AttrR, AttrRW
+from fastcs.attributes import Attribute, AttrR, AttrRW
 from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, String
 from fastcs.launch import FastCS
@@ -125,3 +125,52 @@ def test_hinted_attributes_verified():
         "'hinted_enum' does not match defined datatype. "
         "Expected 'MyEnum', got 'MyEnum2'."
     )
+
+    class ControllerUnspecifiedAccessMode(Controller):
+        hinted: Attribute[int]
+
+        async def initialise(self):
+            self.hinted = AttrR(Int())
+
+    # no assertion thrown
+    FastCS(ControllerUnspecifiedAccessMode(), [], loop)
+
+
+def test_hinted_attributes_verified_on_subcontrollers():
+    loop = asyncio.get_event_loop()
+
+    class ControllerWithWrongType(Controller):
+        hinted_missing: AttrR[int]
+
+        async def connect(self):
+            return
+
+    class TopController(Controller):
+        async def initialise(self):
+            subcontroller = ControllerWithWrongType()
+            self.register_sub_controller("MySubController", subcontroller)
+
+    with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
+        FastCS(TopController(), [], loop)
+
+
+def test_hinted_attribute_types_verified():
+    # test verification works with non-GenericAlias type hints
+    loop = asyncio.get_event_loop()
+
+    class ControllerAttrWrongAccessMode(Controller):
+        read_attr: AttrR
+
+        async def initialise(self):
+            self.read_attr = AttrRW(Int())
+
+    with pytest.raises(RuntimeError, match="does not match defined access mode"):
+        FastCS(ControllerAttrWrongAccessMode(), [], loop)
+
+    class ControllerUnspecifiedAccessMode(Controller):
+        unspecified_access_mode: Attribute
+
+        async def initialise(self):
+            self.unspecified_access_mode = AttrRW(Int())
+
+    FastCS(ControllerUnspecifiedAccessMode(), [], loop)
