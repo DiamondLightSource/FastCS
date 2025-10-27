@@ -125,22 +125,6 @@ class Scan(Method[BaseController]):
         return await self._fn()
 
 
-class Put(Method[BaseController]):
-    """Why don't know what this is for."""
-
-    def __init__(self, fn: PutCallback):
-        super().__init__(fn)
-
-    def _validate(self, fn: PutCallback) -> None:
-        super()._validate(fn)
-
-        if not len(self.parameters) == 1:
-            raise FastCSError("Put method can only take one argument")
-
-    async def __call__(self, value: Any):
-        return await self._fn(value)
-
-
 class UnboundCommand(Method[Controller_T]):
     """A wrapper of an unbound `Controller` method to be bound into a `Command`.
 
@@ -198,25 +182,6 @@ class UnboundScan(Method[Controller_T]):
 
     def bind(self, controller: Controller_T) -> Scan:
         return Scan(MethodType(self.fn, controller), self._period)
-
-    def __call__(self):
-        raise method_not_bound_error
-
-
-class UnboundPut(Method[Controller_T]):
-    """Unbound version of `Put`."""
-
-    def __init__(self, fn: UnboundPutCallback[Controller_T]) -> None:
-        super().__init__(fn)
-
-    def _validate(self, fn: UnboundPutCallback[Controller_T]) -> None:
-        super()._validate(fn)
-
-        if not len(self.parameters) == 2:
-            raise FastCSError("Put method can only take one argument")
-
-    def bind(self, controller: Controller_T) -> Put:
-        return Put(MethodType(self.fn, controller))
 
     def __call__(self):
         raise method_not_bound_error

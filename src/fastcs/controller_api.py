@@ -4,9 +4,8 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 
 from fastcs.attribute_io_ref import AttributeIORef
-from fastcs.attributes import ONCE, Attribute, AttrR, AttrW
-from fastcs.cs_methods import Command, Put, Scan
-from fastcs.exceptions import FastCSError
+from fastcs.attributes import ONCE, Attribute, AttrR
+from fastcs.cs_methods import Command, Scan
 from fastcs.logging import logger as _fastcs_logger
 from fastcs.tracer import Tracer
 
@@ -22,7 +21,6 @@ class ControllerAPI:
     """Path within controller tree (empty if this is the root)"""
     attributes: dict[str, Attribute] = field(default_factory=dict)
     command_methods: dict[str, Command] = field(default_factory=dict)
-    put_methods: dict[str, Put] = field(default_factory=dict)
     scan_methods: dict[str, Scan] = field(default_factory=dict)
     sub_apis: dict[str, "ControllerAPI"] = field(default_factory=dict)
     """APIs of the sub controllers of the `Controller` this API was built from"""
@@ -43,20 +41,6 @@ class ControllerAPI:
         return f"""\
 ControllerAPI(path={self.path}, sub_apis=[{", ".join(self.sub_apis.keys())}])\
 """
-
-    def link_put_tasks(self) -> None:
-        for name, method in self.put_methods.items():
-            name = name.removeprefix("put_")
-
-            attribute = self.attributes[name]
-            match attribute:
-                case AttrW():
-                    attribute.set_on_put_callback(method.fn)
-                case _:
-                    raise FastCSError(
-                        f"Attribute type {type(attribute)} does not"
-                        f"support put operations for {name}"
-                    )
 
     def get_scan_and_initial_coros(self) -> tuple[list[Callable], list[Callable]]:
         scan_dict: dict[float, list[Callable]] = defaultdict(list)
