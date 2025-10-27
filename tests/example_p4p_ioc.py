@@ -41,13 +41,13 @@ class ChildController(Controller):
         print("D: RUNNING")
         await asyncio.sleep(0.1)
         print("D: FINISHED")
-        await self.j.set(self.j.get() + 1)
+        await self.j.update(self.j.get() + 1)
 
     e: AttrR = AttrR(Bool())
 
     @scan(1)
     async def flip_flop(self):
-        await self.e.set(not self.e.get())
+        await self.e.update(not self.e.get())
 
     f: AttrRW = AttrRW(Enum(FEnum))
     g: AttrRW = AttrRW(Waveform(np.int64, shape=(3,)))
@@ -63,13 +63,14 @@ class ChildController(Controller):
         else:
             self.fail_on_next_e = True
             print("I: FINISHED")
-            await self.j.set(self.j.get() + 1)
+            await self.j.update(self.j.get() + 1)
 
     j: AttrR = AttrR(Int())
 
 
 def run(pv_prefix="P4P_TEST_DEVICE"):
     controller = ParentController()
+    controller.a.enable_tracing()
     controller.child1 = ChildController(description="some sub controller")
     controller.child2 = ChildController(description="another sub controller")
 

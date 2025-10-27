@@ -51,7 +51,7 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
     record = make_record.return_value
 
     attribute = AttrR(Int())
-    attribute.add_set_callback = mocker.MagicMock()
+    attribute.add_on_update_callback = mocker.MagicMock()
 
     _create_and_link_read_pv("PREFIX", "PV", "attr", attribute)
 
@@ -59,8 +59,8 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "r")
 
     # Extract the callback generated and set in the function and call it
-    attribute.add_set_callback.assert_called_once_with(mocker.ANY)
-    record_set_callback = attribute.add_set_callback.call_args[0][0]
+    attribute.add_on_update_callback.assert_called_once_with(mocker.ANY)
+    record_set_callback = attribute.add_on_update_callback.call_args[0][0]
     await record_set_callback(1)
 
     record.set.assert_called_once_with(1)
@@ -115,8 +115,8 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
     record = make_record.return_value
 
     attribute = AttrW(Int())
-    attribute.process_without_display_update = mocker.AsyncMock()
-    attribute.add_write_display_callback = mocker.MagicMock()
+    attribute.put = mocker.AsyncMock()
+    attribute.add_sync_setpoint_callback = mocker.MagicMock()
 
     _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
 
@@ -126,9 +126,9 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "w")
 
     # Extract the write update callback generated and set in the function and call it
-    attribute.add_write_display_callback.assert_called_once_with(mocker.ANY)
-    write_display_callback = attribute.add_write_display_callback.call_args[0][0]
-    await write_display_callback(1)
+    attribute.add_sync_setpoint_callback.assert_called_once_with(mocker.ANY)
+    sync_setpoint_callback = attribute.add_sync_setpoint_callback.call_args[0][0]
+    await sync_setpoint_callback(1)
 
     record.set.assert_called_once_with(1, process=False)
 
@@ -136,7 +136,7 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
     on_update_callback = make_record.call_args[1]["on_update"]
     await on_update_callback(1)
 
-    attribute.process_without_display_update.assert_called_once_with(1)
+    attribute.put.assert_called_once_with(1)
 
 
 class LongEnum(enum.Enum):

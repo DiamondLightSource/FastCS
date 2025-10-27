@@ -30,7 +30,7 @@ class IDAttributeIO(AttributeIO[NumberT, IDAttributeIORef]):
         response = await self._connection.send_query("ID?\r\n")
         value = response.strip("\r\n")
 
-        await attr.set(attr.dtype(value))
+        await attr.update(attr.dtype(value))
 
 
 class TemperatureController(Controller):

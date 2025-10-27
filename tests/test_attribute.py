@@ -26,41 +26,23 @@ async def test_attributes():
     async def update_ui(value, key):
         ui[key] = value
 
-    async def send(value, key):
+    async def send(_attr, value, key):
         device[key] = value
 
     async def device_add():
         device["number"] += 1
 
     attr_r = AttrR(String())
-    attr_r.add_set_callback(partial(update_ui, key="state"))
-    await attr_r.set(device["state"])
+    attr_r.add_on_update_callback(partial(update_ui, key="state"))
+    await attr_r.update(device["state"])
     assert ui["state"] == "Idle"
 
     attr_rw = AttrRW(Int())
-    attr_rw.add_process_callback(partial(send, key="number"))
-    attr_rw.add_write_display_callback(partial(update_ui, key="number"))
-    await attr_rw.process(2)
+    attr_rw._on_put_callback = partial(send, key="number")
+    attr_rw.add_sync_setpoint_callback(partial(update_ui, key="number"))
+    await attr_rw.put(2, sync_setpoint=True)
     assert device["number"] == 2
     assert ui["number"] == 2
-
-
-@pytest.mark.asyncio
-async def test_simple_attibute_io_rw(mocker: MockerFixture):
-    attr = AttrRW(Int())
-
-    attr.update_display_without_process = mocker.MagicMock(
-        wraps=attr.update_display_without_process
-    )
-    attr.set = mocker.MagicMock(wraps=attr.set)
-
-    # This is called by the transport when it receives a put
-    await attr.process(1)
-
-    # without io/ref should just set the value on the attribute
-    attr.update_display_without_process.assert_called_once_with(1)
-    attr.set.assert_called_once_with(1)
-    assert attr.get() == 1
 
 
 @pytest.mark.asyncio
@@ -85,12 +67,20 @@ async def test_attribute_io():
     class ControllerNoIO(Controller):
         my_attr = AttrR(Int(), io_ref=MyAttributeIORef(cool=5))
 
-    with pytest.raises(AssertionError, match="does not have an AttributeIO"):
-        ControllerNoIO()
+    @dataclass
+    class OtherAttributeIORef(AttributeIORef):
+        not_cool: int
+
+    class MissingIOController(Controller):
+        my_attr = AttrR(Int(), io_ref=OtherAttributeIORef(not_cool=5))
+
+    with pytest.raises(ValueError, match="does not have an AttributeIO to handle"):
+        controller = MissingIOController()
+        controller._add_io_callbacks()
 
     await c.initialise()
     await c.attribute_initialise()
-    await c.my_attr.update()
+    await c.my_attr.bind_update_callback()()
 
 
 class DummyConnection:
@@ -176,7 +166,7 @@ async def test_dynamic_attribute_io_specification():
             attr: AttrR[NumberT, DemoParameterAttributeIORef],
         ):
             value = await attr.io_ref.connection.get(attr.io_ref.uri)
-            await attr.set(value)  # type: ignore
+            await attr.update(value)  # type: ignore
 
         async def send(
             self,
@@ -231,70 +221,61 @@ async def test_dynamic_attribute_io_specification():
     c = DemoParameterController(ios=[DemoParameterAttributeIO()])
     await c.initialise()
     await c.attribute_initialise()
-    await c.ro_int_parameter.update()
+    await c.ro_int_parameter.bind_update_callback()()
     assert c.ro_int_parameter.get() == 10
-    await c.ro_int_parameter.update()
+    await c.ro_int_parameter.bind_update_callback()()
     assert c.ro_int_parameter.get() == 11
 
-    await c.int_parameter.process(20)
+    await c.int_parameter.put(20)
     assert c.int_parameter.get() == 20
 
 
 @pytest.mark.asyncio
-async def test_attribute_io_defaults(mocker: MockerFixture):
+async def test_attribute_no_io(mocker: MockerFixture):
     class MyController(Controller):
         no_ref = AttrRW(Int())
         base_class_ref = AttrRW(Int(), io_ref=AttributeIORef())
 
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match="MyController does not have an AttributeIO to handle AttributeIORef",
     ):
         c = MyController()
+        await c.attribute_initialise()
 
     class SimpleAttributeIO(AttributeIO[T, AttributeIORef]):
         async def update(self, attr):
             match attr:
                 case AttrR(datatype=Int()):
-                    await attr.set(100)
+                    await attr.update(100)
 
     with pytest.raises(
         RuntimeError, match="More than one AttributeIO class handles AttributeIORef"
     ):
-        MyController(ios=[AttributeIO(), SimpleAttributeIO()])
+        MyController(ios=[SimpleAttributeIO(), SimpleAttributeIO()])
 
     # we need to explicitly pass an AttributeIO if we want to handle instances of
     # the AttributeIORef base class
-    c = MyController(ios=[AttributeIO()])
+    c = MyController(ios=[SimpleAttributeIO()])
     assert not c.no_ref.has_io_ref()
     assert c.base_class_ref.has_io_ref()
 
     await c.initialise()
     await c.attribute_initialise()
 
-    with pytest.raises(NotImplementedError):
-        await c.base_class_ref.update()
-
-    with pytest.raises(NotImplementedError):
-        await c.base_class_ref.process(25)
-
     # There is a difference between providing an AttributeIO for the default
     # AttributeIORef class and not specifying the io_ref for an Attribute
     # default callbacks are not provided by AttributeIO subclasses
 
-    with pytest.raises(
-        RuntimeError, match="Can't call update on Attributes without an io_ref"
-    ):
-        await c.no_ref.update()
+    sync_setpoint_mock = mocker.AsyncMock()
+    c.no_ref.add_sync_setpoint_callback(sync_setpoint_mock)
 
-    process_spy = mocker.spy(c.no_ref, "update_display_without_process")
-    # calls callback which calls update_display_without_process
-    # TODO: reconsider if this is what we want the default case to be
-    # as process already calls that
-    await c.no_ref.process_without_display_update(40)
-    process_spy.assert_called_with(40)
-
-    process_spy.assert_called_once_with(40)
+    await c.no_ref.put(40)
+    sync_setpoint_mock.assert_called_once_with(40)  # sync setpoint called on first set
+    sync_setpoint_mock.reset_mock()
+    await c.no_ref.put(41)  # sync setpoint callback not called without flag
+    await c.no_ref.put(42, sync_setpoint=True)
+    sync_setpoint_mock.assert_called_once_with(42)
 
     c2 = MyController(ios=[SimpleAttributeIO()])
 
@@ -302,5 +283,5 @@ async def test_attribute_io_defaults(mocker: MockerFixture):
     await c2.attribute_initialise()
 
     assert c2.base_class_ref.get() == 0
-    await c2.base_class_ref.update()
+    await c2.base_class_ref.bind_update_callback()()
     assert c2.base_class_ref.get() == 100
