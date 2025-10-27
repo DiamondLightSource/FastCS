@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.controller &#8212; FastCS 0.10.2.dev27+g019ae1532 documentation</title>
+    <title>fastcs.controller &#8212; FastCS 0.10.2.dev28+g7d9dcb1f2 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=be926d3e"></script>
+    <script src="../../_static/documentation_options.js?v=0b6c6b7f"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -458,7 +458,11 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORefT</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Attribute</span><span class="p">,</span>
+    <span class="n">AttrR</span><span class="p">,</span>
+    <span class="n">AttrW</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">T</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
 
@@ -514,39 +518,20 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_io_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">ref</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span> <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">has_io_ref</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
             <span class="n">io</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_ref_io_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">io</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> does not have an AttributeIO &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;to handle </span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">AttrW</span><span class="p">):</span>
-                <span class="n">attr</span><span class="o">.</span><span class="n">add_process_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_send_callback</span><span class="p">(</span><span class="n">io</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
+                <span class="n">attr</span><span class="o">.</span><span class="n">set_on_put_callback</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">send</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">):</span>
-                <span class="n">attr</span><span class="o">.</span><span class="n">add_update_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_update_callback</span><span class="p">(</span><span class="n">io</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_send_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_callback</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-                <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">update_display_without_process</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">):</span>
-                    <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-
-            <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_callback</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-                <span class="k">await</span> <span class="n">io</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">send_callback</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">error_callback</span><span class="p">():</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t call update on Attributes without an io_ref&quot;</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="n">error_callback</span>
-        <span class="k">else</span><span class="p">:</span>
-
-            <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_callback</span><span class="p">():</span>
-                <span class="k">await</span> <span class="n">io</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="n">update_callback</span>
+                <span class="n">attr</span><span class="o">.</span><span class="n">set_update_callback</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -600,14 +585,6 @@
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;More than one AttributeIO class handles </span><span class="si">{</span><span class="n">ref_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">has_io_ref</span><span class="p">():</span>
-                <span class="k">continue</span>
-            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_ref_io_map</span><span class="p">,</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> does not have an AttributeIO to handle &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">add_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">Attribute</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span> <span class="ow">and</span> <span class="n">attribute</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>

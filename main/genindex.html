@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; FastCS 0.10.2.dev27+g019ae1532 documentation</title>
+    <title>Index &#8212; FastCS 0.10.2.dev28+g7d9dcb1f2 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=be926d3e"></script>
+    <script src="_static/documentation_options.js?v=0b6c6b7f"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -532,6 +532,10 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrR.add_on_update_callback">add_on_update_callback() (fastcs.attributes.AttrR method)</a>
+</li>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrW.add_sync_setpoint_callback">add_sync_setpoint_callback() (fastcs.attributes.AttrW method)</a>
+</li>
       <li><a href="_api/fastcs.tracer.html#fastcs.tracer.Tracer.add_tracing_filter">add_tracing_filter() (fastcs.tracer.Tracer method)</a>
 </li>
       <li><a href="_api/fastcs.attributes.html#fastcs.attributes.Attribute">Attribute (class in fastcs.attributes)</a>
@@ -540,15 +544,25 @@
 </li>
       <li><a href="_api/fastcs.attribute_io.html#fastcs.attribute_io.AttributeIO">AttributeIO (class in fastcs.attribute_io)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_api/fastcs.attribute_io_ref.html#fastcs.attribute_io_ref.AttributeIORef">AttributeIORef (class in fastcs.attribute_io_ref)</a>
 </li>
       <li><a href="_api/fastcs.controller.html#fastcs.controller.BaseController.attributes">attributes (fastcs.controller.BaseController attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrIOUpdateCallback">AttrIOUpdateCallback (in module fastcs.attributes)</a>
+</li>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrOnPutCallback">AttrOnPutCallback (in module fastcs.attributes)</a>
+</li>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrOnUpdateCallback">AttrOnUpdateCallback (in module fastcs.attributes)</a>
+</li>
       <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrR">AttrR (class in fastcs.attributes)</a>
 </li>
       <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrRW">AttrRW (class in fastcs.attributes)</a>
+</li>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrSyncSetpointCallback">AttrSyncSetpointCallback (in module fastcs.attributes)</a>
+</li>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrUpdateCallback">AttrUpdateCallback (in module fastcs.attributes)</a>
 </li>
       <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrW">AttrW (class in fastcs.attributes)</a>
 </li>
@@ -559,6 +573,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_api/fastcs.controller.html#fastcs.controller.BaseController">BaseController (class in fastcs.controller)</a>
+</li>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrR.bind_update_callback">bind_update_callback() (fastcs.attributes.AttrR method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1040,6 +1056,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrR.get">get() (fastcs.attributes.AttrR method)</a>
+</li>
       <li><a href="_api/fastcs.launch.html#fastcs.launch.get_controller_schema">get_controller_schema() (in module fastcs.launch)</a>
 </li>
       <li><a href="_api/fastcs.transport.tango.util.html#fastcs.transport.tango.util.get_server_metadata_from_attribute">get_server_metadata_from_attribute() (in module fastcs.transport.tango.util)</a>
@@ -1263,8 +1281,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_api/fastcs.cs_methods.html#fastcs.cs_methods.Put">Put (class in fastcs.cs_methods)</a>
 </li>
-      <li><a href="_api/fastcs.wrappers.html#fastcs.wrappers.put">put() (in module fastcs.wrappers)</a>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrW.put">put() (fastcs.attributes.AttrW method)</a>
+
+      <ul>
+        <li><a href="_api/fastcs.wrappers.html#fastcs.wrappers.put">(in module fastcs.wrappers)</a>
 </li>
+      </ul></li>
       <li><a href="_api/fastcs.cs_methods.html#fastcs.cs_methods.PutCallback">PutCallback (in module fastcs.cs_methods)</a>
 </li>
       <li><a href="_api/fastcs.transport.epics.gui.html#fastcs.transport.epics.gui.PvaEpicsGUI">PvaEpicsGUI (class in fastcs.transport.epics.gui)</a>
@@ -1311,9 +1333,13 @@
 </li>
       <li><a href="_api/fastcs.connections.serial_connection.html#fastcs.connections.serial_connection.SerialConnection">SerialConnection (class in fastcs.connections.serial_connection)</a>
 </li>
+      <li><a href="_api/fastcs.connections.serial_connection.html#fastcs.connections.serial_connection.SerialConnectionSettings">SerialConnectionSettings (class in fastcs.connections.serial_connection)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_api/fastcs.connections.serial_connection.html#fastcs.connections.serial_connection.SerialConnectionSettings">SerialConnectionSettings (class in fastcs.connections.serial_connection)</a>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrW.set_on_put_callback">set_on_put_callback() (fastcs.attributes.AttrW method)</a>
+</li>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrR.set_update_callback">set_update_callback() (fastcs.attributes.AttrR method)</a>
 </li>
       <li><a href="_api/fastcs.util.html#fastcs.util.snake_to_pascal">snake_to_pascal() (in module fastcs.util)</a>
 </li>
@@ -1368,6 +1394,8 @@
       <li><a href="_api/fastcs.cs_methods.html#fastcs.cs_methods.UnboundScan">UnboundScan (class in fastcs.cs_methods)</a>
 </li>
       <li><a href="_api/fastcs.cs_methods.html#fastcs.cs_methods.UnboundScanCallback">UnboundScanCallback (in module fastcs.cs_methods)</a>
+</li>
+      <li><a href="_api/fastcs.attributes.html#fastcs.attributes.AttrR.update">update() (fastcs.attributes.AttrR method)</a>
 </li>
   </ul></td>
 </tr></table>

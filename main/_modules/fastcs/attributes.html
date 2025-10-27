@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.attributes &#8212; FastCS 0.10.2.dev27+g019ae1532 documentation</title>
+    <title>fastcs.attributes &#8212; FastCS 0.10.2.dev28+g7d9dcb1f2 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=be926d3e"></script>
+    <script src="../../_static/documentation_options.js?v=0b6c6b7f"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -452,21 +452,18 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Awaitable</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORefT</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">ATTRIBUTE_TYPES</span><span class="p">,</span>
-    <span class="n">AttrSetCallback</span><span class="p">,</span>
-    <span class="n">AttrUpdateCallback</span><span class="p">,</span>
-    <span class="n">DataType</span><span class="p">,</span>
-    <span class="n">T</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">ATTRIBUTE_TYPES</span><span class="p">,</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">T</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
 
 <span class="n">ONCE</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Special value to indicate that an attribute should be updated once on start up.&quot;&quot;&quot;</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">_logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Attribute">
@@ -551,6 +548,14 @@
 
 
 
+<span class="n">AttrIOUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;AttrR[T, Any]&quot;</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]</span>
+<span class="sd">&quot;&quot;&quot;An AttributeIO callback that takes an AttrR and updates its value&quot;&quot;&quot;</span>
+<span class="n">AttrUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]</span>
+<span class="sd">&quot;&quot;&quot;A callback to be called periodically to update an attribute&quot;&quot;&quot;</span>
+<span class="n">AttrOnUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]</span>
+<span class="sd">&quot;&quot;&quot;A callback to be called when the value of the attribute is updated&quot;&quot;&quot;</span>
+
+
 <div class="viewcode-block" id="AttrR">
 <a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrR">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AttrR</span><span class="p">(</span><span class="n">Attribute</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">AttributeIORefT</span><span class="p">]):</span>
@@ -564,43 +569,96 @@
         <span class="n">initial_value</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">datatype</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-            <span class="n">io_ref</span><span class="p">,</span>
-            <span class="n">group</span><span class="p">,</span>
-            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">io_ref</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">datatype</span><span class="o">.</span><span class="n">initial_value</span> <span class="k">if</span> <span class="n">initial_value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">initial_value</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_on_set_callbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttrSetCallback</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttrUpdateCallback</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_callback</span><span class="p">:</span> <span class="n">AttrIOUpdateCallback</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback to update the value of the attribute with an IO to the source&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttrOnUpdateCallback</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callbacks to publish changes to the value of the attribute&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="AttrR.get">
+<a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrR.get">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the cached value of the attribute.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span></div>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<div class="viewcode-block" id="AttrR.update">
+<a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrR.update">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the value of the attibute</span>
+
+<span class="sd">        This sets the cached value of the attribute presented in the API. It should</span>
+<span class="sd">        generally only be called from an IO or a controller that is updating the value</span>
+<span class="sd">        from some underlying source.</span>
+
+<span class="sd">        To request a change to the setpoint of the attribute, use the ``put`` method,</span>
+<span class="sd">        which will attempt to apply the change to the underlying source.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Attribute set&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_set_callbacks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_set_callbacks</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="p">])</span></div>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_set_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">AttrSetCallback</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_set_callbacks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_on_set_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_on_set_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">AttrUpdateCallback</span><span class="p">):</span>
+<div class="viewcode-block" id="AttrR.add_on_update_callback">
+<a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrR.add_on_update_callback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_on_update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">AttrOnUpdateCallback</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a callback to be called when the value of the attribute is updated</span>
+
+<span class="sd">        The callback will be called with the updated value.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">()</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="p">])</span></div>
 
+<div class="viewcode-block" id="AttrR.set_update_callback">
+<a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrR.set_update_callback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">AttrIOUpdateCallback</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the callback to update the value of the attribute from the source</span>
+
+<span class="sd">        The callback will be converted to an async task and called periodically.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Attribute already has an IO update callback&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_callback</span> <span class="o">=</span> <span class="n">callback</span></div>
+
+
+<div class="viewcode-block" id="AttrR.bind_update_callback">
+<a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrR.bind_update_callback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bind_update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AttrUpdateCallback</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bind self into the registered IO update callback&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_callback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Attribute has no update callback&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">update_callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_callback</span>
+
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_attribute</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Update attribute&quot;</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                <span class="k">await</span> <span class="n">update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Update loop failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+        <span class="k">return</span> <span class="n">update_attribute</span></div>
+</div>
+
+
+
+<span class="n">AttrOnPutCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;AttrW[T, Any]&quot;</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]</span>
+<span class="sd">&quot;&quot;&quot;Callbacks to be called when the setpoint of an attribute is changed&quot;&quot;&quot;</span>
+<span class="n">AttrSyncSetpointCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]</span>
+<span class="sd">&quot;&quot;&quot;Callbacks to be called when the setpoint of an attribute is changed&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="AttrW">
@@ -621,35 +679,64 @@
             <span class="n">group</span><span class="p">,</span>
             <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_process_callbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttrSetCallback</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_write_display_callbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttrSetCallback</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_put_callback</span><span class="p">:</span> <span class="n">AttrOnPutCallback</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback to action a change to the setpoint of the attribute&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sync_setpoint_callbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttrSyncSetpointCallback</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callbacks to publish changes to the setpoint of the attribute&quot;&quot;&quot;</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_without_display_update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_display_without_process</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<div class="viewcode-block" id="AttrW.put">
+<a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrW.put">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setpoint</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">sync_setpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the setpoint of the attribute</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_without_display_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_callbacks</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_callbacks</span><span class="p">])</span>
+<span class="sd">        This should be called by clients to the attribute such as transports to apply a</span>
+<span class="sd">        change to the attribute. The ``_on_put_callback`` will be called with this new</span>
+<span class="sd">        setpoint, which may or may not take effect depending on the validity of the new</span>
+<span class="sd">        value. For example, if the attribute has an IO to some device, the value might</span>
+<span class="sd">        be rejected.</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_display_without_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_display_callbacks</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_display_callbacks</span><span class="p">])</span>
+<span class="sd">        To directly change the value of the attribute, for example from an update loop</span>
+<span class="sd">        that has read a new value from some underlying source, call the ``set`` method.</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_process_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">AttrSetCallback</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_callbacks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_process_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_process_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">setpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">setpoint</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_put_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_put_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setpoint</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">has_process_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_process_callbacks</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sync_setpoint</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_sync_setpoint_callbacks</span><span class="p">(</span><span class="n">setpoint</span><span class="p">)</span></div>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_write_display_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">AttrSetCallback</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_display_callbacks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_write_display_callbacks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_write_display_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_call_sync_setpoint_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setpoint</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sync_setpoint_callbacks</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+                <span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">(</span><span class="n">setpoint</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sync_setpoint_callbacks</span><span class="p">]</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="AttrW.set_on_put_callback">
+<a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrW.set_on_put_callback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_on_put_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">AttrOnPutCallback</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the callback to call when the setpoint is changed</span>
+
+<span class="sd">        The callback will be called with the attribute and the new setpoint.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_put_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Attribute already has an on put callback&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_put_callback</span> <span class="o">=</span> <span class="n">callback</span></div>
+
+
+<div class="viewcode-block" id="AttrW.add_sync_setpoint_callback">
+<a class="viewcode-back" href="../../_api/fastcs.attributes.html#fastcs.attributes.AttrW.add_sync_setpoint_callback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_sync_setpoint_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">AttrSyncSetpointCallback</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a callback to publish changes to the setpoint of the attribute</span>
+
+<span class="sd">        The callback will be called with the new setpoint.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sync_setpoint_callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span></div>
+</div>
 
 
 
@@ -658,10 +745,32 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">AttrRW</span><span class="p">(</span><span class="n">AttrR</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">AttributeIORefT</span><span class="p">],</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">AttributeIORefT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A read-write ``Attribute``.&quot;&quot;&quot;</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+        <span class="n">io_ref</span><span class="p">:</span> <span class="n">AttributeIORefT</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">initial_value</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">io_ref</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">initial_value</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
 
-        <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setpoint_initialised</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">io_ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_on_put_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal_update</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_internal_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">AttributeIORefT</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update value directly when Attribute has no IO&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">attr</span> <span class="ow">is</span> <span class="bp">self</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span>
+        <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setpoint_initialised</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_sync_setpoint_callbacks</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setpoint_initialised</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 </pre></div>
 

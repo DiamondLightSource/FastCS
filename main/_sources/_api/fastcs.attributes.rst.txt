@@ -5,6 +5,11 @@
         
         
         
+        
+        
+        
+        
+        
 
 .. automodule:: fastcs.attributes
     :members:
@@ -20,8 +25,13 @@
     .. autosummary::
         :nosignatures:
     
+        AttrIOUpdateCallback
+        AttrOnPutCallback
+        AttrOnUpdateCallback
         AttrR
         AttrRW
+        AttrSyncSetpointCallback
+        AttrUpdateCallback
         AttrW
         Attribute
         ONCE

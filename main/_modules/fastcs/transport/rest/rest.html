@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.rest.rest &#8212; FastCS 0.10.2.dev27+g019ae1532 documentation</title>
+    <title>fastcs.transport.rest.rest &#8212; FastCS 0.10.2.dev28+g7d9dcb1f2 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=be926d3e"></script>
+    <script src="../../../../_static/documentation_options.js?v=0b6c6b7f"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -523,13 +523,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_wrap_attr_put</span><span class="p">(</span>
     <span class="n">attribute</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Coroutine</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]:</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">attr_set</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-        <span class="k">await</span> <span class="n">attribute</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">cast_from_rest_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">attr_put</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">attribute</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">cast_from_rest_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 
     <span class="c1"># Fast api uses type annotations for validation, schema, conversions</span>
-    <span class="n">attr_set</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s2">&quot;request&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_put_request_body</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+    <span class="n">attr_put</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s2">&quot;request&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_put_request_body</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">attr_set</span>
+    <span class="k">return</span> <span class="n">attr_put</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_response_body</span><span class="p">(</span><span class="n">attribute</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
