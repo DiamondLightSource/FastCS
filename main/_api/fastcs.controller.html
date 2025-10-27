@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.controller &#8212; FastCS 0.10.2.dev32+g15b1a6699 documentation</title>
+    <title>fastcs.controller &#8212; FastCS 0.10.2.dev35+g469c50100 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=ce4066f3"></script>
+    <script src="../_static/documentation_options.js?v=6221cee5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -557,10 +557,15 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="fastcs.controller.BaseController.attribute_initialise">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">attribute_initialise</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/controller.html#BaseController.attribute_initialise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controller.BaseController.attribute_initialise" title="Link to this definition">#</a></dt>
-<dd><p>Register update and send callbacks for attributes on this controller
-and all subcontrollers</p>
+<dt class="sig sig-object py" id="fastcs.controller.BaseController.initialise">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initialise</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/controller.html#BaseController.initialise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controller.BaseController.initialise" title="Link to this definition">#</a></dt>
+<dd><p>Hook to dynamically add attributes before building the API</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.controller.BaseController.connect_attribute_ios">
+<span class="sig-name descname"><span class="pre">connect_attribute_ios</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/controller.html#BaseController.connect_attribute_ios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controller.BaseController.connect_attribute_ios" title="Link to this definition">#</a></dt>
+<dd><p>Connect <code class="docutils literal notranslate"><span class="pre">Attribute</span></code> callbacks to <a href="#id1"><span class="problematic" id="id2">``</span></a>AttributeIO``s</p>
 </dd></dl>
 
 <dl class="py property">
@@ -632,7 +637,8 @@ generating a UI or creating parameters for a control system.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.BaseController"><code class="docutils literal notranslate"><span class="pre">BaseController</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.BaseController.attributes"><code class="docutils literal notranslate"><span class="pre">BaseController.attributes</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.BaseController.attribute_initialise"><code class="docutils literal notranslate"><span class="pre">BaseController.attribute_initialise()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.BaseController.initialise"><code class="docutils literal notranslate"><span class="pre">BaseController.initialise()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.BaseController.connect_attribute_ios"><code class="docutils literal notranslate"><span class="pre">BaseController.connect_attribute_ios()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controller.BaseController.path"><code class="docutils literal notranslate"><span class="pre">BaseController.path</span></code></a></li>
 </ul>
 </li>

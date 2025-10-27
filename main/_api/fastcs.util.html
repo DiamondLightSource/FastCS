@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.util &#8212; FastCS 0.10.2.dev32+g15b1a6699 documentation</title>
+    <title>fastcs.util &#8212; FastCS 0.10.2.dev35+g469c50100 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=ce4066f3"></script>
+    <script src="../_static/documentation_options.js?v=6221cee5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -544,7 +544,7 @@
 <td><p>Converts string from snake case to Pascal case.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.util.validate_hinted_attributes" title="fastcs.util.validate_hinted_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_hinted_attributes</span></code></a></p></td>
-<td><p>Validates that type-hinted attributes exist in the controller, and are accessible via the dot accessor, from the attributes dictionary and with the right datatype.</p></td>
+<td><p>Validate <code class="docutils literal notranslate"><span class="pre">Attribute</span></code> type-hints  match dynamically intropected instances</p></td>
 </tr>
 </tbody>
 </table>
@@ -566,8 +566,9 @@ Only types important for widget creation are explicitly converted</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="fastcs.util.validate_hinted_attributes">
 <span class="sig-prename descclassname"><span class="pre">fastcs.util.</span></span><span class="sig-name descname"><span class="pre">validate_hinted_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.controller.html#fastcs.controller.BaseController" title="fastcs.controller.BaseController"><span class="pre">BaseController</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/util.html#validate_hinted_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.util.validate_hinted_attributes" title="Link to this definition">#</a></dt>
-<dd><p>Validates that type-hinted attributes exist in the controller, and are accessible
-via the dot accessor, from the attributes dictionary and with the right datatype.</p>
+<dd><p>Validate <code class="docutils literal notranslate"><span class="pre">Attribute</span></code> type-hints  match dynamically intropected instances</p>
+<p>For each type-hinted attribute, validate that a corresponding instance exists in the
+controller with the correct access mode and datatype.</p>
 </dd></dl>
 
 </section>
