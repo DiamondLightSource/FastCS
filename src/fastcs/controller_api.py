@@ -49,7 +49,7 @@ ControllerAPI(path={self.path}, sub_apis=[{", ".join(self.sub_apis.keys())}])\
         initial_coros: list[Callable] = []
 
         for controller_api in self.walk_api():
-            _add_scan_method_tasks(scan_dict, controller_api)
+            _add_scan_method_tasks(scan_dict, initial_coros, controller_api)
             _add_attribute_update_tasks(scan_dict, initial_coros, controller_api)
 
         scan_coros = _get_periodic_scan_coros(scan_dict)
@@ -57,10 +57,15 @@ ControllerAPI(path={self.path}, sub_apis=[{", ".join(self.sub_apis.keys())}])\
 
 
 def _add_scan_method_tasks(
-    scan_dict: dict[float, list[Callable]], controller_api: ControllerAPI
+    scan_dict: dict[float, list[Callable]],
+    initial_coros: list[Callable],
+    controller_api: ControllerAPI,
 ):
     for method in controller_api.scan_methods.values():
-        scan_dict[method.period].append(method.fn)
+        if method.period is ONCE:
+            initial_coros.append(method.fn)
+        else:
+            scan_dict[method.period].append(method.fn)
 
 
 def _add_attribute_update_tasks(
