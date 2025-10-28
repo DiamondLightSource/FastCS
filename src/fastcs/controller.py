@@ -67,7 +67,7 @@ class BaseController(Tracer):
             if isinstance(attr, AttrR):
                 attr.set_update_callback(io.update)
 
-        for controller in self.get_sub_controllers().values():
+        for controller in self.sub_controllers.values():
             controller.connect_attribute_ios()
 
     @property
@@ -80,6 +80,8 @@ class BaseController(Tracer):
             raise ValueError(f"sub controller is already registered under {self.path}")
 
         self._path = path
+        for attribute in self.attributes.values():
+            attribute.set_path(path)
 
     def _bind_attrs(self) -> None:
         """Search for `Attributes` and `Methods` to bind them to this instance.
@@ -136,6 +138,7 @@ class BaseController(Tracer):
             )
 
         attribute.set_name(name)
+        attribute.set_path(self.path)
         self.attributes[name] = attribute
         super().__setattr__(name, attribute)
 
@@ -158,13 +161,16 @@ class BaseController(Tracer):
         if isinstance(sub_controller.root_attribute, Attribute):
             self.attributes[name] = sub_controller.root_attribute
 
-    def get_sub_controllers(self) -> dict[str, Controller]:
+    @property
+    def sub_controllers(self) -> dict[str, Controller]:
         return self.__sub_controller_tree
 
     def __repr__(self):
-        return f"""\
-{type(self).__name__}({self.path}, {list(self.__sub_controller_tree.keys())})\
-"""
+        name = self.__class__.__name__
+        path = ".".join(self.path) or None
+        sub_controllers = list(self.sub_controllers.keys()) or None
+
+        return f"{name}(path={path}, sub_controllers={sub_controllers})"
 
     def __setattr__(self, name, value):
         if isinstance(value, Attribute):
@@ -179,9 +185,9 @@ class Controller(BaseController):
     """Top-level controller for a device.
 
     This is the primary class for implementing device support in FastCS. Instances of
-    this class can be loaded into a backend to access its ``Attribute``s. The backend
-    can then perform a specific function with the set of ``Attributes``, such as
-    generating a UI or creating parameters for a control system.
+    this class can be loaded into a FastCS to expose its ``Attribute``s to the transport
+    layer, which can then perform a specific function with the set of ``Attributes``,
+    such as generating a UI or creating parameters for a control system.
     """
 
     root_attribute: Attribute | None = None

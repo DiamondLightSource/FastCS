@@ -200,7 +200,7 @@ def _build_controller_api(controller: BaseController, path: list[str]) -> Contro
         command_methods=command_methods,
         sub_apis={
             name: _build_controller_api(sub_controller, path + [name])
-            for name, sub_controller in controller.get_sub_controllers().items()
+            for name, sub_controller in controller.sub_controllers.items()
         },
         description=controller.description,
     )

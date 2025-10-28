@@ -67,13 +67,16 @@ class _Numerical(DataType[T_Numerical]):
     min_alarm: T_Numerical | None = None
     max_alarm: T_Numerical | None = None
 
-    def validate(self, value: T_Numerical) -> T_Numerical:
-        super().validate(value)
-        if self.min is not None and value < self.min:
-            raise ValueError(f"Value {value} is less than minimum {self.min}")
-        if self.max is not None and value > self.max:
-            raise ValueError(f"Value {value} is greater than maximum {self.max}")
-        return value
+    def validate(self, value: Any) -> T_Numerical:
+        _value = super().validate(value)
+
+        if self.min is not None and _value < self.min:
+            raise ValueError(f"Value {_value} is less than minimum {self.min}")
+
+        if self.max is not None and _value > self.max:
+            raise ValueError(f"Value {_value} is greater than maximum {self.max}")
+
+        return _value
 
     @property
     def initial_value(self) -> T_Numerical:
@@ -99,11 +102,13 @@ class Float(_Numerical[float]):
     def dtype(self) -> type[float]:
         return float
 
-    def validate(self, value: float) -> float:
-        super().validate(value)
+    def validate(self, value: Any) -> float:
+        _value = super().validate(value)
+
         if self.prec is not None:
-            value = round(value, self.prec)
-        return value
+            _value = round(_value, self.prec)
+
+        return _value
 
 
 @dataclass(frozen=True)
@@ -177,21 +182,24 @@ class Waveform(DataType[np.ndarray]):
         return np.zeros(self.shape, dtype=self.array_dtype)
 
     def validate(self, value: np.ndarray) -> np.ndarray:
-        super().validate(value)
-        if self.array_dtype != value.dtype:
+        _value = super().validate(value)
+
+        if self.array_dtype != _value.dtype:
             raise ValueError(
-                f"Value dtype {value.dtype} is not the same as the array dtype "
+                f"Value dtype {_value.dtype} is not the same as the array dtype "
                 f"{self.array_dtype}"
             )
-        if len(self.shape) != len(value.shape) or any(
+
+        if len(self.shape) != len(_value.shape) or any(
             shape1 > shape2
-            for shape1, shape2 in zip(value.shape, self.shape, strict=True)
+            for shape1, shape2 in zip(_value.shape, self.shape, strict=True)
         ):
             raise ValueError(
-                f"Value shape {value.shape} exceeeds the shape maximum shape "
+                f"Value shape {_value.shape} exceeeds the shape maximum shape "
                 f"{self.shape}"
             )
-        return value
+
+        return _value
 
 
 @dataclass(frozen=True)
@@ -207,12 +215,13 @@ class Table(DataType[np.ndarray]):
     def initial_value(self) -> np.ndarray:
         return np.array([], dtype=self.structured_dtype)
 
-    def validate(self, value: np.ndarray) -> np.ndarray:
-        super().validate(value)
+    def validate(self, value: Any) -> np.ndarray:
+        _value = super().validate(value)
 
-        if self.structured_dtype != value.dtype:
+        if self.structured_dtype != _value.dtype:
             raise ValueError(
-                f"Value dtype {value.dtype.descr} is not the same as the structured "
+                f"Value dtype {_value.dtype.descr} is not the same as the structured "
                 f"dtype {self.structured_dtype}"
             )
-        return value
+
+        return _value

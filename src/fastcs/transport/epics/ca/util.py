@@ -71,7 +71,7 @@ def record_metadata_from_datatype(
         case Waveform():
             if len(datatype.shape) != 1:
                 raise TypeError(
-                    f"Unsupported shape {datatype.shape}, the EPICS backend only "
+                    f"Unsupported shape {datatype.shape}, the EPICS transport only "
                     "supports to 1D arrays"
                 )
             arguments["length"] = datatype.shape[0]
