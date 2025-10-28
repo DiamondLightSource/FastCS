@@ -100,6 +100,7 @@ class EpicsGUI:
                     return None
                 return SignalRW(
                     name=name,
+                    description=attribute.description,
                     write_pv=pv,
                     write_widget=write_widget,
                     read_pv=pv + "_RBV",
@@ -109,12 +110,22 @@ class EpicsGUI:
                 read_widget = self._get_read_widget(attribute.datatype)
                 if read_widget is None:
                     return None
-                return SignalR(name=name, read_pv=pv, read_widget=read_widget)
+                return SignalR(
+                    name=name,
+                    description=attribute.description,
+                    read_pv=pv,
+                    read_widget=read_widget,
+                )
             case AttrW():
                 write_widget = self._get_write_widget(attribute.datatype)
                 if write_widget is None:
                     return None
-                return SignalW(name=name, write_pv=pv, write_widget=write_widget)
+                return SignalW(
+                    name=name,
+                    description=attribute.description,
+                    write_pv=pv,
+                    write_widget=write_widget,
+                )
             case _:
                 raise FastCSError(f"Unsupported attribute type: {type(attribute)}")
 
