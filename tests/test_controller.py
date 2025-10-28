@@ -15,8 +15,8 @@ def test_controller_nesting():
 
     assert sub_controller.path == ["a"]
     assert sub_sub_controller.path == ["a", "b"]
-    assert controller.get_sub_controllers() == {"a": sub_controller}
-    assert sub_controller.get_sub_controllers() == {"b": sub_sub_controller}
+    assert controller.sub_controllers == {"a": sub_controller}
+    assert sub_controller.sub_controllers == {"b": sub_sub_controller}
 
     with pytest.raises(ValueError, match=r"existing sub controller"):
         controller.a = Controller()

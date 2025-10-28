@@ -67,7 +67,7 @@ class BaseController(Tracer):
             if isinstance(attr, AttrR):
                 attr.set_update_callback(io.update)
 
-        for controller in self.get_sub_controllers().values():
+        for controller in self.sub_controllers.values():
             controller.connect_attribute_ios()
 
     @property
@@ -158,13 +158,16 @@ class BaseController(Tracer):
         if isinstance(sub_controller.root_attribute, Attribute):
             self.attributes[name] = sub_controller.root_attribute
 
-    def get_sub_controllers(self) -> dict[str, Controller]:
+    @property
+    def sub_controllers(self) -> dict[str, Controller]:
         return self.__sub_controller_tree
 
     def __repr__(self):
-        return f"""\
-{type(self).__name__}({self.path}, {list(self.__sub_controller_tree.keys())})\
-"""
+        name = self.__class__.__name__
+        path = ".".join(self.path) or None
+        sub_controllers = list(self.sub_controllers.keys()) or None
+
+        return f"{name}(path={path}, sub_controllers={sub_controllers})"
 
     def __setattr__(self, name, value):
         if isinstance(value, Attribute):
