@@ -4,12 +4,14 @@ import json
 from dataclasses import KW_ONLY, dataclass
 from typing import TypeVar
 
+import numpy as np
+
 from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORef
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.connections import IPConnection, IPConnectionSettings
 from fastcs.controller import Controller
-from fastcs.datatypes import Enum, Float, Int
+from fastcs.datatypes import Enum, Float, Int, Waveform
 from fastcs.wrappers import command, scan
 
 NumberT = TypeVar("NumberT", int, float)
@@ -68,6 +70,7 @@ class TemperatureControllerAttributeIO(
 class TemperatureController(Controller):
     ramp_rate = AttrRW(Float(), io_ref=TemperatureControllerAttributeIORef(name="R"))
     power = AttrR(Float(), io_ref=TemperatureControllerAttributeIORef(name="P"))
+    voltages = AttrR(Waveform(np.int32, shape=(4,)))
 
     def __init__(self, settings: TemperatureControllerSettings) -> None:
         self.connection = IPConnection()
@@ -103,6 +106,9 @@ class TemperatureController(Controller):
         voltages = json.loads(
             (await self.connection.send_query(f"{query}\r\n")).strip("\r\n")
         )
+
+        await self.voltages.update(voltages)
+
         for index, controller in enumerate(self._ramp_controllers):
             self.log_event(
                 "Update voltages",
