@@ -9,10 +9,14 @@ from strawberry.types.field import StrawberryField
 
 from fastcs.attributes import AttrR, AttrRW, AttrW, T
 from fastcs.controller_api import ControllerAPI
+from fastcs.datatypes import Waveform
 from fastcs.exceptions import FastCSError
 from fastcs.logging import intercept_std_logger
+from fastcs.logging import logger as _logger
 
 from .options import GraphQLServerOptions
+
+logger = _logger.bind(logger_name=__name__)
 
 
 class GraphQLServer:
@@ -60,6 +64,13 @@ class GraphQLAPI:
     def _process_attributes(self, api: ControllerAPI):
         """Create queries and mutations from api attributes."""
         for attr_name, attribute in api.attributes.items():
+            if isinstance(attribute.datatype, Waveform):
+                logger.warning(
+                    "Waveform attributes are not supported in GraphQL transport",
+                    attribute=attribute,
+                )
+                continue
+
             match attribute:
                 # mutation for server changes https://graphql.org/learn/queries/
                 case AttrRW():

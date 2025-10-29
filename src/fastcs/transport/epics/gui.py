@@ -1,6 +1,7 @@
 from pvi._format.dls import DLSFormatter  # type: ignore
 from pvi.device import (
     LED,
+    ArrayTrace,
     ButtonPanel,
     CheckBox,
     ComboBox,
@@ -68,7 +69,7 @@ class EpicsGUI:
             case Enum():
                 return TextRead(format=TextFormat.string)
             case Waveform():
-                return None
+                return ArrayTrace(axis="x")
             case datatype:
                 raise FastCSError(f"Unsupported type {type(datatype)}: {datatype}")
 
