@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from pvi.device import (
     LED,
+    ArrayTrace,
     ButtonPanel,
     ComboBox,
     Group,
@@ -39,7 +40,7 @@ def test_get_pv():
         (Float(), TextRead()),
         (String(), TextRead(format=TextFormat.string)),
         (Enum(ColourEnum), TextRead(format=TextFormat.string)),
-        # (Waveform(array_dtype=np.int32), None),
+        (Waveform(array_dtype=np.int32), ArrayTrace(axis="x")),
     ],
 )
 def test_get_attribute_component_r(datatype, widget):
@@ -48,6 +49,18 @@ def test_get_attribute_component_r(datatype, widget):
     assert gui._get_attribute_component([], "Attr", AttrR(datatype)) == SignalR(
         name="Attr", read_pv="Attr", read_widget=widget
     )
+
+
+@pytest.mark.parametrize(
+    "datatype",
+    [
+        (Waveform(array_dtype=np.int32, shape=(10, 10))),
+    ],
+)
+def test_get_attribute_component_r_signal_none(datatype):
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
+
+    assert gui._get_attribute_component([], "Attr", AttrR(datatype)) is None
 
 
 @pytest.mark.parametrize(
@@ -76,11 +89,6 @@ def test_get_attribute_component_none(mocker):
     assert gui._get_attribute_component([], "Attr", AttrR(Int())) is None
     assert gui._get_attribute_component([], "Attr", AttrW(Int())) is None
     assert gui._get_attribute_component([], "Attr", AttrRW(Int())) is None
-
-
-def test_get_read_widget_none():
-    gui = EpicsGUI(ControllerAPI(), "DEVICE")
-    assert gui._get_read_widget(fastcs_datatype=Waveform(np.int32)) is None
 
 
 def test_get_write_widget_none():

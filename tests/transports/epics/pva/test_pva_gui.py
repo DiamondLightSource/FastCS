@@ -1,8 +1,10 @@
 import numpy as np
+import pytest
 from pvi.device import (
     LED,
     ButtonPanel,
     CheckBox,
+    ImageRead,
     SignalR,
     SignalW,
     SignalX,
@@ -14,9 +16,24 @@ from pvi.device import (
 )
 
 from fastcs.attributes import AttrR, AttrW
-from fastcs.datatypes import Table
+from fastcs.datatypes import Table, Waveform
 from fastcs.transports import ControllerAPI
+from fastcs.transports.epics.gui import EpicsGUI
 from fastcs.transports.epics.pva.gui import PvaEpicsGUI
+
+
+@pytest.mark.parametrize(
+    "datatype, widget",
+    [
+        (Waveform(array_dtype=np.int32), ImageRead()),
+    ],
+)
+def test_pva_get_attribute_component_r(datatype, widget):
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
+
+    assert gui._get_attribute_component([], "Attr", AttrR(datatype)) == SignalR(
+        name="Attr", read_pv="Attr", read_widget=widget
+    )
 
 
 def test_get_pv_in_pva():

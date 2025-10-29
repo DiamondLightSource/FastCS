@@ -1,6 +1,7 @@
 from pvi._format.dls import DLSFormatter  # type: ignore
 from pvi.device import (
     LED,
+    ArrayTrace,
     ButtonPanel,
     ComboBox,
     ComponentUnion,
@@ -66,8 +67,12 @@ class EpicsGUI:
                 return TextRead(format=TextFormat.string)
             case Enum():
                 return TextRead(format=TextFormat.string)
-            case Waveform():
-                return None
+            case Waveform() as waveform:
+                if len(waveform.shape) > 1:
+                    logger.warning("EPICS CA transport only supports 1D waveforms")
+                    return None
+
+                return ArrayTrace(axis="x")
             case datatype:
                 raise TypeError(f"Unsupported type {type(datatype)}: {datatype}")
 
