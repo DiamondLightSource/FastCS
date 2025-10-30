@@ -139,15 +139,18 @@ class PviDevice(dict[str, "PviDevice"]):
         raw_value = self._make_p4p_raw_value()
         p4p_type = self._make_type_for_raw_value(raw_value)
 
-        return Value(
-            p4p_type,
-            {
-                **p4p_alarm_states(),
-                **p4p_timestamp_now(),
-                **display,
-                "value": raw_value,
-            },
-        )
+        try:
+            return Value(
+                p4p_type,
+                {
+                    **p4p_alarm_states(),
+                    **p4p_timestamp_now(),
+                    **display,
+                    "value": raw_value,
+                },
+            )
+        except KeyError as e:
+            raise ValueError(f"Failed to create p4p Value from {raw_value}") from e
 
     def make_provider(
         self,
