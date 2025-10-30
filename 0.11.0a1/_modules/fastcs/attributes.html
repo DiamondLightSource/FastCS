@@ -624,7 +624,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="p">])</span></div>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+                    <span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;On update callback failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span>
+                <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AttrR.add_on_update_callback">
@@ -667,8 +674,8 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Update attribute&quot;</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
                 <span class="k">await</span> <span class="n">update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Update loop failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Update loop failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
                 <span class="k">raise</span>
 
         <span class="k">return</span> <span class="n">update_attribute</span></div>
@@ -722,10 +729,20 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">setpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">setpoint</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_put_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_put_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setpoint</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_put_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setpoint</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Put failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">setpoint</span><span class="o">=</span><span class="n">setpoint</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sync_setpoint</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_sync_setpoint_callbacks</span><span class="p">(</span><span class="n">setpoint</span><span class="p">)</span></div>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_sync_setpoint_callbacks</span><span class="p">(</span><span class="n">setpoint</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Sync setpoint failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">setpoint</span><span class="o">=</span><span class="n">setpoint</span>
+                <span class="p">)</span></div>
 
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_call_sync_setpoint_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setpoint</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

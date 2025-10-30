@@ -592,15 +592,18 @@
         <span class="n">raw_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_p4p_raw_value</span><span class="p">()</span>
         <span class="n">p4p_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_type_for_raw_value</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Value</span><span class="p">(</span>
-            <span class="n">p4p_type</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="o">**</span><span class="n">p4p_alarm_states</span><span class="p">(),</span>
-                <span class="o">**</span><span class="n">p4p_timestamp_now</span><span class="p">(),</span>
-                <span class="o">**</span><span class="n">display</span><span class="p">,</span>
-                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">raw_value</span><span class="p">,</span>
-            <span class="p">},</span>
-        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Value</span><span class="p">(</span>
+                <span class="n">p4p_type</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="o">**</span><span class="n">p4p_alarm_states</span><span class="p">(),</span>
+                    <span class="o">**</span><span class="n">p4p_timestamp_now</span><span class="p">(),</span>
+                    <span class="o">**</span><span class="n">display</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">raw_value</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create p4p Value from </span><span class="si">{</span><span class="n">raw_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">make_provider</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
