@@ -163,7 +163,14 @@ class AttrR(Attribute[T, AttributeIORefT]):
         self._value = self._datatype.validate(value)
 
         if self._on_update_callbacks is not None:
-            await asyncio.gather(*[cb(self._value) for cb in self._on_update_callbacks])
+            try:
+                await asyncio.gather(
+                    *[cb(self._value) for cb in self._on_update_callbacks]
+                )
+            except Exception as e:
+                logger.opt(exception=e).error(
+                    "On update callback failed", attribute=self, value=value
+                )
 
     def add_on_update_callback(self, callback: AttrOnUpdateCallback[T]) -> None:
         """Add a callback to be called when the value of the attribute is updated
@@ -197,8 +204,8 @@ class AttrR(Attribute[T, AttributeIORefT]):
             try:
                 self.log_event("Update attribute", topic=self)
                 await update_callback(self)
-            except Exception:
-                logger.opt(exception=True).error("Update loop failed", attribute=self)
+            except Exception as e:
+                logger.opt(exception=e).error("Update loop failed", attribute=self)
                 raise
 
         return update_attribute
@@ -246,10 +253,20 @@ class AttrW(Attribute[T, AttributeIORefT]):
         """
         setpoint = self._datatype.validate(setpoint)
         if self._on_put_callback is not None:
-            await self._on_put_callback(self, setpoint)
+            try:
+                await self._on_put_callback(self, setpoint)
+            except Exception as e:
+                logger.opt(exception=e).error(
+                    "Put failed", attribute=self, setpoint=setpoint
+                )
 
         if sync_setpoint:
-            await self._call_sync_setpoint_callbacks(setpoint)
+            try:
+                await self._call_sync_setpoint_callbacks(setpoint)
+            except Exception as e:
+                logger.opt(exception=e).error(
+                    "Sync setpoint failed", attribute=self, setpoint=setpoint
+                )
 
     async def _call_sync_setpoint_callbacks(self, setpoint: T) -> None:
         if self._sync_setpoint_callbacks:
