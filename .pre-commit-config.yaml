@@ -23,11 +23,3 @@ repos:
         entry: ruff format --force-exclude
         types: [python]
         require_serial: true
-
-  - repo: https://github.com/losisin/helm-values-schema-json
-    rev: v2.2.1
-    hooks:
-      - id: helm-schema
-        args:
-          - --config
-          - Charts/fastcs/.schema.config.yaml
