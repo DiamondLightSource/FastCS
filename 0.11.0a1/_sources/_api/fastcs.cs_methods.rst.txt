@@ -1,0 +1,45 @@
+``fastcs.cs_methods``
+=====================
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+.. automodule:: fastcs.cs_methods
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        Command
+        CommandCallback
+        Controller_T
+        Method
+        MethodCallback
+        PutCallback
+        Scan
+        ScanCallback
+        UnboundCommand
+        UnboundCommandCallback
+        UnboundPutCallback
+        UnboundScan
+        UnboundScanCallback
+    
+    
