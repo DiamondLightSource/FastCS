@@ -26,6 +26,7 @@ from fastcs.transport.tango.dsr import register_dev
 from tests.assertable_controller import MyTestAttributeIORef, MyTestController
 from tests.example_p4p_ioc import run as _run_p4p_ioc
 from tests.example_softioc import run as _run_softioc
+from tests.example_softioc import run_initial_value as _run_initial
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -169,6 +170,12 @@ def p4p_subprocess():
 def softioc_subprocess():
     multiprocessing.set_start_method("spawn", force=True)
     yield from run_ioc_as_subprocess(_run_softioc, multiprocessing.get_context())
+
+
+@pytest.fixture(scope="module")
+def initial_softioc_subprocess():
+    multiprocessing.set_start_method("spawn", force=True)
+    yield from run_ioc_as_subprocess(_run_initial, multiprocessing.get_context())
 
 
 @pytest.fixture(scope="session")
