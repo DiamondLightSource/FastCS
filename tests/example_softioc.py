@@ -67,9 +67,10 @@ def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
 
 
 def run_initial_value(pv_prefix="SOFTIOC_INITIAL_DEVICE"):
-    epics_options = EpicsCAOptions(ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     controller = InitialValuesController()
-    fastcs = FastCS(controller, [epics_options])
+    fastcs = FastCS(
+        controller, [EpicsCATransport(ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))]
+    )
     fastcs.run()
 
 
