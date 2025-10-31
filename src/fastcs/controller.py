@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Iterator, Mapping, MutableMapping, Sequence
 from copy import deepcopy
 from typing import get_type_hints
 
@@ -22,7 +22,7 @@ class BaseController(Tracer):
 
     def __init__(
         self,
-        path: list[str] | None = None,
+        path: list[str | int] | None = None,
         description: str | None = None,
         ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
     ) -> None:
@@ -35,8 +35,8 @@ class BaseController(Tracer):
 
         if not hasattr(self, "attributes"):
             self.attributes = {}
-        self._path: list[str] = path or []
-        self.__sub_controller_tree: dict[str, Controller] = {}
+        self._path: list[str | int] = path or []
+        self.__sub_controller_tree: dict[str | int, BaseController] = {}
 
         self._bind_attrs()
 
@@ -71,11 +71,11 @@ class BaseController(Tracer):
             controller.connect_attribute_ios()
 
     @property
-    def path(self) -> list[str]:
+    def path(self) -> list[str | int]:
         """Path prefix of attributes, recursively including parent Controllers."""
         return self._path
 
-    def set_path(self, path: list[str]):
+    def set_path(self, path: list[str | int]):
         if self._path:
             raise ValueError(f"sub controller is already registered under {self.path}")
 
@@ -142,7 +142,7 @@ class BaseController(Tracer):
         self.attributes[name] = attribute
         super().__setattr__(name, attribute)
 
-    def add_sub_controller(self, name: str, sub_controller: Controller):
+    def add_sub_controller(self, name: str | int, sub_controller: BaseController):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
                 f"Cannot add sub controller {name}. "
@@ -156,18 +156,18 @@ class BaseController(Tracer):
 
         sub_controller.set_path(self.path + [name])
         self.__sub_controller_tree[name] = sub_controller
-        super().__setattr__(name, sub_controller)
+        super().__setattr__(str(name), sub_controller)
 
         if isinstance(sub_controller.root_attribute, Attribute):
-            self.attributes[name] = sub_controller.root_attribute
+            self.attributes[str(name)] = sub_controller.root_attribute
 
     @property
-    def sub_controllers(self) -> dict[str, Controller]:
+    def sub_controllers(self) -> dict[str | int, BaseController]:
         return self.__sub_controller_tree
 
     def __repr__(self):
         name = self.__class__.__name__
-        path = ".".join(self.path) or None
+        path = ".".join([str(p) for p in self.path]) or None
         sub_controllers = list(self.sub_controllers.keys()) or None
 
         return f"{name}(path={path}, sub_controllers={sub_controllers})"
@@ -204,3 +204,48 @@ class Controller(BaseController):
 
     async def disconnect(self) -> None:
         pass
+
+
+class SubControllerVector(MutableMapping[int, Controller], Controller):
+    """A collection of SubControllers, with an arbitrary integer index.
+    An instance of this class can be registered with a parent ``Controller`` to include
+    it's children as part of a larger controller. Each child of the vector will keep
+    a string name of the vector.
+    """
+
+    def __init__(
+        self, children: Mapping[int, Controller], description: str | None = None
+    ) -> None:
+        self._children: dict[int, Controller] = {}
+        self.update(children)
+        super().__init__(description=description)
+        for index, child in children.items():
+            self.add_sub_controller(index, child)
+
+    def __getitem__(self, key: int) -> Controller:
+        return self._children[key]
+
+    def __setitem__(self, key: int, value: Controller) -> None:
+        if not isinstance(key, int):
+            msg = f"Expected int, got {key}"
+            raise TypeError(msg)
+        if not isinstance(value, Controller):
+            msg = f"Expected Controller, got {value}"
+            raise TypeError(msg)
+        self._children[key] = value
+
+    def __delitem__(self, key: int) -> None:
+        del self._children[key]
+
+    def __iter__(self) -> Iterator[int]:
+        yield from self._children
+
+    def __len__(self) -> int:
+        return len(self._children)
+
+    def children(self) -> Iterator[tuple[str, Controller]]:
+        for key, child in self._children.items():
+            yield str(key), child
+
+    def __hash__(self):
+        return hash(id(self))

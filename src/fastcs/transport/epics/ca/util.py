@@ -91,6 +91,9 @@ def record_metadata_from_datatype(
                     return value in datatype.names
 
                 arguments["validate"] = _verify_in_datatype
+        case Bool():
+            arguments["ZNAM"] = "False"
+            arguments["ONAM"] = "True"
 
     return arguments
 

@@ -101,7 +101,7 @@ def _wrap_attr_get(
 
 def _add_attribute_api_routes(app: FastAPI, root_controller_api: ControllerAPI) -> None:
     for controller_api in root_controller_api.walk_api():
-        path = controller_api.path
+        path = [str(node) for node in controller_api.path]
 
         for attr_name, attribute in controller_api.attributes.items():
             attr_name = attr_name.replace("_", "-")
@@ -151,7 +151,7 @@ def _wrap_command(
 
 def _add_command_api_routes(app: FastAPI, root_controller_api: ControllerAPI) -> None:
     for controller_api in root_controller_api.walk_api():
-        path = controller_api.path
+        path = [str(node) for node in controller_api.path]
 
         for name, method in root_controller_api.command_methods.items():
             cmd_name = name.replace("_", "-")
