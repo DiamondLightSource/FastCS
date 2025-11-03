@@ -38,9 +38,12 @@ class ControllerAPI:
             yield from api.walk_api()
 
     def __repr__(self):
-        return f"""\
-ControllerAPI(path={self.path}, sub_apis=[{", ".join(self.sub_apis.keys())}])\
-"""
+        return (
+            f"ControllerAPI("
+            f"path={self.path}, "
+            f"sub_apis=[{', '.join(str(sub_api) for sub_api in self.sub_apis.keys())}]"
+            f")"
+        )
 
     def get_scan_and_initial_coros(
         self,
