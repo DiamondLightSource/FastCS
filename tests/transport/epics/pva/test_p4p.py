@@ -51,12 +51,11 @@ async def test_ioc(p4p_subprocess: tuple[str, Queue]):
     assert _child_vector_pvi["display"] == {"description": "some child vector"}
     assert _child_vector_pvi["value"] == {
         "vector_attribute": {"r": f"{pv_prefix}:Child:VectorAttribute"},
-        "child": {
-            "d": {"v1": f"{pv_prefix}:Child:1:PVI", "v2": f"{pv_prefix}:Child:2:PVI"}
-        },
+        "v1": {"d": f"{pv_prefix}:Child:1:PVI"},
+        "v2": {"d": f"{pv_prefix}:Child:2:PVI"},
     }
 
-    child_pvi_pv = _child_vector_pvi["value"]["child"]["d"]["v1"]
+    child_pvi_pv = _child_vector_pvi["value"]["v1"]["d"]
     _child_pvi = await ctxt.get(child_pvi_pv)
     assert isinstance(_child_pvi, Value)
     child_pvi = _child_pvi.todict()
@@ -370,13 +369,9 @@ def test_pvi_grouping():
                 "userTag": 0,
             },
             "value": {
-                "child": {
-                    "d": {
-                        "v0": f"{pv_prefix}:Child:0:PVI",
-                        "v1": f"{pv_prefix}:Child:1:PVI",
-                        "v2": f"{pv_prefix}:Child:2:PVI",
-                    },
-                },
+                "v0": {"d": f"{pv_prefix}:Child:0:PVI"},
+                "v1": {"d": f"{pv_prefix}:Child:1:PVI"},
+                "v2": {"d": f"{pv_prefix}:Child:2:PVI"},
             },
         }
         assert len(child_child_controller_pvi) == 1
