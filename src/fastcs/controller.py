@@ -142,7 +142,7 @@ class BaseController(Tracer):
         self.attributes[name] = attribute
         super().__setattr__(name, attribute)
 
-    def add_sub_controller(self, name: str | int, sub_controller: BaseController):
+    def add_sub_controller(self, name: str | int, sub_controller: Controller):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
                 f"Cannot add sub controller {name}. "
