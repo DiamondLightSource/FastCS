@@ -214,11 +214,14 @@ class SubControllerVector(MutableMapping[int, Controller], Controller):
     """
 
     def __init__(
-        self, children: Mapping[int, Controller], description: str | None = None
+        self,
+        children: Mapping[int, Controller],
+        description: str | None = None,
+        ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
     ) -> None:
         self._children: dict[int, Controller] = {}
         self.update(children)
-        super().__init__(description=description)
+        super().__init__(description=description, ios=ios)
         for index, child in children.items():
             self.add_sub_controller(index, child)
 
