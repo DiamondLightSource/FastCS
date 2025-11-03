@@ -180,7 +180,9 @@ def build_controller_api(controller: Controller) -> ControllerAPI:
     return _build_controller_api(controller, [])
 
 
-def _build_controller_api(controller: BaseController, path: list[str]) -> ControllerAPI:
+def _build_controller_api(
+    controller: BaseController, path: list[str | int]
+) -> ControllerAPI:
     scan_methods: dict[str, Scan] = {}
     command_methods: dict[str, Command] = {}
     for attr_name in dir(controller):
