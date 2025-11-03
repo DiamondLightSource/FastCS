@@ -84,24 +84,9 @@ class PviDevice(dict[str, "PviDevice"]):
             is_controller = stripped_leaf != pv_leaf
             pvi_name, number = _pv_to_pvi_name(stripped_leaf or pv_leaf)
             if is_controller and number is not None and not pvi_name:
-                pattern = rf"(?:(?<=:)|^)([^:]+)(?=:{re.escape(str(number))}(?:[:]|$))"
-                match = re.search(pattern, signal_info.pv)
-
-                if not match:
-                    raise RuntimeError(
-                        "Failed to extract parent SubControllerVector name "
-                        f"from Subcontroller pv {signal_info.pv}"
-                    )
-                if (
-                    signal_info.access
-                    not in p4p_raw_value[_pascal_to_snake(match.group(1))]
-                ):
-                    p4p_raw_value[_pascal_to_snake(match.group(1))][
-                        signal_info.access
-                    ] = {}
-                p4p_raw_value[_pascal_to_snake(match.group(1))][signal_info.access][
-                    f"v{number}"
-                ] = signal_info.pv
+                if signal_info.access not in p4p_raw_value[f"v{number}"]:
+                    p4p_raw_value[f"v{number}"][signal_info.access] = {}
+                p4p_raw_value[f"v{number}"][signal_info.access] = signal_info.pv
             elif is_controller:
                 p4p_raw_value[_pascal_to_snake(stripped_leaf)][signal_info.access] = (
                     signal_info.pv
