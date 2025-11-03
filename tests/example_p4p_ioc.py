@@ -1,22 +1,31 @@
 import asyncio
 import enum
+from dataclasses import dataclass
 
 import numpy as np
 
-from fastcs.attributes import AttrHandlerW, AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SubController, SubControllerVector
-from fastcs.datatypes import Bool, Enum, Float, Int, Table, Waveform
+from fastcs.attribute_io import AttributeIO
+from fastcs.attribute_io_ref import AttributeIORef
+from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controller import Controller, SubControllerVector
+from fastcs.datatypes import Bool, Enum, Float, Int, T, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import (
     EpicsIOCOptions,
 )
-from fastcs.transport.epics.pva.options import EpicsPVAOptions
+from fastcs.transport.epics.pva.transport import EpicsPVATransport
 from fastcs.wrappers import command, scan
 
 
-class SimpleAttributeSetter(AttrHandlerW):
-    async def put(self, attr, value):
-        await attr.update_display_without_process(value)
+@dataclass
+class SimpleAttributeIORef(AttributeIORef):
+    pass
+
+
+class SimpleAttributeIO(AttributeIO[T, SimpleAttributeIORef]):
+    async def send(self, attr: AttrW[T, SimpleAttributeIORef], value):
+        if isinstance(attr, AttrRW):
+            await attr.update(value)
 
 
 class FEnum(enum.Enum):
@@ -29,30 +38,39 @@ class FEnum(enum.Enum):
 
 class ParentController(Controller):
     description = "some controller"
-    a: AttrRW = AttrRW(Int(max=400_000, max_alarm=40_000))
-    b: AttrW = AttrW(Float(min=-1, min_alarm=-0.5), handler=SimpleAttributeSetter())
+    a: AttrRW = AttrRW(
+        Int(max=400_000, max_alarm=40_000), io_ref=SimpleAttributeIORef()
+    )
+    b: AttrW = AttrW(Float(min=-1, min_alarm=-0.5), io_ref=SimpleAttributeIORef())
 
     table: AttrRW = AttrRW(
-        Table([("A", np.int32), ("B", "i"), ("C", "?"), ("D", np.float64)])
+        Table([("A", np.int32), ("B", "i"), ("C", "?"), ("D", np.float64)]),
+        io_ref=SimpleAttributeIORef(),
     )
 
+    def __init__(self, description=None, ios=None):
+        super().__init__(description, ios)
 
-class ChildController(SubController):
+
+class ChildController(Controller):
     fail_on_next_e = True
-    c: AttrW = AttrW(Int(), handler=SimpleAttributeSetter())
+    c: AttrW = AttrW(Int(), io_ref=SimpleAttributeIORef())
+
+    def __init__(self, description=None, ios=None):
+        super().__init__(description, ios)
 
     @command()
     async def d(self):
         print("D: RUNNING")
         await asyncio.sleep(0.1)
         print("D: FINISHED")
-        await self.j.set(self.j.get() + 1)
+        await self.j.update(self.j.get() + 1)
 
-    e: AttrR = AttrR(Bool())
+    e: AttrR = AttrR(Bool(), io_ref=SimpleAttributeIORef())
 
     @scan(1)
     async def flip_flop(self):
-        await self.e.set(not self.e.get())
+        await self.e.update(not self.e.get())
 
     f: AttrRW = AttrRW(Enum(FEnum))
     g: AttrRW = AttrRW(Waveform(np.int64, shape=(3,)))
@@ -68,35 +86,37 @@ class ChildController(SubController):
         else:
             self.fail_on_next_e = True
             print("I: FINISHED")
-            await self.j.set(self.j.get() + 1)
+            await self.j.update(self.j.get() + 1)
 
     j: AttrR = AttrR(Int())
 
 
 def run(pv_prefix="P4P_TEST_DEVICE"):
-    p4p_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
-    controller = ParentController()
-    # controller.register_sub_controller(
-    #     "Child1", ChildController(description="some sub controller")
-    # )
-    # controller.register_sub_controller(
-    #     "Child2", ChildController(description="another sub controller")
-    # )
+    simple_attribute_io = SimpleAttributeIO()
+    p4p_options = EpicsPVATransport(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
+    controller = ParentController(ios=[simple_attribute_io])
 
-    class Vector(SubControllerVector):
-        int: AttrR = AttrR(Int())
+    class ChildVector(SubControllerVector):
+        vector_attribute: AttrR = AttrR(Int())
 
-    sub_controller = Vector(
+        def __init__(self, children, description=None):
+            super().__init__(children, description)
+
+    sub_controller = ChildVector(
         {
-            1: ChildController(description="some sub controller"),
-            2: ChildController(description="another sub controller"),
-        }
+            1: ChildController(
+                description="some sub controller", ios=[simple_attribute_io]
+            ),
+            2: ChildController(
+                description="another sub controller", ios=[simple_attribute_io]
+            ),
+        },
+        description="some child vector",
     )
 
-    controller.register_sub_controller("Child", sub_controller)
+    controller.add_sub_controller("Child", sub_controller)
 
     fastcs = FastCS(controller, [p4p_options])
-    fastcs.create_gui()
     fastcs.run()
 
 
