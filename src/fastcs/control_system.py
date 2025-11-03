@@ -139,8 +139,8 @@ class FastCS:
             await asyncio.gather(*coros)
         except asyncio.CancelledError:
             pass
-        except Exception as e:
-            raise RuntimeError("Unhandled exception in serve") from e
+        except Exception:
+            logger.exception("Unhandled exception in serve")
         finally:
             logger.info("Shutting down FastCS")
             self._stop_scan_tasks()

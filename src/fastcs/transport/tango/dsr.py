@@ -209,8 +209,10 @@ class TangoDSR:
 
 def register_dev(dev_name: str, dev_class: str, dsr_instance: str) -> None:
     """Register a device instance in the tango server."""
-    dsr_name = f"{dev_class}/{dsr_instance}"
-    dev_info = DbDevInfo(dev_name, dev_class, dsr_name)
+    dev_info = DbDevInfo()
+    dev_info.name = dev_name
+    dev_info._class = dev_class  # noqa: SLF001
+    dev_info.server = f"{dev_class}/{dsr_instance}"
 
     db = Database()
     db.delete_device(dev_name)  # Remove existing device entry
