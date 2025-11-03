@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, SubControllerVector
+from fastcs.controller import Controller, ControllerVector
 from fastcs.datatypes import Int
 from fastcs.launch import FastCS
 from fastcs.transport.epics.ca.transport import EpicsCATransport, EpicsGUIOptions
@@ -24,7 +24,7 @@ class ChildController(Controller):
 
 def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
     controller = ParentController()
-    vector = SubControllerVector({i: ChildController() for i in range(2)})
+    vector = ControllerVector({i: ChildController() for i in range(2)})
     controller.add_sub_controller("ChildVector", vector)
     gui_options = EpicsGUIOptions(
         output_path=Path(".") / "demo.bob", title="Demo Vector"

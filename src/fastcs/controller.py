@@ -206,7 +206,7 @@ class Controller(BaseController):
         pass
 
 
-class SubControllerVector(MutableMapping[int, Controller], Controller):
+class ControllerVector(MutableMapping[int, Controller], Controller):
     """A collection of SubControllers, with an arbitrary integer index.
     An instance of this class can be registered with a parent ``Controller`` to include
     it's children as part of a larger controller. Each child of the vector will keep
