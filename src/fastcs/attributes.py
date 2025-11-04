@@ -171,6 +171,7 @@ class AttrR(Attribute[T, AttributeIORefT]):
                 logger.opt(exception=e).error(
                     "On update callback failed", attribute=self, value=value
                 )
+                raise
 
     def add_on_update_callback(self, callback: AttrOnUpdateCallback[T]) -> None:
         """Add a callback to be called when the value of the attribute is updated
