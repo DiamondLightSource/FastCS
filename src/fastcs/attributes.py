@@ -6,13 +6,13 @@ from typing import Any, Generic
 
 from fastcs.attribute_io_ref import AttributeIORefT
 from fastcs.datatypes import ATTRIBUTE_TYPES, DataType, T
-from fastcs.logging import logger as _logger
+from fastcs.logging import bind_logger
 from fastcs.tracer import Tracer
 
 ONCE = float("inf")
 """Special value to indicate that an attribute should be updated once on start up."""
 
-logger = _logger.bind(logger_name=__name__)
+logger = bind_logger(logger_name=__name__)
 
 
 class Attribute(Generic[T, AttributeIORefT], Tracer):
