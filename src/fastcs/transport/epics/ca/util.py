@@ -31,6 +31,7 @@ MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
 EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, Waveform)
+EPICS_WAVEFORM_LENGTH = 256
 
 DATATYPE_FIELD_TO_RECORD_FIELD = {
     "prec": "PREC",
@@ -124,8 +125,10 @@ def cast_to_epics_type(datatype: DataType[T], value: T) -> object:
                 return datatype.index_of(datatype.validate(value))
             else:  # enum backed by string record
                 return datatype.validate(value).name
+        case String():
+            return value[: EPICS_WAVEFORM_LENGTH - 1]
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
-            return datatype.validate(value)
+            return value
         case _:
             raise ValueError(f"Unsupported datatype {datatype}")
 
