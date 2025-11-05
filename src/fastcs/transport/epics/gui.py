@@ -51,7 +51,7 @@ class EpicsGUI:
         self._controller_api = controller_api
         self._pv_prefix = pv_prefix
 
-    def _get_pv(self, attr_path: list[str | int], name: str):
+    def _get_pv(self, attr_path: list[str], name: str):
         attr_prefix = ":".join(
             [self._pv_prefix] + [snake_to_pascal(str(node)) for node in attr_path]
         )
@@ -88,7 +88,7 @@ class EpicsGUI:
                 raise FastCSError(f"Unsupported type {type(datatype)}: {datatype}")
 
     def _get_attribute_component(
-        self, attr_path: list[str | int], name: str, attribute: Attribute
+        self, attr_path: list[str], name: str, attribute: Attribute
     ) -> SignalR | SignalW | SignalRW | None:
         pv = self._get_pv(attr_path, name)
         name = snake_to_pascal(name)
@@ -129,7 +129,7 @@ class EpicsGUI:
             case _:
                 raise FastCSError(f"Unsupported attribute type: {type(attribute)}")
 
-    def _get_command_component(self, attr_path: list[str | int], name: str):
+    def _get_command_component(self, attr_path: list[str], name: str):
         pv = self._get_pv(attr_path, name)
         name = snake_to_pascal(name)
 
@@ -160,7 +160,7 @@ class EpicsGUI:
         components: Tree = []
 
         for name, api in controller_api.sub_apis.items():
-            if isinstance(name, int):
+            if name.isdigit():
                 name = f"{controller_api.path[-1]}{name}"
             components.append(
                 Group(
@@ -218,7 +218,7 @@ class EpicsGUI:
 class PvaEpicsGUI(EpicsGUI):
     """For creating gui in the PVA EPICS transport."""
 
-    def _get_pv(self, attr_path: list[str | int], name: str):
+    def _get_pv(self, attr_path: list[str], name: str):
         return f"pva://{super()._get_pv(attr_path, name)}"
 
     def _get_read_widget(self, fastcs_datatype: DataType) -> ReadWidgetUnion | None:

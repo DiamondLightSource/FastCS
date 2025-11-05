@@ -74,7 +74,7 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
         return self._name
 
     @property
-    def path(self) -> list[int | str]:
+    def path(self) -> list[str]:
         return self._path
 
     def add_update_datatype_callback(
@@ -99,7 +99,7 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
 
         self._name = name
 
-    def set_path(self, path: list[int | str]):
+    def set_path(self, path: list[str]):
         if self._path:
             raise RuntimeError(
                 f"Attribute is already registered with a controller at {self._path}"

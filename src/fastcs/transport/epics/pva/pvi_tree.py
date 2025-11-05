@@ -97,7 +97,7 @@ class PviDevice(dict[str, "PviDevice"]):
             # Add Controller entry
             if sub_controller_api:
                 # Sub-device of a ControllerVector
-                if isinstance(sub_controller_api.path[-1], int):
+                if sub_controller_api.path[-1].isdigit():
                     p4p_raw_value[f"__{int(stripped_leaf)}"][signal_info.access] = (
                         signal_info.pv
                     )

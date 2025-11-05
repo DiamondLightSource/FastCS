@@ -22,7 +22,7 @@ class BaseController(Tracer):
 
     def __init__(
         self,
-        path: list[str | int] | None = None,
+        path: list[str] | None = None,
         description: str | None = None,
         ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
     ) -> None:
@@ -35,8 +35,8 @@ class BaseController(Tracer):
 
         if not hasattr(self, "attributes"):
             self.attributes = {}
-        self._path: list[str | int] = path or []
-        self.__sub_controller_tree: dict[str | int, BaseController] = {}
+        self._path: list[str] = path or []
+        self.__sub_controller_tree: dict[str, BaseController] = {}
 
         self._bind_attrs()
 
@@ -71,11 +71,11 @@ class BaseController(Tracer):
             controller.connect_attribute_ios()
 
     @property
-    def path(self) -> list[str | int]:
+    def path(self) -> list[str]:
         """Path prefix of attributes, recursively including parent Controllers."""
         return self._path
 
-    def set_path(self, path: list[str | int]):
+    def set_path(self, path: list[str]):
         if self._path:
             raise ValueError(f"sub controller is already registered under {self.path}")
 
@@ -142,7 +142,9 @@ class BaseController(Tracer):
         self.attributes[name] = attribute
         super().__setattr__(name, attribute)
 
-    def add_sub_controller(self, name: str | int, sub_controller: Controller):
+    def add_sub_controller(
+        self, name: str, sub_controller: Controller | ControllerVector
+    ):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
                 f"Cannot add sub controller {name}. "
@@ -162,7 +164,7 @@ class BaseController(Tracer):
             self.attributes[str(name)] = sub_controller.root_attribute
 
     @property
-    def sub_controllers(self) -> dict[str | int, BaseController]:
+    def sub_controllers(self) -> dict[str, BaseController]:
         return self.__sub_controller_tree
 
     def __repr__(self):
@@ -199,6 +201,16 @@ class Controller(BaseController):
     ) -> None:
         super().__init__(description=description, ios=ios)
 
+    def add_sub_controller(
+        self, name: str, sub_controller: Controller | ControllerVector
+    ):
+        if name.isdigit():
+            raise ValueError(
+                f"Cannot add sub controller {name}. "
+                "Numeric-only names are not allowed; use ControllerVector instead"
+            )
+        return super().add_sub_controller(name, sub_controller)
+
     async def connect(self) -> None:
         pass
 
@@ -206,12 +218,14 @@ class Controller(BaseController):
         pass
 
 
-class ControllerVector(MutableMapping[int, Controller], Controller):
+class ControllerVector(MutableMapping[int, Controller], BaseController):
     """A collection of SubControllers, with an arbitrary integer index.
     An instance of this class can be registered with a parent ``Controller`` to include
     it's children as part of a larger controller. Each child of the vector will keep
     a string name of the vector.
     """
+
+    root_attribute: Attribute | None = None
 
     def __init__(
         self,
@@ -223,7 +237,13 @@ class ControllerVector(MutableMapping[int, Controller], Controller):
         self.update(children)
         super().__init__(description=description, ios=ios)
         for index, child in children.items():
-            self.add_sub_controller(index, child)
+            super().add_sub_controller(str(index), child)
+
+    def add_sub_controller(self, *args, **kwargs):
+        raise NotImplementedError(
+            "Cannot add named sub controller to ControllerVector. "
+            "Use __setitem__ instead, for indexed sub controllers"
+        )
 
     def __getitem__(self, key: int) -> Controller:
         return self._children[key]
