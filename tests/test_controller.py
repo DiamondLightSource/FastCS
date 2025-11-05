@@ -1,7 +1,7 @@
 import pytest
 
 from fastcs.attributes import AttrR
-from fastcs.controller import Controller
+from fastcs.controller import Controller, ControllerVector
 from fastcs.datatypes import Float, Int
 
 
@@ -101,3 +101,18 @@ def test_conflicting_attributes_and_controllers():
         ValueError, match=r"Cannot add attribute .* existing sub controller"
     ):
         controller.sub_controller = AttrR(Int())  # pyright: ignore[reportAttributeAccessIssue]
+
+
+def test_controller_raises_error_if_passed_numeric_sub_controller_name():
+    sub_controller = SomeSubController()
+    controller = SomeController(sub_controller)
+
+    with pytest.raises(ValueError, match="Numeric-only names are not allowed"):
+        controller.add_sub_controller("30", sub_controller)
+
+
+def test_controller_vector_raises_error_if_add_sub_controller_called():
+    controller_vector = ControllerVector({i: SomeSubController() for i in range(2)})
+
+    with pytest.raises(NotImplementedError, match="Use __setitem__ instead"):
+        controller_vector.add_sub_controller("subcontroller", SomeSubController())
