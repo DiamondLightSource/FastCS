@@ -107,7 +107,7 @@ class PviDevice(dict[str, "PviDevice"]):
                     ] = signal_info.pv
             # Add attribute entry
             else:
-                attr_pvi_name = f"{stripped_leaf}"
+                attr_pvi_name = f"{_pascal_to_snake(stripped_leaf)}"
                 p4p_raw_value[attr_pvi_name][signal_info.access] = signal_info.pv
 
         return p4p_raw_value

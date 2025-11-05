@@ -30,11 +30,11 @@ def test_ioc(softioc_subprocess: tuple[str, Queue]):
         "description": "The records in this controller"
     }
     assert _child_vector_pvi["value"] == {
-        "childvector0": {"d": f"{pv_prefix}:ChildVector:0:PVI"},
-        "childvector1": {"d": f"{pv_prefix}:ChildVector:1:PVI"},
+        "__0": {"d": f"{pv_prefix}:ChildVector:0:PVI"},
+        "__1": {"d": f"{pv_prefix}:ChildVector:1:PVI"},
     }
 
-    child_pvi_pv = _child_vector_pvi["value"]["childvector0"]["d"]
+    child_pvi_pv = _child_vector_pvi["value"]["__0"]["d"]
     _child_pvi = ctxt.get(child_pvi_pv)
     assert isinstance(_child_pvi, Value)
     child_pvi = _child_pvi.todict()
