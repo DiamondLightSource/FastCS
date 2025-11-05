@@ -8,6 +8,8 @@ from p4p.nt.common import alarm, timeStamp
 from p4p.server import StaticProvider
 from p4p.server.asyncio import SharedPV
 
+from fastcs.controller_api import ControllerAPI
+
 from .types import p4p_alarm_states, p4p_timestamp_now
 
 AccessModeType = Literal["r", "w", "rw", "d", "x"]
@@ -40,16 +42,19 @@ class PviDevice(dict[str, "PviDevice"]):
     """For creating a pvi structure in pva."""
 
     pv_prefix: str
+    controller_api: ControllerAPI | None
     description: str | None
     device_signal_info: _PviSignalInfo | None
 
     def __init__(
         self,
         pv_prefix: str,
+        controller_api: ControllerAPI | None = None,
         description: str | None = None,
         device_signal_info: _PviSignalInfo | None = None,
     ):
         self.pv_prefix = pv_prefix
+        self.controller_api = controller_api
         self.description = description
         self.device_signal_info = device_signal_info
 
@@ -82,17 +87,37 @@ class PviDevice(dict[str, "PviDevice"]):
         for pv_leaf, signal_info in self._get_signal_infos().items():
             stripped_leaf = pv_leaf.removesuffix(":PVI")
             is_controller = stripped_leaf != pv_leaf
-            pvi_name, number = _pv_to_pvi_name(stripped_leaf or pv_leaf)
-            if is_controller and number is not None and not pvi_name:
-                if signal_info.access not in p4p_raw_value[f"v{number}"]:
-                    p4p_raw_value[f"v{number}"][signal_info.access] = {}
-                p4p_raw_value[f"v{number}"][signal_info.access] = signal_info.pv
-            elif is_controller:
-                p4p_raw_value[_pascal_to_snake(stripped_leaf)][signal_info.access] = (
-                    signal_info.pv
-                )
-            else:
-                attr_pvi_name = f"{pvi_name}{'' if number is None else number}"
+            if is_controller and self.controller_api and not stripped_leaf.isdigit():
+                sub_api = self.controller_api.sub_apis[stripped_leaf]
+                # Check if sub-device has sub-devices with numeric names
+                vector_children = [
+                    child for child in sub_api.sub_apis.keys() if isinstance(child, int)
+                ]
+                # Sub-device is a ControllerVector
+                if vector_children:
+                    # Check if ControllerVector has a 'd' entry
+                    if (
+                        signal_info.access
+                        not in p4p_raw_value[_pascal_to_snake(stripped_leaf)]
+                    ):
+                        p4p_raw_value[_pascal_to_snake(stripped_leaf)][
+                            signal_info.access
+                        ] = {}
+                    # Group entries for all vector children
+                    for vector_child in vector_children:
+                        p4p_raw_value[_pascal_to_snake(stripped_leaf)][
+                            signal_info.access
+                        ][
+                            f"v{vector_child}"
+                        ] = f"{signal_info.pv.removesuffix(':PVI')}:{vector_child}:PVI"
+                # Sub-device is a Controller
+                else:
+                    p4p_raw_value[_pascal_to_snake(stripped_leaf)][
+                        signal_info.access
+                    ] = signal_info.pv
+            # Add attribute entry
+            elif not is_controller:
+                attr_pvi_name = f"{stripped_leaf}"
                 p4p_raw_value[attr_pvi_name][signal_info.access] = signal_info.pv
 
         return p4p_raw_value
@@ -179,17 +204,19 @@ class PviTree:
         self._pvi_tree_root: PviDevice = PviDevice(pv_prefix)
 
     def add_sub_device(
-        self,
-        device_pv: str,
-        description: str | None,
+        self, device_pv: str, description: str | None, controller_api: ControllerAPI
     ):
         if ":" not in device_pv:
             assert device_pv == self._pvi_tree_root.pv_prefix
             self._pvi_tree_root.description = description
+            self._pvi_tree_root.controller_api = controller_api
         else:
             self._pvi_tree_root.get_recursively(
                 *device_pv.split(":")[1:]  # To remove the prefix
             ).description = description
+            self._pvi_tree_root.get_recursively(
+                *device_pv.split(":")[1:]  # To remove the prefix
+            ).controller_api = controller_api
 
     def add_signal(
         self,

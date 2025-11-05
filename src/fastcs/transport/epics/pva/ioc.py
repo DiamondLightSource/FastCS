@@ -37,7 +37,7 @@ async def parse_attributes(
     for controller_api in root_controller_api.walk_api():
         pv_prefix = controller_pv_prefix(root_pv_prefix, controller_api)
 
-        pvi_tree.add_sub_device(pv_prefix, controller_api.description)
+        pvi_tree.add_sub_device(pv_prefix, controller_api.description, controller_api)
 
         for attr_name, attribute in controller_api.attributes.items():
             full_pv_name = f"{pv_prefix}:{snake_to_pascal(attr_name)}"
