@@ -69,54 +69,44 @@ class PviDevice(dict[str, "PviDevice"]):
             d = d[arg]
         return d
 
-    def _get_signal_infos(self) -> dict[str, _PviSignalInfo]:
-        device_signal_infos: dict[str, _PviSignalInfo] = {}
+    def _get_signal_infos(
+        self,
+    ) -> dict[str, tuple[_PviSignalInfo, ControllerAPI | None]]:
+        device_signal_infos: dict[str, tuple[_PviSignalInfo, ControllerAPI | None]] = {}
 
         for sub_device_name, sub_device in self.items():
             if sub_device:
-                device_signal_infos[f"{sub_device_name}:PVI"] = _PviSignalInfo(
-                    pv=f"{sub_device.pv_prefix}:PVI", access="d"
+                device_signal_infos[f"{sub_device_name}:PVI"] = (
+                    _PviSignalInfo(pv=f"{sub_device.pv_prefix}:PVI", access="d"),
+                    sub_device.controller_api,
                 )
             if sub_device.device_signal_info:
-                device_signal_infos[sub_device_name] = sub_device.device_signal_info
+                device_signal_infos[sub_device_name] = (
+                    sub_device.device_signal_info,
+                    sub_device.controller_api,
+                )
 
         return device_signal_infos
 
     def _make_p4p_raw_value(self) -> dict:
         p4p_raw_value = defaultdict(dict)
-        for pv_leaf, signal_info in self._get_signal_infos().items():
+        for pv_leaf, signal_info_and_api in self._get_signal_infos().items():
+            # Sub-controller api returned if current item is a Controller
+            signal_info, sub_controller_api = signal_info_and_api
             stripped_leaf = pv_leaf.removesuffix(":PVI")
-            is_controller = stripped_leaf != pv_leaf
-            if is_controller and self.controller_api and not stripped_leaf.isdigit():
-                sub_api = self.controller_api.sub_apis[stripped_leaf]
-                # Check if sub-device has sub-devices with numeric names
-                vector_children = [
-                    child for child in sub_api.sub_apis.keys() if isinstance(child, int)
-                ]
-                # Sub-device is a ControllerVector
-                if vector_children:
-                    # Check if ControllerVector has a 'd' entry
-                    if (
-                        signal_info.access
-                        not in p4p_raw_value[_pascal_to_snake(stripped_leaf)]
-                    ):
-                        p4p_raw_value[_pascal_to_snake(stripped_leaf)][
-                            signal_info.access
-                        ] = {}
-                    # Group entries for all vector children
-                    for vector_child in vector_children:
-                        p4p_raw_value[_pascal_to_snake(stripped_leaf)][
-                            signal_info.access
-                        ][
-                            f"v{vector_child}"
-                        ] = f"{signal_info.pv.removesuffix(':PVI')}:{vector_child}:PVI"
-                # Sub-device is a Controller
+            # Add Controller entry
+            if sub_controller_api:
+                # Sub-device of a ControllerVector
+                if isinstance(sub_controller_api.path[-1], int):
+                    p4p_raw_value[f"__{int(stripped_leaf)}"][signal_info.access] = (
+                        signal_info.pv
+                    )
                 else:
                     p4p_raw_value[_pascal_to_snake(stripped_leaf)][
                         signal_info.access
                     ] = signal_info.pv
             # Add attribute entry
-            elif not is_controller:
+            else:
                 attr_pvi_name = f"{stripped_leaf}"
                 p4p_raw_value[attr_pvi_name][signal_info.access] = signal_info.pv
 
@@ -209,7 +199,6 @@ class PviTree:
         if ":" not in device_pv:
             assert device_pv == self._pvi_tree_root.pv_prefix
             self._pvi_tree_root.description = description
-            self._pvi_tree_root.controller_api = controller_api
         else:
             self._pvi_tree_root.get_recursively(
                 *device_pv.split(":")[1:]  # To remove the prefix
