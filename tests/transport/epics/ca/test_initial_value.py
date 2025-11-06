@@ -3,8 +3,8 @@ import enum
 
 import numpy as np
 import pytest
-from aioca import caget
 
+import fastcs.transport.epics.ca.ioc as ca_ioc
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
@@ -48,68 +48,69 @@ class InitialValuesController(Controller):
 
 @pytest.mark.forked
 @pytest.mark.asyncio
-async def test_initial_values_set_in_ca():
+async def test_initial_values_set_in_ca(mocker):
     pv_prefix = "SOFTIOC_INITIAL_DEVICE"
 
     loop = asyncio.get_event_loop()
+    controller = InitialValuesController()
     fastcs = FastCS(
-        InitialValuesController(),
+        controller,
         [EpicsCATransport(ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))],
         loop,
     )
 
-    task = asyncio.create_task(fastcs.serve(interactive=False))
-    # combine cagets to reduce timeouts
+    record_spy = mocker.spy(ca_ioc, "_make_record")
 
-    # AttrRWs
-    scalar_sets = await caget(
-        [
-            f"{pv_prefix}:Int",
-            f"{pv_prefix}:Float",
-            f"{pv_prefix}:Bool",
-            f"{pv_prefix}:Enum",
-        ]
-    )
-    assert scalar_sets == [4, 3.1, 1, 1]
-    scalar_rbvs = await caget(
-        [
-            f"{pv_prefix}:Int_RBV",
-            f"{pv_prefix}:Float_RBV",
-            f"{pv_prefix}:Bool_RBV",
-            f"{pv_prefix}:Enum_RBV",
-        ]
-    )
-    assert scalar_rbvs == [4, 3.1, 1, 1]
-    assert (await caget(f"{pv_prefix}:Str")).tobytes() == b"initial\0"
-    assert np.array_equal((await caget(f"{pv_prefix}:Waveform")), list(range(10)))
-    assert (await caget(f"{pv_prefix}:Str_RBV")).tobytes() == b"initial\0"
-    assert np.array_equal((await caget(f"{pv_prefix}:Waveform_RBV")), list(range(10)))
+    try:
+        task = asyncio.create_task(fastcs.serve(interactive=False))
 
-    # AttrRs
-    scalars = await caget(
-        [
-            f"{pv_prefix}:IntR",
-            f"{pv_prefix}:FloatR",
-            f"{pv_prefix}:BoolR",
-            f"{pv_prefix}:EnumR",
-        ]
-    )
-    assert scalars == [5, 4.1, 0, 2]
-    assert (await caget(f"{pv_prefix}:StrR")).tobytes() == b"initial_r\0"
-    assert np.array_equal((await caget(f"{pv_prefix}:WaveformR")), list(range(10, 20)))
+        async with asyncio.timeout(3):
+            while not record_spy.spy_return_list:
+                await asyncio.sleep(0)
 
-    # Check AttrWs use the datatype initial value
-    w_scalars = await caget(
-        [
-            f"{pv_prefix}:IntW",
-            f"{pv_prefix}:FloatW",
-            f"{pv_prefix}:BoolW",
-            f"{pv_prefix}:EnumW",
-        ]
-    )
-    assert w_scalars == [0, 0, 0, 0]
-    assert (await caget(f"{pv_prefix}:StrW")).tobytes() == b"\0"
-    # initial waveforms not set with zeros
-    assert np.array_equal((await caget(f"{pv_prefix}:WaveformW")), [])
-
-    task.cancel()
+        initial_values = {
+            wrapper.name: wrapper.get() for wrapper in record_spy.spy_return_list
+        }
+        for name, value in {
+            "SOFTIOC_INITIAL_DEVICE:Bool": 1,
+            "SOFTIOC_INITIAL_DEVICE:BoolR": 0,
+            "SOFTIOC_INITIAL_DEVICE:BoolW": 0,
+            "SOFTIOC_INITIAL_DEVICE:Bool_RBV": 1,
+            "SOFTIOC_INITIAL_DEVICE:Enum": 1,
+            "SOFTIOC_INITIAL_DEVICE:EnumR": 2,
+            "SOFTIOC_INITIAL_DEVICE:EnumW": 0,
+            "SOFTIOC_INITIAL_DEVICE:Enum_RBV": 1,
+            "SOFTIOC_INITIAL_DEVICE:Float": 3.1,
+            "SOFTIOC_INITIAL_DEVICE:FloatR": 4.1,
+            "SOFTIOC_INITIAL_DEVICE:FloatW": 0.0,
+            "SOFTIOC_INITIAL_DEVICE:Float_RBV": 3.1,
+            "SOFTIOC_INITIAL_DEVICE:Int": 4,
+            "SOFTIOC_INITIAL_DEVICE:IntR": 5,
+            "SOFTIOC_INITIAL_DEVICE:IntW": 0,
+            "SOFTIOC_INITIAL_DEVICE:Int_RBV": 4,
+            "SOFTIOC_INITIAL_DEVICE:Str": "initial",
+            "SOFTIOC_INITIAL_DEVICE:StrR": "initial_r",
+            "SOFTIOC_INITIAL_DEVICE:StrW": "",
+            "SOFTIOC_INITIAL_DEVICE:Str_RBV": "initial",
+            "SOFTIOC_INITIAL_DEVICE:Waveform": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            "SOFTIOC_INITIAL_DEVICE:WaveformR": [
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+            ],
+            # waveforms are not zero initialised currently
+            "SOFTIOC_INITIAL_DEVICE:WaveformW": [],
+            "SOFTIOC_INITIAL_DEVICE:Waveform_RBV": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        }.items():
+            assert np.array_equal(value, initial_values[name])
+    except Exception as e:
+        raise e
+    finally:
+        task.cancel()
