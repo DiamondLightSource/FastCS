@@ -46,6 +46,7 @@ class InitialValuesController(Controller):
     waveform_w = AttrW(Waveform(np.int64, shape=(10,)))
 
 
+@pytest.mark.forked
 @pytest.mark.asyncio
 async def test_initial_values_set_in_ca():
     pv_prefix = "SOFTIOC_INITIAL_DEVICE"
