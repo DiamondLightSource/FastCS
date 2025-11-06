@@ -42,7 +42,6 @@ class PviDevice(dict[str, "PviDevice"]):
     """For creating a pvi structure in pva."""
 
     pv_prefix: str
-    controller_api: ControllerAPI | None
     description: str | None
     device_signal_info: _PviSignalInfo | None
 

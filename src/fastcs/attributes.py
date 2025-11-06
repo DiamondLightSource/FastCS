@@ -109,7 +109,7 @@ class Attribute(Generic[T, AttributeIORefT], Tracer):
 
     def __repr__(self):
         name = self.__class__.__name__
-        path = ".".join([str(node) for node in self._path] + [self._name]) or None
+        path = ".".join(self._path + [self._name]) or None
         datatype = self._datatype.__class__.__name__
 
         return f"{name}(path={path}, datatype={datatype}, io_ref={self._io_ref})"

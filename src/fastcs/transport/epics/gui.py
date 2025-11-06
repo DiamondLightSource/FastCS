@@ -53,7 +53,7 @@ class EpicsGUI:
 
     def _get_pv(self, attr_path: list[str], name: str):
         attr_prefix = ":".join(
-            [self._pv_prefix] + [snake_to_pascal(str(node)) for node in attr_path]
+            [self._pv_prefix] + [snake_to_pascal(node) for node in attr_path]
         )
         return f"{attr_prefix}:{snake_to_pascal(name)}"
 

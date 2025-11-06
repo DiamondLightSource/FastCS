@@ -116,7 +116,7 @@ def _add_sub_controller_pvi_info(pv_prefix: str, parent: ControllerAPI):
         child_name = (
             f"__{child.path[-1]}"  # Sub-Controller of ControllerVector
             if child.path[-1].isdigit()
-            else str(child.path[-1])
+            else child.path[-1]
         )
 
         _add_pvi_info(child_pvi, parent_pvi, child_name.lower())

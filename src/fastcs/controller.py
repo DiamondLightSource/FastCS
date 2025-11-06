@@ -158,10 +158,10 @@ class BaseController(Tracer):
 
         sub_controller.set_path(self.path + [name])
         self.__sub_controller_tree[name] = sub_controller
-        super().__setattr__(str(name), sub_controller)
+        super().__setattr__(name, sub_controller)
 
         if isinstance(sub_controller.root_attribute, Attribute):
-            self.attributes[str(name)] = sub_controller.root_attribute
+            self.attributes[name] = sub_controller.root_attribute
 
     @property
     def sub_controllers(self) -> dict[str, BaseController]:
@@ -169,7 +169,7 @@ class BaseController(Tracer):
 
     def __repr__(self):
         name = self.__class__.__name__
-        path = ".".join([str(p) for p in self.path]) or None
+        path = ".".join(self.path) or None
         sub_controllers = list(self.sub_controllers.keys()) or None
 
         return f"{name}(path={path}, sub_controllers={sub_controllers})"
@@ -219,11 +219,8 @@ class Controller(BaseController):
 
 
 class ControllerVector(MutableMapping[int, Controller], BaseController):
-    """A collection of SubControllers, with an arbitrary integer index.
-    An instance of this class can be registered with a parent ``Controller`` to include
-    it's children as part of a larger controller. Each child of the vector will keep
-    a string name of the vector.
-    """
+    """A controller with a collection of identical sub controllers distinguished
+    by a numeric value"""
 
     root_attribute: Attribute | None = None
 
@@ -239,14 +236,22 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
         for index, child in children.items():
             super().add_sub_controller(str(index), child)
 
-    def add_sub_controller(self, *args, **kwargs):
+    def add_sub_controller(
+        self, name: str, sub_controller: Controller | ControllerVector
+    ):
         raise NotImplementedError(
             "Cannot add named sub controller to ControllerVector. "
-            "Use __setitem__ instead, for indexed sub controllers"
+            "Use __setitem__ instead, for indexed sub controllers. "
+            "E.g., vector[1] = Controller()"
         )
 
     def __getitem__(self, key: int) -> Controller:
-        return self._children[key]
+        try:
+            return self._children[key]
+        except KeyError as exception:
+            raise KeyError(
+                f"ControllerVector does not have Controller with key {key}"
+            ) from exception
 
     def __setitem__(self, key: int, value: Controller) -> None:
         if not isinstance(key, int):
@@ -266,9 +271,5 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
     def __len__(self) -> int:
         return len(self._children)
 
-    def children(self) -> Iterator[tuple[str, Controller]]:
-        for key, child in self._children.items():
-            yield str(key), child
-
-    def __hash__(self):
-        return hash(id(self))
+    def children(self) -> Iterator[tuple[int, Controller]]:
+        yield from self._children.items()
