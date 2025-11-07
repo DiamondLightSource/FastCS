@@ -17,6 +17,7 @@ class BaseController(Tracer):
 
     #: Attributes passed from the device at runtime.
     attributes: dict[str, Attribute]
+    root_attribute: Attribute | None = None
 
     description: str | None = None
 
@@ -144,9 +145,7 @@ class BaseController(Tracer):
         self.attributes[name] = attribute
         super().__setattr__(name, attribute)
 
-    def add_sub_controller(
-        self, name: str, sub_controller: Controller | ControllerVector
-    ):
+    def add_sub_controller(self, name: str, sub_controller: BaseController):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
                 f"Cannot add sub controller {sub_controller}. "
@@ -196,8 +195,6 @@ class Controller(BaseController):
     such as generating a UI or creating parameters for a control system.
     """
 
-    root_attribute: Attribute | None = None
-
     def __init__(
         self,
         description: str | None = None,
@@ -205,9 +202,7 @@ class Controller(BaseController):
     ) -> None:
         super().__init__(description=description, ios=ios)
 
-    def add_sub_controller(
-        self, name: str, sub_controller: Controller | ControllerVector
-    ):
+    def add_sub_controller(self, name: str, sub_controller: BaseController):
         if name.isdigit():
             raise ValueError(
                 f"Cannot add sub controller {name}. "
@@ -226,8 +221,6 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
     """A controller with a collection of identical sub controllers distinguished
     by a numeric value"""
 
-    root_attribute: Attribute | None = None
-
     def __init__(
         self,
         children: Mapping[int, Controller],
@@ -239,9 +232,7 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
         for index, child in children.items():
             self[index] = child
 
-    def add_sub_controller(
-        self, name: str, sub_controller: Controller | ControllerVector
-    ):
+    def add_sub_controller(self, name: str, sub_controller: BaseController):
         raise NotImplementedError(
             "Cannot add named sub controller to ControllerVector. "
             "Use __setitem__ instead, for indexed sub controllers. "

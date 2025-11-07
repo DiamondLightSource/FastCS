@@ -70,9 +70,9 @@ def _make_p4p_raw_value(pv_prefix: str, controller_api: ControllerAPI) -> dict:
     # Sub-controller api returned if current item is a Controller
     for pv_leaf, sub_controller_api in controller_api.sub_apis.items():
         # Add Controller entry
-        # Sub-device of a ControllerVector
         pv = f"{pv_prefix}:{snake_to_pascal(pv_leaf)}:PVI"
         if sub_controller_api.path[-1].isdigit():
+            # Sub-device of a ControllerVector
             p4p_raw_value[f"__{int(pv_leaf)}"]["d"] = pv
         else:
             p4p_raw_value[pv_leaf]["d"] = pv

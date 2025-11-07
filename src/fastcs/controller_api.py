@@ -41,7 +41,7 @@ class ControllerAPI:
         return (
             f"ControllerAPI("
             f"path={self.path}, "
-            f"sub_apis=[{', '.join(sub_api for sub_api in self.sub_apis.keys())}]"
+            f"sub_apis=[{', '.join(self.sub_apis.keys())}]"
             f")"
         )
 
