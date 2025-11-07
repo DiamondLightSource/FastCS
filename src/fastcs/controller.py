@@ -128,13 +128,15 @@ class BaseController(Tracer):
     def add_attribute(self, name, attribute: Attribute):
         if name in self.attributes and attribute is not self.attributes[name]:
             raise ValueError(
-                f"Cannot add attribute {name}. "
-                f"Controller {self} has has existing attribute {name}"
+                f"Cannot add attribute {attribute}. "
+                f"Controller {self} has has existing attribute {name}: "
+                f"{self.attributes[name]}"
             )
         elif name in self.__sub_controller_tree.keys():
             raise ValueError(
-                f"Cannot add attribute {name}. "
-                f"Controller {self} has existing sub controller {name}"
+                f"Cannot add attribute {attribute}. "
+                f"Controller {self} has existing sub controller {name}: "
+                f"{self.__sub_controller_tree[name]}"
             )
 
         attribute.set_name(name)
@@ -147,13 +149,15 @@ class BaseController(Tracer):
     ):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
-                f"Cannot add sub controller {name}. "
-                f"Controller {self} has existing sub controller {name}"
+                f"Cannot add sub controller {sub_controller}. "
+                f"Controller {self} has existing sub controller {name}: "
+                f"{self.__sub_controller_tree[name]}"
             )
         elif name in self.attributes:
             raise ValueError(
-                f"Cannot add sub controller {name}. "
-                f"Controller {self} has existing attribute {name}"
+                f"Cannot add sub controller {sub_controller}. "
+                f"Controller {self} has existing attribute {name}: "
+                f"{self.attributes[name]}"
             )
 
         sub_controller.set_path(self.path + [name])

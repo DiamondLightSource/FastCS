@@ -7,7 +7,7 @@ from ._graylog import GraylogEnvFields as GraylogEnvFields
 from ._graylog import GraylogStaticFields as GraylogStaticFields
 from ._graylog import parse_graylog_env_fields as parse_graylog_env_fields
 from ._graylog import parse_graylog_static_fields as parse_graylog_static_fields
-from ._logging import LogLevel, _configure_logger
+from ._logging import Logger, LogLevel, _configure_logger
 
 logger = _logger.bind(logger_name="fastcs")
 """FastCS logger
@@ -50,11 +50,23 @@ As standard ``loguru`` supports ``trace`` level monitoring, but it should not be
 fastcs. Instead there is a ``Tracer`` class for verbose logging with fine-grained
 controls that can be enabled by the user at runtime.
 
-Use ``configure_logging`` to re-confi the logger at runtime. For more advanced
+Use ``configure_logging`` to re-configure the logger at runtime. For more advanced
 controls, configure the ``logger`` singleton directly.
 
 See the ``loguru`` docs for more information: https://loguru.readthedocs.io
 """
+
+
+def bind_logger(logger_name: str) -> Logger:
+    """Create a wrapper of the singleton fastcs logger with the given name bound
+
+    The name will be displayed in all log messages from the returned wrapper.
+
+    See the docstring for ``fastcs.logging.logger`` for more information.
+
+    """
+
+    return logger.bind(logger_name=logger_name)
 
 
 def configure_logging(
