@@ -33,6 +33,7 @@ def add_pvi_info(
     controller_api: ControllerAPI,
     description: str | None = None,
 ) -> StaticProvider:
+    """Add PVI information to given provider."""
     provider.add(
         f"{pv_prefix}:PVI",
         SharedPV(initial=_make_p4p_value(pv_prefix, controller_api, description)),
