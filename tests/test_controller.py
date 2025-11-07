@@ -124,7 +124,11 @@ def test_controller_vector_indexing():
     controller_vector = ControllerVector({1: another_controller})
     controller_vector[10] = controller
     assert controller_vector.sub_controllers["10"] == controller
-    assert controller_vector.sub_controllers["1"] == another_controller
+    assert controller_vector[1] == another_controller
+    assert len(controller_vector) == 2
+
+    with pytest.raises(KeyError):
+        _ = controller_vector[2]
 
 
 def test_controller_vector_delitem_raises_exception():
@@ -132,3 +136,11 @@ def test_controller_vector_delitem_raises_exception():
     controller_vector = ControllerVector({1: controller})
     with pytest.raises(NotImplementedError, match="Cannot delete"):
         del controller_vector[1]
+
+
+def test_controller_vector_iter():
+    sub_controllers = {1: SomeSubController(), 2: SomeSubController()}
+    controller_vector = ControllerVector(sub_controllers)
+
+    for index, child in controller_vector.items():
+        assert sub_controllers[index] == child
