@@ -15,6 +15,7 @@ from .types import p4p_alarm_states, p4p_timestamp_now
 AccessModeType = Literal["r", "w", "rw", "d", "x"]
 
 
+# TODO: This should be removed after https://github.com/DiamondLightSource/FastCS/issues/260
 def _attribute_to_access(attribute: Attribute) -> AccessModeType:
     match attribute:
         case AttrRW():
