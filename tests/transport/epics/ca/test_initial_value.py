@@ -105,8 +105,7 @@ async def test_initial_values_set_in_ca(mocker):
                 18,
                 19,
             ],
-            # waveforms are not zero initialised currently
-            "SOFTIOC_INITIAL_DEVICE:WaveformW": [],
+            "SOFTIOC_INITIAL_DEVICE:WaveformW": 10 * [0],
             "SOFTIOC_INITIAL_DEVICE:Waveform_RBV": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         }.items():
             assert np.array_equal(value, initial_values[name])
