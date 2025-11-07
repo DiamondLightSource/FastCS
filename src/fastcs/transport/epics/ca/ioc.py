@@ -10,7 +10,7 @@ from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.controller_api import ControllerAPI
 from fastcs.cs_methods import Command
 from fastcs.datatypes import DataType, T
-from fastcs.logging import logger as _logger
+from fastcs.logging import bind_logger
 from fastcs.tracer import Tracer
 from fastcs.transport.epics.ca.util import (
     builder_callable_from_attribute,
@@ -27,7 +27,7 @@ EPICS_MAX_NAME_LENGTH = 60
 
 
 tracer = Tracer(name=__name__)
-logger = _logger.bind(logger_name=__name__)
+logger = bind_logger(logger_name=__name__)
 
 
 class EpicsCAIOC:

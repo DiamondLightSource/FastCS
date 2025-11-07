@@ -6,13 +6,13 @@ from typing import Any, Generic
 
 from fastcs.attribute_io_ref import AttributeIORefT
 from fastcs.datatypes import ATTRIBUTE_TYPES, DataType, T
-from fastcs.logging import logger as _logger
+from fastcs.logging import bind_logger
 from fastcs.tracer import Tracer
 
 ONCE = float("inf")
 """Special value to indicate that an attribute should be updated once on start up."""
 
-logger = _logger.bind(logger_name=__name__)
+logger = bind_logger(logger_name=__name__)
 
 
 class Attribute(Generic[T, AttributeIORefT], Tracer):
@@ -171,6 +171,7 @@ class AttrR(Attribute[T, AttributeIORefT]):
                 logger.opt(exception=e).error(
                     "On update callback failed", attribute=self, value=value
                 )
+                raise
 
     def add_on_update_callback(self, callback: AttrOnUpdateCallback[T]) -> None:
         """Add a callback to be called when the value of the attribute is updated
@@ -248,7 +249,8 @@ class AttrW(Attribute[T, AttributeIORefT]):
         be rejected.
 
         To directly change the value of the attribute, for example from an update loop
-        that has read a new value from some underlying source, call the ``set`` method.
+        that has read a new value from some underlying source, call the ``update``
+        method.
 
         """
         setpoint = self._datatype.validate(setpoint)
