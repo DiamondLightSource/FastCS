@@ -116,3 +116,19 @@ def test_controller_vector_raises_error_if_add_sub_controller_called():
 
     with pytest.raises(NotImplementedError, match="Use __setitem__ instead"):
         controller_vector.add_sub_controller("subcontroller", SomeSubController())
+
+
+def test_controller_vector_indexing():
+    controller = SomeSubController()
+    another_controller = SomeSubController()
+    controller_vector = ControllerVector({1: another_controller})
+    controller_vector[10] = controller
+    assert controller_vector.sub_controllers["10"] == controller
+    assert controller_vector.sub_controllers["1"] == another_controller
+
+
+def test_controller_vector_delitem_raises_exception():
+    controller = SomeSubController()
+    controller_vector = ControllerVector({1: controller})
+    with pytest.raises(NotImplementedError, match="Cannot delete"):
+        del controller_vector[1]
