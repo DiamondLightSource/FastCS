@@ -277,7 +277,7 @@ def test_pvi_grouping():
 
     sub_controller_vector = ControllerVector({i: ChildController() for i in range(3)})
 
-    controller.add_sub_controller("Child", sub_controller_vector)
+    controller.add_sub_controller("child", sub_controller_vector)
 
     sub_controller = ChildController()
     controller.child0 = sub_controller
@@ -347,10 +347,10 @@ def test_pvi_grouping():
             "value": {
                 "additional_child": {"d": f"{pv_prefix}:AdditionalChild:PVI"},
                 "another_child": {"d": f"{pv_prefix}:AnotherChild:PVI"},
-                "another_attr0": {"rw": f"{pv_prefix}:AnotherAttr0"},
-                "another_attr1000": {"rw": f"{pv_prefix}:AnotherAttr1000"},
+                "another_attr_0": {"rw": f"{pv_prefix}:AnotherAttr0"},
+                "another_attr_1000": {"rw": f"{pv_prefix}:AnotherAttr1000"},
                 "a_third_attr": {"w": f"{pv_prefix}:AThirdAttr"},
-                "attr1": {"rw": f"{pv_prefix}:Attr1"},
+                "attr_1": {"rw": f"{pv_prefix}:Attr1"},
                 "child": {"d": f"{pv_prefix}:Child:PVI"},
                 "child0": {"d": f"{pv_prefix}:Child0:PVI"},
                 "child1": {"d": f"{pv_prefix}:Child1:PVI"},

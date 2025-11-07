@@ -70,17 +70,18 @@ def _make_p4p_raw_value(pv_prefix: str, controller_api: ControllerAPI) -> dict:
     for pv_leaf, sub_controller_api in controller_api.sub_apis.items():
         # Add Controller entry
         # Sub-device of a ControllerVector
-        controller_pvi_name = f"{snake_to_pascal(pv_leaf)}"
-        pv = f"{pv_prefix}:{controller_pvi_name}:PVI"
+        pv = f"{pv_prefix}:{snake_to_pascal(pv_leaf)}:PVI"
         if sub_controller_api.path[-1].isdigit():
             p4p_raw_value[f"__{int(pv_leaf)}"]["d"] = pv
         else:
-            p4p_raw_value[controller_pvi_name]["d"] = pv
+            p4p_raw_value[pv_leaf]["d"] = pv
     for pv_leaf, attribute in controller_api.attributes.items():
         # Add attribute entry
-        attr_pvi_name = f"{snake_to_pascal(pv_leaf)}"
-        pv = f"{pv_prefix}:{attr_pvi_name}"
-        p4p_raw_value[attr_pvi_name][_attribute_to_access(attribute)] = pv
+        pv = f"{pv_prefix}:{snake_to_pascal(pv_leaf)}"
+        p4p_raw_value[pv_leaf][_attribute_to_access(attribute)] = pv
+    for pv_leaf, _ in controller_api.command_methods.items():
+        pv = f"{pv_prefix}:{snake_to_pascal(pv_leaf)}"
+        p4p_raw_value[pv_leaf]["x"] = pv
 
     return p4p_raw_value
 

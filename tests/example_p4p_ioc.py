@@ -114,7 +114,7 @@ def run(pv_prefix="P4P_TEST_DEVICE"):
         description="some child vector",
     )
 
-    controller.add_sub_controller("Child", sub_controller)
+    controller.add_sub_controller("child", sub_controller)
 
     fastcs = FastCS(controller, [p4p_options])
     fastcs.run()
