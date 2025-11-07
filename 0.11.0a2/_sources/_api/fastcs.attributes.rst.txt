@@ -1,0 +1,39 @@
+``fastcs.attributes``
+=====================
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+.. automodule:: fastcs.attributes
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        AttrIOUpdateCallback
+        AttrOnPutCallback
+        AttrOnUpdateCallback
+        AttrR
+        AttrRW
+        AttrSyncSetpointCallback
+        AttrUpdateCallback
+        AttrW
+        Attribute
+        ONCE
+    
+    
