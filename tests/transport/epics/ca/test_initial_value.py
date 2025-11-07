@@ -61,9 +61,8 @@ async def test_initial_values_set_in_ca(mocker):
 
     record_spy = mocker.spy(ca_ioc, "_make_record")
 
+    task = asyncio.create_task(fastcs.serve(interactive=False))
     try:
-        task = asyncio.create_task(fastcs.serve(interactive=False))
-
         async with asyncio.timeout(3):
             while not record_spy.spy_return_list:
                 await asyncio.sleep(0)
