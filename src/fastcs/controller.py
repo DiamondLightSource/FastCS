@@ -230,11 +230,10 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
         description: str | None = None,
         ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
     ) -> None:
-        self._children: dict[int, Controller] = {}
-        self.update(children)
         super().__init__(description=description, ios=ios)
+        self._children: dict[int, Controller] = {}
         for index, child in children.items():
-            super().add_sub_controller(str(index), child)
+            self[index] = child
 
     def add_sub_controller(
         self, name: str, sub_controller: Controller | ControllerVector
@@ -261,9 +260,10 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
             msg = f"Expected Controller, got {value}"
             raise TypeError(msg)
         self._children[key] = value
+        super().add_sub_controller(str(key), value)
 
     def __delitem__(self, key: int) -> None:
-        del self._children[key]
+        raise NotImplementedError("Cannot delete sub controller from ControllerVector.")
 
     def __iter__(self) -> Iterator[int]:
         yield from self._children
