@@ -270,6 +270,3 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
 
     def __len__(self) -> int:
         return len(self._children)
-
-    def children(self) -> Iterator[tuple[int, Controller]]:
-        yield from self._children.items()
