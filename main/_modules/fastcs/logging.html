@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.logging &#8212; FastCS 0.11.0a1 documentation</title>
+    <title>fastcs.logging &#8212; FastCS 0.11.0a2.dev6+g0f785f490 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=66820133"></script>
+    <script src="../../_static/documentation_options.js?v=ba0e613e"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -57,7 +57,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://DiamondLightSource.github.io/FastCS/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.11.0a1';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'main';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -66,7 +66,7 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0a1" />
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -458,7 +458,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">._graylog</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraylogStaticFields</span> <span class="k">as</span> <span class="n">GraylogStaticFields</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._graylog</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_graylog_env_fields</span> <span class="k">as</span> <span class="n">parse_graylog_env_fields</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._graylog</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_graylog_static_fields</span> <span class="k">as</span> <span class="n">parse_graylog_static_fields</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">._logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogLevel</span><span class="p">,</span> <span class="n">_configure_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">LogLevel</span><span class="p">,</span> <span class="n">_configure_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">_logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="s2">&quot;fastcs&quot;</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;FastCS logger</span>
@@ -501,11 +501,26 @@
 <span class="sd">fastcs. Instead there is a ``Tracer`` class for verbose logging with fine-grained</span>
 <span class="sd">controls that can be enabled by the user at runtime.</span>
 
-<span class="sd">Use ``configure_logging`` to re-confi the logger at runtime. For more advanced</span>
+<span class="sd">Use ``configure_logging`` to re-configure the logger at runtime. For more advanced</span>
 <span class="sd">controls, configure the ``logger`` singleton directly.</span>
 
 <span class="sd">See the ``loguru`` docs for more information: https://loguru.readthedocs.io</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="bind_logger">
+<a class="viewcode-back" href="../../_api/fastcs.logging.html#fastcs.logging.bind_logger">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">bind_logger</span><span class="p">(</span><span class="n">logger_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Logger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a wrapper of the singleton fastcs logger with the given name bound</span>
+
+<span class="sd">    The name will be displayed in all log messages from the returned wrapper.</span>
+
+<span class="sd">    See the docstring for ``fastcs.logging.logger`` for more information.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="n">logger_name</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="configure_logging">

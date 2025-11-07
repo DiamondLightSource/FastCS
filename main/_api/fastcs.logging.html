@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.logging &#8212; FastCS 0.11.0a1 documentation</title>
+    <title>fastcs.logging &#8212; FastCS 0.11.0a2.dev6+g0f785f490 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=66820133"></script>
+    <script src="../_static/documentation_options.js?v=ba0e613e"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -58,7 +58,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://DiamondLightSource.github.io/FastCS/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.11.0a1';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'main';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -69,7 +69,7 @@
     <link rel="prev" title="fastcs.launch" href="fastcs.launch.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0a1" />
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -537,13 +537,16 @@
 <p class="rubric">Members</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.logging.configure_logging" title="fastcs.logging.configure_logging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configure_logging</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.logging.bind_logger" title="fastcs.logging.bind_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bind_logger</span></code></a></p></td>
+<td><p>Create a wrapper of the singleton fastcs logger with the given name bound</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.logging.configure_logging" title="fastcs.logging.configure_logging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configure_logging</span></code></a></p></td>
 <td><p>Configure FastCS logger</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.logging.intercept_std_logger" title="fastcs.logging.intercept_std_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept_std_logger</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.logging.intercept_std_logger" title="fastcs.logging.intercept_std_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intercept_std_logger</span></code></a></p></td>
 <td><p>Intercept std logging messages from the given logger</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.logging.logger" title="fastcs.logging.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.logging.logger" title="fastcs.logging.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
 <td><p>FastCS logger</p></td>
 </tr>
 </tbody>
@@ -582,9 +585,17 @@ method. To create a module logger with its name</p>
 <p>As standard <code class="docutils literal notranslate"><span class="pre">loguru</span></code> supports <code class="docutils literal notranslate"><span class="pre">trace</span></code> level monitoring, but it should not be used in
 fastcs. Instead there is a <code class="docutils literal notranslate"><span class="pre">Tracer</span></code> class for verbose logging with fine-grained
 controls that can be enabled by the user at runtime.</p>
-<p>Use <code class="docutils literal notranslate"><span class="pre">configure_logging</span></code> to re-confi the logger at runtime. For more advanced
+<p>Use <code class="docutils literal notranslate"><span class="pre">configure_logging</span></code> to re-configure the logger at runtime. For more advanced
 controls, configure the <code class="docutils literal notranslate"><span class="pre">logger</span></code> singleton directly.</p>
 <p>See the <code class="docutils literal notranslate"><span class="pre">loguru</span></code> docs for more information: <a class="reference external" href="https://loguru.readthedocs.io">https://loguru.readthedocs.io</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fastcs.logging.bind_logger">
+<span class="sig-prename descclassname"><span class="pre">fastcs.logging.</span></span><span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="../_modules/fastcs/logging.html#bind_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.logging.bind_logger" title="Link to this definition">#</a></dt>
+<dd><p>Create a wrapper of the singleton fastcs logger with the given name bound</p>
+<p>The name will be displayed in all log messages from the returned wrapper.</p>
+<p>See the docstring for <code class="docutils literal notranslate"><span class="pre">fastcs.logging.logger</span></code> for more information.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -674,6 +685,7 @@ controls, configure the <code class="docutils literal notranslate"><span class="
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.logging.logger"><code class="docutils literal notranslate"><span class="pre">logger</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.logging.bind_logger"><code class="docutils literal notranslate"><span class="pre">bind_logger()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.logging.configure_logging"><code class="docutils literal notranslate"><span class="pre">configure_logging()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.logging.intercept_std_logger"><code class="docutils literal notranslate"><span class="pre">intercept_std_logger()</span></code></a></li>
 </ul>
@@ -683,7 +695,7 @@ controls, configure the <code class="docutils literal notranslate"><span class="
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/DiamondLightSource/FastCS/edit/0.11.0a1/docs/_api/fastcs.logging.rst">
+    <a href="https://github.com/DiamondLightSource/FastCS/edit/main/docs/_api/fastcs.logging.rst">
       <i class="fa-solid fa-pencil"></i>
       
       

@@ -3,6 +3,7 @@
         
         
         
+        
 
 .. automodule:: fastcs.logging
     :members:
@@ -18,6 +19,7 @@
     .. autosummary::
         :nosignatures:
     
+        bind_logger
         configure_logging
         intercept_std_logger
         logger
