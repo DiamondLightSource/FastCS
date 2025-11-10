@@ -32,7 +32,7 @@ MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
 EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, Waveform)
-EPICS_WAVEFORM_LENGTH = 256
+DEFAULT_STRING_WAVEFORM_LENGTH = 256
 
 DATATYPE_FIELD_TO_RECORD_FIELD = {
     "prec": "PREC",
@@ -79,6 +79,8 @@ def record_metadata_from_datatype(
         arguments.pop("DRVH", None)
 
     match datatype:
+        case String():
+            arguments["length"] = datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH
         case Waveform():
             if len(datatype.shape) != 1:
                 raise TypeError(
@@ -138,8 +140,8 @@ def cast_to_epics_type(datatype: DataType[T], value: T) -> Any:
                 return datatype.index_of(datatype.validate(value))
             else:  # enum backed by string record
                 return datatype.validate(value).name
-        case String():
-            return value[: EPICS_WAVEFORM_LENGTH - 1]
+        case String() as string:
+            return value[: string.length]
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
             return value
         case _:
