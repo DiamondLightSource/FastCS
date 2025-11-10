@@ -23,7 +23,7 @@ async def parse_attributes(
 
     for controller_api in root_controller_api.walk_api():
         pv_prefix = controller_pv_prefix(root_pv_prefix, controller_api)
-        provider = add_pvi_info(
+        add_pvi_info(
             provider=provider,
             pv_prefix=pv_prefix,
             controller_api=controller_api,
