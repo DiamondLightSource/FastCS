@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from typing import Any
 
 from softioc import builder
 
@@ -45,10 +46,19 @@ DATATYPE_FIELD_TO_RECORD_FIELD = {
 
 def record_metadata_from_attribute(
     attribute: Attribute[T],
-) -> dict[str, str | None]:
+) -> dict[str, Any]:
     """Converts attributes on the `Attribute` to the
     field name/value in the record metadata."""
-    return {"DESC": attribute.description}
+    metadata: dict[str, Any] = {"DESC": attribute.description}
+    initial = None
+    match attribute:
+        case AttrR():
+            initial = attribute.get()
+        case AttrW():
+            initial = attribute.datatype.initial_value
+    if initial is not None:
+        metadata["initial_value"] = cast_to_epics_type(attribute.datatype, initial)
+    return metadata
 
 
 def record_metadata_from_datatype(
@@ -120,7 +130,7 @@ def cast_from_epics_type(datatype: DataType[T], value: object) -> T:
             raise ValueError(f"Unsupported datatype {datatype}")
 
 
-def cast_to_epics_type(datatype: DataType[T], value: T) -> object:
+def cast_to_epics_type(datatype: DataType[T], value: T) -> Any:
     """Casts from an attribute's datatype to an EPICS datatype."""
     match datatype:
         case Enum():

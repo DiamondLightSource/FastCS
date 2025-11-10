@@ -50,6 +50,7 @@ dev = [
     "pytest-cov",
     "pytest-mock",
     "pytest-asyncio",
+    "pytest-forked",
     "pytest-markdown-docs",
     "ruff",
     "sphinx-autobuild",
