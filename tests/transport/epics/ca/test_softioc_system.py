@@ -16,16 +16,31 @@ def test_ioc(softioc_subprocess: tuple[str, Queue]):
     assert parent_pvi["value"] == {
         "a": {"r": f"{pv_prefix}:A"},
         "b": {"r": f"{pv_prefix}:B_RBV", "w": f"{pv_prefix}:B"},
-        "child": {"d": f"{pv_prefix}:Child:PVI"},
+        "childvector": {"d": f"{pv_prefix}:ChildVector:PVI"},
     }
 
-    child_pvi_pv = parent_pvi["value"]["child"]["d"]
+    child_vector_pvi_pv = parent_pvi["value"]["childvector"]["d"]
+    _child_vector_pvi = ctxt.get(child_vector_pvi_pv)
+    assert isinstance(_child_vector_pvi, Value)
+    _child_vector_pvi = _child_vector_pvi.todict()
+    assert all(
+        f in _child_vector_pvi for f in ("alarm", "display", "timeStamp", "value")
+    )
+    assert _child_vector_pvi["display"] == {
+        "description": "The records in this controller"
+    }
+    assert _child_vector_pvi["value"] == {
+        "__0": {"d": f"{pv_prefix}:ChildVector:0:PVI"},
+        "__1": {"d": f"{pv_prefix}:ChildVector:1:PVI"},
+    }
+
+    child_pvi_pv = _child_vector_pvi["value"]["__0"]["d"]
     _child_pvi = ctxt.get(child_pvi_pv)
     assert isinstance(_child_pvi, Value)
     child_pvi = _child_pvi.todict()
     assert all(f in child_pvi for f in ("alarm", "display", "timeStamp", "value"))
     assert child_pvi["display"] == {"description": "The records in this controller"}
     assert child_pvi["value"] == {
-        "c": {"w": f"{pv_prefix}:Child:C"},
-        "d": {"x": f"{pv_prefix}:Child:D"},
+        "c": {"w": f"{pv_prefix}:ChildVector:0:C"},
+        "d": {"x": f"{pv_prefix}:ChildVector:0:D"},
     }

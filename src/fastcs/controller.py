@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Iterator, Mapping, MutableMapping, Sequence
 from copy import deepcopy
 from typing import get_type_hints
 
@@ -17,6 +17,7 @@ class BaseController(Tracer):
 
     #: Attributes passed from the device at runtime.
     attributes: dict[str, Attribute]
+    root_attribute: Attribute | None = None
 
     description: str | None = None
 
@@ -36,7 +37,7 @@ class BaseController(Tracer):
         if not hasattr(self, "attributes"):
             self.attributes = {}
         self._path: list[str] = path or []
-        self.__sub_controller_tree: dict[str, Controller] = {}
+        self.__sub_controller_tree: dict[str, BaseController] = {}
 
         self._bind_attrs()
 
@@ -144,7 +145,7 @@ class BaseController(Tracer):
         self.attributes[name] = attribute
         super().__setattr__(name, attribute)
 
-    def add_sub_controller(self, name: str, sub_controller: Controller):
+    def add_sub_controller(self, name: str, sub_controller: BaseController):
         if name in self.__sub_controller_tree.keys():
             raise ValueError(
                 f"Cannot add sub controller {sub_controller}. "
@@ -166,7 +167,7 @@ class BaseController(Tracer):
             self.attributes[name] = sub_controller.root_attribute
 
     @property
-    def sub_controllers(self) -> dict[str, Controller]:
+    def sub_controllers(self) -> dict[str, BaseController]:
         return self.__sub_controller_tree
 
     def __repr__(self):
@@ -194,8 +195,6 @@ class Controller(BaseController):
     such as generating a UI or creating parameters for a control system.
     """
 
-    root_attribute: Attribute | None = None
-
     def __init__(
         self,
         description: str | None = None,
@@ -203,8 +202,66 @@ class Controller(BaseController):
     ) -> None:
         super().__init__(description=description, ios=ios)
 
+    def add_sub_controller(self, name: str, sub_controller: BaseController):
+        if name.isdigit():
+            raise ValueError(
+                f"Cannot add sub controller {name}. "
+                "Numeric-only names are not allowed; use ControllerVector instead"
+            )
+        return super().add_sub_controller(name, sub_controller)
+
     async def connect(self) -> None:
         pass
 
     async def disconnect(self) -> None:
         pass
+
+
+class ControllerVector(MutableMapping[int, Controller], BaseController):
+    """A controller with a collection of identical sub controllers distinguished
+    by a numeric value"""
+
+    def __init__(
+        self,
+        children: Mapping[int, Controller],
+        description: str | None = None,
+        ios: Sequence[AttributeIO[T, AttributeIORefT]] | None = None,
+    ) -> None:
+        super().__init__(description=description, ios=ios)
+        self._children: dict[int, Controller] = {}
+        for index, child in children.items():
+            self[index] = child
+
+    def add_sub_controller(self, name: str, sub_controller: BaseController):
+        raise NotImplementedError(
+            "Cannot add named sub controller to ControllerVector. "
+            "Use __setitem__ instead, for indexed sub controllers. "
+            "E.g., vector[1] = Controller()"
+        )
+
+    def __getitem__(self, key: int) -> Controller:
+        try:
+            return self._children[key]
+        except KeyError as exception:
+            raise KeyError(
+                f"ControllerVector does not have Controller with key {key}"
+            ) from exception
+
+    def __setitem__(self, key: int, value: Controller) -> None:
+        if not isinstance(key, int):
+            msg = f"Expected int, got {key}"
+            raise TypeError(msg)
+        if not isinstance(value, Controller):
+            msg = f"Expected Controller, got {value}"
+            raise TypeError(msg)
+        self._children[key] = value
+        super().add_sub_controller(str(key), value)
+
+    def __delitem__(self, key: int) -> None:
+        raise NotImplementedError("Cannot delete sub controller from ControllerVector.")
+
+    def __iter__(self) -> Iterator[int]:
+        yield from self._children
+
+    def __len__(self) -> int:
+        return len(self._children)

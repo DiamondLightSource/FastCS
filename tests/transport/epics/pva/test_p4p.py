@@ -14,7 +14,7 @@ from p4p.client.thread import Context as ThreadContext
 from p4p.nt import NTTable
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller
+from fastcs.controller import Controller, ControllerVector
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table, Waveform
 from fastcs.launch import FastCS
 from fastcs.transport.epics.options import EpicsIOCOptions
@@ -35,32 +35,41 @@ async def test_ioc(p4p_subprocess: tuple[str, Queue]):
     assert parent_pvi["value"] == {
         "a": {"rw": f"{pv_prefix}:A"},
         "b": {"w": f"{pv_prefix}:B"},
-        "child": {
-            "d": {
-                "v1": f"{pv_prefix}:Child1:PVI",
-                "v2": f"{pv_prefix}:Child2:PVI",
-            }
-        },
+        "child": {"d": f"{pv_prefix}:Child:PVI"},
         "table": {
             "rw": f"{pv_prefix}:Table",
         },
     }
 
-    child_pvi_pv = parent_pvi["value"]["child"]["d"]["v1"]
+    child_vector_pvi_pv = parent_pvi["value"]["child"]["d"]
+    _child_vector_pvi = await ctxt.get(child_vector_pvi_pv)
+    assert isinstance(_child_vector_pvi, Value)
+    _child_vector_pvi = _child_vector_pvi.todict()
+    assert all(
+        f in _child_vector_pvi for f in ("alarm", "display", "timeStamp", "value")
+    )
+    assert _child_vector_pvi["display"] == {"description": "some child vector"}
+    assert _child_vector_pvi["value"] == {
+        "vector_attribute": {"r": f"{pv_prefix}:Child:VectorAttribute"},
+        "__1": {"d": f"{pv_prefix}:Child:1:PVI"},
+        "__2": {"d": f"{pv_prefix}:Child:2:PVI"},
+    }
+
+    child_pvi_pv = _child_vector_pvi["value"]["__1"]["d"]
     _child_pvi = await ctxt.get(child_pvi_pv)
     assert isinstance(_child_pvi, Value)
     child_pvi = _child_pvi.todict()
     assert all(f in child_pvi for f in ("alarm", "display", "timeStamp", "value"))
     assert child_pvi["display"] == {"description": "some sub controller"}
     assert child_pvi["value"] == {
-        "c": {"w": f"{pv_prefix}:Child1:C"},
-        "d": {"x": f"{pv_prefix}:Child1:D"},
-        "e": {"r": f"{pv_prefix}:Child1:E"},
-        "f": {"rw": f"{pv_prefix}:Child1:F"},
-        "g": {"rw": f"{pv_prefix}:Child1:G"},
-        "h": {"rw": f"{pv_prefix}:Child1:H"},
-        "i": {"x": f"{pv_prefix}:Child1:I"},
-        "j": {"r": f"{pv_prefix}:Child1:J"},
+        "c": {"w": f"{pv_prefix}:Child:1:C"},
+        "d": {"x": f"{pv_prefix}:Child:1:D"},
+        "e": {"r": f"{pv_prefix}:Child:1:E"},
+        "f": {"rw": f"{pv_prefix}:Child:1:F"},
+        "g": {"rw": f"{pv_prefix}:Child:1:G"},
+        "h": {"rw": f"{pv_prefix}:Child:1:H"},
+        "i": {"x": f"{pv_prefix}:Child:1:I"},
+        "j": {"r": f"{pv_prefix}:Child:1:J"},
     }
 
 
@@ -74,7 +83,7 @@ async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
     # time for the p4p transport to update, broadcast, get.
     latency = 1e8
 
-    e_monitor = ctxt.monitor(f"{pv_prefix}:Child1:E", e_values.put)
+    e_monitor = ctxt.monitor(f"{pv_prefix}:Child:1:E", e_values.put)
     try:
         # Throw away the value on the ioc setup so we can compare timestamps
         _ = await e_values.get()
@@ -111,14 +120,14 @@ async def test_command_method(p4p_subprocess: tuple[str, Queue]):
     j_values = asyncio.Queue()
     ctxt = Context("pva")
 
-    d_monitor = ctxt.monitor(f"{pv_prefix}:Child1:D", d_values.put)
-    i_monitor = ctxt.monitor(f"{pv_prefix}:Child1:I", i_values.put)
-    j_monitor = ctxt.monitor(f"{pv_prefix}:Child1:J", j_values.put)
+    d_monitor = ctxt.monitor(f"{pv_prefix}:Child:1:D", d_values.put)
+    i_monitor = ctxt.monitor(f"{pv_prefix}:Child:1:I", i_values.put)
+    j_monitor = ctxt.monitor(f"{pv_prefix}:Child:1:J", j_values.put)
 
     try:
         j_initial_value = await j_values.get()
         assert (await d_values.get()).raw.value is False
-        await ctxt.put(f"{pv_prefix}:Child1:D", True)
+        await ctxt.put(f"{pv_prefix}:Child:1:D", True)
         assert (await d_values.get()).raw.value is True
         # D process hangs for 0.1s, so we wait slightly longer
         await asyncio.sleep(0.2)
@@ -132,7 +141,7 @@ async def test_command_method(p4p_subprocess: tuple[str, Queue]):
         assert before_command_value["value"] is False
         assert before_command_value["alarm"]["severity"] == 0
         assert before_command_value["alarm"]["message"] == ""
-        await ctxt.put(f"{pv_prefix}:Child1:I", True)
+        await ctxt.put(f"{pv_prefix}:Child:1:I", True)
         assert (await i_values.get()).raw.value is True
         await asyncio.sleep(0.2)
 
@@ -146,7 +155,7 @@ async def test_command_method(p4p_subprocess: tuple[str, Queue]):
         assert j_values.empty()
 
         # Second run succeeds
-        await ctxt.put(f"{pv_prefix}:Child1:I", True)
+        await ctxt.put(f"{pv_prefix}:Child:1:I", True)
         assert (await i_values.get()).raw.value is True
         await asyncio.sleep(0.2)
         after_command_value = (await i_values.get()).raw
@@ -266,6 +275,10 @@ def test_pvi_grouping():
 
     controller = SomeController()
 
+    sub_controller_vector = ControllerVector({i: ChildController() for i in range(3)})
+
+    controller.add_sub_controller("child", sub_controller_vector)
+
     sub_controller = ChildController()
     controller.child0 = sub_controller
     sub_controller.child_child = ChildChildController()
@@ -291,13 +304,21 @@ def test_pvi_grouping():
 
     ctxt = ThreadContext("pva")
 
-    controller_pvi, child_controller_pvi, child_child_controller_pvi = [], [], []
+    (
+        controller_pvi,
+        child_vector_controller_pvi,
+        child_child_controller_pvi,
+        child_child_child_controller_pvi,
+    ) = [], [], [], []
     controller_monitor = ctxt.monitor(f"{pv_prefix}:PVI", controller_pvi.append)
-    child_controller_monitor = ctxt.monitor(
-        f"{pv_prefix}:Child0:PVI", child_controller_pvi.append
+    child_vector_controller_monitor = ctxt.monitor(
+        f"{pv_prefix}:Child:PVI", child_vector_controller_pvi.append
     )
     child_child_controller_monitor = ctxt.monitor(
-        f"{pv_prefix}:Child0:ChildChild:PVI", child_child_controller_pvi.append
+        f"{pv_prefix}:Child:0:PVI", child_child_controller_pvi.append
+    )
+    child_child_child_controller_monitor = ctxt.monitor(
+        f"{pv_prefix}Child:0:ChildChild:PVI", child_child_child_controller_pvi.append
     )
     serve = asyncio.ensure_future(fastcs.serve(interactive=False))
 
@@ -309,8 +330,9 @@ def test_pvi_grouping():
         ...
     finally:
         controller_monitor.close()
-        child_controller_monitor.close()
+        child_vector_controller_monitor.close()
         child_child_controller_monitor.close()
+        child_child_child_controller_monitor.close()
         serve.cancel()
 
         assert len(controller_pvi) == 1
@@ -325,21 +347,18 @@ def test_pvi_grouping():
             "value": {
                 "additional_child": {"d": f"{pv_prefix}:AdditionalChild:PVI"},
                 "another_child": {"d": f"{pv_prefix}:AnotherChild:PVI"},
-                "another_attr0": {"rw": f"{pv_prefix}:AnotherAttr0"},
-                "another_attr1000": {"rw": f"{pv_prefix}:AnotherAttr1000"},
+                "another_attr_0": {"rw": f"{pv_prefix}:AnotherAttr0"},
+                "another_attr_1000": {"rw": f"{pv_prefix}:AnotherAttr1000"},
                 "a_third_attr": {"w": f"{pv_prefix}:AThirdAttr"},
-                "attr1": {"rw": f"{pv_prefix}:Attr1"},
-                "child": {
-                    "d": {
-                        "v0": f"{pv_prefix}:Child0:PVI",
-                        "v1": f"{pv_prefix}:Child1:PVI",
-                        "v2": f"{pv_prefix}:Child2:PVI",
-                    }
-                },
+                "attr_1": {"rw": f"{pv_prefix}:Attr1"},
+                "child": {"d": f"{pv_prefix}:Child:PVI"},
+                "child0": {"d": f"{pv_prefix}:Child0:PVI"},
+                "child1": {"d": f"{pv_prefix}:Child1:PVI"},
+                "child2": {"d": f"{pv_prefix}:Child2:PVI"},
             },
         }
-        assert len(child_controller_pvi) == 1
-        assert child_controller_pvi[0].todict() == {
+        assert len(child_vector_controller_pvi) == 1
+        assert child_vector_controller_pvi[0].todict() == {
             "alarm": {"message": "", "severity": 0, "status": 0},
             "display": {"description": ""},
             "timeStamp": {
@@ -348,11 +367,9 @@ def test_pvi_grouping():
                 "userTag": 0,
             },
             "value": {
-                "attr_c": {"w": f"{pv_prefix}:Child0:AttrC"},
-                "attr_d": {
-                    "w": f"{pv_prefix}:Child0:AttrD",
-                },
-                "child_child": {"d": f"{pv_prefix}:Child0:ChildChild:PVI"},
+                "__0": {"d": f"{pv_prefix}:Child:0:PVI"},
+                "__1": {"d": f"{pv_prefix}:Child:1:PVI"},
+                "__2": {"d": f"{pv_prefix}:Child:2:PVI"},
             },
         }
         assert len(child_child_controller_pvi) == 1
@@ -365,8 +382,10 @@ def test_pvi_grouping():
                 "userTag": 0,
             },
             "value": {
-                "attr_e": {"rw": f"{pv_prefix}:Child0:ChildChild:AttrE"},
-                "attr_f": {"r": f"{pv_prefix}:Child0:ChildChild:AttrF"},
+                "attr_c": {"w": f"{pv_prefix}:Child:0:AttrC"},
+                "attr_d": {
+                    "w": f"{pv_prefix}:Child:0:AttrD",
+                },
             },
         }
 

@@ -1,7 +1,7 @@
 import pytest
 
 from fastcs.attributes import AttrR
-from fastcs.controller import Controller
+from fastcs.controller import Controller, ControllerVector
 from fastcs.datatypes import Float, Int
 
 
@@ -101,3 +101,46 @@ def test_conflicting_attributes_and_controllers():
         ValueError, match=r"Cannot add attribute .* existing sub controller"
     ):
         controller.sub_controller = AttrR(Int())  # pyright: ignore[reportAttributeAccessIssue]
+
+
+def test_controller_raises_error_if_passed_numeric_sub_controller_name():
+    sub_controller = SomeSubController()
+    controller = SomeController(sub_controller)
+
+    with pytest.raises(ValueError, match="Numeric-only names are not allowed"):
+        controller.add_sub_controller("30", sub_controller)
+
+
+def test_controller_vector_raises_error_if_add_sub_controller_called():
+    controller_vector = ControllerVector({i: SomeSubController() for i in range(2)})
+
+    with pytest.raises(NotImplementedError, match="Use __setitem__ instead"):
+        controller_vector.add_sub_controller("subcontroller", SomeSubController())
+
+
+def test_controller_vector_indexing():
+    controller = SomeSubController()
+    another_controller = SomeSubController()
+    controller_vector = ControllerVector({1: another_controller})
+    controller_vector[10] = controller
+    assert controller_vector.sub_controllers["10"] == controller
+    assert controller_vector[1] == another_controller
+    assert len(controller_vector) == 2
+
+    with pytest.raises(KeyError):
+        _ = controller_vector[2]
+
+
+def test_controller_vector_delitem_raises_exception():
+    controller = SomeSubController()
+    controller_vector = ControllerVector({1: controller})
+    with pytest.raises(NotImplementedError, match="Cannot delete"):
+        del controller_vector[1]
+
+
+def test_controller_vector_iter():
+    sub_controllers = {1: SomeSubController(), 2: SomeSubController()}
+    controller_vector = ControllerVector(sub_controllers)
+
+    for index, child in controller_vector.items():
+        assert sub_controllers[index] == child

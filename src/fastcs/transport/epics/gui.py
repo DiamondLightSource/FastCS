@@ -160,6 +160,8 @@ class EpicsGUI:
         components: Tree = []
 
         for name, api in controller_api.sub_apis.items():
+            if name.isdigit():
+                name = f"{controller_api.path[-1]}{name}"
             components.append(
                 Group(
                     name=snake_to_pascal(name),

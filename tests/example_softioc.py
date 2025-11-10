@@ -1,8 +1,10 @@
+from pathlib import Path
+
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller
+from fastcs.controller import Controller, ControllerVector
 from fastcs.datatypes import Int
 from fastcs.launch import FastCS
-from fastcs.transport.epics.ca.transport import EpicsCATransport
+from fastcs.transport.epics.ca.transport import EpicsCATransport, EpicsGUIOptions
 from fastcs.transport.epics.options import EpicsIOCOptions
 from fastcs.wrappers import command
 
@@ -22,11 +24,20 @@ class ChildController(Controller):
 
 def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
     controller = ParentController()
-    controller.child = ChildController()
-    fastcs = FastCS(
-        controller, [EpicsCATransport(ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))]
+    vector = ControllerVector({i: ChildController() for i in range(2)})
+    controller.add_sub_controller("ChildVector", vector)
+    gui_options = EpicsGUIOptions(
+        output_path=Path(".") / "demo.bob", title="Demo Vector"
     )
-    fastcs.run(interactive=False)
+    fastcs = FastCS(
+        controller,
+        [
+            EpicsCATransport(
+                ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix), gui=gui_options
+            )
+        ],
+    )
+    fastcs.run(interactive=True)
 
 
 if __name__ == "__main__":
