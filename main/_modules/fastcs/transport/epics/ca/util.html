@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.ca.util &#8212; FastCS 0.11.0a3.dev3+g77a720df8 documentation</title>
+    <title>fastcs.transport.epics.ca.util &#8212; FastCS 0.11.0a3.dev4+g48c688d80 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=e3aa8fa3"></script>
+    <script src="../../../../../_static/documentation_options.js?v=c663c9bb"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -483,7 +483,7 @@
 
 
 <span class="n">EPICS_ALLOWED_DATATYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">Bool</span><span class="p">,</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Waveform</span><span class="p">)</span>
-<span class="n">EPICS_WAVEFORM_LENGTH</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="n">DEFAULT_STRING_WAVEFORM_LENGTH</span> <span class="o">=</span> <span class="mi">256</span>
 
 <span class="n">DATATYPE_FIELD_TO_RECORD_FIELD</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;prec&quot;</span><span class="p">:</span> <span class="s2">&quot;PREC&quot;</span><span class="p">,</span>
@@ -535,6 +535,8 @@
         <span class="n">arguments</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;DRVH&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">match</span> <span class="n">datatype</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">String</span><span class="p">():</span>
+            <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datatype</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">DEFAULT_STRING_WAVEFORM_LENGTH</span>
         <span class="k">case</span> <span class="n">Waveform</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -600,8 +602,8 @@
                 <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">index_of</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>  <span class="c1"># enum backed by string record</span>
                 <span class="k">return</span> <span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">case</span> <span class="n">String</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">value</span><span class="p">[:</span> <span class="n">EPICS_WAVEFORM_LENGTH</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">case</span> <span class="n">String</span><span class="p">()</span> <span class="k">as</span> <span class="n">string</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span><span class="p">[:</span> <span class="n">string</span><span class="o">.</span><span class="n">length</span><span class="p">]</span>
         <span class="k">case</span> <span class="n">datatype</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">datatype</span><span class="p">),</span> <span class="n">EPICS_ALLOWED_DATATYPES</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span>
         <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
