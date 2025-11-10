@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.ca.ioc &#8212; FastCS 0.11.0a3.dev1+gbced85da1 documentation</title>
+    <title>fastcs.transport.epics.ca.ioc &#8212; FastCS 0.11.0a3.dev2+gafd418028 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=6700453e"></script>
+    <script src="../../../../../_static/documentation_options.js?v=9bd024d9"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -567,9 +567,14 @@
 
     <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">sub_apis</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">child_pvi</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">controller_pv_prefix</span><span class="p">(</span><span class="n">pv_prefix</span><span class="p">,</span><span class="w"> </span><span class="n">child</span><span class="p">)</span><span class="si">}</span><span class="s2">:PVI&quot;</span>
-        <span class="n">child_name</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">child_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># Sub-Controller of ControllerVector</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span>
+            <span class="k">else</span> <span class="n">child</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
 
-        <span class="n">_add_pvi_info</span><span class="p">(</span><span class="n">child_pvi</span><span class="p">,</span> <span class="n">parent_pvi</span><span class="p">,</span> <span class="n">child_name</span><span class="p">)</span>
+        <span class="n">_add_pvi_info</span><span class="p">(</span><span class="n">child_pvi</span><span class="p">,</span> <span class="n">parent_pvi</span><span class="p">,</span> <span class="n">child_name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
         <span class="n">_add_sub_controller_pvi_info</span><span class="p">(</span><span class="n">pv_prefix</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
 
 

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.pva.ioc &#8212; FastCS 0.11.0a3.dev1+gbced85da1 documentation</title>
+    <title>fastcs.transport.epics.pva.ioc &#8212; FastCS 0.11.0a3.dev2+gafd418028 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=6700453e"></script>
+    <script src="../../../../../_static/documentation_options.js?v=9bd024d9"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -453,7 +453,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">p4p.server</span><span class="w"> </span><span class="kn">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">StaticProvider</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">controller_pv_prefix</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">snake_to_pascal</span>
@@ -463,34 +463,25 @@
     <span class="n">make_shared_read_pv</span><span class="p">,</span>
     <span class="n">make_shared_write_pv</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.pvi_tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessModeType</span><span class="p">,</span> <span class="n">PviTree</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_attribute_to_access</span><span class="p">(</span><span class="n">attribute</span><span class="p">:</span> <span class="n">Attribute</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessModeType</span><span class="p">:</span>
-    <span class="k">match</span> <span class="n">attribute</span><span class="p">:</span>
-        <span class="k">case</span> <span class="n">AttrRW</span><span class="p">():</span>
-            <span class="k">return</span> <span class="s2">&quot;rw&quot;</span>
-        <span class="k">case</span> <span class="n">AttrR</span><span class="p">():</span>
-            <span class="k">return</span> <span class="s2">&quot;r&quot;</span>
-        <span class="k">case</span> <span class="n">AttrW</span><span class="p">():</span>
-            <span class="k">return</span> <span class="s2">&quot;w&quot;</span>
-        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown attribute type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pvi</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_pvi_info</span>
 
 
 <div class="viewcode-block" id="parse_attributes">
 <a class="viewcode-back" href="../../../../../_api/fastcs.transport.epics.pva.ioc.html#fastcs.transport.epics.pva.ioc.parse_attributes">[docs]</a>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">parse_attributes</span><span class="p">(</span>
     <span class="n">root_pv_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root_controller_api</span><span class="p">:</span> <span class="n">ControllerAPI</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">StaticProvider</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StaticProvider</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parses `Attribute` s into p4p signals in handlers.&quot;&quot;&quot;</span>
-    <span class="n">pvi_tree</span> <span class="o">=</span> <span class="n">PviTree</span><span class="p">(</span><span class="n">root_pv_prefix</span><span class="p">)</span>
     <span class="n">provider</span> <span class="o">=</span> <span class="n">StaticProvider</span><span class="p">(</span><span class="n">root_pv_prefix</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">controller_api</span> <span class="ow">in</span> <span class="n">root_controller_api</span><span class="o">.</span><span class="n">walk_api</span><span class="p">():</span>
         <span class="n">pv_prefix</span> <span class="o">=</span> <span class="n">controller_pv_prefix</span><span class="p">(</span><span class="n">root_pv_prefix</span><span class="p">,</span> <span class="n">controller_api</span><span class="p">)</span>
-
-        <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_sub_device</span><span class="p">(</span><span class="n">pv_prefix</span><span class="p">,</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="n">add_pvi_info</span><span class="p">(</span>
+            <span class="n">provider</span><span class="o">=</span><span class="n">provider</span><span class="p">,</span>
+            <span class="n">pv_prefix</span><span class="o">=</span><span class="n">pv_prefix</span><span class="p">,</span>
+            <span class="n">controller_api</span><span class="o">=</span><span class="n">controller_api</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">controller_api</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">full_pv_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">snake_to_pascal</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -500,23 +491,19 @@
                     <span class="n">attribute_pv_rbv</span> <span class="o">=</span> <span class="n">make_shared_read_pv</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
                     <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">attribute_pv</span><span class="p">)</span>
                     <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">_RBV&quot;</span><span class="p">,</span> <span class="n">attribute_pv_rbv</span><span class="p">)</span>
-                    <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_signal</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;rw&quot;</span><span class="p">)</span>
                 <span class="k">case</span> <span class="n">AttrR</span><span class="p">():</span>
                     <span class="n">attribute_pv</span> <span class="o">=</span> <span class="n">make_shared_read_pv</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
                     <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">attribute_pv</span><span class="p">)</span>
-                    <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_signal</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
                 <span class="k">case</span> <span class="n">AttrW</span><span class="p">():</span>
                     <span class="n">attribute_pv</span> <span class="o">=</span> <span class="n">make_shared_write_pv</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
                     <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">attribute_pv</span><span class="p">)</span>
-                    <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_signal</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">command_methods</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">full_pv_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">snake_to_pascal</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">command_pv</span> <span class="o">=</span> <span class="n">make_command_pv</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
             <span class="n">provider</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">command_pv</span><span class="p">)</span>
-            <span class="n">pvi_tree</span><span class="o">.</span><span class="n">add_signal</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">full_pv_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">[</span><span class="n">provider</span><span class="p">,</span> <span class="n">pvi_tree</span><span class="o">.</span><span class="n">make_provider</span><span class="p">()]</span></div>
+    <span class="k">return</span> <span class="n">provider</span></div>
 
 
 
@@ -530,10 +517,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span> <span class="o">=</span> <span class="n">controller_api</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">providers</span> <span class="o">=</span> <span class="k">await</span> <span class="n">parse_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pv_prefix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span><span class="p">)</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="k">await</span> <span class="n">parse_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pv_prefix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span><span class="p">)</span>
 
         <span class="n">endless_event</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
-        <span class="k">with</span> <span class="n">Server</span><span class="p">(</span><span class="n">providers</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">Server</span><span class="p">([</span><span class="n">provider</span><span class="p">]):</span>
             <span class="k">await</span> <span class="n">endless_event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
 
 </pre></div>

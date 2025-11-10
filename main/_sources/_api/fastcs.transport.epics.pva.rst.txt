@@ -14,7 +14,7 @@
         :recursive:
     
         ioc
-        pvi_tree
+        pvi
         transport
         types
     
