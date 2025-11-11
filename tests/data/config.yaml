@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=schema.json
 transport:
-  - ca_ioc: {}
+  - epicsca: {}
     docs: {}
     gui: {}
   - pva_ioc: {}

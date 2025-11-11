@@ -9,7 +9,7 @@ transport:
       host: localhost
       port: 8083
       log_level: info
-  - ca_ioc:
+  - epicsca:
       pv_prefix: GARYDEMO
     gui:
       title: Temperature Controller Demo

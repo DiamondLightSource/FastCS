@@ -23,7 +23,7 @@ logger = _fastcs_logger.bind(logger_name=__name__)
 class EpicsCATransport(Transport):
     """Channel access transport."""
 
-    ca_ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
+    epicsca: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
     docs: EpicsDocsOptions | None = None
     gui: EpicsGUIOptions | None = None
 
@@ -34,8 +34,8 @@ class EpicsCATransport(Transport):
     ) -> None:
         self._controller_api = controller_api
         self._loop = loop
-        self._pv_prefix = self.ca_ioc.pv_prefix
-        self._ioc = EpicsCAIOC(self.ca_ioc.pv_prefix, controller_api, self.ca_ioc)
+        self._pv_prefix = self.epicsca.pv_prefix
+        self._ioc = EpicsCAIOC(self.epicsca.pv_prefix, controller_api, self.epicsca)
 
         if self.docs is not None:
             EpicsDocs(self._controller_api).create_docs(self.docs)

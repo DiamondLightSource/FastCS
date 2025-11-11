@@ -55,7 +55,7 @@ async def test_initial_values_set_in_ca(mocker):
     controller = InitialValuesController()
     fastcs = FastCS(
         controller,
-        [EpicsCATransport(ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))],
+        [EpicsCATransport(epicsca=EpicsIOCOptions(pv_prefix=pv_prefix))],
         loop,
     )
 

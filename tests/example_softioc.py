@@ -33,7 +33,7 @@ def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
         controller,
         [
             EpicsCATransport(
-                ca_ioc=EpicsIOCOptions(pv_prefix=pv_prefix), gui=gui_options
+                epicsca=EpicsIOCOptions(pv_prefix=pv_prefix), gui=gui_options
             )
         ],
     )
