@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Creating a FastCS Driver &#8212; FastCS 0.11.0a3.dev5+g7582add37 documentation</title>
+    <title>Creating a FastCS Driver &#8212; FastCS 0.11.0a3.dev6+gaecb4c374 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=5eeb7bbf"></script>
+    <script src="../_static/documentation_options.js?v=4eea5e4b"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -621,24 +621,23 @@ options to the transport options and generate a <code class="docutils literal no
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
     <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">())</span>
 
 
-<span class="hll"><span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
-</span><span class="hll">    <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.bob&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Demo Temperature Controller&quot;</span>
+<span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
+<span class="hll">    <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.bob&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Demo Temperature Controller&quot;</span>
 </span><span class="hll"><span class="p">)</span>
 </span><span class="hll"><span class="n">epics_ca</span> <span class="o">=</span> <span class="n">EpicsCATransport</span><span class="p">(</span><span class="n">gui</span><span class="o">=</span><span class="n">gui_options</span><span class="p">,</span> <span class="n">epicsca</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 </span><span class="hll"><span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(),</span> <span class="p">[</span><span class="n">epics_ca</span><span class="p">])</span>
-</span>
-<span class="hll"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-</span>    <span class="n">fastcs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
+</span><span class="hll">
+</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="hll">    <span class="n">fastcs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</span></pre></div>
 </div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">demo.bob</span></code> will have been created in the directory the application was run from.</p>
