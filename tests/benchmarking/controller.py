@@ -21,9 +21,9 @@ def run():
     transport_options = [
         RestTransport(rest=RestServerOptions(port=8090)),
         EpicsCATransport(
-            ca_ioc=EpicsIOCOptions(pv_prefix="BENCHMARK-DEVICE"),
+            epicsca=EpicsIOCOptions(pv_prefix="BENCHMARK-DEVICE"),
         ),
-        TangoTransport(dsr=TangoDSROptions(dev_name="MY/BENCHMARK/DEVICE")),
+        TangoTransport(tango=TangoDSROptions(dev_name="MY/BENCHMARK/DEVICE")),
     ]
     instance = FastCS(MyTestController(), transport_options, asyncio.get_event_loop())
     instance.run()

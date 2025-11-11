@@ -93,7 +93,7 @@ class ChildController(Controller):
 
 def run(pv_prefix="P4P_TEST_DEVICE"):
     simple_attribute_io = SimpleAttributeIO()
-    p4p_options = EpicsPVATransport(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
+    p4p_options = EpicsPVATransport(epicspva=EpicsIOCOptions(pv_prefix=pv_prefix))
     controller = ParentController(ios=[simple_attribute_io])
 
     class ChildVector(ControllerVector):

@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=schema.json
 transport:
-  - ca_ioc: {}
+  - epicsca: {}
     docs: {}
     gui: {}
-  - pva_ioc: {}
+  - epicspva: {}
     docs: {}
     gui: {}
   - rest: {}
-  - dsr: {}
+  - tango: {}
   - graphql: {}
 controller:
   name: controller-name

@@ -11,7 +11,7 @@ from .dsr import TangoDSR, TangoDSROptions
 class TangoTransport(Transport):
     """Tango transport."""
 
-    dsr: TangoDSROptions = field(default_factory=TangoDSROptions)
+    tango: TangoDSROptions = field(default_factory=TangoDSROptions)
 
     def connect(
         self,
@@ -21,5 +21,5 @@ class TangoTransport(Transport):
         self._dsr = TangoDSR(controller_api, loop)
 
     async def serve(self) -> None:
-        coro = asyncio.to_thread(self._dsr.run, self.dsr)
+        coro = asyncio.to_thread(self._dsr.run, self.tango)
         await coro

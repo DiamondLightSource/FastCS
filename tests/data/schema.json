@@ -2,7 +2,7 @@
   "$defs": {
     "EpicsCATransport": {
       "properties": {
-        "ca_ioc": {
+        "epicsca": {
           "$ref": "#/$defs/EpicsIOCOptions"
         },
         "docs": {
@@ -98,7 +98,7 @@
     },
     "EpicsPVATransport": {
       "properties": {
-        "pva_ioc": {
+        "epicspva": {
           "$ref": "#/$defs/EpicsIOCOptions"
         },
         "docs": {
@@ -223,7 +223,7 @@
     },
     "TangoTransport": {
       "properties": {
-        "dsr": {
+        "tango": {
           "$ref": "#/$defs/TangoDSROptions"
         }
       },

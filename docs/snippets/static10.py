@@ -80,7 +80,7 @@ class TemperatureController(Controller):
 gui_options = EpicsGUIOptions(
     output_path=Path(".") / "demo.bob", title="Demo Temperature Controller"
 )
-epics_ca = EpicsCATransport(gui=gui_options, ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"))
+epics_ca = EpicsCATransport(gui=gui_options, epicsca=EpicsIOCOptions(pv_prefix="DEMO"))
 connection_settings = IPConnectionSettings("localhost", 25565)
 fastcs = FastCS(TemperatureController(4, connection_settings), [epics_ca])
 

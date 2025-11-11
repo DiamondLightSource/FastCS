@@ -16,7 +16,7 @@ class TemperatureController(Controller):
 gui_options = EpicsGUIOptions(
     output_path=Path(".") / "demo.bob", title="Demo Temperature Controller"
 )
-epics_ca = EpicsCATransport(gui=gui_options, ca_ioc=EpicsIOCOptions(pv_prefix="DEMO"))
+epics_ca = EpicsCATransport(gui=gui_options, epicsca=EpicsIOCOptions(pv_prefix="DEMO"))
 fastcs = FastCS(TemperatureController(), [epics_ca])
 
 if __name__ == "__main__":
