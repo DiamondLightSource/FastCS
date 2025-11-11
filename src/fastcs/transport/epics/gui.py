@@ -8,6 +8,7 @@ from pvi.device import (
     Device,
     Grid,
     Group,
+    ImageColorMap,
     ImageRead,
     ReadWidgetUnion,
     SignalR,
@@ -76,7 +77,9 @@ class EpicsGUI:
                         * fastcs_datatype.shape[0]
                         / fastcs_datatype.shape[1]
                     )
-                    return ImageRead(width=default_width, height=height, grayscale=True)
+                    return ImageRead(
+                        width=default_width, height=height, color_map=ImageColorMap.GRAY
+                    )
                 else:
                     raise NotImplementedError("hmm figure this out")
             case datatype:
