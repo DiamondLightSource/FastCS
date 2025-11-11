@@ -1,6 +1,7 @@
 from pvi._format.dls import DLSFormatter  # type: ignore
 from pvi.device import (
     LED,
+    ArrayTrace,
     ButtonPanel,
     ComboBox,
     ComponentUnion,
@@ -67,7 +68,7 @@ class EpicsGUI:
             case Enum():
                 return TextRead(format=TextFormat.string)
             case Waveform():
-                if len(fastcs_datatype.shape) == 2:
+                if (length := len(fastcs_datatype.shape)) == 2:
                     default_width = 800
                     height = int(
                         default_width
@@ -77,8 +78,12 @@ class EpicsGUI:
                     return ImageRead(
                         width=default_width, height=height, color_map=ImageColorMap.GRAY
                     )
+                elif length == 1:
+                    return ArrayTrace(axis="")
                 else:
-                    raise NotImplementedError("hmm figure this out")
+                    raise NotImplementedError(
+                        f"Waveform shape {fastcs_datatype.shape} not supported"
+                    )
             case datatype:
                 raise TypeError(f"Unsupported type {type(datatype)}: {datatype}")
 
