@@ -3,7 +3,7 @@ transport:
   - epicsca: {}
     docs: {}
     gui: {}
-  - pva_ioc: {}
+  - epicspva: {}
     docs: {}
     gui: {}
   - rest: {}

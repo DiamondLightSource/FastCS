@@ -98,7 +98,7 @@
     },
     "EpicsPVATransport": {
       "properties": {
-        "pva_ioc": {
+        "epicspva": {
           "$ref": "#/$defs/EpicsIOCOptions"
         },
         "docs": {

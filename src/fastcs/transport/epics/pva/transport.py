@@ -21,7 +21,7 @@ logger = _fastcs_logger.bind(logger_name=__name__)
 class EpicsPVATransport(Transport):
     """PV access transport."""
 
-    pva_ioc: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
+    epicspva: EpicsIOCOptions = field(default_factory=EpicsIOCOptions)
     docs: EpicsDocsOptions | None = None
     gui: EpicsGUIOptions | None = None
 
@@ -31,8 +31,8 @@ class EpicsPVATransport(Transport):
         loop: asyncio.AbstractEventLoop,
     ) -> None:
         self._controller_api = controller_api
-        self._pv_prefix = self.pva_ioc.pv_prefix
-        self._ioc = P4PIOC(self.pva_ioc.pv_prefix, controller_api)
+        self._pv_prefix = self.epicspva.pv_prefix
+        self._ioc = P4PIOC(self.epicspva.pv_prefix, controller_api)
 
         if self.docs is not None:
             EpicsDocs(self._controller_api).create_docs(self.docs)
