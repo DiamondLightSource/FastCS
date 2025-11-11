@@ -223,7 +223,7 @@
     },
     "TangoTransport": {
       "properties": {
-        "dsr": {
+        "tango": {
           "$ref": "#/$defs/TangoDSROptions"
         }
       },

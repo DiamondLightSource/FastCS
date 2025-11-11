@@ -194,7 +194,7 @@
     },
     "TangoOptions": {
       "properties": {
-        "dsr": {
+        "tango": {
           "$ref": "#/$defs/TangoDSROptions"
         }
       },

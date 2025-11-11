@@ -7,7 +7,7 @@ transport:
     docs: {}
     gui: {}
   - rest: {}
-  - dsr: {}
+  - tango: {}
   - graphql: {}
 controller:
   name: controller-name
