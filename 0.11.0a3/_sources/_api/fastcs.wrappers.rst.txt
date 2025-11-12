@@ -1,0 +1,23 @@
+``fastcs.wrappers``
+===================
+        
+        
+
+.. automodule:: fastcs.wrappers
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        command
+        scan
+    
+    

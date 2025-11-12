@@ -1,0 +1,21 @@
+``fastcs.attribute_io_ref``
+===========================
+        
+
+.. automodule:: fastcs.attribute_io_ref
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        AttributeIORef
+    
+    
