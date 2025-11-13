@@ -1,9 +1,11 @@
 from multiprocessing import Queue
 
+import pytest
 from p4p import Value
 from p4p.client.thread import Context
 
 
+@pytest.mark.timeout(3)
 def test_ioc(softioc_subprocess: tuple[str, Queue]):
     pv_prefix, _ = softioc_subprocess
     ctxt = Context("pva")

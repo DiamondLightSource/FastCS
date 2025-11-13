@@ -52,6 +52,7 @@ dev = [
     "pytest-asyncio",
     "pytest-forked",
     "pytest-markdown-docs",
+    "pytest-timeout",
     "ruff",
     "sphinx-autobuild",
     "sphinx-copybutton",
@@ -93,6 +94,7 @@ addopts = """
 # filterwarnings = "error"
 # Doctest python code in docs, python code in src docstrings, test functions in tests
 testpaths = "docs src tests"
+timeout = 1
 
 [tool.coverage.run]
 data_file = "/tmp/fastcs.coverage"
