@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.util &#8212; FastCS 0.11.0a3.dev6+gaecb4c374 documentation</title>
+    <title>fastcs.util &#8212; FastCS 0.11.0a4.dev1+g291768b30 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=4eea5e4b"></script>
+    <script src="../../_static/documentation_options.js?v=bc2b71fd"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -496,11 +496,20 @@
 <span class="sd">    For each type-hinted attribute, validate that a corresponding instance exists in the</span>
 <span class="sd">    controller with the correct access mode and datatype.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">controller</span><span class="p">))</span>
-    <span class="n">alias_hints</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hints</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">_GenericAlias</span><span class="p">)}</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">hint</span> <span class="ow">in</span> <span class="n">alias_hints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">attr_class</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">subcontroller</span> <span class="ow">in</span> <span class="n">controller</span><span class="o">.</span><span class="n">sub_controllers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">validate_hinted_attributes</span><span class="p">(</span><span class="n">subcontroller</span><span class="p">)</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">controller</span><span class="p">))</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">_GenericAlias</span> <span class="o">|</span> <span class="nb">type</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">hint</span> <span class="ow">in</span> <span class="n">hints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="n">attr_class</span> <span class="o">=</span> <span class="n">hint</span>
+            <span class="n">attr_dtype</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attr_class</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+            <span class="n">attr_dtype</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">hint</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">attr_class</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
             <span class="k">continue</span>
 
@@ -510,16 +519,13 @@
                 <span class="sa">f</span><span class="s2">&quot;Controller `</span><span class="si">{</span><span class="n">controller</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">` failed to introspect &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;hinted attribute `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` during initialisation&quot;</span>
             <span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">attr_class</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">attr_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Controller &#39;</span><span class="si">{</span><span class="n">controller</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; introspection of hinted &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match defined access mode. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Controller &#39;</span><span class="si">{</span><span class="n">controller</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; introspection of &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;hinted attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match defined access mode. &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">attr_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, got &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
             <span class="p">)</span>
-
-        <span class="n">attr_dtype</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">hint</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">attr_dtype</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">attr_dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">attr_dtype</span> <span class="o">!=</span> <span class="n">attr</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Controller &#39;</span><span class="si">{</span><span class="n">controller</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; introspection of hinted &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match defined datatype. &quot;</span>
