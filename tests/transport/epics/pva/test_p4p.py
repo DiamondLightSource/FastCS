@@ -74,6 +74,7 @@ async def test_ioc(p4p_subprocess: tuple[str, Queue]):
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(4)
 async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
     pv_prefix, _ = p4p_subprocess
     ctxt = Context("pva")
@@ -535,6 +536,7 @@ def test_more_exotic_datatypes():
             )
 
 
+@pytest.mark.timeout(4)
 def test_command_method_put_twice(caplog):
     class SomeController(Controller):
         command_runs_for_a_while_times = []
