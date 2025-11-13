@@ -87,6 +87,9 @@ def format_record(record) -> str:
     else:
         extras = ""
 
+    # Escape braces so Loguru doesn't parse them as format placeholders
+    extras = extras.replace("{", "{{").replace("}", "}}")
+
     return f"""\
 <level>[{time} {record["level"].name[0]}]</level> \
 {record["message"]:<80} \
