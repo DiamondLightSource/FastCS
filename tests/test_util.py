@@ -186,3 +186,14 @@ async def test_hinted_attributes_with_unspecified_access_mode():
     await controller.initialise()
     # no assertion thrown
     validate_hinted_attributes(controller)
+
+    class ControllerUnspecifiedAccessModeWrongType(Controller):
+        unspecified_access_mode_wrong_type: Attribute[int]
+
+        async def initialise(self):
+            self.unspecified_access_mode_wrong_type = AttrRW(Float())
+
+    controller = ControllerUnspecifiedAccessModeWrongType()
+    await controller.initialise()
+    with pytest.raises(RuntimeError, match="does not match defined datatype"):
+        validate_hinted_attributes(controller)

@@ -62,13 +62,12 @@ def validate_hinted_attributes(controller: BaseController):
             )
         if attr_class is not type(attr):
             # skip validation if access mode not specified
-            if attr_class is Attribute and isinstance(attr, Attribute):
-                continue
-            raise RuntimeError(
-                f"Controller '{controller.__class__.__name__}' introspection of hinted "
-                f"attribute '{name}' does not match defined access mode. "
-                f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
-            )
+            if not (attr_class is Attribute and isinstance(attr, Attribute)):
+                raise RuntimeError(
+                    f"Controller '{controller.__class__.__name__}' introspection of "
+                    f"hinted attribute '{name}' does not match defined access mode. "
+                    f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
+                )
         if attr_dtype is not None and attr_dtype != attr.datatype.dtype:
             raise RuntimeError(
                 f"Controller '{controller.__class__.__name__}' introspection of hinted "
