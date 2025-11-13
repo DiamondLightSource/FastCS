@@ -27,18 +27,19 @@ class EpicsPVATransport(Transport):
 
     def connect(
         self,
-        controller_api: ControllerAPI,
+        controller_apis: list[ControllerAPI],
         loop: asyncio.AbstractEventLoop,
     ) -> None:
-        self._controller_api = controller_api
-        self._pv_prefix = self.epicspva.pv_prefix
-        self._ioc = P4PIOC(self.epicspva.pv_prefix, controller_api)
+        self._controller_api = controller_apis
+        self._pv_prefix = self.epicspva.pv_prefixes
+        self._ioc = P4PIOC(self.epicspva.pv_prefixes, controller_apis)
 
-        if self.docs is not None:
-            EpicsDocs(self._controller_api).create_docs(self.docs)
+        for pv_prefix, api in zip(self._pv_prefix, controller_apis, strict=True):
+            if self.docs is not None:
+                EpicsDocs(api).create_docs(self.docs)
 
-        if self.gui is not None:
-            PvaEpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
+            if self.gui is not None:
+                PvaEpicsGUI(api, pv_prefix).create_gui(self.gui)
 
     async def serve(self) -> None:
         logger.info("Running IOC", pv_prefix=self._pv_prefix)

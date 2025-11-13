@@ -25,7 +25,7 @@ class Transport:
 
     @abstractmethod
     def connect(
-        self, controller_api: ControllerAPI, loop: asyncio.AbstractEventLoop
+        self, controller_apis: list[ControllerAPI], loop: asyncio.AbstractEventLoop
     ) -> None:
         pass
 

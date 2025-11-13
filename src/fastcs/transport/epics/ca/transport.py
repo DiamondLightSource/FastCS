@@ -27,24 +27,25 @@ class EpicsCATransport(Transport):
     docs: EpicsDocsOptions | None = None
     gui: EpicsGUIOptions | None = None
 
-    def connect(
+    def connect(  # type: ignore
         self,
-        controller_api: ControllerAPI,
+        controller_apis: list[ControllerAPI],
         loop: asyncio.AbstractEventLoop,
     ) -> None:
-        self._controller_api = controller_api
+        self._controller_apis = controller_apis
         self._loop = loop
-        self._pv_prefix = self.epicsca.pv_prefix
-        self._ioc = EpicsCAIOC(self.epicsca.pv_prefix, controller_api, self.epicsca)
+        self._pv_prefixes = self.epicsca.pv_prefixes
+        self._ioc = EpicsCAIOC(self.epicsca.pv_prefixes, controller_apis, self.epicsca)
 
-        if self.docs is not None:
-            EpicsDocs(self._controller_api).create_docs(self.docs)
+        for pv_prefix, api in zip(self._pv_prefixes, controller_apis, strict=True):
+            if self.docs is not None:
+                EpicsDocs(api).create_docs(self.docs)
 
-        if self.gui is not None:
-            EpicsGUI(self._controller_api, self._pv_prefix).create_gui(self.gui)
+            if self.gui is not None:
+                EpicsGUI(api, pv_prefix).create_gui(self.gui)
 
     async def serve(self) -> None:
-        logger.info("Running IOC", pv_prefix=self._pv_prefix)
+        logger.info("Running IOC", pv_prefix=self._pv_prefixes)
         self._ioc.run(self._loop)
 
     @property
@@ -56,4 +57,4 @@ class EpicsCATransport(Transport):
         }
 
     def __repr__(self):
-        return f"EpicsCATransport({self._pv_prefix})"
+        return f"EpicsCATransport({self._pv_prefixes})"

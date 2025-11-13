@@ -23,17 +23,19 @@ class ChildController(Controller):
 
 
 def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
-    controller = ParentController()
+    first_controller = ParentController()
+    second_controller = ChildController()
     vector = ControllerVector({i: ChildController() for i in range(2)})
-    controller.add_sub_controller("ChildVector", vector)
+    first_controller.add_sub_controller("ChildVector", vector)
     gui_options = EpicsGUIOptions(
         output_path=Path(".") / "demo.bob", title="Demo Vector"
     )
     fastcs = FastCS(
-        controller,
+        [first_controller, second_controller],
         [
             EpicsCATransport(
-                epicsca=EpicsIOCOptions(pv_prefix=pv_prefix), gui=gui_options
+                epicsca=EpicsIOCOptions(pv_prefixes=[pv_prefix, f"{pv_prefix}_2"]),
+                gui=gui_options,
             )
         ],
     )

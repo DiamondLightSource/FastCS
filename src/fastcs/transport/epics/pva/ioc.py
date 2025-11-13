@@ -56,13 +56,18 @@ async def parse_attributes(
 class P4PIOC:
     """A P4P IOC which handles a controller"""
 
-    def __init__(self, pv_prefix: str, controller_api: ControllerAPI):
-        self.pv_prefix = pv_prefix
-        self.controller_api = controller_api
+    def __init__(self, pv_prefixes: list[str], controller_apis: list[ControllerAPI]):
+        self.pv_prefixes = pv_prefixes
+        self.controller_apis = controller_apis
 
     async def run(self):
-        provider = await parse_attributes(self.pv_prefix, self.controller_api)
+        providers = [
+            await parse_attributes(pv_prefix, api)
+            for pv_prefix, api in zip(
+                self.pv_prefixes, self.controller_apis, strict=True
+            )
+        ]
 
         endless_event = asyncio.Event()
-        with Server([provider]):
+        with Server(providers):
             await endless_event.wait()

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
@@ -31,4 +31,4 @@ class EpicsGUIOptions:
 class EpicsIOCOptions:
     """Epics IOC options for use in both CA and PVA transports."""
 
-    pv_prefix: str = "MY-DEVICE-PREFIX"
+    pv_prefixes: list[str] = field(default_factory=list)

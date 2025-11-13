@@ -35,17 +35,18 @@ class EpicsCAIOC:
 
     def __init__(
         self,
-        pv_prefix: str,
-        controller_api: ControllerAPI,
+        pv_prefixes: list[str],
+        controller_apis: list[ControllerAPI],
         options: EpicsIOCOptions | None = None,
     ):
-        self._options = options or EpicsIOCOptions()
-        self._controller_api = controller_api
-        _add_pvi_info(f"{pv_prefix}:PVI")
-        _add_sub_controller_pvi_info(pv_prefix, controller_api)
+        for pv_prefix, api in zip(pv_prefixes, controller_apis, strict=True):
+            self._options = options or EpicsIOCOptions()
+            self._controller_api = api
+            _add_pvi_info(f"{pv_prefix}:PVI")
+            _add_sub_controller_pvi_info(pv_prefix, api)
 
-        _create_and_link_attribute_pvs(pv_prefix, controller_api)
-        _create_and_link_command_pvs(pv_prefix, controller_api)
+            _create_and_link_attribute_pvs(pv_prefix, api)
+            _create_and_link_command_pvs(pv_prefix, api)
 
     def run(
         self,

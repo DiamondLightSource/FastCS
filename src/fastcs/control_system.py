@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import signal
 from collections.abc import Coroutine, Sequence
 from functools import partial
@@ -32,11 +33,11 @@ class FastCS:
 
     def __init__(
         self,
-        controller: Controller,
+        controllers: list[Controller],
         transports: Sequence[Transport],
         loop: asyncio.AbstractEventLoop | None = None,
     ):
-        self._controller = controller
+        self._controllers = controllers
         self._transports = transports
         self._loop = loop or asyncio.get_event_loop()
 
@@ -56,19 +57,20 @@ class FastCS:
         for coro in self._initial_coros:
             await coro()
 
-    async def _start_scan_tasks(self):
+    async def _start_scan_tasks(self, controller: Controller):
         self._scan_tasks = {self._loop.create_task(coro()) for coro in self._scan_coros}
 
         for task in self._scan_tasks:
-            task.add_done_callback(self._scan_done)
+            task.add_done_callback(
+                functools.partial(self._scan_done, controller=controller)
+            )
 
-    def _scan_done(self, task: asyncio.Task):
+    def _scan_done(self, task: asyncio.Task, controller: Controller):
         try:
             task.result()
         except Exception as e:
             raise FastCSError(
-                "Exception raised in scan method of "
-                f"{self._controller.__class__.__name__}"
+                f"Exception raised in scan method of {controller.__class__.__name__}"
             ) from e
 
     def _stop_scan_tasks(self):
@@ -84,18 +86,20 @@ class FastCS:
         self._scan_tasks.clear()
 
     async def serve(self, interactive: bool = True) -> None:
-        await self._controller.initialise()
-        validate_hinted_attributes(self._controller)
-        self._controller.connect_attribute_ios()
-
-        self.controller_api = build_controller_api(self._controller)
-        self._scan_coros, self._initial_coros = (
-            self.controller_api.get_scan_and_initial_coros()
-        )
+        controller_apis: list[ControllerAPI] = []
+        for controller in self._controllers:
+            await controller.initialise()
+            validate_hinted_attributes(controller)
+            controller.connect_attribute_ios()
+            api = build_controller_api(controller)
+            controller_apis.append(api)
+            scan_coro, initial_coro = api.get_scan_and_initial_coros()
+            self._scan_coros.extend(scan_coro or [])
+            self._initial_coros.extend(initial_coro or [])
 
         context = {
-            "controller": self._controller,
-            "controller_api": self.controller_api,
+            "controllers": self._controllers,
+            "controller_apis": controller_apis,
             "transports": [
                 transport.__class__.__name__ for transport in self._transports
             ],
@@ -103,7 +107,7 @@ class FastCS:
 
         coros: list[Coroutine] = []
         for transport in self._transports:
-            transport.connect(controller_api=self.controller_api, loop=self._loop)
+            transport.connect(controller_apis=controller_apis, loop=self._loop)
             coros.append(transport.serve())
             common_context = context.keys() & transport.context.keys()
             if common_context:
@@ -127,13 +131,17 @@ class FastCS:
 
         logger.info(
             "Starting FastCS",
-            controller=self._controller,
+            controllers=self._controllers,
             transports=f"[{', '.join(str(t) for t in self._transports)}]",
         )
 
-        await self._controller.connect()
+        await asyncio.gather(
+            *(controller.connect() for controller in self._controllers)
+        )
         await self._run_initial_coros()
-        await self._start_scan_tasks()
+        asyncio.gather(
+            *(self._start_scan_tasks(controller) for controller in self._controllers)
+        )
 
         try:
             await asyncio.gather(*coros)
@@ -144,7 +152,9 @@ class FastCS:
         finally:
             logger.info("Shutting down FastCS")
             self._stop_scan_tasks()
-            await self._controller.disconnect()
+            await asyncio.gather(
+                *(controller.disconnect() for controller in self._controllers)
+            )
 
     async def _interactive_shell(self, context: dict[str, Any]):
         """Spawn interactive shell in another thread and wait for it to complete."""
