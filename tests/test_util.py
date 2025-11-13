@@ -1,3 +1,4 @@
+import asyncio
 import enum
 
 import numpy as np
@@ -5,9 +6,10 @@ import pytest
 from pvi.device import SignalR
 from pydantic import ValidationError
 
-from fastcs.attributes import AttrR, AttrRW
+from fastcs.attributes import Attribute, AttrR, AttrRW
 from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, String
+from fastcs.launch import FastCS
 from fastcs.util import (
     numpy_to_fastcs_datatype,
     snake_to_pascal,
@@ -136,3 +138,57 @@ async def test_hinted_attributes_verified():
         "'hinted_enum' does not match defined datatype. "
         "Expected 'MyEnum', got 'MyEnum2'."
     )
+
+
+def test_hinted_attributes_verified_on_subcontrollers():
+    loop = asyncio.get_event_loop()
+
+    class ControllerWithWrongType(Controller):
+        hinted_missing: AttrR[int]
+
+        async def connect(self):
+            return
+
+    class TopController(Controller):
+        async def initialise(self):  # why does this not get called?
+            subcontroller = ControllerWithWrongType()
+            self.add_sub_controller("MySubController", subcontroller)
+
+    fastcs = FastCS(TopController(), [], loop)
+    with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
+        fastcs.run()
+
+
+def test_hinted_attribute_access_mode_verified():
+    # test verification works with non-GenericAlias type hints
+    loop = asyncio.get_event_loop()
+
+    class ControllerAttrWrongAccessMode(Controller):
+        read_attr: AttrR
+
+        async def initialise(self):
+            self.read_attr = AttrRW(Int())
+
+    fastcs = FastCS(ControllerAttrWrongAccessMode(), [], loop)
+    with pytest.raises(RuntimeError, match="does not match defined access mode"):
+        fastcs.run()
+
+
+@pytest.mark.asyncio
+async def test_hinted_attributes_with_unspecified_access_mode():
+    class ControllerUnspecifiedAccessMode(Controller):
+        unspecified_access_mode: Attribute
+
+        async def initialise(self):
+            self.unspecified_access_mode = AttrRW(Int())
+
+    controller = ControllerUnspecifiedAccessMode()
+    await controller.initialise()
+    # no assertion thrown
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            "does not match defined access mode. Expected 'Attribute', got 'AttrRW'"
+        ),
+    ):
+        validate_hinted_attributes(controller)

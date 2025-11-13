@@ -37,11 +37,20 @@ def validate_hinted_attributes(controller: BaseController):
     For each type-hinted attribute, validate that a corresponding instance exists in the
     controller with the correct access mode and datatype.
     """
-
-    hints = get_type_hints(type(controller))
-    alias_hints = {k: v for k, v in hints.items() if isinstance(v, _GenericAlias)}
-    for name, hint in alias_hints.items():
-        attr_class = get_origin(hint)
+    for subcontroller in controller.sub_controllers.values():
+        validate_hinted_attributes(subcontroller)
+    hints = {
+        k: v
+        for k, v in get_type_hints(type(controller)).items()
+        if isinstance(v, _GenericAlias | type)
+    }
+    for name, hint in hints.items():
+        if isinstance(hint, type):
+            attr_class = hint
+            attr_dtype = None
+        else:
+            attr_class = get_origin(hint)
+            attr_dtype = get_args(hint)[0]
         if not issubclass(attr_class, Attribute):
             continue
 
@@ -51,16 +60,13 @@ def validate_hinted_attributes(controller: BaseController):
                 f"Controller `{controller.__class__.__name__}` failed to introspect "
                 f"hinted attribute `{name}` during initialisation"
             )
-
-        if type(attr) is not attr_class:
+        if attr_class is not type(attr):
             raise RuntimeError(
-                f"Controller '{controller.__class__.__name__}' introspection of hinted "
-                f"attribute '{name}' does not match defined access mode. "
+                f"Controller '{controller.__class__.__name__}' introspection of "
+                f"hinted attribute '{name}' does not match defined access mode. "
                 f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
             )
-
-        attr_dtype = get_args(hint)[0]
-        if attr.datatype.dtype != attr_dtype:
+        if attr_dtype is not None and attr_dtype != attr.datatype.dtype:
             raise RuntimeError(
                 f"Controller '{controller.__class__.__name__}' introspection of hinted "
                 f"attribute '{name}' does not match defined datatype. "
