@@ -1,3 +1,4 @@
+import asyncio
 import enum
 
 import numpy as np
@@ -8,6 +9,7 @@ from pydantic import ValidationError
 from fastcs.attributes import Attribute, AttrR, AttrRW
 from fastcs.controller import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, String
+from fastcs.launch import FastCS
 from fastcs.util import (
     numpy_to_fastcs_datatype,
     snake_to_pascal,
@@ -137,15 +139,6 @@ async def test_hinted_attributes_verified():
         "Expected 'MyEnum', got 'MyEnum2'."
     )
 
-    class ControllerUnspecifiedAccessMode(Controller):
-        hinted: Attribute[int]
-
-        async def initialise(self):
-            self.hinted = AttrR(Int())
-
-    # no assertion thrown
-    FastCS(ControllerUnspecifiedAccessMode(), [], loop)
-
 
 def test_hinted_attributes_verified_on_subcontrollers():
     loop = asyncio.get_event_loop()
@@ -157,15 +150,16 @@ def test_hinted_attributes_verified_on_subcontrollers():
             return
 
     class TopController(Controller):
-        async def initialise(self):
+        async def initialise(self):  # why does this not get called?
             subcontroller = ControllerWithWrongType()
-            self.register_sub_controller("MySubController", subcontroller)
+            self.add_sub_controller("MySubController", subcontroller)
 
+    fastcs = FastCS(TopController(), [], loop)
     with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
-        FastCS(TopController(), [], loop)
+        fastcs.run()
 
 
-def test_hinted_attribute_types_verified():
+def test_hinted_attribute_access_mode_verified():
     # test verification works with non-GenericAlias type hints
     loop = asyncio.get_event_loop()
 
@@ -175,13 +169,20 @@ def test_hinted_attribute_types_verified():
         async def initialise(self):
             self.read_attr = AttrRW(Int())
 
+    fastcs = FastCS(ControllerAttrWrongAccessMode(), [], loop)
     with pytest.raises(RuntimeError, match="does not match defined access mode"):
-        FastCS(ControllerAttrWrongAccessMode(), [], loop)
+        fastcs.run()
 
+
+@pytest.mark.asyncio
+async def test_hinted_attributes_with_unspecified_access_mode():
     class ControllerUnspecifiedAccessMode(Controller):
         unspecified_access_mode: Attribute
 
         async def initialise(self):
             self.unspecified_access_mode = AttrRW(Int())
 
-    FastCS(ControllerUnspecifiedAccessMode(), [], loop)
+    controller = ControllerUnspecifiedAccessMode()
+    await controller.initialise()
+    # no assertion thrown
+    validate_hinted_attributes(controller)
