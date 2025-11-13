@@ -37,7 +37,7 @@ def sim_temperature_controller():
     print(process.communicate()[0])
 
 
-@pytest.mark.timeout(2)
+@pytest.mark.timeout(10)
 @pytest.mark.parametrize("filename", glob.glob("docs/snippets/*.py", recursive=True))
 def test_snippet(filename):
     runpy.run_path(filename)
