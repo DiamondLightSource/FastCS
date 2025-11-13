@@ -191,7 +191,7 @@ async def test_hinted_attributes_with_unspecified_access_mode():
         unspecified_access_mode_wrong_type: Attribute[int]
 
         async def initialise(self):
-            self.unspecified_access_mode_wrong_type = AttrRW(Float())
+            self.unspecified_access_mode_wrong_type = AttrRW(Float())  # type: ignore
 
     controller = ControllerUnspecifiedAccessModeWrongType()
     await controller.initialise()
