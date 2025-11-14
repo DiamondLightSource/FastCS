@@ -3,12 +3,12 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Iterator, Mapping, MutableMapping, Sequence
 from copy import deepcopy
-from typing import get_type_hints
+from typing import _GenericAlias, get_args, get_origin, get_type_hints  # type: ignore
 
 from fastcs.attribute_io import AttributeIO
 from fastcs.attribute_io_ref import AttributeIORefT
 from fastcs.attributes import Attribute, AttrR, AttrW
-from fastcs.datatypes import T
+from fastcs.datatypes import DataType, T
 from fastcs.tracer import Tracer
 
 
@@ -39,15 +39,45 @@ class BaseController(Tracer):
         self._path: list[str] = path or []
         self.__sub_controller_tree: dict[str, BaseController] = {}
 
+        self.__hinted_attributes = self._parse_attribute_type_hints()
         self._bind_attrs()
 
         ios = ios or []
         self._attribute_ref_io_map = {io.ref_type: io for io in ios}
         self._validate_io(ios)
 
+    def _parse_attribute_type_hints(
+        self,
+    ) -> dict[str, tuple[type[Attribute], type[DataType]]]:
+        hinted_attributes = {}
+        for name, hint in get_type_hints(type(self)).items():
+            if not isinstance(hint, _GenericAlias):  # e.g. AttrR[int]
+                continue
+
+            origin = get_origin(hint)
+            if not isinstance(origin, type) or not issubclass(origin, Attribute):
+                continue
+
+            hinted_attributes[name] = (origin, get_args(hint)[0])
+
+        return hinted_attributes
+
     async def initialise(self):
         """Hook to dynamically add attributes before building the API"""
         pass
+
+    def validate_hinted_attributes(self):
+        """Validate ``Attribute`` type-hints were introspected during initialisation"""
+        for name in self.__hinted_attributes:
+            attr = getattr(self, name, None)
+            if attr is None:
+                raise RuntimeError(
+                    f"Controller `{self.__class__.__name__}` failed to introspect "
+                    f"hinted attribute `{name}` during initialisation"
+                )
+
+        for subcontroller in self.sub_controllers.values():
+            subcontroller.validate_hinted_attributes()  # noqa: SLF001
 
     def connect_attribute_ios(self) -> None:
         """Connect ``Attribute`` callbacks to ``AttributeIO``s"""
@@ -126,24 +156,39 @@ class BaseController(Tracer):
                     f"More than one AttributeIO class handles {ref_type.__name__}"
                 )
 
-    def add_attribute(self, name, attribute: Attribute):
-        if name in self.attributes and attribute is not self.attributes[name]:
+    def add_attribute(self, name, attr: Attribute):
+        if name in self.attributes:
             raise ValueError(
-                f"Cannot add attribute {attribute}. "
+                f"Cannot add attribute {attr}. "
                 f"Controller {self} has has existing attribute {name}: "
                 f"{self.attributes[name]}"
             )
+        elif name in self.__hinted_attributes:
+            attr_class, attr_dtype = self.__hinted_attributes[name]
+            if not isinstance(attr, attr_class):
+                raise RuntimeError(
+                    f"Controller '{self.__class__.__name__}' introspection of "
+                    f"hinted attribute '{name}' does not match defined access mode. "
+                    f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
+                )
+            if attr_dtype is not None and attr_dtype != attr.datatype.dtype:
+                raise RuntimeError(
+                    f"Controller '{self.__class__.__name__}' introspection of "
+                    f"hinted attribute '{name}' does not match defined datatype. "
+                    f"Expected '{attr_dtype.__name__}', "
+                    f"got '{attr.datatype.dtype.__name__}'."
+                )
         elif name in self.__sub_controller_tree.keys():
             raise ValueError(
-                f"Cannot add attribute {attribute}. "
+                f"Cannot add attribute {attr}. "
                 f"Controller {self} has existing sub controller {name}: "
                 f"{self.__sub_controller_tree[name]}"
             )
 
-        attribute.set_name(name)
-        attribute.set_path(self.path)
-        self.attributes[name] = attribute
-        super().__setattr__(name, attribute)
+        attr.set_name(name)
+        attr.set_path(self.path)
+        self.attributes[name] = attr
+        super().__setattr__(name, attr)
 
     def add_sub_controller(self, name: str, sub_controller: BaseController):
         if name in self.__sub_controller_tree.keys():

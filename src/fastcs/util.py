@@ -1,10 +1,7 @@
 import re
-from typing import _GenericAlias, get_args, get_origin, get_type_hints  # type: ignore
 
 import numpy as np
 
-from fastcs.attributes import Attribute
-from fastcs.controller import BaseController
 from fastcs.datatypes import Bool, DataType, Float, Int, String
 
 
@@ -29,47 +26,3 @@ def numpy_to_fastcs_datatype(np_type) -> DataType:
         return Bool()
     else:
         return String()
-
-
-def validate_hinted_attributes(controller: BaseController):
-    """Validate ``Attribute`` type-hints  match dynamically intropected instances
-
-    For each type-hinted attribute, validate that a corresponding instance exists in the
-    controller with the correct access mode and datatype.
-    """
-    for subcontroller in controller.sub_controllers.values():
-        validate_hinted_attributes(subcontroller)
-    hints = {
-        k: v
-        for k, v in get_type_hints(type(controller)).items()
-        if isinstance(v, _GenericAlias | type)
-    }
-    for name, hint in hints.items():
-        if isinstance(hint, type):
-            attr_class = hint
-            attr_dtype = None
-        else:
-            attr_class = get_origin(hint)
-            attr_dtype = get_args(hint)[0]
-        if not issubclass(attr_class, Attribute):
-            continue
-
-        attr = getattr(controller, name, None)
-        if attr is None:
-            raise RuntimeError(
-                f"Controller `{controller.__class__.__name__}` failed to introspect "
-                f"hinted attribute `{name}` during initialisation"
-            )
-        if attr_class is not type(attr):
-            raise RuntimeError(
-                f"Controller '{controller.__class__.__name__}' introspection of "
-                f"hinted attribute '{name}' does not match defined access mode. "
-                f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
-            )
-        if attr_dtype is not None and attr_dtype != attr.datatype.dtype:
-            raise RuntimeError(
-                f"Controller '{controller.__class__.__name__}' introspection of hinted "
-                f"attribute '{name}' does not match defined datatype. "
-                f"Expected '{attr_dtype.__name__}', "
-                f"got '{attr.datatype.dtype.__name__}'."
-            )

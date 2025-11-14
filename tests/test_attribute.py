@@ -208,9 +208,7 @@ async def test_dynamic_attribute_io_specification():
                         initial_value=parameter_response.get("value", None),
                     )
 
-                    self.attributes[ref.name] = attr
-                    setattr(self, ref.name, attr)
-
+                    self.add_attribute(ref.name, attr)
                 except Exception as e:
                     print(
                         "Exception constructing attribute from parameter response:",
