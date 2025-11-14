@@ -99,7 +99,8 @@ class TemperatureRampController(Controller):
         super().__init__(f"Ramp{index}", ios=[io])
 
     async def initialise(self):
-        self.attributes.update(create_attributes(self._parameters))
+        for name, attribute in create_attributes(self._parameters).items():
+            self.add_attribute(name, attribute)
 
 
 class TemperatureController(Controller):
@@ -119,7 +120,9 @@ class TemperatureController(Controller):
         api = json.loads((await self._connection.send_query("API?\r\n")).strip("\r\n"))
 
         ramps_api = api.pop("Ramps")
-        self.attributes.update(create_attributes(api))
+
+        for name, attribute in create_attributes(api).items():
+            self.add_attribute(name, attribute)
 
         for idx, ramp_parameters in enumerate(ramps_api):
             ramp_controller = TemperatureRampController(

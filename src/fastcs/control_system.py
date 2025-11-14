@@ -13,7 +13,6 @@ from fastcs.exceptions import FastCSError
 from fastcs.logging import logger as _fastcs_logger
 from fastcs.tracer import Tracer
 from fastcs.transport import Transport
-from fastcs.util import validate_hinted_attributes
 
 tracer = Tracer(name=__name__)
 logger = _fastcs_logger.bind(logger_name=__name__)
@@ -85,8 +84,7 @@ class FastCS:
 
     async def serve(self, interactive: bool = True) -> None:
         await self._controller.initialise()
-        validate_hinted_attributes(self._controller)
-        self._controller.connect_attribute_ios()
+        self._controller.post_initialise()
 
         self.controller_api = build_controller_api(self._controller)
         self._scan_coros, self._initial_coros = (
