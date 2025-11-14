@@ -269,6 +269,9 @@ def _create_and_link_command_pv(
         f"{pv_prefix}:{pv_name}",
         on_update=wrapped_method,
         blocking=True,
+        initial_value=0,
+        ZNAM="Idle",
+        ONAM="Active",
     )
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "x")
