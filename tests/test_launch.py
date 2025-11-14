@@ -154,6 +154,14 @@ def test_error_if_identical_context_in_transports(mocker: MockerFixture, data):
         new_callable=mocker.PropertyMock,
         return_value={"controller": "test"},
     )
+    mocker.patch(
+        "fastcs.transport.epics.pva.transport.EpicsPVATransport.serve",
+        new_callable=mocker.PropertyMock,
+    )
+    mocker.patch(
+        "fastcs.transport.epics.ca.transport.EpicsCATransport.serve",
+        new_callable=mocker.PropertyMock,
+    )
     app = _launch(IsHinted)
     result = runner.invoke(app, ["run", str(data / "config.yaml")])
     assert isinstance(result.exception, RuntimeError)

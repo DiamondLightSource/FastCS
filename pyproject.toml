@@ -91,7 +91,7 @@ addopts = """
     """
 # https://iscinumpy.gitlab.io/post/bound-version-constraints/#watch-for-warnings
 # https://github.com/DiamondLightSource/FastCS/issues/230
-# filterwarnings = "error"
+filterwarnings = "error"
 # Doctest python code in docs, python code in src docstrings, test functions in tests
 testpaths = "docs src tests"
 timeout = 1

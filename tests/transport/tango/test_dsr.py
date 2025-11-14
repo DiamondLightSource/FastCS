@@ -50,9 +50,11 @@ def create_test_context(tango_controller_api: AssertableControllerAPI):
     tango_transport = TangoTransport()
     tango_transport.connect(
         tango_controller_api,
-        # This is passed to enable instantiating the transport, but tests must avoid
-        # using via patching of functions. It will raise NotImplementedError if used.
-        asyncio.AbstractEventLoop(),
+        # changed from asyncio.AbstractEventLoop since TangoTransport ends up holding
+        # a non-functional loop, while the actual event loop used by DeviceTestContext
+        # is created internally by PyTango and never closed, along with open sockets!
+        # This event loop is now correctly closed by event_loop ficture in conftest.
+        asyncio.get_event_loop(),
     )
     device = tango_transport._dsr._device
     # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
