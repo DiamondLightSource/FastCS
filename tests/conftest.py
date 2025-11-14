@@ -1,3 +1,4 @@
+import asyncio
 import io
 import multiprocessing
 import os
@@ -236,3 +237,11 @@ def test_controller(tango_system, register_device):
 
     process.send_signal(signal.SIGINT)
     process.wait(timeout)
+
+
+@pytest.fixture
+def event_loop():
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.run_until_complete(loop.shutdown_asyncgens())
+    loop.close()
