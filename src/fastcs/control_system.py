@@ -84,8 +84,7 @@ class FastCS:
 
     async def serve(self, interactive: bool = True) -> None:
         await self._controller.initialise()
-        self._controller.validate_hinted_attributes()
-        self._controller.connect_attribute_ios()
+        self._controller.post_initialise()
 
         self.controller_api = build_controller_api(self._controller)
         self._scan_coros, self._initial_coros = (

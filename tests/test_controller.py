@@ -161,7 +161,11 @@ def test_controller_introspection_hint_validation():
         controller.add_attribute("read_write_int", AttrR(Int()))
 
     with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
-        controller.validate_hinted_attributes()
+        controller.read_write_int = 5  # type: ignore
+        controller._validate_hinted_attributes()
+
+    with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
+        controller._validate_hinted_attributes()
 
     controller.add_attribute("read_write_int", AttrRW(Int()))
 

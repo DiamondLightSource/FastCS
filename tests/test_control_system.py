@@ -36,7 +36,7 @@ def test_controller_api():
         def __init__(self):
             super().__init__(description="Controller for testing")
 
-            self.attributes["attr2"] = AttrRW(Int())
+            self.attr2 = AttrRW(Int())
 
         @command()
         async def do_nothing(self):
