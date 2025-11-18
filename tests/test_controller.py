@@ -1,8 +1,10 @@
+import enum
+
 import pytest
 
-from fastcs.attributes import AttrR
+from fastcs.attributes import AttrR, AttrRW
 from fastcs.controller import Controller, ControllerVector
-from fastcs.datatypes import Float, Int
+from fastcs.datatypes import Enum, Float, Int
 
 
 def test_controller_nesting():
@@ -144,3 +146,43 @@ def test_controller_vector_iter():
 
     for index, child in controller_vector.items():
         assert sub_controllers[index] == child
+
+
+def test_controller_introspection_hint_validation():
+    class HintedController(Controller):
+        read_write_int: AttrRW[int]
+
+    controller = HintedController()
+
+    with pytest.raises(RuntimeError, match="does not match defined datatype"):
+        controller.add_attribute("read_write_int", AttrRW(Float()))
+
+    with pytest.raises(RuntimeError, match="does not match defined access mode"):
+        controller.add_attribute("read_write_int", AttrR(Int()))
+
+    with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
+        controller.read_write_int = 5  # type: ignore
+        controller._validate_hinted_attributes()
+
+    with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
+        controller._validate_hinted_attributes()
+
+    controller.add_attribute("read_write_int", AttrRW(Int()))
+
+
+def test_controller_introspection_hint_validation_enum():
+    class GoodEnum(enum.IntEnum):
+        VAL = 0
+
+    class BadEnum(enum.IntEnum):
+        VAL = 0
+
+    class HintedController(Controller):
+        enum: AttrRW[GoodEnum]
+
+    controller = HintedController()
+
+    with pytest.raises(RuntimeError, match="does not match defined datatype"):
+        controller.add_attribute("enum", AttrRW(Enum(BadEnum)))
+
+    controller.add_attribute("enum", AttrRW(Enum(GoodEnum)))
