@@ -214,7 +214,7 @@ because the value is actually a string, but for `P` the value is a float, so the
 `update` methods needs to explicitly cast to the correct type. It can use
 `Attribute.dtype` to call the builtin for its datatype - e.g. `int`, `float`, `str`,
 etc.
-::::
+:::
 
 :::{admonition} Code 8
 :class: dropdown, hint
@@ -404,6 +404,95 @@ New : DEMO:DisableAll
 ❯ caget DEMO:R1:Enabled_RBV
 DEMO:R1:Enabled_RBV            Off
 ```
+
+## Logging
+
+FastCS has convenient logging support to provide status and metrics from the
+application. To enable logging from the core framework call `configure_logging` with no
+arguments (the default logging level is INFO). To log messages from a driver, either
+import the singleton `logger` directly, or to provide more context to the message, call
+`bind_logger` with a name (usually either the name of the module or the name of the
+class).
+
+Create a module-level logger to log status of the application start up. Create a class
+logger for `TemperatureControllerAttributeIO` to log the commands it sends.
+
+::::{admonition} Code 14
+:class: dropdown, hint
+
+:::{literalinclude} /snippets/static14.py
+:emphasize-lines: 15,20-21,53-55,116,123
+:::
+
+::::
+
+Try setting a PV and check the console for the log message it prints.
+
+```
+[2025-11-18 11:26:41.065+0000 I] Sending attribute value      [TemperatureControllerAttributeIO] command=E01=70, attribute=AttrRW(path=R1.end, datatype=Int, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='E'))
+```
+
+A similar log message could be added for the update method of the IO, but this would be
+very verbose. For this use case FastCS provides the `Tracer` class, which is inherited
+by `AttributeIO`, among other core FastCS classes. This adds a  enables logging `TRACE`
+level log messages that are disabled by default, but can be enabled at runtime.
+
+Update the `send` method of the IO to log a message showing the query that was sent and
+the response from the device. Update the `configure_logging` call to pass
+`LogLevel.TRACE` as the log level, so that when tracing is enabled the messages are
+visible.
+
+::::{admonition} Code 15
+:class: dropdown, hint
+
+:::{literalinclude} /snippets/static15.py
+:emphasize-lines: 15,47-49,119
+:::
+
+::::
+
+Enable tracing on the `power` attribute by calling `enable_tracing` and then enable a
+ramp so that the value updates. Check the console to see the messages.  Call `disable_tracing` to disable the log messages for `power.
+
+```
+In [1]: controller.power.enable_tracing()
+[2025-11-18 11:11:12.060+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=0.0
+[2025-11-18 11:11:12.060+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='P')), value=0.0
+[2025-11-18 11:11:12.060+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=0.0
+[2025-11-18 11:11:12.194+0000 I] PV put: DEMO:R1:Enabled = 1  [fastcs.transport.epics.ca.ioc] pv=DEMO:R1:Enabled, value=1
+[2025-11-18 11:11:12.195+0000 I] Sending attribute value      [TemperatureControllerAttributeIO] command=N01=1, attribute=AttrRW(path=R1.enabled, datatype=Enum, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='N'))
+[2025-11-18 11:11:12.261+0000 T] Update attribute             [AttrR]
+[2025-11-18 11:11:12.262+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=29.040181873093132
+[2025-11-18 11:11:12.262+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='P')), value=29.040181873093132
+[2025-11-18 11:11:12.262+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=29.04
+[2025-11-18 11:11:12.463+0000 T] Update attribute             [AttrR]
+[2025-11-18 11:11:12.464+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=30.452524641833854
+[2025-11-18 11:11:12.464+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='P')), value=30.452524641833854
+[2025-11-18 11:11:12.465+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=30.45
+In [2]: controller.power.disable_tracing()
+```
+
+These log messages includes other trace loggers that log messages with `power` as the
+`topic`, so they also appear automatically, so the log messages show changes to the
+attribute throughout the stack: the query to the device and its response, the value the
+attribute is set to, and the value that the PV in the EPICS CA transport is set to.
+
+
+:::{note}
+The `Tracer` can also be used as a module-level instance for use in free functions.
+
+```python
+from fastcs.tracer import Tracer
+
+tracer = Tracer(__name__)
+
+def handle_attribute(attr):
+    tracer.log_event("Handling attribute", topic=attr)
+```
+
+These messages can then be enabled by calling `enable_tracing` on the module-level
+`Tracer`, or more likely on a specific attribute.
+:::
 
 ## Summary
 
