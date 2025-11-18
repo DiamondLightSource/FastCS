@@ -1,0 +1,38 @@
+﻿``fastcs``
+==========
+
+.. automodule:: fastcs
+    :members:
+
+    
+    
+    .. rubric:: Submodules
+
+    .. autosummary::
+        :toctree:
+        :template: custom-module-template.rst
+        :recursive:
+    
+        attribute_io
+        attribute_io_ref
+        attributes
+        connections
+        control_system
+        controller
+        controller_api
+        cs_methods
+        datatypes
+        demo
+        exceptions
+        launch
+        logging
+        tracer
+        transport
+        util
+        wrappers
+    
+    
+
+    
+    
+    
