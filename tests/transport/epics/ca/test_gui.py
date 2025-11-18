@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from pvi.device import (
     LED,
+    ArrayTrace,
     ButtonPanel,
     ComboBox,
     Group,
@@ -39,7 +40,7 @@ def test_get_pv(controller_api):
         (Float(), TextRead()),
         (String(), TextRead(format=TextFormat.string)),
         (Enum(ColourEnum), TextRead(format=TextFormat.string)),
-        # (Waveform(array_dtype=np.int32), None),
+        (Waveform(array_dtype=np.int32), ArrayTrace(axis="x")),
     ],
 )
 def test_get_attribute_component_r(datatype, widget, controller_api):
