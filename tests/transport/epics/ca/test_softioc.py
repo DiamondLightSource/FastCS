@@ -316,7 +316,12 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
         ),
     )
     ioc_builder.Action.assert_any_call(
-        f"{DEVICE}:Go", on_update=mocker.ANY, blocking=True
+        f"{DEVICE}:Go",
+        on_update=mocker.ANY,
+        blocking=True,
+        initial_value=0,
+        ZNAM="Idle",
+        ONAM="Active",
     )
 
     # Check info tags are added
@@ -504,7 +509,12 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
 
     short_command_pv_name = "command_short_name".title().replace("_", "")
     ioc_builder.Action.assert_called_once_with(
-        f"{DEVICE}:{short_command_pv_name}", on_update=mocker.ANY, blocking=True
+        f"{DEVICE}:{short_command_pv_name}",
+        on_update=mocker.ANY,
+        blocking=True,
+        initial_value=0,
+        ZNAM="Idle",
+        ONAM="Active",
     )
     with pytest.raises(AssertionError):
         long_command_pv_name = long_command_name.title().replace("_", "")
