@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.controller &#8212; FastCS 0.11.0a4.dev3+gd750b614f documentation</title>
+    <title>fastcs.controller &#8212; FastCS 0.11.0a4.dev6+g2d72f412d documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=36db45a1"></script>
+    <script src="../../_static/documentation_options.js?v=581b7171"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -454,24 +454,32 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">,</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_hints</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_GenericAlias</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_type_hints</span>  <span class="c1"># type: ignore</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORefT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrW</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">T</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">T</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
 
 
 <div class="viewcode-block" id="BaseController">
 <a class="viewcode-back" href="../../_api/fastcs.controller.html#fastcs.controller.BaseController">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseController</span><span class="p">(</span><span class="n">Tracer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for controller.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for controllers</span>
 
-    <span class="c1">#: Attributes passed from the device at runtime.</span>
-    <span class="n">attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">]</span>
+<span class="sd">    Instances of this class can be loaded into FastCS to expose its Attributes to</span>
+<span class="sd">    the transport layer, which can then perform a specific function such as generating a</span>
+<span class="sd">    UI or creating parameters for a control system.</span>
+
+<span class="sd">    This class is public for type hinting purposes, but should not be inherited to</span>
+<span class="sd">    implement device drivers. Use either ``Controller`` or ``ControllerVector`` instead.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># These class attributes can be overridden on child classes to define default</span>
+    <span class="c1"># behaviour of instantiated controllers</span>
     <span class="n">root_attribute</span><span class="p">:</span> <span class="n">Attribute</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -482,15 +490,16 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="p">):</span>  <span class="c1"># Use the argument over the one class defined description.</span>
+        <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Use the argument over the one class defined description.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;attributes&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controller_tree</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseController</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Internal state that should not be accessed directly by base classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseController</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_attribute_type_hints</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_bind_attrs</span><span class="p">()</span>
 
@@ -498,60 +507,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_ref_io_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">io</span><span class="o">.</span><span class="n">ref_type</span><span class="p">:</span> <span class="n">io</span> <span class="k">for</span> <span class="n">io</span> <span class="ow">in</span> <span class="n">ios</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_io</span><span class="p">(</span><span class="n">ios</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BaseController.initialise">
-<a class="viewcode-back" href="../../_api/fastcs.controller.html#fastcs.controller.BaseController.initialise">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hook to dynamically add attributes before building the API&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
-
-
-<div class="viewcode-block" id="BaseController.connect_attribute_ios">
-<a class="viewcode-back" href="../../_api/fastcs.controller.html#fastcs.controller.BaseController.connect_attribute_ios">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">connect_attribute_ios</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect ``Attribute`` callbacks to ``AttributeIO``s&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">ref</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span> <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">has_io_ref</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_attribute_type_hints</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">Attribute</span><span class="p">],</span> <span class="nb">type</span><span class="p">[</span><span class="n">DataType</span><span class="p">]]]:</span>
+        <span class="n">hinted_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">hint</span> <span class="ow">in</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">_GenericAlias</span><span class="p">):</span>  <span class="c1"># e.g. AttrR[int]</span>
                 <span class="k">continue</span>
 
-            <span class="n">io</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_ref_io_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">io</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> does not have an AttributeIO &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;to handle </span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
+                <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">AttrW</span><span class="p">):</span>
-                <span class="n">attr</span><span class="o">.</span><span class="n">set_on_put_callback</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">send</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">):</span>
-                <span class="n">attr</span><span class="o">.</span><span class="n">set_update_callback</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
+            <span class="n">hinted_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="n">hint</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
-        <span class="k">for</span> <span class="n">controller</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_controllers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">controller</span><span class="o">.</span><span class="n">connect_attribute_ios</span><span class="p">()</span></div>
-
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Path prefix of attributes, recursively including parent Controllers.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sub controller is already registered under </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
-        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">attribute</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hinted_attributes</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_bind_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search for `Attributes` and `Methods` to bind them to this instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search for Attributes and Methods to bind them to this instance.</span>
 
 <span class="sd">        This method will search the attributes of this controller class to bind them to</span>
-<span class="sd">        this specific instance. For `Attribute`s, this is just a case of copying and</span>
-<span class="sd">        re-assigning to `self` to make it unique across multiple instances of this</span>
-<span class="sd">        controller class. For `Method`s, this requires creating a bound method from a</span>
+<span class="sd">        this specific instance. For Attributes, this is just a case of copying and</span>
+<span class="sd">        re-assigning to ``self`` to make it unique across multiple instances of this</span>
+<span class="sd">        controller class. For Methods, this requires creating a bound method from a</span>
 <span class="sd">        class method and a controller instance, so that it can be called from any</span>
-<span class="sd">        context with the controller instance passed as the `self` argument.</span>
+<span class="sd">        context with the controller instance passed as the ``self`` argument.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Lazy import to avoid circular references</span>
@@ -585,50 +565,6 @@
                     <span class="sa">f</span><span class="s2">&quot;More than one AttributeIO class handles </span><span class="si">{</span><span class="n">ref_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">Attribute</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span> <span class="ow">and</span> <span class="n">attribute</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot add attribute </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has has existing attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controller_tree</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot add attribute </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has existing sub controller </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__sub_controller_tree</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-
-        <span class="n">attribute</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">attribute</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attribute</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_sub_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sub_controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controller_tree</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot add sub controller </span><span class="si">{</span><span class="n">sub_controller</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has existing sub controller </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__sub_controller_tree</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot add sub controller </span><span class="si">{</span><span class="n">sub_controller</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has existing attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-
-        <span class="n">sub_controller</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">name</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controller_tree</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub_controller</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sub_controller</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_controller</span><span class="o">.</span><span class="n">root_attribute</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub_controller</span><span class="o">.</span><span class="n">root_attribute</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sub_controllers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseController</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controller_tree</span>
-
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
@@ -642,20 +578,140 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Controller</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_sub_controller</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseController.initialise">
+<a class="viewcode-back" href="../../_api/fastcs.controller.html#fastcs.controller.BaseController.initialise">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hook for subclasses to dynamically add attributes before building the API&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="BaseController.post_initialise">
+<a class="viewcode-back" href="../../_api/fastcs.controller.html#fastcs.controller.BaseController.post_initialise">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hook to call after all attributes added, before serving the application&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_hinted_attributes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connect_attribute_ios</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_hinted_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate ``Attribute`` type-hints were introspected during initialisation&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Controller `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">` failed to introspect &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;hinted attribute `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` during initialisation&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">subcontroller</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_controllers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">subcontroller</span><span class="o">.</span><span class="n">_validate_hinted_attributes</span><span class="p">()</span>  <span class="c1"># noqa: SLF001</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_connect_attribute_ios</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect ``Attribute`` callbacks to ``AttributeIO``s&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span> <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">has_io_ref</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">io</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_ref_io_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">io</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> does not have an AttributeIO &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;to handle </span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">AttrW</span><span class="p">):</span>
+                <span class="n">attr</span><span class="o">.</span><span class="n">set_on_put_callback</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">send</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">):</span>
+                <span class="n">attr</span><span class="o">.</span><span class="n">set_update_callback</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">update</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">controller</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_controllers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">controller</span><span class="o">.</span><span class="n">_connect_attribute_ios</span><span class="p">()</span>  <span class="c1"># noqa: SLF001</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Path prefix of attributes, recursively including parent Controllers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sub controller is already registered under </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">attribute</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">Attribute</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot add attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has has existing attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">:</span>
+            <span class="n">attr_class</span><span class="p">,</span> <span class="n">attr_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_class</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Controller &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; introspection of &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;hinted attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match defined access mode. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">attr_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, got &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">attr_dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">attr_dtype</span> <span class="o">!=</span> <span class="n">attr</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Controller &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; introspection of &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;hinted attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match defined datatype. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">attr_dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;got &#39;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot add attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has existing sub controller </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">attr</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">attr</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_sub_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sub_controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot add sub controller </span><span class="si">{</span><span class="n">sub_controller</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has existing sub controller </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot add sub controller </span><span class="si">{</span><span class="n">sub_controller</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has existing attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">sub_controller</span><span class="o">.</span><span class="n">set_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub_controller</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sub_controller</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_controller</span><span class="o">.</span><span class="n">root_attribute</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub_controller</span><span class="o">.</span><span class="n">root_attribute</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sub_controllers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseController</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span></div>
 
 
 
 <div class="viewcode-block" id="Controller">
 <a class="viewcode-back" href="../../_api/fastcs.controller.html#fastcs.controller.Controller">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Controller</span><span class="p">(</span><span class="n">BaseController</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Top-level controller for a device.</span>
-
-<span class="sd">    This is the primary class for implementing device support in FastCS. Instances of</span>
-<span class="sd">    this class can be loaded into a FastCS to expose its ``Attribute``s to the transport</span>
-<span class="sd">    layer, which can then perform a specific function with the set of ``Attributes``,</span>
-<span class="sd">    such as generating a UI or creating parameters for a control system.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Controller containing Attributes and named sub Controllers&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -683,8 +739,12 @@
 <div class="viewcode-block" id="ControllerVector">
 <a class="viewcode-back" href="../../_api/fastcs.controller.html#fastcs.controller.ControllerVector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ControllerVector</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Controller</span><span class="p">],</span> <span class="n">BaseController</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A controller with a collection of identical sub controllers distinguished</span>
-<span class="sd">    by a numeric value&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Controller containing Attributes and indexed sub Controllers</span>
+
+<span class="sd">    The sub controllers registered with this Controller should be instances of the same</span>
+<span class="sd">    Controller type, distinguished only by an integer index. The indexes do not need</span>
+<span class="sd">    to be continiguous.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

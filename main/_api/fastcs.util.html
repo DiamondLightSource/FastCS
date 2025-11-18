@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.util &#8212; FastCS 0.11.0a4.dev3+gd750b614f documentation</title>
+    <title>fastcs.util &#8212; FastCS 0.11.0a4.dev6+g2d72f412d documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=36db45a1"></script>
+    <script src="../_static/documentation_options.js?v=581b7171"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -543,9 +543,6 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#fastcs.util.snake_to_pascal" title="fastcs.util.snake_to_pascal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snake_to_pascal</span></code></a></p></td>
 <td><p>Converts string from snake case to Pascal case.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.util.validate_hinted_attributes" title="fastcs.util.validate_hinted_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_hinted_attributes</span></code></a></p></td>
-<td><p>Validate <code class="docutils literal notranslate"><span class="pre">Attribute</span></code> type-hints  match dynamically intropected instances</p></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -561,14 +558,6 @@ If string is not a valid snake case it will be returned unchanged</p>
 <span class="sig-prename descclassname"><span class="pre">fastcs.util.</span></span><span class="sig-name descname"><span class="pre">numpy_to_fastcs_datatype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">np_type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="fastcs.datatypes.html#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a></span></span><a class="reference internal" href="../_modules/fastcs/util.html#numpy_to_fastcs_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.util.numpy_to_fastcs_datatype" title="Link to this definition">#</a></dt>
 <dd><p>Converts numpy types to fastcs types for widget creation.
 Only types important for widget creation are explicitly converted</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.util.validate_hinted_attributes">
-<span class="sig-prename descclassname"><span class="pre">fastcs.util.</span></span><span class="sig-name descname"><span class="pre">validate_hinted_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.controller.html#fastcs.controller.BaseController" title="fastcs.controller.BaseController"><span class="pre">BaseController</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/util.html#validate_hinted_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.util.validate_hinted_attributes" title="Link to this definition">#</a></dt>
-<dd><p>Validate <code class="docutils literal notranslate"><span class="pre">Attribute</span></code> type-hints  match dynamically intropected instances</p>
-<p>For each type-hinted attribute, validate that a corresponding instance exists in the
-controller with the correct access mode and datatype.</p>
 </dd></dl>
 
 </section>
@@ -622,7 +611,6 @@ controller with the correct access mode and datatype.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.util.snake_to_pascal"><code class="docutils literal notranslate"><span class="pre">snake_to_pascal()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.util.numpy_to_fastcs_datatype"><code class="docutils literal notranslate"><span class="pre">numpy_to_fastcs_datatype()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.util.validate_hinted_attributes"><code class="docutils literal notranslate"><span class="pre">validate_hinted_attributes()</span></code></a></li>
 </ul>
   </nav></div>
 
