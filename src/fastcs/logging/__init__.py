@@ -16,7 +16,7 @@ This is a singleton logger instance to be used throughout the library and in spe
 drivers. This logger uses ``loguru`` as underlying logging library, which enables much
 simpler configuration as well as structured logging.
 
-Keyword arguments to log statments will be attached as extra fields on the log record.
+Keyword arguments to log statements will be attached as extra fields on the log record.
 These fields are displayed separately in the console output and can used for filtering
 and metrics in graylog.
 
@@ -70,7 +70,7 @@ def bind_logger(logger_name: str) -> Logger:
 
 
 def configure_logging(
-    level: LogLevel | None = None,
+    level: LogLevel = LogLevel.INFO,
     graylog_endpoint: GraylogEndpoint | None = None,
     graylog_static_fields: GraylogStaticFields | None = None,
     graylog_env_fields: GraylogEnvFields | None = None,
@@ -95,7 +95,7 @@ def configure_logging(
 
 
 # Configure logger with defaults - INFO level and disabled
-configure_logging()
+_configure_logger(logger)
 
 
 class _StdLoggingInterceptHandler(logging.Handler):

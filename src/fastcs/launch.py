@@ -105,10 +105,7 @@ def _launch(
                 help=f"A yaml file matching the {controller_class.__name__} schema"
             ),
         ],
-        log_level: Annotated[
-            Optional[LogLevel],  # noqa: UP045
-            typer.Option(),
-        ] = None,
+        log_level: Annotated[LogLevel, typer.Option()] = LogLevel.INFO,
         graylog_endpoint: Annotated[
             Optional[GraylogEndpoint],  # noqa: UP045
             typer.Option(
