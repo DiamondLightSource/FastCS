@@ -4,12 +4,12 @@ from dataclasses import dataclass, field
 from fastcs.controller_api import ControllerAPI
 from fastcs.logging import logger as _fastcs_logger
 from fastcs.transport.epics.docs import EpicsDocs
-from fastcs.transport.epics.gui import PvaEpicsGUI
 from fastcs.transport.epics.options import (
     EpicsDocsOptions,
     EpicsGUIOptions,
     EpicsIOCOptions,
 )
+from fastcs.transport.epics.pva.gui import PvaEpicsGUI
 from fastcs.transport.transport import Transport
 
 from .ioc import P4PIOC

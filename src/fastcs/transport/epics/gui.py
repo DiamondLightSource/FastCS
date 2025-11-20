@@ -2,7 +2,6 @@ from pvi._format.dls import DLSFormatter  # type: ignore
 from pvi.device import (
     LED,
     ButtonPanel,
-    CheckBox,
     ComboBox,
     ComponentUnion,
     Device,
@@ -14,8 +13,6 @@ from pvi.device import (
     SignalW,
     SignalX,
     SubScreen,
-    TableRead,
-    TableWrite,
     TextFormat,
     TextRead,
     TextWrite,
@@ -35,12 +32,11 @@ from fastcs.datatypes import (
     Float,
     Int,
     String,
-    Table,
     Waveform,
 )
 from fastcs.exceptions import FastCSError
 from fastcs.logging import bind_logger
-from fastcs.util import numpy_to_fastcs_datatype, snake_to_pascal
+from fastcs.util import snake_to_pascal
 
 from .options import EpicsGUIFormat, EpicsGUIOptions
 
@@ -216,39 +212,3 @@ class EpicsGUI:
             components.append(Group(name=name, layout=Grid(), children=children))
 
         return components
-
-
-class PvaEpicsGUI(EpicsGUI):
-    """For creating gui in the PVA EPICS transport."""
-
-    def _get_pv(self, attr_path: list[str], name: str):
-        return f"pva://{super()._get_pv(attr_path, name)}"
-
-    def _get_read_widget(self, fastcs_datatype: DataType) -> ReadWidgetUnion | None:
-        if isinstance(fastcs_datatype, Table):
-            fastcs_datatypes = [
-                numpy_to_fastcs_datatype(datatype)
-                for _, datatype in fastcs_datatype.structured_dtype
-            ]
-
-            base_get_read_widget = super()._get_read_widget
-            widgets = [base_get_read_widget(datatype) for datatype in fastcs_datatypes]
-
-            return TableRead(widgets=widgets)  # type: ignore
-        else:
-            return super()._get_read_widget(fastcs_datatype)
-
-    def _get_write_widget(self, fastcs_datatype: DataType) -> WriteWidgetUnion | None:
-        if isinstance(fastcs_datatype, Table):
-            widgets = []
-            for _, datatype in fastcs_datatype.structured_dtype:
-                fastcs_datatype = numpy_to_fastcs_datatype(datatype)
-                if isinstance(fastcs_datatype, Bool):
-                    # Replace with compact version for Table row
-                    widget = CheckBox()
-                else:
-                    widget = super()._get_write_widget(fastcs_datatype)
-                widgets.append(widget)
-            return TableWrite(widgets=widgets)
-        else:
-            return super()._get_write_widget(fastcs_datatype)
