@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transport.epics.gui &#8212; FastCS 0.11.0a5.dev2+g2895e1fcd documentation</title>
+    <title>fastcs.transport.epics.gui &#8212; FastCS 0.11.0a5.dev3+g9d894efec documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=1088b302"></script>
+    <script src="../../../../_static/documentation_options.js?v=dbe1fb7a"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -453,7 +453,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pvi.device</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">LED</span><span class="p">,</span>
     <span class="n">ButtonPanel</span><span class="p">,</span>
-    <span class="n">CheckBox</span><span class="p">,</span>
     <span class="n">ComboBox</span><span class="p">,</span>
     <span class="n">ComponentUnion</span><span class="p">,</span>
     <span class="n">Device</span><span class="p">,</span>
@@ -465,8 +464,6 @@
     <span class="n">SignalW</span><span class="p">,</span>
     <span class="n">SignalX</span><span class="p">,</span>
     <span class="n">SubScreen</span><span class="p">,</span>
-    <span class="n">TableRead</span><span class="p">,</span>
-    <span class="n">TableWrite</span><span class="p">,</span>
     <span class="n">TextFormat</span><span class="p">,</span>
     <span class="n">TextRead</span><span class="p">,</span>
     <span class="n">TextWrite</span><span class="p">,</span>
@@ -486,12 +483,11 @@
     <span class="n">Float</span><span class="p">,</span>
     <span class="n">Int</span><span class="p">,</span>
     <span class="n">String</span><span class="p">,</span>
-    <span class="n">Table</span><span class="p">,</span>
     <span class="n">Waveform</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCSError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">bind_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy_to_fastcs_datatype</span><span class="p">,</span> <span class="n">snake_to_pascal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">snake_to_pascal</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIFormat</span><span class="p">,</span> <span class="n">EpicsGUIOptions</span>
 
@@ -669,45 +665,6 @@
             <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Group</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">Grid</span><span class="p">(),</span> <span class="n">children</span><span class="o">=</span><span class="n">children</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">components</span></div>
-
-
-
-<div class="viewcode-block" id="PvaEpicsGUI">
-<a class="viewcode-back" href="../../../../_api/fastcs.transport.epics.gui.html#fastcs.transport.epics.gui.PvaEpicsGUI">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PvaEpicsGUI</span><span class="p">(</span><span class="n">EpicsGUI</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;For creating gui in the PVA EPICS transport.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_pv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;pva://</span><span class="si">{</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_pv</span><span class="p">(</span><span class="n">attr_path</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_read_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fastcs_datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReadWidgetUnion</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fastcs_datatype</span><span class="p">,</span> <span class="n">Table</span><span class="p">):</span>
-            <span class="n">fastcs_datatypes</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">numpy_to_fastcs_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">datatype</span> <span class="ow">in</span> <span class="n">fastcs_datatype</span><span class="o">.</span><span class="n">structured_dtype</span>
-            <span class="p">]</span>
-
-            <span class="n">base_get_read_widget</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_read_widget</span>
-            <span class="n">widgets</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_get_read_widget</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span> <span class="k">for</span> <span class="n">datatype</span> <span class="ow">in</span> <span class="n">fastcs_datatypes</span><span class="p">]</span>
-
-            <span class="k">return</span> <span class="n">TableRead</span><span class="p">(</span><span class="n">widgets</span><span class="o">=</span><span class="n">widgets</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_read_widget</span><span class="p">(</span><span class="n">fastcs_datatype</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_write_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fastcs_datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WriteWidgetUnion</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fastcs_datatype</span><span class="p">,</span> <span class="n">Table</span><span class="p">):</span>
-            <span class="n">widgets</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">datatype</span> <span class="ow">in</span> <span class="n">fastcs_datatype</span><span class="o">.</span><span class="n">structured_dtype</span><span class="p">:</span>
-                <span class="n">fastcs_datatype</span> <span class="o">=</span> <span class="n">numpy_to_fastcs_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fastcs_datatype</span><span class="p">,</span> <span class="n">Bool</span><span class="p">):</span>
-                    <span class="c1"># Replace with compact version for Table row</span>
-                    <span class="n">widget</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">()</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">widget</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_write_widget</span><span class="p">(</span><span class="n">fastcs_datatype</span><span class="p">)</span>
-                <span class="n">widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">TableWrite</span><span class="p">(</span><span class="n">widgets</span><span class="o">=</span><span class="n">widgets</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_write_widget</span><span class="p">(</span><span class="n">fastcs_datatype</span><span class="p">)</span></div>
 
 </pre></div>
 

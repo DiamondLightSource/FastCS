@@ -1,7 +1,6 @@
 ``fastcs.transport.epics.gui``
 ==============================
         
-        
 
 .. automodule:: fastcs.transport.epics.gui
     :members:
@@ -18,6 +17,5 @@
         :nosignatures:
     
         EpicsGUI
-        PvaEpicsGUI
     
     

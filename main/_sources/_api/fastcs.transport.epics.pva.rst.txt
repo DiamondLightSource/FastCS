@@ -13,6 +13,7 @@
         :template: custom-module-template.rst
         :recursive:
     
+        gui
         ioc
         pvi
         transport
