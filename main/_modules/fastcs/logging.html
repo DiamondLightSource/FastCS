@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.logging &#8212; FastCS 0.11.0a5.dev1+g5045dcd8e documentation</title>
+    <title>fastcs.logging &#8212; FastCS 0.11.0a5.dev2+g2895e1fcd documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=41cf242f"></script>
+    <script src="../../_static/documentation_options.js?v=1088b302"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -467,7 +467,7 @@
 <span class="sd">drivers. This logger uses ``loguru`` as underlying logging library, which enables much</span>
 <span class="sd">simpler configuration as well as structured logging.</span>
 
-<span class="sd">Keyword arguments to log statments will be attached as extra fields on the log record.</span>
+<span class="sd">Keyword arguments to log statements will be attached as extra fields on the log record.</span>
 <span class="sd">These fields are displayed separately in the console output and can used for filtering</span>
 <span class="sd">and metrics in graylog.</span>
 
@@ -526,7 +526,7 @@
 <div class="viewcode-block" id="configure_logging">
 <a class="viewcode-back" href="../../_api/fastcs.logging.html#fastcs.logging.configure_logging">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">configure_logging</span><span class="p">(</span>
-    <span class="n">level</span><span class="p">:</span> <span class="n">LogLevel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="n">LogLevel</span> <span class="o">=</span> <span class="n">LogLevel</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
     <span class="n">graylog_endpoint</span><span class="p">:</span> <span class="n">GraylogEndpoint</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">graylog_static_fields</span><span class="p">:</span> <span class="n">GraylogStaticFields</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">graylog_env_fields</span><span class="p">:</span> <span class="n">GraylogEnvFields</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -552,7 +552,7 @@
 
 
 <span class="c1"># Configure logger with defaults - INFO level and disabled</span>
-<span class="n">configure_logging</span><span class="p">()</span>
+<span class="n">_configure_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_StdLoggingInterceptHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
