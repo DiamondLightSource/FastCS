@@ -39,9 +39,12 @@ from fastcs.datatypes import (
     Waveform,
 )
 from fastcs.exceptions import FastCSError
+from fastcs.logging import bind_logger
 from fastcs.util import numpy_to_fastcs_datatype, snake_to_pascal
 
 from .options import EpicsGUIFormat, EpicsGUIOptions
+
+logger = bind_logger(logger_name=__name__)
 
 
 class EpicsGUI:
@@ -145,7 +148,7 @@ class EpicsGUI:
             options = EpicsGUIOptions()
 
         if options.file_format is EpicsGUIFormat.edl:
-            raise FastCSError("FastCS does not support .edl screens.")
+            logger.warning("FastCS may not support all widgets in .edl screens")
 
         assert options.output_path.suffix == options.file_format.value
         options.output_path.parent.mkdir(parents=True, exist_ok=True)
