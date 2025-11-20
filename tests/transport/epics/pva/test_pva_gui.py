@@ -13,7 +13,7 @@ from pvi.device import (
 
 from fastcs.attributes import AttrR, AttrW
 from fastcs.datatypes import Table
-from fastcs.transport.epics.gui import PvaEpicsGUI
+from fastcs.transport.epics.pva.gui import PvaEpicsGUI
 
 
 def test_get_pv_in_pva(controller_api):
