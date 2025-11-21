@@ -3,15 +3,13 @@ from dataclasses import dataclass
 
 import pytest
 
-from fastcs.attribute_io import AttributeIO
-from fastcs.attribute_io_ref import AttributeIORef
-from fastcs.attributes import ONCE, AttrR, AttrRW
+from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW
 from fastcs.control_system import FastCS, build_controller_api
-from fastcs.controller import Controller
-from fastcs.cs_methods import Command
+from fastcs.controllers import Controller
 from fastcs.datatypes import Int
 from fastcs.exceptions import FastCSError
-from fastcs.wrappers import command, scan
+from fastcs.methods import Command, command, scan
+from fastcs.util import ONCE
 
 
 @pytest.mark.asyncio

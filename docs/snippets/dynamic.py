@@ -4,15 +4,20 @@ from typing import Any, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from fastcs.attribute_io import AttributeIO
-from fastcs.attribute_io_ref import AttributeIORef
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.attributes import (
+    Attribute,
+    AttributeIO,
+    AttributeIORef,
+    AttrR,
+    AttrRW,
+    AttrW,
+)
 from fastcs.connections import IPConnection, IPConnectionSettings
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 from fastcs.datatypes import Bool, DataType, Float, Int, String
 from fastcs.launch import FastCS
-from fastcs.transport.epics.ca.transport import EpicsCATransport
-from fastcs.transport.epics.options import EpicsIOCOptions
+from fastcs.transports.epics import EpicsIOCOptions
+from fastcs.transports.epics.ca import EpicsCATransport
 
 
 class TemperatureControllerParameter(BaseModel):

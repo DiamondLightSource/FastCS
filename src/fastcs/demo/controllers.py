@@ -4,13 +4,11 @@ import json
 from dataclasses import KW_ONLY, dataclass
 from typing import TypeVar
 
-from fastcs.attribute_io import AttributeIO
-from fastcs.attribute_io_ref import AttributeIORef
-from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW, AttrW
 from fastcs.connections import IPConnection, IPConnectionSettings
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 from fastcs.datatypes import Enum, Float, Int
-from fastcs.wrappers import command, scan
+from fastcs.methods import command, scan
 
 NumberT = TypeVar("NumberT", int, float)
 

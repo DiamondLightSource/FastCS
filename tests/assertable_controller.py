@@ -5,14 +5,12 @@ from typing import Literal
 
 from pytest_mock import MockerFixture, MockType
 
-from fastcs.attribute_io import AttributeIO
-from fastcs.attribute_io_ref import AttributeIORef
-from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW, AttrW
 from fastcs.control_system import build_controller_api
-from fastcs.controller import Controller
-from fastcs.controller_api import ControllerAPI
-from fastcs.datatypes import Int, T
-from fastcs.wrappers import command, scan
+from fastcs.controllers import Controller
+from fastcs.datatypes import DType_T, Int
+from fastcs.methods import command, scan
+from fastcs.transports import ControllerAPI
 
 
 @dataclass
@@ -20,11 +18,11 @@ class MyTestAttributeIORef(AttributeIORef):
     update_period = 1
 
 
-class MyTestAttributeIO(AttributeIO[T, MyTestAttributeIORef]):
-    async def update(self, attr: AttrR[T, MyTestAttributeIORef]):
+class MyTestAttributeIO(AttributeIO[DType_T, MyTestAttributeIORef]):
+    async def update(self, attr: AttrR[DType_T, MyTestAttributeIORef]):
         print(f"update {attr}")
 
-    async def send(self, attr: AttrW[T, MyTestAttributeIORef], value: T):
+    async def send(self, attr: AttrW[DType_T, MyTestAttributeIORef], value: DType_T):
         print(f"sending {attr} = {value}")
         if isinstance(attr, AttrRW):
             await attr.update(value)
