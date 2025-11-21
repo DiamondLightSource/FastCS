@@ -1,12 +1,12 @@
 from pathlib import Path
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, ControllerVector
+from fastcs.control_system import FastCS
+from fastcs.controllers import Controller, ControllerVector
 from fastcs.datatypes import Int
-from fastcs.launch import FastCS
-from fastcs.transport.epics.ca.transport import EpicsCATransport, EpicsGUIOptions
-from fastcs.transport.epics.options import EpicsIOCOptions
-from fastcs.wrappers import command
+from fastcs.methods import command
+from fastcs.transports.epics import EpicsIOCOptions
+from fastcs.transports.epics.ca.transport import EpicsCATransport, EpicsGUIOptions
 
 
 class ParentController(Controller):

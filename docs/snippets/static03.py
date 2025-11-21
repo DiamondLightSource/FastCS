@@ -1,5 +1,5 @@
 from fastcs.attributes import AttrR
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 from fastcs.datatypes import String
 from fastcs.launch import FastCS
 

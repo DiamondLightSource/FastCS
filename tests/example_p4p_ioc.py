@@ -4,17 +4,13 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from fastcs.attribute_io import AttributeIO
-from fastcs.attribute_io_ref import AttributeIORef
-from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controller import Controller, ControllerVector
-from fastcs.datatypes import Bool, Enum, Float, Int, T, Table, Waveform
+from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW, AttrW
+from fastcs.controllers import Controller, ControllerVector
+from fastcs.datatypes import Bool, DType_T, Enum, Float, Int, Table, Waveform
 from fastcs.launch import FastCS
-from fastcs.transport.epics.options import (
-    EpicsIOCOptions,
-)
-from fastcs.transport.epics.pva.transport import EpicsPVATransport
-from fastcs.wrappers import command, scan
+from fastcs.methods import command, scan
+from fastcs.transports.epics import EpicsIOCOptions
+from fastcs.transports.epics.pva import EpicsPVATransport
 
 
 @dataclass
@@ -22,8 +18,8 @@ class SimpleAttributeIORef(AttributeIORef):
     pass
 
 
-class SimpleAttributeIO(AttributeIO[T, SimpleAttributeIORef]):
-    async def send(self, attr: AttrW[T, SimpleAttributeIORef], value):
+class SimpleAttributeIO(AttributeIO[DType_T, SimpleAttributeIORef]):
+    async def send(self, attr: AttrW[DType_T, SimpleAttributeIORef], value):
         if isinstance(attr, AttrRW):
             await attr.update(value)
 

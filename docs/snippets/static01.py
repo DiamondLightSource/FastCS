@@ -1,4 +1,4 @@
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 
 
 class TemperatureController(Controller):

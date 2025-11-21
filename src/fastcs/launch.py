@@ -10,7 +10,7 @@ from ruamel.yaml import YAML
 
 from fastcs import __version__
 from fastcs.control_system import FastCS
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 from fastcs.exceptions import LaunchError
 from fastcs.logging import (
     GraylogEndpoint,
@@ -21,7 +21,7 @@ from fastcs.logging import (
     parse_graylog_env_fields,
     parse_graylog_static_fields,
 )
-from fastcs.transport import Transport
+from fastcs.transports import Transport
 
 
 def launch(
