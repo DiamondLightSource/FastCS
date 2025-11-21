@@ -23,3 +23,15 @@ repos:
         entry: ruff format --force-exclude
         types: [python]
         require_serial: true
+
+
+  - repo: https://github.com/semgrep/pre-commit
+    rev: v1.144.0
+    hooks:
+      - id: semgrep
+        # Use Semgrep's "default" ruleset and fail the commit on findings
+        args:
+          - --config
+          - p/default
+          - --error
+          - --skip-unknown-extensions
