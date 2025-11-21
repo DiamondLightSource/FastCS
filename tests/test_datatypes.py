@@ -4,6 +4,9 @@ import numpy as np
 import pytest
 
 from fastcs.datatypes import DataType, Enum, Float, Int, Waveform
+from fastcs.datatypes._util import numpy_to_fastcs_datatype
+from fastcs.datatypes.bool import Bool
+from fastcs.datatypes.string import String
 
 
 def test_base_validate():
@@ -40,3 +43,21 @@ def test_base_validate():
 def test_validate(datatype, init_args, value):
     with pytest.raises(ValueError):
         datatype(**init_args).validate(value)
+
+
+@pytest.mark.parametrize(
+    "numpy_type, fastcs_datatype",
+    [
+        (np.float16, Float()),
+        (np.float32, Float()),
+        (np.int16, Int()),
+        (np.int32, Int()),
+        (np.bool, Bool()),
+        (np.dtype("S1000"), String()),
+        (np.dtype("U25"), String()),
+        (np.dtype(">i4"), Int()),
+        (np.dtype("d"), Float()),
+    ],
+)
+def test_numpy_to_fastcs_datatype(numpy_type, fastcs_datatype):
+    assert fastcs_datatype == numpy_to_fastcs_datatype(numpy_type)

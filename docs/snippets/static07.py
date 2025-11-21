@@ -2,15 +2,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeVar
 
-from fastcs.attribute_io import AttributeIO
-from fastcs.attribute_io_ref import AttributeIORef
-from fastcs.attributes import AttrR
+from fastcs.attributes import AttributeIO, AttributeIORef, AttrR
 from fastcs.connections import IPConnection, IPConnectionSettings
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 from fastcs.datatypes import String
 from fastcs.launch import FastCS
-from fastcs.transport.epics.ca.transport import EpicsCATransport
-from fastcs.transport.epics.options import EpicsGUIOptions, EpicsIOCOptions
+from fastcs.transports.epics import EpicsGUIOptions, EpicsIOCOptions
+from fastcs.transports.epics.ca import EpicsCATransport
 
 NumberT = TypeVar("NumberT", int, float)
 

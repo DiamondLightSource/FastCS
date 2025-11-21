@@ -6,16 +6,15 @@ from typing import Any
 
 from IPython.terminal.embed import InteractiveShellEmbed
 
-from fastcs.controller import BaseController, Controller
-from fastcs.controller_api import ControllerAPI
-from fastcs.cs_methods import Command, Scan, ScanCallback
+from fastcs.controllers import BaseController, Controller
 from fastcs.exceptions import FastCSError
-from fastcs.logging import logger as _fastcs_logger
+from fastcs.logging import bind_logger
+from fastcs.methods import Command, Scan, ScanCallback
 from fastcs.tracer import Tracer
-from fastcs.transport import Transport
+from fastcs.transports import ControllerAPI, Transport
 
 tracer = Tracer(name=__name__)
-logger = _fastcs_logger.bind(logger_name=__name__)
+logger = bind_logger(logger_name=__name__)
 
 
 class FastCS:

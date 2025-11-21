@@ -23,7 +23,7 @@ from fastcs.control_system import build_controller_api
 from fastcs.datatypes import Bool, Float, Int, String
 from fastcs.logging import configure_logging, logger
 from fastcs.logging._logging import LogLevel
-from fastcs.transport.tango.dsr import register_dev
+from fastcs.transports.tango.dsr import register_dev
 from tests.assertable_controller import MyTestAttributeIORef, MyTestController
 from tests.example_p4p_ioc import run as _run_p4p_ioc
 from tests.example_softioc import run as _run_softioc

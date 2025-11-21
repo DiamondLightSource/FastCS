@@ -458,17 +458,17 @@ ramp so that the value updates. Check the console to see the messages.  Call `di
 In [1]: controller.power.enable_tracing()
 [2025-11-18 11:11:12.060+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=0.0
 [2025-11-18 11:11:12.060+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='P')), value=0.0
-[2025-11-18 11:11:12.060+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=0.0
-[2025-11-18 11:11:12.194+0000 I] PV put: DEMO:R1:Enabled = 1  [fastcs.transport.epics.ca.ioc] pv=DEMO:R1:Enabled, value=1
+[2025-11-18 11:11:12.060+0000 T] PV set from attribute        [fastcs.transports.epics.ca.ioc] pv=DEMO:Power, value=0.0
+[2025-11-18 11:11:12.194+0000 I] PV put: DEMO:R1:Enabled = 1  [fastcs.transports.epics.ca.ioc] pv=DEMO:R1:Enabled, value=1
 [2025-11-18 11:11:12.195+0000 I] Sending attribute value      [TemperatureControllerAttributeIO] command=N01=1, attribute=AttrRW(path=R1.enabled, datatype=Enum, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='N'))
 [2025-11-18 11:11:12.261+0000 T] Update attribute             [AttrR]
 [2025-11-18 11:11:12.262+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=29.040181873093132
 [2025-11-18 11:11:12.262+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='P')), value=29.040181873093132
-[2025-11-18 11:11:12.262+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=29.04
+[2025-11-18 11:11:12.262+0000 T] PV set from attribute        [fastcs.transports.epics.ca.ioc] pv=DEMO:Power, value=29.04
 [2025-11-18 11:11:12.463+0000 T] Update attribute             [AttrR]
 [2025-11-18 11:11:12.464+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=30.452524641833854
 [2025-11-18 11:11:12.464+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name='P')), value=30.452524641833854
-[2025-11-18 11:11:12.465+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=30.45
+[2025-11-18 11:11:12.465+0000 T] PV set from attribute        [fastcs.transports.epics.ca.ioc] pv=DEMO:Power, value=30.45
 In [2]: controller.power.disable_tracing()
 ```
 

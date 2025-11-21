@@ -90,23 +90,24 @@ nitpick_ignore = [
     # Problems in FastCS itself
     ("py:class", "T"),
     ("py:class", "AttrIOUpdateCallback"),
-    ("py:class", "fastcs.transport.epics.pva.pvi_tree._PviSignalInfo"),
+    ("py:class", "fastcs.transports.epics.pva.pvi_tree._PviSignalInfo"),
     ("py:class", "fastcs.logging._logging.LogLevel"),
     ("py:class", "fastcs.logging._graylog.GraylogEndpoint"),
     ("py:class", "fastcs.logging._graylog.GraylogStaticFields"),
     ("py:class", "fastcs.logging._graylog.GraylogEnvFields"),
     ("py:obj", "fastcs.control_system.build_controller_api"),
-    ("py:obj", "fastcs.transport.epics.util.controller_pv_prefix"),
+    ("py:obj", "fastcs.transports.epics.util.controller_pv_prefix"),
     ("docutils", "fastcs.demo.controllers.TemperatureControllerSettings"),
     # TypeVar without docstrings still give warnings
-    ("py:class", "fastcs.datatypes.T_Numerical"),
     ("py:class", "strawberry.schema.schema.Schema"),
 ]
 nitpick_ignore_regex = [
-    ("py:class", "fastcs.*.T"),
-    ("py:obj", "fastcs.*.T"),
+    ("py:class", r"fastcs.*.DType_T"),
+    ("py:class", r"fastcs.*.Numeric_T"),
+    ("py:obj", r"fastcs.*.DType_T"),
     (r"py:.*", r"fastcs\.demo.*"),
     (r"py:.*", r"tickit.*"),
+    ("py:class", r"numpy.*"),
 ]
 
 suppress_warnings = ["docutils"]
@@ -149,6 +150,7 @@ pygments_style = "sphinx"
 # docs in the python documentation.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
 }
 
 # A dictionary of graphviz graph attributes for inheritance diagrams.
