@@ -1,0 +1,23 @@
+``fastcs.control_system``
+=========================
+        
+        
+
+.. automodule:: fastcs.control_system
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        FastCS
+        build_controller_api
+    
+    
