@@ -2,14 +2,14 @@ import asyncio
 
 from fastcs import FastCS
 from fastcs.attributes import AttrR, AttrW
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 from fastcs.datatypes import Bool, Int
-from fastcs.transport.epics.ca.transport import EpicsCATransport
-from fastcs.transport.epics.options import EpicsIOCOptions
-from fastcs.transport.rest.options import RestServerOptions
-from fastcs.transport.rest.transport import RestTransport
-from fastcs.transport.tango.options import TangoDSROptions
-from fastcs.transport.tango.transport import TangoTransport
+from fastcs.transports.epics import EpicsIOCOptions
+from fastcs.transports.epics.ca.transport import EpicsCATransport
+from fastcs.transports.rest.options import RestServerOptions
+from fastcs.transports.rest.transport import RestTransport
+from fastcs.transports.tango.options import TangoDSROptions
+from fastcs.transports.tango.transport import TangoTransport
 
 
 class MyTestController(Controller):

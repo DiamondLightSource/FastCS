@@ -10,15 +10,11 @@ from typer.testing import CliRunner
 
 from fastcs import __version__
 from fastcs.attributes import AttrR
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 from fastcs.datatypes import Int
 from fastcs.exceptions import LaunchError
-from fastcs.launch import (
-    _launch,
-    get_controller_schema,
-    launch,
-)
-from fastcs.transport.transport import Transport
+from fastcs.launch import _launch, get_controller_schema, launch
+from fastcs.transports import Transport
 
 
 @dataclass
@@ -150,16 +146,16 @@ def test_get_schema(data):
 
 def test_error_if_identical_context_in_transports(mocker: MockerFixture, data):
     mocker.patch(
-        "fastcs.transport.Transport.context",
+        "fastcs.transports.Transport.context",
         new_callable=mocker.PropertyMock,
         return_value={"controller": "test"},
     )
     mocker.patch(
-        "fastcs.transport.epics.pva.transport.EpicsPVATransport.serve",
+        "fastcs.transports.epics.pva.transport.EpicsPVATransport.serve",
         new_callable=mocker.PropertyMock,
     )
     mocker.patch(
-        "fastcs.transport.epics.ca.transport.EpicsCATransport.serve",
+        "fastcs.transports.epics.ca.transport.EpicsCATransport.serve",
         new_callable=mocker.PropertyMock,
     )
     app = _launch(IsHinted)
