@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.attributes &#8212; FastCS 0.11.0a5.dev3+g9d894efec documentation</title>
+    <title>fastcs.attributes &#8212; FastCS 0.11.0a5.dev4+g0f75fa188 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=dbe1fb7a"></script>
+    <script src="../_static/documentation_options.js?v=b87e3fae"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -65,8 +65,8 @@
     <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fastcs.connections" href="fastcs.connections.html" />
-    <link rel="prev" title="fastcs.attribute_io_ref" href="fastcs.attribute_io_ref.html" />
+    <link rel="next" title="fastcs.attributes.attr_r" href="fastcs.attributes.attr_r.html" />
+    <link rel="prev" title="fastcs" href="fastcs.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="main" />
@@ -405,19 +405,38 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="fastcs.html">API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="fastcs.attribute_io.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attribute_io</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.attribute_io_ref.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attribute_io_ref</span></code></a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes</span></code></a></li>
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_r.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_r</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_rw.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_rw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_w.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_w</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute_io.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute_io</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute_io_ref.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute_io_ref</span></code></a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.connections.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.connections.ip_connection.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections.ip_connection</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.connections.serial_connection.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections.serial_connection</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.control_system.html"><code class="docutils literal notranslate"><span class="pre">fastcs.control_system</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controller</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controller_api</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.cs_methods.html"><code class="docutils literal notranslate"><span class="pre">fastcs.cs_methods</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.datatypes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.base_controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.base_controller</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.controller_vector.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_vector</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.datatypes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.bool.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.bool</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.datatype.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.datatype</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.enum.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.enum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.float.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.float</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.int.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.int</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.string.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.string</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.table.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.table</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.waveform.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.waveform</span></code></a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.demo.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.demo.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.controllers</span></code></a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.demo.simulation.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.simulation</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -429,42 +448,48 @@
 <li class="toctree-l2"><a class="reference internal" href="fastcs.exceptions.html"><code class="docutils literal notranslate"><span class="pre">fastcs.exceptions</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.launch.html"><code class="docutils literal notranslate"><span class="pre">fastcs.launch</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.logging.html"><code class="docutils literal notranslate"><span class="pre">fastcs.logging</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.methods.html"><code class="docutils literal notranslate"><span class="pre">fastcs.methods</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.methods.command.html"><code class="docutils literal notranslate"><span class="pre">fastcs.methods.command</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.methods.method.html"><code class="docutils literal notranslate"><span class="pre">fastcs.methods.method</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.methods.scan.html"><code class="docutils literal notranslate"><span class="pre">fastcs.methods.scan</span></code></a></li>
+</ul>
+</details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.tracer.html"><code class="docutils literal notranslate"><span class="pre">fastcs.tracer</span></code></a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.epics.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.ca.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.ca</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.docs</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.gui.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.gui</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.options</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.pva.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.util</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.transports.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.transports.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.controller_api</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.epics.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.ca.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.ca</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.docs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.gui.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.gui</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.pva.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.pva</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.util</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.graphql</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.options</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.transport</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.graphql</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.graphql.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.graphql.graphql</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.graphql.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.graphql.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.graphql.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.graphql.transport</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.options</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.rest</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.transport</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.util</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.rest.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.rest.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest.rest</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.rest.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest.transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.rest.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest.util</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.tango.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.dsr.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.dsr</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.options</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.transport</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.util</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.tango.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.tango.dsr.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango.dsr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.tango.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.tango.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango.transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.tango.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango.util</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l3"><a class="reference internal" href="fastcs.transport.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.transport</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.transports.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.transport</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.util</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.wrappers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.wrappers</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
@@ -534,173 +559,30 @@
                   
   <section id="module-fastcs.attributes">
 <span id="fastcs-attributes"></span><h1><code class="docutils literal notranslate"><span class="pre">fastcs.attributes</span></code><a class="headerlink" href="#module-fastcs.attributes" title="Link to this heading">#</a></h1>
-<p class="rubric">Members</p>
+<p class="rubric">Submodules</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.attributes.AttrIOUpdateCallback" title="fastcs.attributes.AttrIOUpdateCallback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrIOUpdateCallback</span></code></a></p></td>
-<td><p>An AttributeIO callback that takes an AttrR and updates its value</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.attributes.attr_r.html#module-fastcs.attributes.attr_r" title="fastcs.attributes.attr_r"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attr_r</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.attributes.AttrOnPutCallback" title="fastcs.attributes.AttrOnPutCallback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrOnPutCallback</span></code></a></p></td>
-<td><p>Callbacks to be called when the setpoint of an attribute is changed</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.attributes.attr_rw.html#module-fastcs.attributes.attr_rw" title="fastcs.attributes.attr_rw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attr_rw</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.attributes.AttrOnUpdateCallback" title="fastcs.attributes.AttrOnUpdateCallback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrOnUpdateCallback</span></code></a></p></td>
-<td><p>A callback to be called when the value of the attribute is updated</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.attributes.attr_w.html#module-fastcs.attributes.attr_w" title="fastcs.attributes.attr_w"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attr_w</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.attributes.AttrR" title="fastcs.attributes.AttrR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrR</span></code></a></p></td>
-<td><p>A read-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.attributes.attribute.html#module-fastcs.attributes.attribute" title="fastcs.attributes.attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attribute</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.attributes.AttrRW" title="fastcs.attributes.AttrRW"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrRW</span></code></a></p></td>
-<td><p>A read-write <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.attributes.attribute_io.html#module-fastcs.attributes.attribute_io" title="fastcs.attributes.attribute_io"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attribute_io</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.attributes.AttrSyncSetpointCallback" title="fastcs.attributes.AttrSyncSetpointCallback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrSyncSetpointCallback</span></code></a></p></td>
-<td><p>Callbacks to be called when the setpoint of an attribute is changed</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.attributes.AttrUpdateCallback" title="fastcs.attributes.AttrUpdateCallback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrUpdateCallback</span></code></a></p></td>
-<td><p>A callback to be called periodically to update an attribute</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.attributes.AttrW" title="fastcs.attributes.AttrW"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrW</span></code></a></p></td>
-<td><p>A write-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.attributes.Attribute" title="fastcs.attributes.Attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Attribute</span></code></a></p></td>
-<td><p>Base FastCS attribute.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.attributes.ONCE" title="fastcs.attributes.ONCE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ONCE</span></code></a></p></td>
-<td><p>Special value to indicate that an attribute should be updated once on start up.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.attributes.attribute_io_ref.html#module-fastcs.attributes.attribute_io_ref" title="fastcs.attributes.attribute_io_ref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attribute_io_ref</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<dl class="py data">
-<dt class="sig sig-object py" id="fastcs.attributes.ONCE">
-<span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">ONCE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">inf</span></em><a class="headerlink" href="#fastcs.attributes.ONCE" title="Link to this definition">#</a></dt>
-<dd><p>Special value to indicate that an attribute should be updated once on start up.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.Attribute">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">Attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.html#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">io_ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AttributeIORefT</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#Attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.Attribute" title="Link to this definition">#</a></dt>
-<dd><p>Base FastCS attribute.</p>
-<p>Instances of this class added to a <code class="docutils literal notranslate"><span class="pre">Controller</span></code> will be used by the FastCS class.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrIOUpdateCallback">
-<span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrIOUpdateCallback</span></span><a class="headerlink" href="#fastcs.attributes.AttrIOUpdateCallback" title="Link to this definition">#</a></dt>
-<dd><p>An AttributeIO callback that takes an AttrR and updates its value</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[AttrR[T, Any]], <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Awaitable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]]</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrUpdateCallback">
-<span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrUpdateCallback</span></span><a class="headerlink" href="#fastcs.attributes.AttrUpdateCallback" title="Link to this definition">#</a></dt>
-<dd><p>A callback to be called periodically to update an attribute</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[], <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Awaitable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]]</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrOnUpdateCallback">
-<span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrOnUpdateCallback</span></span><a class="headerlink" href="#fastcs.attributes.AttrOnUpdateCallback" title="Link to this definition">#</a></dt>
-<dd><p>A callback to be called when the value of the attribute is updated</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>], <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Awaitable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]]</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrR">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.html#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">io_ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AttributeIORefT</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrR" title="Link to this definition">#</a></dt>
-<dd><p>A read-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrR.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span></span></span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrR.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrR.get" title="Link to this definition">#</a></dt>
-<dd><p>Get the cached value of the attribute.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrR.update">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrR.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrR.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the value of the attibute</p>
-<p>This sets the cached value of the attribute presented in the API. It should
-generally only be called from an IO or a controller that is updating the value
-from some underlying source.</p>
-<p>To request a change to the setpoint of the attribute, use the <code class="docutils literal notranslate"><span class="pre">put</span></code> method,
-which will attempt to apply the change to the underlying source.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrR.add_on_update_callback">
-<span class="sig-name descname"><span class="pre">add_on_update_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrR.add_on_update_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrR.add_on_update_callback" title="Link to this definition">#</a></dt>
-<dd><p>Add a callback to be called when the value of the attribute is updated</p>
-<p>The callback will be called with the updated value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrR.set_update_callback">
-<span class="sig-name descname"><span class="pre">set_update_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AttrIOUpdateCallback</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrR.set_update_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrR.set_update_callback" title="Link to this definition">#</a></dt>
-<dd><p>Set the callback to update the value of the attribute from the source</p>
-<p>The callback will be converted to an async task and called periodically.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrR.bind_update_callback">
-<span class="sig-name descname"><span class="pre">bind_update_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrR.bind_update_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrR.bind_update_callback" title="Link to this definition">#</a></dt>
-<dd><p>Bind self into the registered IO update callback</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrOnPutCallback">
-<span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrOnPutCallback</span></span><a class="headerlink" href="#fastcs.attributes.AttrOnPutCallback" title="Link to this definition">#</a></dt>
-<dd><p>Callbacks to be called when the setpoint of an attribute is changed</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[AttrW[T, Any], <code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>], <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Awaitable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]]</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrSyncSetpointCallback">
-<span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrSyncSetpointCallback</span></span><a class="headerlink" href="#fastcs.attributes.AttrSyncSetpointCallback" title="Link to this definition">#</a></dt>
-<dd><p>Callbacks to be called when the setpoint of an attribute is changed</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>], <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Awaitable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]]</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrW">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.html#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">io_ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AttributeIORefT</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrW" title="Link to this definition">#</a></dt>
-<dd><p>A write-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrW.put">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync_setpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrW.put"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrW.put" title="Link to this definition">#</a></dt>
-<dd><p>Set the setpoint of the attribute</p>
-<p>This should be called by clients to the attribute such as transports to apply a
-change to the attribute. The <code class="docutils literal notranslate"><span class="pre">_on_put_callback</span></code> will be called with this new
-setpoint, which may or may not take effect depending on the validity of the new
-value. For example, if the attribute has an IO to some device, the value might
-be rejected.</p>
-<p>To directly change the value of the attribute, for example from an update loop
-that has read a new value from some underlying source, call the <code class="docutils literal notranslate"><span class="pre">update</span></code>
-method.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrW.set_on_put_callback">
-<span class="sig-name descname"><span class="pre">set_on_put_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#fastcs.attributes.AttrW" title="fastcs.attributes.AttrW"><span class="pre">AttrW</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrW.set_on_put_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrW.set_on_put_callback" title="Link to this definition">#</a></dt>
-<dd><p>Set the callback to call when the setpoint is changed</p>
-<p>The callback will be called with the attribute and the new setpoint.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrW.add_sync_setpoint_callback">
-<span class="sig-name descname"><span class="pre">add_sync_setpoint_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrW.add_sync_setpoint_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrW.add_sync_setpoint_callback" title="Link to this definition">#</a></dt>
-<dd><p>Add a callback to publish changes to the setpoint of the attribute</p>
-<p>The callback will be called with the new setpoint.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.attributes.AttrRW">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.</span></span><span class="sig-name descname"><span class="pre">AttrRW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.html#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">io_ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AttributeIORefT</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes.html#AttrRW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.AttrRW" title="Link to this definition">#</a></dt>
-<dd><p>A read-write <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
-</dd></dl>
-
 </section>
 
 
@@ -714,20 +596,20 @@ method.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="fastcs.attribute_io_ref.html"
+       href="fastcs.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.attribute_io_ref</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs</span></code></p>
       </div>
     </a>
     <a class="right-next"
-       href="fastcs.connections.html"
+       href="fastcs.attributes.attr_r.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.connections</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_r</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -741,39 +623,6 @@ method.</p>
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.ONCE"><code class="docutils literal notranslate"><span class="pre">ONCE</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.Attribute"><code class="docutils literal notranslate"><span class="pre">Attribute</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrIOUpdateCallback"><code class="docutils literal notranslate"><span class="pre">AttrIOUpdateCallback</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrUpdateCallback"><code class="docutils literal notranslate"><span class="pre">AttrUpdateCallback</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrOnUpdateCallback"><code class="docutils literal notranslate"><span class="pre">AttrOnUpdateCallback</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrR"><code class="docutils literal notranslate"><span class="pre">AttrR</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrR.get"><code class="docutils literal notranslate"><span class="pre">AttrR.get()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrR.update"><code class="docutils literal notranslate"><span class="pre">AttrR.update()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrR.add_on_update_callback"><code class="docutils literal notranslate"><span class="pre">AttrR.add_on_update_callback()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrR.set_update_callback"><code class="docutils literal notranslate"><span class="pre">AttrR.set_update_callback()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrR.bind_update_callback"><code class="docutils literal notranslate"><span class="pre">AttrR.bind_update_callback()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrOnPutCallback"><code class="docutils literal notranslate"><span class="pre">AttrOnPutCallback</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrSyncSetpointCallback"><code class="docutils literal notranslate"><span class="pre">AttrSyncSetpointCallback</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrW"><code class="docutils literal notranslate"><span class="pre">AttrW</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrW.put"><code class="docutils literal notranslate"><span class="pre">AttrW.put()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrW.set_on_put_callback"><code class="docutils literal notranslate"><span class="pre">AttrW.set_on_put_callback()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrW.add_sync_setpoint_callback"><code class="docutils literal notranslate"><span class="pre">AttrW.add_sync_setpoint_callback()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.AttrRW"><code class="docutils literal notranslate"><span class="pre">AttrRW</span></code></a></li>
-</ul>
-  </nav></div>
 
   <div class="sidebar-secondary-item">
 

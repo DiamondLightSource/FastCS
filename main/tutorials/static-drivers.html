@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Creating a FastCS Driver &#8212; FastCS 0.11.0a5.dev3+g9d894efec documentation</title>
+    <title>Creating a FastCS Driver &#8212; FastCS 0.11.0a5.dev4+g0f75fa188 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=dbe1fb7a"></script>
+    <script src="../_static/documentation_options.js?v=b87e3fae"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -493,7 +493,7 @@ functionality.</p>
 <p>Create a <code class="docutils literal notranslate"><span class="pre">TemperatureController</span></code> class that inherits from <code class="docutils literal notranslate"><span class="pre">Controller</span></code>.</p>
 <div class="dropdown hint admonition">
 <p class="admonition-title">Code 1</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
@@ -510,7 +510,7 @@ the application. Create a <code class="docutils literal notranslate"><span class
 along with an empty list of transports (for now).</p>
 <div class="dropdown hint admonition">
 <p class="admonition-title">Code 2</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 </span>
 
@@ -538,7 +538,7 @@ is a string, so <code class="docutils literal notranslate"><span class="pre">Str
 <div class="dropdown hint admonition">
 <p class="admonition-title">Code 3</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
 
@@ -585,11 +585,11 @@ passing it in.</p>
 <div class="dropdown hint admonition">
 <p class="admonition-title">Code 4</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-</span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
+</span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 </span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
@@ -618,11 +618,11 @@ options to the transport options and generate a <code class="docutils literal no
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
@@ -661,11 +661,11 @@ ensure the connection is established before it is used.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
 <span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
@@ -714,19 +714,17 @@ it to the <code class="docutils literal notranslate"><span class="pre">device_id
 </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 </span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-</span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span>
+</span><span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
-<span class="hll"><span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
-</span><span class="hll">
-</span><span class="hll">
+<span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+
+<span class="hll">
 </span><span class="hll"><span class="nd">@dataclass</span>
 </span><span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">IDAttributeIORef</span><span class="p">(</span><span class="n">AttributeIORef</span><span class="p">):</span>
 </span><span class="hll">    <span class="n">update_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span>
@@ -743,19 +741,19 @@ it to the <code class="docutils literal notranslate"><span class="pre">device_id
 </span><span class="hll">        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span class="hll">
 </span><span class="hll">        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+    <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">IDAttributeIORef</span><span class="p">())</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-<span class="hll">    <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">IDAttributeIORef</span><span class="p">())</span>
-</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
+<span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">IPConnection</span><span class="p">()</span>
 
-<span class="hll">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ios</span><span class="o">=</span><span class="p">[</span><span class="n">IDAttributeIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)])</span>
-</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ios</span><span class="o">=</span><span class="p">[</span><span class="n">IDAttributeIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)])</span>
+
+<span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
 
 <span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
@@ -805,26 +803,24 @@ etc.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
 <span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">AttributeIORef</span><span class="p">):</span>
-</span><span class="hll">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
-</span><span class="hll">    <span class="n">_</span><span class="p">:</span> <span class="n">KW_ONLY</span>
-</span>    <span class="n">update_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span>
-
-
+<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">AttributeIORef</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="hll">    <span class="n">_</span><span class="p">:</span> <span class="n">KW_ONLY</span>
+</span><span class="hll">    <span class="n">update_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.2</span>
+</span><span class="hll">
+</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerAttributeIO</span><span class="p">(</span>
     <span class="n">AttributeIO</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">]</span>
 <span class="p">):</span>
@@ -833,20 +829,20 @@ etc.</p>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">connection</span>
 
-<span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">]):</span>
-</span><span class="hll">        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">?&quot;</span>
-</span><span class="hll">        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">]):</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">?&quot;</span>
+<span class="hll">        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span class="hll">        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span class="hll">
 </span><span class="hll">        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-<span class="hll">    <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
-</span><span class="hll">    <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
-</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+    <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
+    <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
+<span class="hll">
+</span><span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">IPConnection</span><span class="p">()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ios</span><span class="o">=</span><span class="p">[</span><span class="n">TemperatureControllerAttributeIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)])</span>
@@ -887,15 +883,13 @@ and set the ramp rate.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
 <span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
@@ -922,20 +916,20 @@ and set the ramp rate.</p>
 
         <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
-<span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span>
-</span><span class="hll">        <span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="n">NumberT</span>
-</span><span class="hll">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="n">NumberT</span>
+<span class="hll">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span class="hll">        <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span class="hll">        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-<span class="hll">    <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
-</span><span class="hll">    <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
-</span><span class="hll">    <span class="n">ramp_rate</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
-</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+    <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
+    <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
+<span class="hll">    <span class="n">ramp_rate</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
+</span><span class="hll">
+</span><span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">IPConnection</span><span class="p">()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ios</span><span class="o">=</span><span class="p">[</span><span class="n">TemperatureControllerAttributeIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)])</span>
@@ -991,15 +985,13 @@ are, which is used to register the correct number of ramp controllers with the p
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
 <span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
@@ -1014,56 +1006,56 @@ are, which is used to register the correct number of ramp controllers with the p
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerAttributeIO</span><span class="p">(</span>
     <span class="n">AttributeIO</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">]</span>
 <span class="p">):</span>
-<span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
-</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="hll">
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span> <span class="o">=</span> <span class="n">suffix</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">connection</span>
-<span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span> <span class="o">=</span> <span class="n">suffix</span>
+<span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">]):</span>
+</span>        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}</span><span class="s2">?&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="hll">        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">]):</span>
-<span class="hll">        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}</span><span class="s2">?&quot;</span>
-</span>        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
         <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="n">NumberT</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="hll">        <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-
-<span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
-</span><span class="hll">    <span class="n">start</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
-</span><span class="hll">    <span class="n">end</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="hll">
+</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
+<span class="hll">    <span class="n">end</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
 </span><span class="hll">
 </span><span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span class="hll">        <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span class="hll">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
 </span><span class="hll">            <span class="sa">f</span><span class="s2">&quot;Ramp</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ios</span><span class="o">=</span><span class="p">[</span><span class="n">TemperatureControllerAttributeIO</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)]</span>
 </span><span class="hll">        <span class="p">)</span>
-</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
     <span class="n">device_id</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">String</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">))</span>
     <span class="n">power</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">))</span>
     <span class="n">ramp_rate</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
 
-<span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ramp_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
-</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">IPConnection</span><span class="p">()</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ramp_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">IPConnectionSettings</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span> <span class="o">=</span> <span class="n">settings</span>
+<span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="o">=</span> <span class="n">IPConnection</span><span class="p">()</span>
+</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ios</span><span class="o">=</span><span class="p">[</span><span class="n">TemperatureControllerAttributeIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)])</span>
 
-<span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TemperatureRampController</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span class="hll">        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-</span><span class="hll">            <span class="n">controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TemperatureRampController</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ramp_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+<span class="hll">            <span class="n">controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="p">)</span>
 </span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
 </span><span class="hll">            <span class="bp">self</span><span class="o">.</span><span class="n">add_sub_controller</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
-</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
+</span><span class="hll">
+</span><span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
 
 <span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
@@ -1071,10 +1063,10 @@ are, which is used to register the correct number of ramp controllers with the p
 <span class="p">)</span>
 <span class="n">epics_ca</span> <span class="o">=</span> <span class="n">EpicsCATransport</span><span class="p">(</span><span class="n">gui</span><span class="o">=</span><span class="n">gui_options</span><span class="p">,</span> <span class="n">epicsca</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
-<span class="hll"><span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_ca</span><span class="p">])</span>
-</span>
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">fastcs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_ca</span><span class="p">])</span>
+
+<span class="hll"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span>    <span class="n">fastcs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1099,15 +1091,13 @@ enable (and disable) the ramping.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
 <span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 
@@ -1142,18 +1132,18 @@ enable (and disable) the ramping.</p>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
-<span class="hll"><span class="k">class</span><span class="w"> </span><span class="nc">OnOffEnum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
-</span><span class="hll">    <span class="n">Off</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
-</span><span class="hll">    <span class="n">On</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
-</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OnOffEnum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="n">Off</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+<span class="hll">    <span class="n">On</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
     <span class="n">end</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
-<span class="hll">    <span class="n">enabled</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Enum</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="p">),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">))</span>
-</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">enabled</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Enum</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="p">),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">))</span>
+
+<span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span>        <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Ramp</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ios</span><span class="o">=</span><span class="p">[</span><span class="n">TemperatureControllerAttributeIO</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)]</span>
         <span class="p">)</span>
@@ -1238,19 +1228,17 @@ gets the array of voltages and sets each ramp controller with its value. Also ad
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.wrappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">scan</span>
-</span>
-<span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">scan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
+<span class="hll"><span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+</span>
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">AttributeIORef</span><span class="p">):</span>
@@ -1291,12 +1279,12 @@ gets the array of voltages and sets each ramp controller with its value. Also ad
     <span class="n">start</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">))</span>
     <span class="n">end</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Int</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
     <span class="n">enabled</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">Enum</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="p">),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">))</span>
-<span class="hll">    <span class="n">target</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">))</span>
-</span><span class="hll">    <span class="n">actual</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">))</span>
-</span><span class="hll">    <span class="n">voltage</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">())</span>
-</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">))</span>
+    <span class="n">actual</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">(),</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">))</span>
+<span class="hll">    <span class="n">voltage</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">Float</span><span class="p">())</span>
+</span><span class="hll">
+</span><span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="n">IPConnection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span>        <span class="n">suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Ramp</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ios</span><span class="o">=</span><span class="p">[</span><span class="n">TemperatureControllerAttributeIO</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)]</span>
         <span class="p">)</span>
@@ -1322,16 +1310,16 @@ gets the array of voltages and sets each ramp controller with its value. Also ad
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ip_settings</span><span class="p">)</span>
 
-<span class="hll">    <span class="nd">@scan</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-</span><span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_voltages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class="hll">        <span class="n">voltages</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+    <span class="nd">@scan</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_voltages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="hll">        <span class="n">voltages</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
 </span><span class="hll">            <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="s2">&quot;V?</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span class="hll">        <span class="p">)</span>
 </span><span class="hll">        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">controller</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">):</span>
 </span><span class="hll">            <span class="k">await</span> <span class="n">controller</span><span class="o">.</span><span class="n">voltage</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">voltages</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
-</span>
-
-<span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
     <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.bob&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Demo Temperature Controller&quot;</span>
 <span class="p">)</span>
 <span class="n">epics_ca</span> <span class="o">=</span> <span class="n">EpicsCATransport</span><span class="p">(</span><span class="n">gui</span><span class="o">=</span><span class="n">gui_options</span><span class="p">,</span> <span class="n">epicsca</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
@@ -1362,19 +1350,17 @@ controller.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.wrappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">scan</span>
-</span>
-<span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">scan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
+<span class="hll"><span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+</span>
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">AttributeIORef</span><span class="p">):</span>
@@ -1454,15 +1440,15 @@ controller.</p>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">controller</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">):</span>
             <span class="k">await</span> <span class="n">controller</span><span class="o">.</span><span class="n">voltage</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">voltages</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
 
-<span class="hll">    <span class="nd">@command</span><span class="p">()</span>
-</span><span class="hll">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disable_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span class="hll">        <span class="k">for</span> <span class="n">rc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span>
+    <span class="nd">@command</span><span class="p">()</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disable_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="hll">        <span class="k">for</span> <span class="n">rc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ramp_controllers</span><span class="p">:</span>
 </span><span class="hll">            <span class="k">await</span> <span class="n">rc</span><span class="o">.</span><span class="n">enabled</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">OnOffEnum</span><span class="o">.</span><span class="n">Off</span><span class="p">,</span> <span class="n">sync_setpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span class="hll">            <span class="c1"># TODO: The requests all get concatenated and the sim doesn&#39;t handle it</span>
 </span><span class="hll">            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-</span>
-
-<span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
+</span><span class="hll">
+</span><span class="hll">
+</span><span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
     <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.bob&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Demo Temperature Controller&quot;</span>
 <span class="p">)</span>
 <span class="n">epics_ca</span> <span class="o">=</span> <span class="n">EpicsCATransport</span><span class="p">(</span><span class="n">gui</span><span class="o">=</span><span class="n">gui_options</span><span class="p">,</span> <span class="n">epicsca</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
@@ -1505,23 +1491,21 @@ logger for <code class="docutils literal notranslate"><span class="pre">Temperat
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">bind_logger</span><span class="p">,</span> <span class="n">configure_logging</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.wrappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">scan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">bind_logger</span><span class="p">,</span> <span class="n">configure_logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">scan</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
-<span class="hll"><span class="n">logger</span> <span class="o">=</span> <span class="n">bind_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">bind_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="hll"><span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 </span><span class="hll">
-</span><span class="n">NumberT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;NumberT&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
-
-
+</span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">AttributeIORef</span><span class="p">):</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
@@ -1550,12 +1534,12 @@ logger for <code class="docutils literal notranslate"><span class="pre">Temperat
         <span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="n">NumberT</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sending attribute value&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="n">attr</span><span class="p">)</span>
 <span class="hll">
-</span><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sending attribute value&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">command</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="n">attr</span><span class="p">)</span>
+</span><span class="hll">        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span class="hll">
-</span>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-
+</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OnOffEnum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
     <span class="n">Off</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
     <span class="n">On</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
@@ -1613,17 +1597,17 @@ logger for <code class="docutils literal notranslate"><span class="pre">Temperat
             <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
 
 
-<span class="hll"><span class="n">configure_logging</span><span class="p">()</span>
-</span>
-<span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
-    <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.bob&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Demo Temperature Controller&quot;</span>
+<span class="n">configure_logging</span><span class="p">()</span>
+
+<span class="hll"><span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
+</span>    <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.bob&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Demo Temperature Controller&quot;</span>
 <span class="p">)</span>
 <span class="n">epics_ca</span> <span class="o">=</span> <span class="n">EpicsCATransport</span><span class="p">(</span><span class="n">gui</span><span class="o">=</span><span class="n">gui_options</span><span class="p">,</span> <span class="n">epicsca</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
-<span class="hll"><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configuring connection settings&quot;</span><span class="p">,</span> <span class="n">connection_settings</span><span class="o">=</span><span class="n">connection_settings</span><span class="p">)</span>
-</span><span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_ca</span><span class="p">])</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configuring connection settings&quot;</span><span class="p">,</span> <span class="n">connection_settings</span><span class="o">=</span><span class="n">connection_settings</span><span class="p">)</span>
+<span class="n">fastcs</span> <span class="o">=</span> <span class="n">FastCS</span><span class="p">(</span><span class="n">TemperatureController</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">connection_settings</span><span class="p">),</span> <span class="p">[</span><span class="n">epics_ca</span><span class="p">])</span>
+<span class="hll">
+</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">fastcs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -1649,17 +1633,15 @@ visible.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORef</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogLevel</span><span class="p">,</span> <span class="n">bind_logger</span><span class="p">,</span> <span class="n">configure_logging</span>
-</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.wrappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">scan</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogLevel</span><span class="p">,</span> <span class="n">bind_logger</span><span class="p">,</span> <span class="n">configure_logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">command</span><span class="p">,</span> <span class="n">scan</span>
+<span class="hll"><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsGUIOptions</span><span class="p">,</span> <span class="n">EpicsIOCOptions</span>
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">bind_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -1688,12 +1670,12 @@ visible.</p>
         <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}</span><span class="s2">?&quot;</span>
         <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="hll">
-</span><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Query for attribute&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="n">attr</span><span class="p">)</span>
-</span><span class="hll">
-</span>        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Query for attribute&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="n">attr</span><span class="p">)</span>
+<span class="hll">
+</span><span class="hll">        <span class="k">await</span> <span class="n">attr</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+</span><span class="hll">
+</span>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">[</span><span class="n">NumberT</span><span class="p">,</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="n">NumberT</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -1760,10 +1742,10 @@ visible.</p>
             <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
 
 
-<span class="hll"><span class="n">configure_logging</span><span class="p">(</span><span class="n">LogLevel</span><span class="o">.</span><span class="n">TRACE</span><span class="p">)</span>
-</span>
-<span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
-    <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.bob&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Demo Temperature Controller&quot;</span>
+<span class="n">configure_logging</span><span class="p">(</span><span class="n">LogLevel</span><span class="o">.</span><span class="n">TRACE</span><span class="p">)</span>
+
+<span class="hll"><span class="n">gui_options</span> <span class="o">=</span> <span class="n">EpicsGUIOptions</span><span class="p">(</span>
+</span>    <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.bob&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Demo Temperature Controller&quot;</span>
 <span class="p">)</span>
 <span class="n">epics_ca</span> <span class="o">=</span> <span class="n">EpicsCATransport</span><span class="p">(</span><span class="n">gui</span><span class="o">=</span><span class="n">gui_options</span><span class="p">,</span> <span class="n">epicsca</span><span class="o">=</span><span class="n">EpicsIOCOptions</span><span class="p">(</span><span class="n">pv_prefix</span><span class="o">=</span><span class="s2">&quot;DEMO&quot;</span><span class="p">))</span>
 <span class="n">connection_settings</span> <span class="o">=</span> <span class="n">IPConnectionSettings</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">25565</span><span class="p">)</span>
@@ -1780,17 +1762,17 @@ ramp so that the value updates. Check the console to see the messages.  Call <co
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>In [1]: controller.power.enable_tracing()
 [2025-11-18 11:11:12.060+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=0.0
 [2025-11-18 11:11:12.060+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name=&#39;P&#39;)), value=0.0
-[2025-11-18 11:11:12.060+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=0.0
-[2025-11-18 11:11:12.194+0000 I] PV put: DEMO:R1:Enabled = 1  [fastcs.transport.epics.ca.ioc] pv=DEMO:R1:Enabled, value=1
+[2025-11-18 11:11:12.060+0000 T] PV set from attribute        [fastcs.transports.epics.ca.ioc] pv=DEMO:Power, value=0.0
+[2025-11-18 11:11:12.194+0000 I] PV put: DEMO:R1:Enabled = 1  [fastcs.transports.epics.ca.ioc] pv=DEMO:R1:Enabled, value=1
 [2025-11-18 11:11:12.195+0000 I] Sending attribute value      [TemperatureControllerAttributeIO] command=N01=1, attribute=AttrRW(path=R1.enabled, datatype=Enum, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name=&#39;N&#39;))
 [2025-11-18 11:11:12.261+0000 T] Update attribute             [AttrR]
 [2025-11-18 11:11:12.262+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=29.040181873093132
 [2025-11-18 11:11:12.262+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name=&#39;P&#39;)), value=29.040181873093132
-[2025-11-18 11:11:12.262+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=29.04
+[2025-11-18 11:11:12.262+0000 T] PV set from attribute        [fastcs.transports.epics.ca.ioc] pv=DEMO:Power, value=29.04
 [2025-11-18 11:11:12.463+0000 T] Update attribute             [AttrR]
 [2025-11-18 11:11:12.464+0000 T] Query for attribute          [TemperatureControllerAttributeIO] query=P?, response=30.452524641833854
 [2025-11-18 11:11:12.464+0000 T] Attribute set                [AttrR] attribute=AttrR(path=power, datatype=Float, io_ref=TemperatureControllerAttributeIORef(update_period=0.2, name=&#39;P&#39;)), value=30.452524641833854
-[2025-11-18 11:11:12.465+0000 T] PV set from attribute        [fastcs.transport.epics.ca.ioc] pv=DEMO:Power, value=30.45
+[2025-11-18 11:11:12.465+0000 T] PV set from attribute        [fastcs.transports.epics.ca.ioc] pv=DEMO:Power, value=30.45
 In [2]: controller.power.disable_tracing()
 </pre></div>
 </div>

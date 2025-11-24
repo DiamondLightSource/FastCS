@@ -1,7 +1,6 @@
 ``fastcs.util``
 ===============
         
-        
 
 .. automodule:: fastcs.util
     :members:
@@ -17,7 +16,6 @@
     .. autosummary::
         :nosignatures:
     
-        numpy_to_fastcs_datatype
-        snake_to_pascal
+        ONCE
     
     

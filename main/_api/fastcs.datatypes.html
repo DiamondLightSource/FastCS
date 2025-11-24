@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.datatypes &#8212; FastCS 0.11.0a5.dev3+g9d894efec documentation</title>
+    <title>fastcs.datatypes &#8212; FastCS 0.11.0a5.dev4+g0f75fa188 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=dbe1fb7a"></script>
+    <script src="../_static/documentation_options.js?v=b87e3fae"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -65,8 +65,8 @@
     <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fastcs.demo" href="fastcs.demo.html" />
-    <link rel="prev" title="fastcs.cs_methods" href="fastcs.cs_methods.html" />
+    <link rel="next" title="fastcs.datatypes.bool" href="fastcs.datatypes.bool.html" />
+    <link rel="prev" title="fastcs.controllers.controller_vector" href="fastcs.controllers.controller_vector.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="main" />
@@ -405,19 +405,38 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="fastcs.html">API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="fastcs.attribute_io.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attribute_io</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.attribute_io_ref.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attribute_io_ref</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.attributes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.attributes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_r.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_r</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_rw.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_rw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_w.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_w</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute_io.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute_io</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute_io_ref.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute_io_ref</span></code></a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.connections.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.connections.ip_connection.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections.ip_connection</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.connections.serial_connection.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections.serial_connection</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.control_system.html"><code class="docutils literal notranslate"><span class="pre">fastcs.control_system</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controller</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controller_api</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.cs_methods.html"><code class="docutils literal notranslate"><span class="pre">fastcs.cs_methods</span></code></a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.base_controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.base_controller</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.controller_vector.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_vector</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.bool.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.bool</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.datatype.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.datatype</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.enum.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.enum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.float.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.float</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.int.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.int</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.string.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.string</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.table.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.table</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.datatypes.waveform.html"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.waveform</span></code></a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.demo.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.demo.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.controllers</span></code></a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.demo.simulation.html"><code class="docutils literal notranslate"><span class="pre">fastcs.demo.simulation</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -429,42 +448,48 @@
 <li class="toctree-l2"><a class="reference internal" href="fastcs.exceptions.html"><code class="docutils literal notranslate"><span class="pre">fastcs.exceptions</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.launch.html"><code class="docutils literal notranslate"><span class="pre">fastcs.launch</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.logging.html"><code class="docutils literal notranslate"><span class="pre">fastcs.logging</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.methods.html"><code class="docutils literal notranslate"><span class="pre">fastcs.methods</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.methods.command.html"><code class="docutils literal notranslate"><span class="pre">fastcs.methods.command</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.methods.method.html"><code class="docutils literal notranslate"><span class="pre">fastcs.methods.method</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.methods.scan.html"><code class="docutils literal notranslate"><span class="pre">fastcs.methods.scan</span></code></a></li>
+</ul>
+</details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.tracer.html"><code class="docutils literal notranslate"><span class="pre">fastcs.tracer</span></code></a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.epics.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.ca.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.ca</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.docs</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.gui.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.gui</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.options</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.pva.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.pva</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.epics.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.epics.util</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.transports.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.transports.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.controller_api</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.epics.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.ca.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.ca</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.docs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.gui.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.gui</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.pva.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.pva</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.util</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.graphql</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.options</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.graphql.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.graphql.transport</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.graphql</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.graphql.graphql.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.graphql.graphql</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.graphql.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.graphql.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.graphql.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.graphql.transport</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.options</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.rest</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.transport</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.rest.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.rest.util</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.rest.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.rest.rest.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest.rest</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.rest.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest.transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.rest.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.rest.util</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transport.tango.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.dsr.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.dsr</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.options</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.transport</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="fastcs.transport.tango.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.tango.util</span></code></a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.tango.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.tango.dsr.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango.dsr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.tango.options.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango.options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.tango.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango.transport</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="fastcs.transports.tango.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.tango.util</span></code></a></li>
 </ul>
 </details></li>
-<li class="toctree-l3"><a class="reference internal" href="fastcs.transport.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transport.transport</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.transports.transport.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.transport</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.util</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="fastcs.wrappers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.wrappers</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
@@ -534,97 +559,36 @@
                   
   <section id="module-fastcs.datatypes">
 <span id="fastcs-datatypes"></span><h1><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes</span></code><a class="headerlink" href="#module-fastcs.datatypes" title="Link to this heading">#</a></h1>
-<p class="rubric">Members</p>
+<p class="rubric">Submodules</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.datatypes.Bool" title="fastcs.datatypes.Bool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Bool</span></code></a></p></td>
-<td><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">bool</span></code>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.datatypes.bool.html#module-fastcs.datatypes.bool" title="fastcs.datatypes.bool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataType</span></code></a></p></td>
-<td><p>Generic datatype mapping to a python type, with additional metadata.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.datatypes.datatype.html#module-fastcs.datatypes.datatype" title="fastcs.datatypes.datatype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datatype</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.datatypes.Enum" title="fastcs.datatypes.Enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a></p></td>
-<td><p>Enum(enum_cls: 'type[T_Enum]')</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.datatypes.enum.html#module-fastcs.datatypes.enum" title="fastcs.datatypes.enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.datatypes.Float" title="fastcs.datatypes.Float"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Float</span></code></a></p></td>
-<td><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.datatypes.float.html#module-fastcs.datatypes.float" title="fastcs.datatypes.float"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.datatypes.Int" title="fastcs.datatypes.Int"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Int</span></code></a></p></td>
-<td><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">int</span></code>.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.datatypes.int.html#module-fastcs.datatypes.int" title="fastcs.datatypes.int"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.datatypes.String" title="fastcs.datatypes.String"><code class="xref py py-obj docutils literal notranslate"><span class="pre">String</span></code></a></p></td>
-<td><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">str</span></code>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.datatypes.string.html#module-fastcs.datatypes.string" title="fastcs.datatypes.string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.datatypes.Table" title="fastcs.datatypes.Table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Table</span></code></a></p></td>
-<td><p>Table(structured_dtype: 'list[tuple[str, DTypeLike]]')</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.datatypes.table.html#module-fastcs.datatypes.table" title="fastcs.datatypes.table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">table</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.datatypes.Waveform" title="fastcs.datatypes.Waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Waveform</span></code></a></p></td>
-<td><p>Waveform(array_dtype: 'DTypeLike', shape: 'tuple[int, ...]' = (2000,))</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="fastcs.datatypes.waveform.html#module-fastcs.datatypes.waveform" title="fastcs.datatypes.waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.DataType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">DataType</span></span><a class="reference internal" href="../_modules/fastcs/datatypes.html#DataType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.DataType" title="Link to this definition">#</a></dt>
-<dd><p>Generic datatype mapping to a python type, with additional metadata.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="fastcs.datatypes.DataType.validate">
-<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span></span></span><a class="reference internal" href="../_modules/fastcs/datatypes.html#DataType.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.DataType.validate" title="Link to this definition">#</a></dt>
-<dd><p>Validate a value against the datatype.</p>
-<p>The base implementation is to try the cast and raise a useful error if it fails.</p>
-<p>Child classes can implement logic before calling <code class="docutils literal notranslate"><span class="pre">super.validate(value)</span></code> to
-modify the value passed in and help the cast succeed or after to perform further
-validation of the coerced type.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Int">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T_Numerical</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T_Numerical</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_alarm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T_Numerical</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_alarm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T_Numerical</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Int" title="Link to this definition">#</a></dt>
-<dd><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">int</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Float">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T_Numerical</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T_Numerical</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_alarm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T_Numerical</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_alarm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T_Numerical</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Float" title="Link to this definition">#</a></dt>
-<dd><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Bool">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Bool</span></span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Bool" title="Link to this definition">#</a></dt>
-<dd><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">bool</span></code>.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.String">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">String</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/datatypes.html#String"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.String" title="Link to this definition">#</a></dt>
-<dd><p><a class="reference internal" href="#fastcs.datatypes.DataType" title="fastcs.datatypes.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> mapping to builtin <code class="docutils literal notranslate"><span class="pre">str</span></code>.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="fastcs.datatypes.String.length">
-<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#fastcs.datatypes.String.length" title="Link to this definition">#</a></dt>
-<dd><p>Maximum length of string to display in transports</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Enum">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Enum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enum_cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'type[T_Enum]'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Enum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Enum" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Waveform">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'DTypeLike'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'tuple[int,</span> <span class="pre">...]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(2000,)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Waveform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Waveform" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="fastcs.datatypes.Table">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.</span></span><span class="sig-name descname"><span class="pre">Table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structured_dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'list[tuple[str,</span> <span class="pre">DTypeLike]]'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/datatypes.html#Table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.datatypes.Table" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
 </section>
 
 
@@ -638,20 +602,20 @@ validation of the coerced type.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="fastcs.cs_methods.html"
+       href="fastcs.controllers.controller_vector.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.cs_methods</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_vector</span></code></p>
       </div>
     </a>
     <a class="right-next"
-       href="fastcs.demo.html"
+       href="fastcs.datatypes.bool.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.demo</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.datatypes.bool</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -665,31 +629,6 @@ validation of the coerced type.</p>
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.DataType"><code class="docutils literal notranslate"><span class="pre">DataType</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.DataType.validate"><code class="docutils literal notranslate"><span class="pre">DataType.validate()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Int"><code class="docutils literal notranslate"><span class="pre">Int</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Float"><code class="docutils literal notranslate"><span class="pre">Float</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Bool"><code class="docutils literal notranslate"><span class="pre">Bool</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.String"><code class="docutils literal notranslate"><span class="pre">String</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.String.length"><code class="docutils literal notranslate"><span class="pre">String.length</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Enum"><code class="docutils literal notranslate"><span class="pre">Enum</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Waveform"><code class="docutils literal notranslate"><span class="pre">Waveform</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.Table"><code class="docutils literal notranslate"><span class="pre">Table</span></code></a></li>
-</ul>
-  </nav></div>
 
   <div class="sidebar-secondary-item">
 

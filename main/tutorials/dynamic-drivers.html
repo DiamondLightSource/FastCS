@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Dynamic FastCS drivers &#8212; FastCS 0.11.0a5.dev3+g9d894efec documentation</title>
+    <title>Dynamic FastCS drivers &#8212; FastCS 0.11.0a5.dev4+g0f75fa188 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=dbe1fb7a"></script>
+    <script src="../_static/documentation_options.js?v=b87e3fae"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -507,6 +507,11 @@ statically defined <code class="docutils literal notranslate"><span class="pre">
 implement an <code class="docutils literal notranslate"><span class="pre">initialise</span></code> method to create these dynamically instead.</p>
 <p>Create a pydantic model to validate the response from the device</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
+
+
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerParameter</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
 
@@ -520,16 +525,16 @@ implement an <code class="docutils literal notranslate"><span class="pre">initia
             <span class="k">case</span> <span class="s2">&quot;bool&quot;</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">Bool</span><span class="p">()</span>
             <span class="k">case</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">Int</span><span class="p">()</span>
-            <span class="k">case</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">Float</span><span class="p">()</span>
-            <span class="k">case</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">String</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Create a function to parse the dictionary, validate the entries against the model and
 create <code class="docutils literal notranslate"><span class="pre">Attributes</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_attributes</span><span class="p">(</span><span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">]:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                <span class="k">return</span> <span class="n">Float</span><span class="p">()</span>
+            <span class="k">case</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">String</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_attributes</span><span class="p">(</span><span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">]:</span>
     <span class="n">attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -543,16 +548,16 @@ create <code class="docutils literal notranslate"><span class="pre">Attributes</
         <span class="n">io_ref</span> <span class="o">=</span> <span class="n">TemperatureControllerAttributeIORef</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">command</span><span class="p">)</span>
         <span class="k">match</span> <span class="n">parameter</span><span class="o">.</span><span class="n">access_mode</span><span class="p">:</span>
             <span class="k">case</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
-                <span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">fastcs_datatype</span><span class="p">,</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">io_ref</span><span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;rw&quot;</span><span class="p">:</span>
-                <span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">fastcs_datatype</span><span class="p">,</span> <span class="n">io_ref</span><span class="o">=</span><span class="n">io_ref</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">attributes</span>
 </pre></div>
 </div>
 <p>Update the controllers to not define attributes statically and implement initialise
 methods to create these attributes dynamically.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">io_ref</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TemperatureRampController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -588,11 +593,6 @@ methods to create these attributes dynamically.</p>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">create_attributes</span><span class="p">(</span><span class="n">api</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ramp_parameters</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ramps_api</span><span class="p">):</span>
-            <span class="n">ramp_controller</span> <span class="o">=</span> <span class="n">TemperatureRampController</span><span class="p">(</span>
-                <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ramp_parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_io</span>
-            <span class="p">)</span>
-            <span class="k">await</span> <span class="n">ramp_controller</span><span class="o">.</span><span class="n">initialise</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">suffix</span></code> field should also be removed from <code class="docutils literal notranslate"><span class="pre">TemperatureController</span></code> and
@@ -609,15 +609,20 @@ demonstrate validation of introspected Attributes.</p>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">ValidationError</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIO</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Attribute</span><span class="p">,</span>
+    <span class="n">AttributeIO</span><span class="p">,</span>
+    <span class="n">AttributeIORef</span><span class="p">,</span>
+    <span class="n">AttrR</span><span class="p">,</span>
+    <span class="n">AttrRW</span><span class="p">,</span>
+    <span class="n">AttrW</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.connections</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPConnection</span><span class="p">,</span> <span class="n">IPConnectionSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.launch</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.ca.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transport.epics.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsCATransport</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TemperatureControllerParameter</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>

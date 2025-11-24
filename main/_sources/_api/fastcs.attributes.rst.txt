@@ -1,39 +1,27 @@
 ``fastcs.attributes``
 =====================
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
 .. automodule:: fastcs.attributes
     :members:
 
     
     
-    
-
-    
-    
-    .. rubric:: Members
+    .. rubric:: Submodules
 
     .. autosummary::
-        :nosignatures:
+        :toctree:
+        :template: custom-module-template.rst
+        :recursive:
     
-        AttrIOUpdateCallback
-        AttrOnPutCallback
-        AttrOnUpdateCallback
-        AttrR
-        AttrRW
-        AttrSyncSetpointCallback
-        AttrUpdateCallback
-        AttrW
-        Attribute
-        ONCE
+        attr_r
+        attr_rw
+        attr_w
+        attribute
+        attribute_io
+        attribute_io_ref
+    
+    
+
+    
     
     

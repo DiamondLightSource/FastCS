@@ -1,35 +1,29 @@
 ``fastcs.datatypes``
 ====================
-        
-        
-        
-        
-        
-        
-        
-        
 
 .. automodule:: fastcs.datatypes
     :members:
 
     
     
-    
-
-    
-    
-    .. rubric:: Members
+    .. rubric:: Submodules
 
     .. autosummary::
-        :nosignatures:
+        :toctree:
+        :template: custom-module-template.rst
+        :recursive:
     
-        Bool
-        DataType
-        Enum
-        Float
-        Int
-        String
-        Table
-        Waveform
+        bool
+        datatype
+        enum
+        float
+        int
+        string
+        table
+        waveform
+    
+    
+
+    
     
     
