@@ -6,6 +6,9 @@ services:
     image: registry.gitlab.com/tango-controls/docker/mysql:5
     environment:
       - MYSQL_ROOT_PASSWORD=root
+    security_opt:
+      - "no-new-privileges:true"
+    read_only: true
 
   tango-cs:
     hostname: localhost
@@ -20,3 +23,6 @@ services:
       - MYSQL_DATABASE=tango
     depends_on:
       - mysql
+    security_opt:
+      - "no-new-privileges:true"
+    read_only: true
