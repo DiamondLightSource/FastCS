@@ -21,6 +21,7 @@ dependencies = [
     "IPython",
     "loguru~=0.7",
     "pygelf",
+    "stdio-socket",
 ]
 dynamic = ["version"]
 license.file = "LICENSE"
