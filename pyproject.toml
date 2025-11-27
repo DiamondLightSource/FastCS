@@ -30,12 +30,12 @@ requires-python = ">=3.11"
 [project.optional-dependencies]
 demo = ["tickit~=0.4.3"]
 epicsca = [
-    "pvi@git+https://github.com/epics-containers/pvi@image-viewer",
+    "pvi@git+https://github.com/epics-containers/pvi@main",
     "softioc>=4.5.0",
 ]
 epicspva = [
     "p4p",
-    "pvi@git+https://github.com/epics-containers/pvi@image-viewer",
+    "pvi@git+https://github.com/epics-containers/pvi@main",
 ]
 epics = ["fastcs[epicsca]", "fastcs[epicspva]"]
 tango = ["pytango"]
