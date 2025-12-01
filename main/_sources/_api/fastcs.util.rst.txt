@@ -1,6 +1,7 @@
 ``fastcs.util``
 ===============
         
+        
 
 .. automodule:: fastcs.util
     :members:
@@ -17,5 +18,6 @@
         :nosignatures:
     
         ONCE
+        snake_to_pascal
     
     

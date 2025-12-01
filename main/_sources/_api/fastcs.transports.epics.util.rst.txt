@@ -1,7 +1,6 @@
 ``fastcs.transports.epics.util``
 ================================
         
-        
 
 .. automodule:: fastcs.transports.epics.util
     :members:
@@ -18,6 +17,5 @@
         :nosignatures:
     
         controller_pv_prefix
-        snake_to_pascal
     
     
