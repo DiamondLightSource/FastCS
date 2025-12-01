@@ -8,7 +8,7 @@ from p4p.server.asyncio import SharedPV
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.transports.controller_api import ControllerAPI
-from fastcs.transports.epics.util import snake_to_pascal
+from fastcs.util import snake_to_pascal
 
 from .types import p4p_alarm_states, p4p_timestamp_now
 

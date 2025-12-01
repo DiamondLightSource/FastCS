@@ -4,13 +4,10 @@ from p4p.server import Server, StaticProvider
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.transports.controller_api import ControllerAPI
-from fastcs.transports.epics.util import controller_pv_prefix, snake_to_pascal
+from fastcs.transports.epics.util import controller_pv_prefix
+from fastcs.util import snake_to_pascal
 
-from ._pv_handlers import (
-    make_command_pv,
-    make_shared_read_pv,
-    make_shared_write_pv,
-)
+from ._pv_handlers import make_command_pv, make_shared_read_pv, make_shared_write_pv
 from .pvi import add_pvi_info
 
 

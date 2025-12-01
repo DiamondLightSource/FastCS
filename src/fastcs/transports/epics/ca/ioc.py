@@ -20,7 +20,8 @@ from fastcs.transports.epics.ca.util import (
     record_metadata_from_attribute,
     record_metadata_from_datatype,
 )
-from fastcs.transports.epics.util import controller_pv_prefix, snake_to_pascal
+from fastcs.transports.epics.util import controller_pv_prefix
+from fastcs.util import snake_to_pascal
 
 EPICS_MAX_NAME_LENGTH = 60
 
