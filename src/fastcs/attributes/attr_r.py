@@ -21,7 +21,7 @@ AttrOnUpdateCallback = Callable[[DType_T], Awaitable[None]]
 
 
 class AttrR(Attribute[DType_T, AttributeIORefT]):
-    """A read-only ``Attribute``."""
+    """A read-only ``Attribute``"""
 
     def __init__(
         self,
@@ -44,7 +44,7 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         """Get the cached value of the attribute."""
         return self._value
 
-    async def update(self, value: DType_T) -> None:
+    async def update(self, value: Any) -> None:
         """Update the value of the attibute
 
         This sets the cached value of the attribute presented in the API. It should
@@ -54,8 +54,16 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         To request a change to the setpoint of the attribute, use the ``put`` method,
         which will attempt to apply the change to the underlying source.
 
+        Args:
+            value: The new value of the attribute
+
+        Raises:
+            ValueError: If the value fails to be validated to DType_T
+
         """
-        self.log_event("Attribute set", attribute=self, value=value)
+        self.log_event(
+            "Attribute set", value=value, value_type=type(value), attribute=self
+        )
 
         self._value = self._datatype.validate(value)
 
@@ -66,7 +74,7 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
                 )
             except Exception as e:
                 logger.opt(exception=e).error(
-                    "On update callback failed", attribute=self, value=value
+                    "On update callbacks failed", attribute=self, value=value
                 )
                 raise
 

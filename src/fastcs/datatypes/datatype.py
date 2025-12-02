@@ -39,6 +39,15 @@ class DataType(Generic[DType_T]):
         modify the value passed in and help the cast succeed or after to perform further
         validation of the coerced type.
 
+        Args:
+            value: The value to validate
+
+        Returns:
+            The validated value
+
+        Raises:
+            ValueError: If the value cannot be coerced
+
         """
         if isinstance(value, self.dtype):
             return value
