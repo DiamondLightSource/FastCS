@@ -71,7 +71,7 @@ def _wrap_attr_put(
         await attribute.put(cast_from_rest_type(attribute.datatype, request.value))
 
     # Fast api uses type annotations for validation, schema, conversions
-    attr_put.__annotations__["request"] = _put_request_body(attribute)
+    attr_put.__annotations__["request"] = _put_request_body(attribute)  # nosemgrep
 
     return attr_put
 

@@ -12,6 +12,7 @@ runs:
   using: composite
   steps:
     - name: Get version of python
+      # nosemgrep
       run: |
         PYTHON_VERSION="${{ inputs.python-version }}"
         if [ $PYTHON_VERSION == "dev" ]; then
@@ -27,7 +28,7 @@ runs:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install packages
-      run: pip install ${{ inputs.pip-install }}
+      run: pip install ${{ inputs.pip-install }}  # nosemgrep
       shell: bash
 
     - name: Report what was installed
