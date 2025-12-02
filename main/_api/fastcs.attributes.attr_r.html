@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.attributes.attr_r &#8212; FastCS 0.11.2.dev1+g1a11c3a3e documentation</title>
+    <title>fastcs.attributes.attr_r &#8212; FastCS 0.11.3.dev1+gdb37f8b6d documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=413c5a7b"></script>
+    <script src="../_static/documentation_options.js?v=8cdcc463"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -572,7 +572,7 @@
 <td><p>A callback to be called when the value of the attribute is updated</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.attributes.attr_r.AttrR" title="fastcs.attributes.attr_r.AttrR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrR</span></code></a></p></td>
-<td><p>A read-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p></td>
+<td><p>A read-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#fastcs.attributes.attr_r.AttrUpdateCallback" title="fastcs.attributes.attr_r.AttrUpdateCallback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttrUpdateCallback</span></code></a></p></td>
 <td><p>A callback to be called periodically to update an attribute</p></td>
@@ -604,7 +604,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="fastcs.attributes.attr_r.AttrR">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.attr_r.</span></span><span class="sig-name descname"><span class="pre">AttrR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DataType" title="fastcs.datatypes.datatype.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">io_ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.attributes.attribute_io_ref.html#fastcs.attributes.attribute_io_ref.AttributeIORefT" title="fastcs.attributes.attribute_io_ref.AttributeIORefT"><span class="pre">AttributeIORefT</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes/attr_r.html#AttrR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.attr_r.AttrR" title="Link to this definition">#</a></dt>
-<dd><p>A read-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code>.</p>
+<dd><p>A read-only <code class="docutils literal notranslate"><span class="pre">Attribute</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="fastcs.attributes.attr_r.AttrR.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes/attr_r.html#AttrR.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.attr_r.AttrR.get" title="Link to this definition">#</a></dt>
@@ -613,13 +613,21 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="fastcs.attributes.attr_r.AttrR.update">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes/attr_r.html#AttrR.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.attr_r.AttrR.update" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes/attr_r.html#AttrR.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.attr_r.AttrR.update" title="Link to this definition">#</a></dt>
 <dd><p>Update the value of the attibute</p>
 <p>This sets the cached value of the attribute presented in the API. It should
 generally only be called from an IO or a controller that is updating the value
 from some underlying source.</p>
 <p>To request a change to the setpoint of the attribute, use the <code class="docutils literal notranslate"><span class="pre">put</span></code> method,
 which will attempt to apply the change to the underlying source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – The new value of the attribute</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the value fails to be validated to DType_T</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.datatypes.datatype &#8212; FastCS 0.11.2.dev1+g1a11c3a3e documentation</title>
+    <title>fastcs.datatypes.datatype &#8212; FastCS 0.11.3.dev1+gdb37f8b6d documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=413c5a7b"></script>
+    <script src="../_static/documentation_options.js?v=8cdcc463"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -593,6 +593,17 @@
 <p>Child classes can implement logic before calling <code class="docutils literal notranslate"><span class="pre">super.validate(value)</span></code> to
 modify the value passed in and help the cast succeed or after to perform further
 validation of the coerced type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to validate</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The validated value</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the value cannot be coerced</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

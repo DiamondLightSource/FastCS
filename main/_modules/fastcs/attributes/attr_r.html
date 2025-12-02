@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.attributes.attr_r &#8212; FastCS 0.11.2.dev1+g1a11c3a3e documentation</title>
+    <title>fastcs.attributes.attr_r &#8212; FastCS 0.11.3.dev1+gdb37f8b6d documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=413c5a7b"></script>
+    <script src="../../../_static/documentation_options.js?v=8cdcc463"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -474,7 +474,7 @@
 <div class="viewcode-block" id="AttrR">
 <a class="viewcode-back" href="../../../_api/fastcs.attributes.attr_r.html#fastcs.attributes.attr_r.AttrR">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AttrR</span><span class="p">(</span><span class="n">Attribute</span><span class="p">[</span><span class="n">DType_T</span><span class="p">,</span> <span class="n">AttributeIORefT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A read-only ``Attribute``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A read-only ``Attribute``&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -502,7 +502,7 @@
 
 <div class="viewcode-block" id="AttrR.update">
 <a class="viewcode-back" href="../../../_api/fastcs.attributes.attr_r.html#fastcs.attributes.attr_r.AttrR.update">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DType_T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the value of the attibute</span>
 
 <span class="sd">        This sets the cached value of the attribute presented in the API. It should</span>
@@ -512,8 +512,16 @@
 <span class="sd">        To request a change to the setpoint of the attribute, use the ``put`` method,</span>
 <span class="sd">        which will attempt to apply the change to the underlying source.</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            value: The new value of the attribute</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the value fails to be validated to DType_T</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Attribute set&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span>
+            <span class="s2">&quot;Attribute set&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -524,7 +532,7 @@
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="s2">&quot;On update callback failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span>
+                    <span class="s2">&quot;On update callbacks failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span>
                 <span class="p">)</span>
                 <span class="k">raise</span></div>
 
