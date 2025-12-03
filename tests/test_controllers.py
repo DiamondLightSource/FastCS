@@ -162,10 +162,10 @@ def test_controller_introspection_hint_validation():
 
     with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
         controller.read_write_int = 5  # type: ignore
-        controller._validate_hinted_attributes()
+        controller._validate_type_hints()
 
     with pytest.raises(RuntimeError, match="failed to introspect hinted attribute"):
-        controller._validate_hinted_attributes()
+        controller._validate_type_hints()
 
     controller.add_attribute("read_write_int", AttrRW(Int()))
 
@@ -186,3 +186,20 @@ def test_controller_introspection_hint_validation_enum():
         controller.add_attribute("enum", AttrRW(Enum(BadEnum)))
 
     controller.add_attribute("enum", AttrRW(Enum(GoodEnum)))
+
+
+@pytest.mark.asyncio
+async def test_controller_introspection_hint_validation_controller():
+    class HintedController(Controller):
+        child: SomeSubController
+
+    controller = HintedController()
+
+    with pytest.raises(RuntimeError, match="failed to introspect hinted controller"):
+        controller._validate_type_hints()
+
+    with pytest.raises(RuntimeError, match="does not match defined type"):
+        controller.add_sub_controller("child", Controller())
+
+    controller.add_sub_controller("child", SomeSubController())
+    controller._validate_type_hints()
