@@ -2,6 +2,7 @@ from .attr_r import AttrR as AttrR
 from .attr_rw import AttrRW as AttrRW
 from .attr_w import AttrW as AttrW
 from .attribute import Attribute as Attribute
+from .attribute_info import AttributeInfo as AttributeInfo
 from .attribute_io import AnyAttributeIO as AnyAttributeIO
 from .attribute_io import AttributeIO as AttributeIO
 from .attribute_io_ref import AttributeIORef as AttributeIORef

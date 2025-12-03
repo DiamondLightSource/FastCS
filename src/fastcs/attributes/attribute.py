@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from typing import Generic
 
-from fastcs.attributes.attribute_io_ref import AttributeIORefT
+from fastcs.attributes import AttributeInfo, AttributeIORefT
 from fastcs.datatypes import DataType, DType, DType_T
 from fastcs.logging import bind_logger
 from fastcs.tracer import Tracer
@@ -99,6 +99,14 @@ class Attribute(Generic[DType_T, AttributeIORefT], Tracer):
             )
 
         self._path = path
+
+    def add_info(self, info: AttributeInfo):
+        """Apply info fields"""
+        if info.description:
+            self.description = info.description
+
+        if info.group:
+            self._group = info.group
 
     def __repr__(self):
         name = self.__class__.__name__

@@ -3,10 +3,17 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Sequence
 from copy import deepcopy
-from typing import _GenericAlias, get_args, get_origin, get_type_hints  # type: ignore
+from typing import (
+    Annotated,
+    _GenericAlias,  # type: ignore
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 from fastcs.attributes import (
     Attribute,
+    AttributeInfo,
     AttributeIO,
     AttributeIORefT,
     AttrR,
@@ -67,7 +74,13 @@ class BaseController(Tracer):
 
     def _find_type_hints(self):
         """Find `Attribute` and `Controller` type hints for introspection validation"""
-        for name, hint in get_type_hints(type(self)).items():
+        for name, hint in get_type_hints(type(self), include_extras=True).items():
+            # Annotated[AttrR[int], AttributeInfo(...)]
+            metadata = None
+            if isinstance(origin := get_origin(hint), type) and origin is Annotated:
+                args = get_args(hint)
+                hint, metadata = args[0], args[1:]
+
             if isinstance(hint, _GenericAlias):  # e.g. AttrR[int]
                 args = get_args(hint)
                 hint = get_origin(hint)
@@ -78,16 +91,25 @@ class BaseController(Tracer):
                 if args is None:
                     dtype = None
                 else:
-                    if len(args) == 2:
-                        dtype = args[0]
-                    else:
+                    if len(args) != 2:
                         raise TypeError(
                             f"Invalid type hint for attribute {name}: {hint}"
                         )
 
-                self.__hinted_attributes[name] = HintedAttribute(
-                    attr_type=hint, dtype=dtype
-                )
+                    dtype, _io_ref = args
+                    if metadata is not None:
+                        if not isinstance(metadata[0], AttributeInfo):
+                            raise TypeError(
+                                f"Invalid annotation for attribute {name}: {hint}"
+                            )
+                        else:
+                            info = metadata[0]
+                    else:
+                        info = None
+
+                    self.__hinted_attributes[name] = HintedAttribute(
+                        attr_type=origin, dtype=dtype, info=info
+                    )
 
             elif isinstance(hint, type) and issubclass(hint, BaseController):
                 self.__hinted_sub_controllers[name] = hint
@@ -259,6 +281,10 @@ class BaseController(Tracer):
                     f"Expected '{hint.dtype.__name__}', "
                     f"got '{attr.datatype.dtype.__name__}'."
                 )
+
+            if hint.info is not None:
+                attr.add_info(hint.info)
+
         elif name in self.__sub_controllers.keys():
             raise ValueError(
                 f"Cannot add attribute {attr}. "

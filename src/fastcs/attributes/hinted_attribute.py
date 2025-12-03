@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from fastcs.attributes.attribute import Attribute
+from fastcs.attributes.attribute_info import AttributeInfo
 from fastcs.datatypes import DType
 
 
@@ -16,3 +17,4 @@ class HintedAttribute:
     """The type of the `Attribute` in the type hint - e.g. `AttrR`"""
     dtype: type[DType] | None
     """The dtype of the `Attribute` in the type hint, if any - e.g. `int`"""
+    info: AttributeInfo | None
