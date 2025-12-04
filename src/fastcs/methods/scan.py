@@ -2,7 +2,10 @@ from collections.abc import Callable, Coroutine
 from types import MethodType
 
 from fastcs.controllers import BaseController
+from fastcs.logging import bind_logger
 from fastcs.methods.method import Controller_T, Method
+
+logger = bind_logger(logger_name=__name__)
 
 UnboundScanCallback = Callable[[Controller_T], Coroutine[None, None, None]]
 """A Scan callback that is unbound and must be called with a `Controller` instance"""
@@ -35,6 +38,17 @@ class Scan(Method[BaseController]):
 
     async def __call__(self):
         return await self._fn()
+
+    @property
+    def fn(self):
+        async def scan():
+            try:
+                return await self._fn()
+            except Exception:
+                logger.error("Scan update loop stopped", fn=self._fn)
+                raise
+
+        return scan
 
 
 class UnboundScan(Method[Controller_T]):

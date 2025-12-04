@@ -110,8 +110,8 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
             try:
                 self.log_event("Update attribute", topic=self)
                 await update_callback(self)
-            except Exception as e:
-                logger.opt(exception=e).error("Update loop failed", attribute=self)
+            except Exception:
+                logger.error("Attribute update loop stopped", attribute=self)
                 raise
 
         return update_attribute

@@ -7,7 +7,6 @@ from typing import Any
 from IPython.terminal.embed import InteractiveShellEmbed
 
 from fastcs.controllers import BaseController, Controller
-from fastcs.exceptions import FastCSError
 from fastcs.logging import bind_logger
 from fastcs.methods import Command, Scan, ScanCallback
 from fastcs.tracer import Tracer
@@ -63,11 +62,8 @@ class FastCS:
     def _scan_done(self, task: asyncio.Task):
         try:
             task.result()
-        except Exception as e:
-            raise FastCSError(
-                "Exception raised in scan method of "
-                f"{self._controller.__class__.__name__}"
-            ) from e
+        except Exception:
+            logger.exception("Exception raised in scan task")
 
     def _stop_scan_tasks(self):
         for task in self._scan_tasks:
