@@ -2,7 +2,7 @@ import getpass
 import os
 from enum import StrEnum
 from logging import LogRecord
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from prompt_toolkit.patch_stdout import StdoutProxy
 from pygelf import GelfUdpHandler
@@ -79,7 +79,8 @@ def format_record(record) -> str:
     sep = "<white>,</white> "
     if "extra" in record:
         extras = [
-            format_key_value(k, v)
+            # Escape `<` so Loguru doesn't parse them as format tags
+            format_key_value(k, f"{v}".replace("<", r"\<"))
             for k, v in record["extra"].items()
             if not k.startswith("_")
         ]
@@ -99,7 +100,7 @@ def format_record(record) -> str:
 """
 
 
-def format_key_value(k, v):
+def format_key_value(k: Any, v: Any) -> str:
     return f"<cyan>{k}</cyan><white>=</white><magenta>{v}</magenta>"
 
 
