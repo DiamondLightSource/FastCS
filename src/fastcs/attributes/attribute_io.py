@@ -37,4 +37,4 @@ class AttributeIO(Generic[DType_T, AttributeIORefT], Tracer):
         raise NotImplementedError()
 
 
-AnyAttributeIO = AttributeIO[DType_T, AttributeIORef]
+AnyAttributeIO = AttributeIO[Any]

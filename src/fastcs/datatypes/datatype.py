@@ -13,17 +13,10 @@ DType = (
     | enum.Enum  # Enum
     | np.ndarray  # Waveform / Table
 )
-
-DType_T = TypeVar(
-    "DType_T",
-    int,  # Int
-    float,  # Float
-    bool,  # Bool
-    str,  # String
-    enum.Enum,  # Enum
-    np.ndarray,  # Waveform / Table
-)
 """A builtin (or numpy) type supported by a corresponding FastCS Attribute DataType"""
+
+DType_T = TypeVar("DType_T", bound=DType)
+"""A TypeVar of `DType` for use in generic classes and functions"""
 
 
 @dataclass(frozen=True)
