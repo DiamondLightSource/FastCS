@@ -6,3 +6,4 @@ from .attribute_io import AnyAttributeIO as AnyAttributeIO
 from .attribute_io import AttributeIO as AttributeIO
 from .attribute_io_ref import AttributeIORef as AttributeIORef
 from .attribute_io_ref import AttributeIORefT as AttributeIORefT
+from .hinted_attribute import HintedAttribute as HintedAttribute

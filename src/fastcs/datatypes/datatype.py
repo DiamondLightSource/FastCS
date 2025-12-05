@@ -4,7 +4,15 @@ from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
 import numpy as np
-from numpy.typing import DTypeLike
+
+DType = (
+    int  # Int
+    | float  # Float
+    | bool  # Bool
+    | str  # String
+    | enum.Enum  # Enum
+    | np.ndarray  # Waveform / Table
+)
 
 DType_T = TypeVar(
     "DType_T",
@@ -13,12 +21,9 @@ DType_T = TypeVar(
     bool,  # Bool
     str,  # String
     enum.Enum,  # Enum
-    np.ndarray,  # Waveform
-    list[tuple[str, DTypeLike]],  # Table
+    np.ndarray,  # Waveform / Table
 )
 """A builtin (or numpy) type supported by a corresponding FastCS Attribute DataType"""
-
-DATATYPE_DTYPES: tuple[type] = DType_T.__constraints__  # type: ignore
 
 
 @dataclass(frozen=True)
