@@ -2,7 +2,7 @@ from collections.abc import Callable
 from typing import Generic
 
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
-from fastcs.datatypes import DATATYPE_DTYPES, DataType, DType_T
+from fastcs.datatypes import DataType, DType, DType_T
 from fastcs.logging import bind_logger
 from fastcs.tracer import Tracer
 
@@ -24,9 +24,8 @@ class Attribute(Generic[DType_T, AttributeIORefT], Tracer):
     ) -> None:
         super().__init__()
 
-        assert issubclass(datatype.dtype, DATATYPE_DTYPES), (
-            f"Attr type must be one of {DATATYPE_DTYPES}, "
-            "received type {datatype.dtype}"
+        assert issubclass(datatype.dtype, DType), (
+            f"Attr type must be one of {DType}, received type {datatype.dtype}"
         )
         self._io_ref = io_ref
         self._datatype: DataType[DType_T] = datatype
