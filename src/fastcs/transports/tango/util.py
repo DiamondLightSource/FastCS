@@ -7,6 +7,7 @@ from fastcs.attributes import Attribute
 from fastcs.datatypes import (
     Bool,
     DataType,
+    DType,
     DType_T,
     Enum,
     Float,
@@ -27,7 +28,7 @@ DATATYPE_FIELD_TO_SERVER_FIELD = {
 
 
 def get_server_metadata_from_attribute(
-    attribute: Attribute[DType_T],
+    attribute: Attribute[DType],
 ) -> dict[str, Any]:
     """Gets the metadata for a Tango field from an attribute."""
     arguments = {}
@@ -35,7 +36,7 @@ def get_server_metadata_from_attribute(
     return arguments
 
 
-def get_server_metadata_from_datatype(datatype: DataType[DType_T]) -> dict[str, str]:
+def get_server_metadata_from_datatype(datatype: DataType[DType]) -> dict[str, str]:
     """Gets the metadata for a Tango field from a FastCS datatype."""
     arguments = {
         DATATYPE_FIELD_TO_SERVER_FIELD[field]: value
@@ -86,6 +87,7 @@ def cast_from_tango_type(datatype: DataType[DType_T], value: object) -> DType_T:
     """Casts a value from tango to FastCS datatype."""
     match datatype:
         case Enum():
+            assert isinstance(value, int), "Got non-integer value for Enum"
             return datatype.validate(datatype.members[value])
         case datatype if issubclass(type(datatype), TANGO_ALLOWED_DATATYPES):
             return datatype.validate(value)  # type: ignore

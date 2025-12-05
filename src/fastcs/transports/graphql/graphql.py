@@ -135,10 +135,10 @@ def _wrap_attr_set(
 
 def _wrap_attr_get(
     attr_name: str, attribute: AttrR[DType_T]
-) -> Callable[[], Coroutine[Any, Any, Any]]:
+) -> Callable[[], Coroutine[Any, Any, DType_T]]:
     """Wrap an attribute in a function with annotations for strawberry"""
 
-    async def _dynamic_f() -> Any:
+    async def _dynamic_f() -> DType_T:
         return attribute.get()
 
     _dynamic_f.__name__ = attr_name

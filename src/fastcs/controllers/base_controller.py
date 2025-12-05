@@ -5,15 +5,7 @@ from collections.abc import Sequence
 from copy import deepcopy
 from typing import _GenericAlias, get_args, get_origin, get_type_hints  # type: ignore
 
-from fastcs.attributes import (
-    Attribute,
-    AttributeIO,
-    AttributeIORefT,
-    AttrR,
-    AttrW,
-    HintedAttribute,
-)
-from fastcs.datatypes import DType_T
+from fastcs.attributes import AnyAttributeIO, Attribute, AttrR, AttrW, HintedAttribute
 from fastcs.logging import bind_logger
 from fastcs.tracer import Tracer
 
@@ -41,7 +33,7 @@ class BaseController(Tracer):
         self,
         path: list[str] | None = None,
         description: str | None = None,
-        ios: Sequence[AttributeIO[DType_T, AttributeIORefT]] | None = None,
+        ios: Sequence[AnyAttributeIO] | None = None,
     ) -> None:
         super().__init__()
 
@@ -125,7 +117,7 @@ class BaseController(Tracer):
             elif isinstance(attr, UnboundScan | UnboundCommand):
                 setattr(self, attr_name, attr.bind(self))
 
-    def _validate_io(self, ios: Sequence[AttributeIO[DType_T, AttributeIORefT]]):
+    def _validate_io(self, ios: Sequence[AnyAttributeIO]):
         """Validate that there is exactly one AttributeIO class registered to the
         controller for each type of AttributeIORef belonging to the attributes of the
         controller"""
