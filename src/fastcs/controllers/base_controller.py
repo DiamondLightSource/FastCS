@@ -5,9 +5,19 @@ from collections.abc import Sequence
 from copy import deepcopy
 from typing import _GenericAlias, get_args, get_origin, get_type_hints  # type: ignore
 
-from fastcs.attributes import Attribute, AttributeIO, AttributeIORefT, AttrR, AttrW
-from fastcs.datatypes import DataType, DType_T
+from fastcs.attributes import (
+    Attribute,
+    AttributeIO,
+    AttributeIORefT,
+    AttrR,
+    AttrW,
+    HintedAttribute,
+)
+from fastcs.datatypes import DType_T
+from fastcs.logging import bind_logger
 from fastcs.tracer import Tracer
+
+logger = bind_logger(logger_name=__name__)
 
 
 class BaseController(Tracer):
@@ -44,7 +54,10 @@ class BaseController(Tracer):
         # Internal state that should not be accessed directly by base classes
         self.__attributes: dict[str, Attribute] = {}
         self.__sub_controllers: dict[str, BaseController] = {}
-        self.__hinted_attributes = self._parse_attribute_type_hints()
+
+        self.__hinted_attributes: dict[str, HintedAttribute] = {}
+        self.__hinted_sub_controllers: dict[str, type[BaseController]] = {}
+        self._find_type_hints()
 
         self._bind_attrs()
 
@@ -52,21 +65,32 @@ class BaseController(Tracer):
         self._attribute_ref_io_map = {io.ref_type: io for io in ios}
         self._validate_io(ios)
 
-    def _parse_attribute_type_hints(
-        self,
-    ) -> dict[str, tuple[type[Attribute], type[DataType]]]:
-        hinted_attributes = {}
+    def _find_type_hints(self):
+        """Find `Attribute` and `Controller` type hints for introspection validation"""
         for name, hint in get_type_hints(type(self)).items():
-            if not isinstance(hint, _GenericAlias):  # e.g. AttrR[int]
-                continue
+            if isinstance(hint, _GenericAlias):  # e.g. AttrR[int]
+                args = get_args(hint)
+                hint = get_origin(hint)
+            else:
+                args = None
 
-            origin = get_origin(hint)
-            if not isinstance(origin, type) or not issubclass(origin, Attribute):
-                continue
+            if isinstance(hint, type) and issubclass(hint, Attribute):
+                if args is None:
+                    dtype = None
+                else:
+                    if len(args) == 2:
+                        dtype = args[0]
+                    else:
+                        raise TypeError(
+                            f"Invalid type hint for attribute {name}: {hint}"
+                        )
 
-            hinted_attributes[name] = (origin, get_args(hint)[0])
+                self.__hinted_attributes[name] = HintedAttribute(
+                    attr_type=hint, dtype=dtype
+                )
 
-        return hinted_attributes
+            elif isinstance(hint, type) and issubclass(hint, BaseController):
+                self.__hinted_sub_controllers[name] = hint
 
     def _bind_attrs(self) -> None:
         """Search for Attributes and Methods to bind them to this instance.
@@ -132,21 +156,51 @@ class BaseController(Tracer):
 
     def post_initialise(self):
         """Hook to call after all attributes added, before serving the application"""
-        self._validate_hinted_attributes()
+        self._validate_type_hints()
         self._connect_attribute_ios()
 
-    def _validate_hinted_attributes(self):
-        """Validate ``Attribute`` type-hints were introspected during initialisation"""
+    def _validate_type_hints(self):
+        """Validate all `Attribute` and `Controller` type-hints were introspected"""
         for name in self.__hinted_attributes:
-            attr = getattr(self, name, None)
-            if attr is None or not isinstance(attr, Attribute):
-                raise RuntimeError(
-                    f"Controller `{self.__class__.__name__}` failed to introspect "
-                    f"hinted attribute `{name}` during initialisation"
-                )
+            self._validate_hinted_attribute(name)
+
+        for name in self.__hinted_sub_controllers:
+            self._validate_hinted_controller(name)
 
         for subcontroller in self.sub_controllers.values():
-            subcontroller._validate_hinted_attributes()  # noqa: SLF001
+            subcontroller._validate_type_hints()  # noqa: SLF001
+
+    def _validate_hinted_attribute(self, name: str):
+        """Check that an `Attribute` with the given name exists on the controller"""
+        attr = getattr(self, name, None)
+        if attr is None or not isinstance(attr, Attribute):
+            raise RuntimeError(
+                f"Controller `{self.__class__.__name__}` failed to introspect "
+                f"hinted attribute `{name}` during initialisation"
+            )
+        else:
+            logger.debug(
+                "Validated hinted attribute",
+                name=name,
+                controller=self,
+                attribute=attr,
+            )
+
+    def _validate_hinted_controller(self, name: str):
+        """Check that a sub controller with the given name exists on the controller"""
+        controller = getattr(self, name, None)
+        if controller is None or not isinstance(controller, BaseController):
+            raise RuntimeError(
+                f"Controller `{self.__class__.__name__}` failed to introspect "
+                f"hinted controller `{name}` during initialisation"
+            )
+        else:
+            logger.debug(
+                "Validated hinted sub controller",
+                name=name,
+                controller=self,
+                sub_controller=controller,
+            )
 
     def _connect_attribute_ios(self) -> None:
         """Connect ``Attribute`` callbacks to ``AttributeIO``s"""
@@ -191,18 +245,18 @@ class BaseController(Tracer):
                 f"{self.__attributes[name]}"
             )
         elif name in self.__hinted_attributes:
-            attr_class, attr_dtype = self.__hinted_attributes[name]
-            if not isinstance(attr, attr_class):
+            hint = self.__hinted_attributes[name]
+            if not isinstance(attr, hint.attr_type):
                 raise RuntimeError(
                     f"Controller '{self.__class__.__name__}' introspection of "
                     f"hinted attribute '{name}' does not match defined access mode. "
-                    f"Expected '{attr_class.__name__}', got '{type(attr).__name__}'."
+                    f"Expected '{hint.attr_type.__name__}' got '{type(attr).__name__}'."
                 )
-            if attr_dtype is not None and attr_dtype != attr.datatype.dtype:
+            if hint.dtype is not None and hint.dtype != attr.datatype.dtype:
                 raise RuntimeError(
                     f"Controller '{self.__class__.__name__}' introspection of "
                     f"hinted attribute '{name}' does not match defined datatype. "
-                    f"Expected '{attr_dtype.__name__}', "
+                    f"Expected '{hint.dtype.__name__}', "
                     f"got '{attr.datatype.dtype.__name__}'."
                 )
         elif name in self.__sub_controllers.keys():
@@ -228,6 +282,15 @@ class BaseController(Tracer):
                 f"Controller {self} has existing sub controller {name}: "
                 f"{self.__sub_controllers[name]}"
             )
+        elif name in self.__hinted_sub_controllers:
+            hint = self.__hinted_sub_controllers[name]
+            if not isinstance(sub_controller, hint):
+                raise RuntimeError(
+                    f"Controller '{self.__class__.__name__}' introspection of "
+                    f"hinted sub controller '{name}' does not match defined type. "
+                    f"Expected '{hint.__name__}' got "
+                    f"'{sub_controller.__class__.__name__}'."
+                )
         elif name in self.__attributes:
             raise ValueError(
                 f"Cannot add sub controller {sub_controller}. "
