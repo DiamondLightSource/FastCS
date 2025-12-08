@@ -68,6 +68,8 @@ class AttrW(Attribute[DType_T, AttributeIORefT]):
                     "Sync setpoint failed", attribute=self, setpoint=setpoint
                 )
 
+        self.log_event("Put complete", setpoint=setpoint, attribute=self)
+
     async def _call_sync_setpoint_callbacks(self, setpoint: DType_T) -> None:
         if self._sync_setpoint_callbacks:
             await asyncio.gather(
