@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.controllers.base_controller &#8212; FastCS 0.11.4.dev1+gc6122bff5 documentation</title>
+    <title>fastcs.controllers.base_controller &#8212; FastCS 0.11.4.dev5+g68cddc80e documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=82906554"></script>
+    <script src="../../../_static/documentation_options.js?v=dd8094ea"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -456,9 +456,19 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_GenericAlias</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_type_hints</span>  <span class="c1"># type: ignore</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttributeIO</span><span class="p">,</span> <span class="n">AttributeIORefT</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrW</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">DType_T</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Attribute</span><span class="p">,</span>
+    <span class="n">AttributeIO</span><span class="p">,</span>
+    <span class="n">AttributeIORefT</span><span class="p">,</span>
+    <span class="n">AttrR</span><span class="p">,</span>
+    <span class="n">AttrW</span><span class="p">,</span>
+    <span class="n">HintedAttribute</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DType_T</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">bind_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">bind_logger</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BaseController">
@@ -497,7 +507,10 @@
         <span class="c1"># Internal state that should not be accessed directly by base classes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseController</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_attribute_type_hints</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">HintedAttribute</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_sub_controllers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseController</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_find_type_hints</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_bind_attrs</span><span class="p">()</span>
 
@@ -505,21 +518,32 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_ref_io_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">io</span><span class="o">.</span><span class="n">ref_type</span><span class="p">:</span> <span class="n">io</span> <span class="k">for</span> <span class="n">io</span> <span class="ow">in</span> <span class="n">ios</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_io</span><span class="p">(</span><span class="n">ios</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_attribute_type_hints</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">Attribute</span><span class="p">],</span> <span class="nb">type</span><span class="p">[</span><span class="n">DataType</span><span class="p">]]]:</span>
-        <span class="n">hinted_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_type_hints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find `Attribute` and `Controller` type hints for introspection validation&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">hint</span> <span class="ow">in</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">_GenericAlias</span><span class="p">):</span>  <span class="c1"># e.g. AttrR[int]</span>
-                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">_GenericAlias</span><span class="p">):</span>  <span class="c1"># e.g. AttrR[int]</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+                <span class="n">hint</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="kc">None</span>
 
-            <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
-                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">dtype</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Invalid type hint for attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
 
-            <span class="n">hinted_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="n">hint</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">HintedAttribute</span><span class="p">(</span>
+                    <span class="n">attr_type</span><span class="o">=</span><span class="n">hint</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+                <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">hinted_attributes</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">BaseController</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_sub_controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">hint</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_bind_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Search for Attributes and Methods to bind them to this instance.</span>
@@ -590,22 +614,52 @@
 <a class="viewcode-back" href="../../../_api/fastcs.controllers.base_controller.html#fastcs.controllers.base_controller.BaseController.post_initialise">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">post_initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Hook to call after all attributes added, before serving the application&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_hinted_attributes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_type_hints</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_connect_attribute_ios</span><span class="p">()</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_hinted_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate ``Attribute`` type-hints were introspected during initialisation&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_type_hints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate all `Attribute` and `Controller` type-hints were introspected&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">:</span>
-            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">attr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Controller `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">` failed to introspect &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;hinted attribute `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` during initialisation&quot;</span>
-                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_hinted_attribute</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_sub_controllers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_hinted_controller</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">subcontroller</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_controllers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">subcontroller</span><span class="o">.</span><span class="n">_validate_hinted_attributes</span><span class="p">()</span>  <span class="c1"># noqa: SLF001</span>
+            <span class="n">subcontroller</span><span class="o">.</span><span class="n">_validate_type_hints</span><span class="p">()</span>  <span class="c1"># noqa: SLF001</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_hinted_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that an `Attribute` with the given name exists on the controller&quot;&quot;&quot;</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">attr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Controller `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">` failed to introspect &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;hinted attribute `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` during initialisation&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;Validated hinted attribute&quot;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">controller</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">attribute</span><span class="o">=</span><span class="n">attr</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_hinted_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that a sub controller with the given name exists on the controller&quot;&quot;&quot;</span>
+        <span class="n">controller</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">controller</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">BaseController</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Controller `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">` failed to introspect &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;hinted controller `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` during initialisation&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;Validated hinted sub controller&quot;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">controller</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">sub_controller</span><span class="o">=</span><span class="n">controller</span><span class="p">,</span>
+            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_connect_attribute_ios</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect ``Attribute`` callbacks to ``AttributeIO``s&quot;&quot;&quot;</span>
@@ -650,18 +704,18 @@
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">:</span>
-            <span class="n">attr_class</span><span class="p">,</span> <span class="n">attr_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">attr_class</span><span class="p">):</span>
+            <span class="n">hint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">hint</span><span class="o">.</span><span class="n">attr_type</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Controller &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; introspection of &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;hinted attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match defined access mode. &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">attr_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, got &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">hint</span><span class="o">.</span><span class="n">attr_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; got &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="n">attr_dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">attr_dtype</span> <span class="o">!=</span> <span class="n">attr</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hint</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hint</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">attr</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Controller &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; introspection of &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;hinted attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match defined datatype. &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">attr_dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">hint</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;got &#39;</span><span class="si">{</span><span class="n">attr</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
                 <span class="p">)</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -687,6 +741,15 @@
                 <span class="sa">f</span><span class="s2">&quot;Controller </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> has existing sub controller </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__sub_controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_sub_controllers</span><span class="p">:</span>
+            <span class="n">hint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hinted_sub_controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sub_controller</span><span class="p">,</span> <span class="n">hint</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Controller &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; introspection of &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;hinted sub controller &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; does not match defined type. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">hint</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; got &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">sub_controller</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                <span class="p">)</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__attributes</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Cannot add sub controller </span><span class="si">{</span><span class="n">sub_controller</span><span class="si">}</span><span class="s2">. &quot;</span>

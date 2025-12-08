@@ -19,6 +19,7 @@
         attribute
         attribute_io
         attribute_io_ref
+        hinted_attribute
     
     
 
