@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.control_system &#8212; FastCS 0.11.4.dev5+g68cddc80e documentation</title>
+    <title>fastcs.control_system &#8212; FastCS 0.11.4.dev6+ga2a780819 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=dd8094ea"></script>
+    <script src="../../_static/documentation_options.js?v=a2e8f6b6"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -458,7 +458,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.terminal.embed</span><span class="w"> </span><span class="kn">import</span> <span class="n">InteractiveShellEmbed</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCSError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">bind_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span><span class="p">,</span> <span class="n">Scan</span><span class="p">,</span> <span class="n">ScanCallback</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
@@ -516,11 +515,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_scan_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">task</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span>
-                <span class="s2">&quot;Exception raised in scan method of &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Exception raised in scan task&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_stop_scan_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan_tasks</span><span class="p">:</span>
