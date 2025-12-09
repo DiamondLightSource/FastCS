@@ -33,7 +33,7 @@ FastCS documentation follows the Diataxis framework, which organizes documentati
 
 #### Document: `docs/how-to/create-epics-ioc-with-ca-and-pva.md` ✅
 
-**Status**: Implemented and available
+**Status**: Implemented and available - see [docs/how-to/create-epics-ioc-with-ca-and-pva.md](../docs/how-to/create-epics-ioc-with-ca-and-pva.md)
 
 **Purpose**: Enable developers to create a production-ready EPICS IOC using FastCS with both Channel Access (CA) and PV Access (PVA) transports.
 
@@ -42,176 +42,15 @@ FastCS documentation follows the Diataxis framework, which organizes documentati
 - New FastCS users with EPICS background
 - AI assistants helping users create device drivers
 
-**Content Structure**:
-
-```markdown
-# Creating an EPICS IOC with CA and PVA Transports
-
-## Overview
-Brief introduction to FastCS EPICS support and when to use CA vs PVA vs both
-
-## Prerequisites
-- Python 3.11+
-- FastCS installation with EPICS extras
-- Basic EPICS knowledge (PVs, records, CA/PVA protocols)
-- Understanding of your device's control interface
-
-## Step 1: Project Setup
-- Create project directory structure
-- Set up virtual environment
-- Install FastCS with EPICS dependencies: `pip install 'fastcs[ca,pva]'`
-- Verify installation
-
-## Step 2: Define Your Controller
-- Import required FastCS components
-- Create a Controller class
-- Add Attributes (AttrR, AttrW, AttrRW) for device parameters
-- Define data types (Int, Float, String, Bool, Enum, etc.)
-- Add sub-controllers for hierarchical device structures
-
-## Step 3: Implement Device Communication
-- Create connection class (e.g., IPConnection for TCP/IP devices)
-- Implement connect() method in controller
-- Create AttributeIO classes for reading/writing device values
-- Implement update() and send() methods
-- Handle errors and timeouts appropriately
-
-## Step 4: Set Up Channel Access Transport
-- Import EpicsCATransport and EpicsIOCOptions
-- Configure PV prefix
-- Add GUI generation options (optional)
-- Create transport instance:
-  ```python
-  from fastcs.transports import EpicsCATransport, EpicsIOCOptions
-
-  ca_transport = EpicsCATransport(
-      epicsca=EpicsIOCOptions(pv_prefix="MY-DEVICE"),
-      gui=EpicsGUIOptions(output_path=Path("./device.bob"))
-  )
-  ```
-
-## Step 5: Set Up PV Access Transport
-- Import EpicsPVATransport
-- Use same PV prefix or different prefix if needed
-- Create transport instance:
-  ```python
-  from fastcs.transports import EpicsPVATransport
-
-  pva_transport = EpicsPVATransport(
-      epicspva=EpicsIOCOptions(pv_prefix="MY-DEVICE")
-  )
-  ```
-
-## Step 6: Launch with Multiple Transports
-- Create FastCS instance with controller and both transports
-- Run the IOC:
-  ```python
-  from fastcs.launch import FastCS
-
-  fastcs = FastCS(
-      MyDeviceController(),
-      [ca_transport, pva_transport]
-  )
-
-  if __name__ == "__main__":
-      fastcs.run()
-  ```
-
-## Step 7: Testing Your IOC
-- Start the IOC
-- Test CA PVs with caget/caput
-- Test PVA PVs with pvget/pvput
-- Verify GUI file generation
-- Test with Phoebus/CS-Studio/EDM
-
-## Step 8: Advanced Configuration
-- Setting update periods for different attributes
-- Organizing PVs with sub-controllers
-- Using Methods for commands
-- Implementing scan methods for periodic updates
-- Adding validation and limits
-
-## Converting an Existing EPICS IOC to FastCS
-
-### Analyze Your Current Implementation
-- Identify database records (db/template files)
-- Map record types to FastCS Attributes
-- Identify device support code
-- Document communication protocol
-
-### Migration Strategy
-- Create equivalent Controller structure
-- Map database records to Attributes:
-  - `ai/ao` → `AttrR(Float())` / `AttrRW(Float())`
-  - `bi/bo` → `AttrR(Bool())` / `AttrRW(Bool())`
-  - `stringin/stringout` → `AttrR(String())` / `AttrRW(String())`
-  - `mbbi/mbbo` → `AttrR(Enum(...))` / `AttrRW(Enum(...))`
-  - `waveform` → `AttrR(Waveform(...))` / `AttrRW(Waveform(...))`
-- Port device support logic to AttributeIO classes
-- Replace asynDriver calls with direct protocol implementation
-- Test incrementally
-
-### Example Conversion
-```python
-# Old: database template
-# record(ai, "$(P):TEMPERATURE") {
-#     field(DTYP, "asynFloat64")
-#     field(INP, "@asyn($(PORT)) TEMP")
-#     field(SCAN, "1 second")
-#     field(PREC, "2")
-# }
-
-# New: FastCS Controller
-class MyController(Controller):
-    temperature = AttrR(Float(), description="Device temperature")
-
-    async def connect(self):
-        # Initialize connection
-        pass
-
-# AttributeIO handles the "TEMP" command
-class MyAttributeIO(AttributeIO):
-    async def update(self, attribute: Attribute):
-        value = await self._conn.send_query("TEMP")
-        attribute.set(float(value))
-```
-
-## Troubleshooting
-- Common errors and solutions
-- Debugging with logging
-- EPICS environment variables
-- Port conflicts
-- Dependency issues
-
-## Best Practices
-- PV naming conventions
-- When to use CA vs PVA
-- Performance considerations
-- Error handling patterns
-- Testing strategies
-
-## Complete Working Example
-[Full code example of a simple device with both transports]
-
-## Next Steps
-- Read about dynamic drivers
-- Explore other transports (Tango, GraphQL, REST)
-- Implement methods for complex commands
-- Add comprehensive error handling
-
-## See Also
-- Tutorial: Creating a FastCS Driver (static-drivers.md)
-- Tutorial: Dynamic FastCS Drivers (dynamic-drivers.md)
-- Reference: API Documentation
-- Explanation: FastCS Architecture
-```
-
-**Implementation Details**:
-- Code examples should be complete and runnable
-- Include both minimal and realistic examples
-- Provide comparison with traditional EPICS IOC code
-- Show migration path from existing implementations
-- Include troubleshooting for common issues
+**Key Topics Covered**:
+- Project setup and installation
+- Controller and attribute definition
+- Device communication implementation
+- Setting up both CA and PVA transports
+- Testing and verification
+- Converting existing EPICS IOCs to FastCS
+- Complete working examples
+- Troubleshooting and best practices
 
 **Success Criteria**:
 - A developer can create a basic dual-transport IOC in under 30 minutes
