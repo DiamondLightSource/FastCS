@@ -11,7 +11,7 @@ FastCS enables you to create EPICS IOCs that support both Channel Access (CA) an
 
 ## Prerequisites
 
-- A FastCS project set up with EPICS support (`fastcs[ca,pva]`)
+- A FastCS project set up with EPICS support (`fastcs[epicsca,epicspva]`)
 - Basic understanding of EPICS concepts (PVs, records, protocols)
 - Knowledge of your device's control interface (serial, TCP/IP, etc.)
 
@@ -43,15 +43,15 @@ class MyDeviceController(Controller):
     enable: AttrRW = AttrRW(Bool(), description="Enable/disable device")
 
     # Write-only attributes (commands)
-    reset: AttrW = AttrW(Bool(), description="Reset device")
+    reset: Command = Command(Bool(), description="Reset device")
 ```
 
 ### Understanding Attribute Types
 
 FastCS provides three attribute access modes:
 
-- **`AttrR`**: Read-only attributes (like EPICS `ai`, `bi`, `stringin`)
-- **`AttrW`**: Write-only attributes (like EPICS `ao`, `bo`, `stringout`)
+- **`AttrR`**: Read-only attributes
+- **`AttrW`**: Write-only attributes
 - **`AttrRW`**: Read-write attributes (creates separate readback PVs)
 
 ### Common Data Types
@@ -64,7 +64,7 @@ enabled = AttrRW(Bool())
 
 # Numeric with precision
 temperature = AttrR(Float())  # Default precision
-pressure = AttrR(Float())     # Use PV precision field for display
+precision = AttrR(Float())    # Use PV precision field for display
 
 # Integer
 count = AttrR(Int())
@@ -84,7 +84,7 @@ state = AttrR(Enum(DeviceState))
 
 # Waveform (arrays)
 import numpy as np
-waveform = AttrR(Waveform(np.dtype("f")))  # Float array
+waveform = AttrR(Waveform(np.dtype("f"), shape=(1024,768) ))  # Float array
 ```
 
 ## Step 2: Implement Device Communication
@@ -97,9 +97,9 @@ For TCP/IP devices, use FastCS's built-in `IPConnection`:
 from fastcs.connections import IPConnection, IPConnectionSettings
 
 class MyDeviceController(Controller):
-    def __init__(self, host: str, port: int):
+    def __init__(self, settings: IPConnectionSettings):
         self._connection = IPConnection()
-        self._settings = IPConnectionSettings(host, port)
+        self._settings = settings
         super().__init__()
 
     async def connect(self):
@@ -133,14 +133,14 @@ class DeviceAttributeIO(AttributeIO[NumberT, DeviceAttributeIORef]):
         super().__init__()
         self._connection = connection
 
-    async def update(self, attr):
+    async def update(self, attr: AttrR[NumberT, DeviceAttributeIORef]):
         """Read value from device and update attribute."""
         # Send query to device
         response = await self._connection.send_query(
             f"{attr.io_ref.command}?\r\n"
         )
         # Parse response and update attribute
-        value = attr.dtype(response.strip())
+        value = response.strip()
         await attr.update(value)
 
     async def send(self, attr):
@@ -156,7 +156,7 @@ from fastcs.attributes import AttrR, AttrRW
 
 class MyDeviceController(Controller):
     # Attribute with IO reference
-    temperature: AttrR = AttrR(
+    temperature = AttrR(
         Float(),
         io_ref=DeviceAttributeIORef(command="TEMP", update_period=0.5)
     )
@@ -301,11 +301,8 @@ if __name__ == "__main__":
 ### Start the IOC
 
 ```bash
-# Using uv
-uv run python my_device.py
-
-# Or in the devcontainer
-python my_device.py
+# Use uv
+uv run my-device
 ```
 
 You should see output indicating both transports are running:
@@ -409,12 +406,9 @@ class MyDeviceController(Controller):
         super().__init__()
 
         # Add sub-controller
-        power_supply = PowerSupplyController()
-        self.add_sub_controller("psu", power_supply)
+        self.psu = PowerSupplyController()
 ```
-
-This creates PVs like:
-- `MY-DEVICE:DeviceId`
+        self.psu = PowerSupplyController()
 - `MY-DEVICE:Psu:Voltage`
 - `MY-DEVICE:Psu:Current`
 
@@ -602,11 +596,6 @@ class DeviceAttributeIO(AttributeIO):
    - ✓ Existing control system scripts still work
    - ✓ GUIs display correctly
 
-4. **Deployment**:
-   - Document PV name changes (if any)
-   - Update control system configuration
-   - Train operators on any differences
-   - Monitor for issues
 
 ### Benefits of Migration
 
@@ -719,7 +708,7 @@ class MyController(Controller):
 
     device_id: AttrR = AttrR(
         String(),
-        io_ref=IORef(command="ID", update_period=3600.0)  # Slow: 1/hour
+        io_ref=IORef(command="ID", update_period=ONCE)  # Slow: 1/hour
     )
 ```
 
