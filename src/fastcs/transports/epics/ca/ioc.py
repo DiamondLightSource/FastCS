@@ -193,7 +193,11 @@ def _make_record(
     )
     attribute_record_metadata = record_metadata_from_attribute(attribute)
 
-    update = {"always_update": True, "on_update": on_update} if on_update else {}
+    update = (
+        {"on_update": on_update, "always_update": True, "blocking": True}
+        if on_update
+        else {}
+    )
 
     record = builder_callable(
         pv, **update, **datatype_record_metadata, **attribute_record_metadata
