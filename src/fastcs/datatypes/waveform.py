@@ -38,3 +38,7 @@ class Waveform(DataType[np.ndarray]):
             )
 
         return _value
+
+    @staticmethod
+    def equal(value1: np.ndarray, value2: np.ndarray) -> bool:
+        return np.array_equal(value1, value2)
