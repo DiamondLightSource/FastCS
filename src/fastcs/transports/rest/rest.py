@@ -90,11 +90,9 @@ def _get_response_body(attribute: AttrR[DType_T]):
     )
 
 
-def _wrap_attr_get(
-    attribute: AttrR[DType_T],
-) -> Callable[[], Coroutine[Any, Any, Any]]:
-    async def attr_get() -> Any:  # Must be any as response_model is set
-        value = attribute.get()  # type: ignore
+def _wrap_attr_get(attribute: AttrR[DType_T]) -> Callable[[], Coroutine[Any, Any, Any]]:
+    async def attr_get() -> dict[str, object]:  # Must be any as response_model is set
+        value = attribute.get()
         return {"value": cast_to_rest_type(attribute.datatype, value)}
 
     return attr_get

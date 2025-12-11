@@ -1,9 +1,8 @@
 from collections.abc import Iterator, Mapping, MutableMapping, Sequence
 
-from fastcs.attributes import AttributeIO, AttributeIORefT
+from fastcs.attributes import AnyAttributeIO
 from fastcs.controllers.base_controller import BaseController
 from fastcs.controllers.controller import Controller
-from fastcs.datatypes import DType_T
 
 
 class ControllerVector(MutableMapping[int, Controller], BaseController):
@@ -18,7 +17,7 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
         self,
         children: Mapping[int, Controller],
         description: str | None = None,
-        ios: Sequence[AttributeIO[DType_T, AttributeIORefT]] | None = None,
+        ios: Sequence[AnyAttributeIO] | None = None,
     ) -> None:
         super().__init__(description=description, ios=ios)
         self._children: dict[int, Controller] = {}

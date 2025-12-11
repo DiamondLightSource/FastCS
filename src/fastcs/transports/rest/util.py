@@ -5,7 +5,7 @@ from fastcs.datatypes import Bool, DataType, DType_T, Enum, Float, Int, String, 
 REST_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String)
 
 
-def convert_datatype(datatype: DataType[DType_T]) -> type:
+def convert_datatype(datatype: DataType[DType_T]) -> type[DType_T]:
     """Converts a datatype to a rest serialisable type."""
     match datatype:
         case Waveform():

@@ -1,10 +1,12 @@
+import enum
 from dataclasses import asdict
 from typing import Any
 
 from softioc import builder
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.datatypes import Bool, DataType, DType_T, Enum, Float, Int, String, Waveform
+from fastcs.datatypes import Bool, DType_T, Enum, Float, Int, String, Waveform
+from fastcs.datatypes.datatype import DataType
 from fastcs.exceptions import FastCSError
 
 _MBB_FIELD_PREFIXES = (
@@ -31,7 +33,7 @@ MBB_VALUE_FIELDS = tuple(f"{p}VL" for p in _MBB_FIELD_PREFIXES)
 MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 
 
-EPICS_ALLOWED_DATATYPES = (Bool, DataType, Enum, Float, Int, String, Waveform)
+EPICS_ALLOWED_DATATYPES = (Bool, Enum, Float, Int, String, Waveform)
 DEFAULT_STRING_WAVEFORM_LENGTH = 256
 
 DATATYPE_FIELD_TO_RECORD_FIELD = {
@@ -44,9 +46,7 @@ DATATYPE_FIELD_TO_RECORD_FIELD = {
 }
 
 
-def record_metadata_from_attribute(
-    attribute: Attribute[DType_T],
-) -> dict[str, Any]:
+def record_metadata_from_attribute(attribute: Attribute[DType_T]) -> dict[str, Any]:
     """Converts attributes on the `Attribute` to the
     field name/value in the record metadata."""
     metadata: dict[str, Any] = {"DESC": attribute.description}
@@ -62,7 +62,7 @@ def record_metadata_from_attribute(
 
 
 def record_metadata_from_datatype(
-    datatype: DataType[DType_T], out_record: bool = False
+    datatype: DataType[Any], out_record: bool = False
 ) -> dict[str, str]:
     """Converts attributes on the `DataType` to the
     field name/value in the record metadata."""
@@ -123,9 +123,14 @@ def cast_from_epics_type(datatype: DataType[DType_T], value: object) -> DType_T:
                 raise ValueError(f"Invalid bool value from EPICS record {value}")
         case Enum():
             if len(datatype.members) <= MBB_MAX_CHOICES:
+                assert isinstance(value, int), "Got non-integer value for Enum"
                 return datatype.validate(datatype.members[value])
             else:  # enum backed by string record
-                return datatype.validate(datatype.enum_cls[value])
+                assert isinstance(value, str), "Got non-string value for long Enum"
+                # python typing can't narrow the nested generic enum_cls
+                assert issubclass(datatype.enum_cls, enum.Enum), "Invalid Enum.enum_cls"
+                enum_member = datatype.enum_cls[value]
+                return datatype.validate(enum_member)
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
             return datatype.validate(value)  # type: ignore
         case _:
