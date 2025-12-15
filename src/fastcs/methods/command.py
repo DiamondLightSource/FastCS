@@ -2,7 +2,10 @@ from collections.abc import Callable, Coroutine
 from types import MethodType
 
 from fastcs.controllers import BaseController
+from fastcs.logging import bind_logger
 from fastcs.methods.method import Controller_T, Method
+
+logger = bind_logger(logger_name=__name__)
 
 UnboundCommandCallback = Callable[[Controller_T], Coroutine[None, None, None]]
 """A Command callback that is unbound and must be called with a `Controller` instance"""
@@ -28,7 +31,18 @@ class Command(Method[BaseController]):
             raise TypeError(f"Command method cannot have arguments: {fn}")
 
     async def __call__(self):
-        return await self._fn()
+        return await self.fn()
+
+    @property
+    def fn(self):
+        async def command():
+            try:
+                return await self._fn()
+            except Exception:
+                logger.exception("Command failed", fn=self._fn)
+                raise
+
+        return command
 
 
 class UnboundCommand(Method[Controller_T]):
