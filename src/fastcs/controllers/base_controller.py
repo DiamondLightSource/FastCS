@@ -7,6 +7,7 @@ from typing import _GenericAlias, get_args, get_origin, get_type_hints  # type: 
 
 from fastcs.attributes import AnyAttributeIO, Attribute, AttrR, AttrW, HintedAttribute
 from fastcs.logging import bind_logger
+from fastcs.methods import Command, Scan, UnboundCommand, UnboundScan
 from fastcs.tracer import Tracer
 
 logger = bind_logger(logger_name=__name__)
@@ -46,6 +47,8 @@ class BaseController(Tracer):
         # Internal state that should not be accessed directly by base classes
         self.__attributes: dict[str, Attribute] = {}
         self.__sub_controllers: dict[str, BaseController] = {}
+        self.__command_methods: dict[str, Command] = {}
+        self.__scan_methods: dict[str, Scan] = {}
 
         self.__hinted_attributes: dict[str, HintedAttribute] = {}
         self.__hinted_sub_controllers: dict[str, type[BaseController]] = {}
@@ -95,10 +98,6 @@ class BaseController(Tracer):
         context with the controller instance passed as the ``self`` argument.
 
         """
-        # Lazy import to avoid circular references
-        from fastcs.methods.command import UnboundCommand
-        from fastcs.methods.scan import UnboundScan
-
         # Using a dictionary instead of a set to maintain order.
         class_dir = {key: None for key in dir(type(self)) if not key.startswith("_")}
         class_type_hints = {
@@ -114,8 +113,21 @@ class BaseController(Tracer):
             attr = getattr(self, attr_name, None)
             if isinstance(attr, Attribute):
                 setattr(self, attr_name, deepcopy(attr))
-            elif isinstance(attr, UnboundScan | UnboundCommand):
-                setattr(self, attr_name, attr.bind(self))
+            else:
+                if isinstance(attr, Command):
+                    self.add_command(attr_name, attr)
+                elif isinstance(attr, Scan):
+                    self.add_scan(attr_name, attr)
+                elif isinstance(
+                    unbound_command := getattr(attr, "__unbound_command__", None),
+                    UnboundCommand,
+                ):
+                    self.add_command(attr_name, unbound_command.bind(self))
+                elif isinstance(
+                    unbound_scan := getattr(attr, "__unbound_scan__", None),
+                    UnboundScan,
+                ):
+                    self.add_scan(attr_name, unbound_scan.bind(self))
 
     def _validate_io(self, ios: Sequence[AnyAttributeIO]):
         """Validate that there is exactly one AttributeIO class registered to the
@@ -137,6 +149,10 @@ class BaseController(Tracer):
     def __setattr__(self, name, value):
         if isinstance(value, Attribute):
             self.add_attribute(name, value)
+        elif isinstance(value, Command):
+            self.add_command(name, value)
+        elif isinstance(value, Scan):
+            self.add_scan(name, value)
         elif isinstance(value, BaseController):
             self.add_sub_controller(name, value)
         else:
@@ -300,3 +316,19 @@ class BaseController(Tracer):
     @property
     def sub_controllers(self) -> dict[str, BaseController]:
         return self.__sub_controllers
+
+    def add_command(self, name: str, command: Command):
+        self.__command_methods[name] = command
+        super().__setattr__(name, command)
+
+    @property
+    def command_methods(self) -> dict[str, Command]:
+        return self.__command_methods
+
+    def add_scan(self, name: str, scan: Scan):
+        self.__scan_methods[name] = scan
+        super().__setattr__(name, scan)
+
+    @property
+    def scan_methods(self) -> dict[str, Scan]:
+        return self.__scan_methods

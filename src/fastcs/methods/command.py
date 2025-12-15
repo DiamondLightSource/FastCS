@@ -1,9 +1,12 @@
 from collections.abc import Callable, Coroutine
 from types import MethodType
+from typing import TYPE_CHECKING
 
-from fastcs.controllers import BaseController
 from fastcs.logging import bind_logger
 from fastcs.methods.method import Controller_T, Method
+
+if TYPE_CHECKING:
+    from fastcs.controllers import BaseController  # noqa: F401
 
 logger = bind_logger(logger_name=__name__)
 
@@ -13,7 +16,7 @@ CommandCallback = Callable[[], Coroutine[None, None, None]]
 """A Command callback that is bound and can be called without `self`"""
 
 
-class Command(Method[BaseController]):
+class Command(Method["BaseController"]):
     """A `Controller` `Method` that performs a single action when called.
 
     This class contains a function that is bound to a specific `Controller` instance and
@@ -34,7 +37,7 @@ class Command(Method[BaseController]):
         return await self.fn()
 
     @property
-    def fn(self):
+    def fn(self) -> CommandCallback:
         async def command():
             try:
                 return await self._fn()
@@ -70,15 +73,12 @@ class UnboundCommand(Method[Controller_T]):
     def bind(self, controller: Controller_T) -> Command:
         return Command(MethodType(self.fn, controller), group=self.group)
 
-    def __call__(self):
-        raise NotImplementedError(
-            "Method must be bound to a controller instance to be callable"
-        )
-
 
 def command(
     *, group: str | None = None
-) -> Callable[[UnboundCommandCallback[Controller_T]], UnboundCommand[Controller_T]]:
+) -> Callable[
+    [UnboundCommandCallback[Controller_T]], UnboundCommandCallback[Controller_T]
+]:
     """Decorator to register a `Controller` method as a `Command`
 
     The `Command` will be passed to the transport layer to expose in the API
@@ -89,7 +89,9 @@ def command(
 
     def wrapper(
         fn: UnboundCommandCallback[Controller_T],
-    ) -> UnboundCommand[Controller_T]:
-        return UnboundCommand(fn, group=group)
+    ) -> UnboundCommandCallback[Controller_T]:
+        setattr(fn, "__unbound_command__", UnboundCommand(fn, group=group))  # noqa: B010
+
+        return fn
 
     return wrapper
