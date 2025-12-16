@@ -47,7 +47,7 @@ class WritePvHandler:
         cast_value = cast_from_p4p_value(self._attr_w, raw_value)
 
         tracer.log_event("PV put", topic=self._attr_w, pv=pv, value=cast_value)
-        await self._attr_w.put(cast_value)
+        await self._attr_w.put(cast_value, sync_setpoint=True)
         op.done()
 
 
