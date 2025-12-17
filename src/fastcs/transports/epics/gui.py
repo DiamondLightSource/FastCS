@@ -44,6 +44,8 @@ logger = bind_logger(logger_name=__name__)
 class EpicsGUI:
     """For creating gui in the EPICS transports."""
 
+    command_value = "1"
+
     def __init__(self, controller_api: ControllerAPI, pv_prefix: str) -> None:
         self._controller_api = controller_api
         self._pv_prefix = pv_prefix
@@ -133,8 +135,7 @@ class EpicsGUI:
         return SignalX(
             name=name,
             write_pv=pv,
-            value="1",
-            write_widget=ButtonPanel(actions={name: "1"}),
+            write_widget=ButtonPanel(actions={name: self.command_value}),
         )
 
     def create_gui(self, options: EpicsGUIOptions | None = None) -> None:
