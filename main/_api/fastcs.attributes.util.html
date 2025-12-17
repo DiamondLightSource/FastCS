@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.controllers &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
+    <title>fastcs.attributes.util &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
   
   
   
@@ -54,7 +54,7 @@
     <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_api/fastcs.controllers';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_api/fastcs.attributes.util';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://DiamondLightSource.github.io/FastCS/switcher.json';
@@ -65,8 +65,8 @@
     <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fastcs.controllers.base_controller" href="fastcs.controllers.base_controller.html" />
-    <link rel="prev" title="fastcs.control_system" href="fastcs.control_system.html" />
+    <link rel="next" title="fastcs.connections" href="fastcs.connections.html" />
+    <link rel="prev" title="fastcs.attributes.hinted_attribute" href="fastcs.attributes.hinted_attribute.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="main" />
@@ -405,7 +405,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="fastcs.html">API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.attributes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="fastcs.attributes.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_r.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_r</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_rw.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_rw</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attr_w.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attr_w</span></code></a></li>
@@ -413,7 +413,7 @@
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute_io.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute_io</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute_io_ref.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute_io_ref</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.hinted_attribute.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.hinted_attribute</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.util</span></code></a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.util</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.connections.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -422,7 +422,7 @@
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.control_system.html"><code class="docutils literal notranslate"><span class="pre">fastcs.control_system</span></code></a></li>
-<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.base_controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.base_controller</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.controller_vector.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_vector</span></code></a></li>
@@ -542,7 +542,10 @@
     
     <li class="breadcrumb-item"><a href="fastcs.html" class="nav-link"><code class="docutils literal notranslate"><span class="pre">fastcs</span></code></a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers</span></code></span></li>
+    
+    <li class="breadcrumb-item"><a href="fastcs.attributes.html" class="nav-link"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes</span></code></a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.util</span></code></span></li>
   </ul>
 </nav>
 </div>
@@ -559,23 +562,40 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-fastcs.controllers">
-<span id="fastcs-controllers"></span><h1><code class="docutils literal notranslate"><span class="pre">fastcs.controllers</span></code><a class="headerlink" href="#module-fastcs.controllers" title="Link to this heading">#</a></h1>
-<p class="rubric">Submodules</p>
+  <section id="module-fastcs.attributes.util">
+<span id="fastcs-attributes-util"></span><h1><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.util</span></code><a class="headerlink" href="#module-fastcs.attributes.util" title="Link to this heading">#</a></h1>
+<p class="rubric">Members</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.controllers.base_controller.html#module-fastcs.controllers.base_controller" title="fastcs.controllers.base_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base_controller</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="fastcs.controllers.controller.html#module-fastcs.controllers.controller" title="fastcs.controllers.controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">controller</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="fastcs.controllers.controller_vector.html#module-fastcs.controllers.controller_vector" title="fastcs.controllers.controller_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">controller_vector</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.attributes.util.PredicateEvent" title="fastcs.attributes.util.PredicateEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PredicateEvent</span></code></a></p></td>
+<td><p>A wrapper of <a class="reference external" href="https://docs.python.org/3/library/asyncio-sync.html#asyncio.Event" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">asyncio.Event</span></code></a> that only triggers when a predicate is satisfied</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<dl class="py class">
+<dt class="sig sig-object py" id="fastcs.attributes.util.PredicateEvent">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.attributes.util.</span></span><span class="sig-name descname"><span class="pre">PredicateEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">_predicate:</span> <span class="pre">~collections.abc.Callable[[~fastcs.datatypes.datatype.DType_T],</span> <span class="pre">bool],</span> <span class="pre">_event:</span> <span class="pre">~asyncio.locks.Event</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes/util.html#PredicateEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.util.PredicateEvent" title="Link to this definition">#</a></dt>
+<dd><p>A wrapper of <a class="reference external" href="https://docs.python.org/3/library/asyncio-sync.html#asyncio.Event" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">asyncio.Event</span></code></a> that only triggers when a predicate is satisfied</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.attributes.util.PredicateEvent.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/fastcs/attributes/util.html#PredicateEvent.set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.util.PredicateEvent.set" title="Link to this definition">#</a></dt>
+<dd><p>Set the event if the predicate is satisfied by the value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">True</span></code></a> if the predicate was satisfied and the event was set, else <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">False</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.attributes.util.PredicateEvent.wait">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes/util.html#PredicateEvent.wait"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.util.PredicateEvent.wait" title="Link to this definition">#</a></dt>
+<dd><p>Wait for the event to be set</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -589,20 +609,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="fastcs.control_system.html"
+       href="fastcs.attributes.hinted_attribute.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.control_system</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.hinted_attribute</span></code></p>
       </div>
     </a>
     <a class="right-next"
-       href="fastcs.controllers.base_controller.html"
+       href="fastcs.connections.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.base_controller</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.connections</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -618,10 +638,26 @@
 
 
   <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.util.PredicateEvent"><code class="docutils literal notranslate"><span class="pre">PredicateEvent</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.util.PredicateEvent.set"><code class="docutils literal notranslate"><span class="pre">PredicateEvent.set()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.util.PredicateEvent.wait"><code class="docutils literal notranslate"><span class="pre">PredicateEvent.wait()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/DiamondLightSource/FastCS/edit/main/docs/_api/fastcs.controllers.rst">
+    <a href="https://github.com/DiamondLightSource/FastCS/edit/main/docs/_api/fastcs.attributes.util.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -637,7 +673,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/_api/fastcs.controllers.rst.txt"
+      <li><a href="../_sources/_api/fastcs.attributes.util.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

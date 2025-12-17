@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.attributes.attr_r &#8212; FastCS 0.11.4.dev6+ga2a780819 documentation</title>
+    <title>fastcs.attributes.attr_r &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=a2e8f6b6"></script>
+    <script src="../_static/documentation_options.js?v=bba35bb6"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -413,6 +413,7 @@
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute_io.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute_io</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.attribute_io_ref.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.attribute_io_ref</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.hinted_attribute.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.hinted_attribute</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.attributes.util.html"><code class="docutils literal notranslate"><span class="pre">fastcs.attributes.util</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.connections.html"><code class="docutils literal notranslate"><span class="pre">fastcs.connections</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -619,6 +620,8 @@
 <p>This sets the cached value of the attribute presented in the API. It should
 generally only be called from an IO or a controller that is updating the value
 from some underlying source.</p>
+<p>Any update callbacks will be called with the new value and any update events
+with predicates satisfied by the new value will be set.</p>
 <p>To request a change to the setpoint of the attribute, use the <code class="docutils literal notranslate"><span class="pre">put</span></code> method,
 which will attempt to apply the change to the underlying source.</p>
 <dl class="field-list simple">
@@ -649,6 +652,39 @@ which will attempt to apply the change to the underlying source.</p>
 <dt class="sig sig-object py" id="fastcs.attributes.attr_r.AttrR.bind_update_callback">
 <span class="sig-name descname"><span class="pre">bind_update_callback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.14)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/fastcs/attributes/attr_r.html#AttrR.bind_update_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.attr_r.AttrR.bind_update_callback" title="Link to this definition">#</a></dt>
 <dd><p>Bind self into the registered IO update callback</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.attributes.attr_r.AttrR.wait_for_predicate">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wait_for_predicate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes/attr_r.html#AttrR.wait_for_predicate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.attr_r.AttrR.wait_for_predicate" title="Link to this definition">#</a></dt>
+<dd><p>Wait for the predicate to be satisfied when called with the current value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predicate</strong> – The predicate to test - a callable that takes the attribute
+value and returns True if the event should be set</p></li>
+<li><p><strong>timeout</strong> – The timeout in seconds</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.attributes.attr_r.AttrR.wait_for_value">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wait_for_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/attributes/attr_r.html#AttrR.wait_for_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.attributes.attr_r.AttrR.wait_for_value" title="Link to this definition">#</a></dt>
+<dd><p>Wait for self._value to equal the target value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_value</strong> – The target value to wait for</p></li>
+<li><p><strong>timeout</strong> – The timeout in seconds</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TimeoutError" title="(in Python v3.14)"><strong>TimeoutError</strong></a> – If the attribute does not reach the target value within the
+    timeout</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -711,6 +747,8 @@ which will attempt to apply the change to the underlying source.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.attr_r.AttrR.add_on_update_callback"><code class="docutils literal notranslate"><span class="pre">AttrR.add_on_update_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.attr_r.AttrR.set_update_callback"><code class="docutils literal notranslate"><span class="pre">AttrR.set_update_callback()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.attr_r.AttrR.bind_update_callback"><code class="docutils literal notranslate"><span class="pre">AttrR.bind_update_callback()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.attr_r.AttrR.wait_for_predicate"><code class="docutils literal notranslate"><span class="pre">AttrR.wait_for_predicate()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.attributes.attr_r.AttrR.wait_for_value"><code class="docutils literal notranslate"><span class="pre">AttrR.wait_for_value()</span></code></a></li>
 </ul>
 </li>
 </ul>

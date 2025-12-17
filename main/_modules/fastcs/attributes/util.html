@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.datatypes.datatype &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
+    <title>fastcs.attributes.util &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
   
   
   
@@ -53,7 +53,7 @@
     <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fastcs/datatypes/datatype';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fastcs/attributes/util';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://DiamondLightSource.github.io/FastCS/switcher.json';
@@ -431,7 +431,7 @@
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fastcs.datatypes.datatype</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fastcs.attributes.util</span></li>
   </ul>
 </nav>
 </div>
@@ -448,80 +448,54 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for fastcs.datatypes.datatype</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
+  <h1>Source code for fastcs.attributes.util</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generic</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DType_T</span>
 
-<span class="n">DType</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="nb">int</span>  <span class="c1"># Int</span>
-    <span class="o">|</span> <span class="nb">float</span>  <span class="c1"># Float</span>
-    <span class="o">|</span> <span class="nb">bool</span>  <span class="c1"># Bool</span>
-    <span class="o">|</span> <span class="nb">str</span>  <span class="c1"># String</span>
-    <span class="o">|</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span>  <span class="c1"># Enum</span>
-    <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>  <span class="c1"># Waveform / Table</span>
-<span class="p">)</span>
-
-<span class="n">DType_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span>
-    <span class="s2">&quot;DType_T&quot;</span><span class="p">,</span>
-    <span class="nb">int</span><span class="p">,</span>  <span class="c1"># Int</span>
-    <span class="nb">float</span><span class="p">,</span>  <span class="c1"># Float</span>
-    <span class="nb">bool</span><span class="p">,</span>  <span class="c1"># Bool</span>
-    <span class="nb">str</span><span class="p">,</span>  <span class="c1"># String</span>
-    <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span>  <span class="c1"># Enum</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>  <span class="c1"># Waveform / Table</span>
-<span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;A builtin (or numpy) type supported by a corresponding FastCS Attribute DataType&quot;&quot;&quot;</span>
+<span class="n">AttrValuePredicate</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DType_T</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="DataType">
-<a class="viewcode-back" href="../../../_api/fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DataType">[docs]</a>
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">DataType</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">DType_T</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic datatype mapping to a python type, with additional metadata.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PredicateEvent">
+<a class="viewcode-back" href="../../../_api/fastcs.attributes.util.html#fastcs.attributes.util.PredicateEvent">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">eq</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PredicateEvent</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">DType_T</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A wrapper of `asyncio.Event` that only triggers when a predicate is satisfied&quot;&quot;&quot;</span>
 
-    <span class="nd">@property</span>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">DType_T</span><span class="p">]:</span>  <span class="c1"># Using property due to lack of Generic ClassVars</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+    <span class="n">_predicate</span><span class="p">:</span> <span class="n">AttrValuePredicate</span><span class="p">[</span><span class="n">DType_T</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Predicate to filter set calls by&quot;&quot;&quot;</span>
+    <span class="n">_event</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Event to set&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="DataType.validate">
-<a class="viewcode-back" href="../../../_api/fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DataType.validate">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DType_T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate a value against the datatype.</span>
-
-<span class="sd">        The base implementation is to try the cast and raise a useful error if it fails.</span>
-
-<span class="sd">        Child classes can implement logic before calling ``super.validate(value)`` to</span>
-<span class="sd">        modify the value passed in and help the cast succeed or after to perform further</span>
-<span class="sd">        validation of the coerced type.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            value: The value to validate</span>
+<div class="viewcode-block" id="PredicateEvent.set">
+<a class="viewcode-back" href="../../../_api/fastcs.attributes.util.html#fastcs.attributes.util.PredicateEvent.set">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DType_T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the event if the predicate is satisfied by the value</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The validated value</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If the value cannot be coerced</span>
+<span class="sd">            `True` if the predicate was satisfied and the event was set, else `False`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predicate</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to cast </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> to type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span></div>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
-    <span class="nd">@property</span>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">initial_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DType_T</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+<div class="viewcode-block" id="PredicateEvent.wait">
+<a class="viewcode-back" href="../../../_api/fastcs.attributes.util.html#fastcs.attributes.util.PredicateEvent.wait">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait for the event to be set&quot;&quot;&quot;</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make instances unique when stored in sets&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 </pre></div>
 

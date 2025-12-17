@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.attributes.attr_r &#8212; FastCS 0.11.4.dev6+ga2a780819 documentation</title>
+    <title>fastcs.attributes.attr_r &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=a2e8f6b6"></script>
+    <script src="../../../_static/documentation_options.js?v=bba35bb6"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -457,6 +457,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.attribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORefT</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrValuePredicate</span><span class="p">,</span> <span class="n">PredicateEvent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">DType_T</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">bind_logger</span>
 
@@ -492,6 +493,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback to update the value of the attribute with an IO to the source&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttrOnUpdateCallback</span><span class="p">[</span><span class="n">DType_T</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callbacks to publish changes to the value of the attribute&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_events</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">PredicateEvent</span><span class="p">[</span><span class="n">DType_T</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Events to set when the value satisifies some predicate&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="AttrR.get">
 <a class="viewcode-back" href="../../../_api/fastcs.attributes.attr_r.html#fastcs.attributes.attr_r.AttrR.get">[docs]</a>
@@ -509,6 +512,9 @@
 <span class="sd">        generally only be called from an IO or a controller that is updating the value</span>
 <span class="sd">        from some underlying source.</span>
 
+<span class="sd">        Any update callbacks will be called with the new value and any update events</span>
+<span class="sd">        with predicates satisfied by the new value will be set.</span>
+
 <span class="sd">        To request a change to the setpoint of the attribute, use the ``put`` method,</span>
 <span class="sd">        which will attempt to apply the change to the underlying source.</span>
 
@@ -524,6 +530,10 @@
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_events</span> <span class="o">-=</span> <span class="p">{</span>
+            <span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_events</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span>
+        <span class="p">}</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_callbacks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -582,6 +592,78 @@
                 <span class="k">raise</span>
 
         <span class="k">return</span> <span class="n">update_attribute</span></div>
+
+
+<div class="viewcode-block" id="AttrR.wait_for_predicate">
+<a class="viewcode-back" href="../../../_api/fastcs.attributes.attr_r.html#fastcs.attributes.attr_r.AttrR.wait_for_predicate">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_predicate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="n">AttrValuePredicate</span><span class="p">[</span><span class="n">DType_T</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait for the predicate to be satisfied when called with the current value</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            predicate: The predicate to test - a callable that takes the attribute</span>
+<span class="sd">                value and returns True if the event should be set</span>
+<span class="sd">            timeout: The timeout in seconds</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">predicate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span>
+                <span class="s2">&quot;Predicate already satisfied&quot;</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_events</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">update_event</span> <span class="o">:=</span> <span class="n">PredicateEvent</span><span class="p">(</span><span class="n">predicate</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Waiting for predicate&quot;</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">update_event</span><span class="o">.</span><span class="n">wait</span><span class="p">(),</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_events</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">update_event</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Timeout waiting </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="si">}</span><span class="s2"> predicate </span><span class="si">{</span><span class="n">predicate</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; - current value: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Predicate satisfied&quot;</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AttrR.wait_for_value">
+<a class="viewcode-back" href="../../../_api/fastcs.attributes.attr_r.html#fastcs.attributes.attr_r.AttrR.wait_for_value">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_value</span><span class="p">:</span> <span class="n">DType_T</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait for self._value to equal the target value</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_value: The target value to wait for</span>
+<span class="sd">            timeout: The timeout in seconds</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TimeoutError: If the attribute does not reach the target value within the</span>
+<span class="sd">                timeout</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span>
+                <span class="s2">&quot;Current value already equals target value&quot;</span><span class="p">,</span>
+                <span class="n">target_value</span><span class="o">=</span><span class="n">target_value</span><span class="p">,</span>
+                <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">predicate</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">DType_T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span> <span class="o">==</span> <span class="n">target_value</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_predicate</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Timeout waiting </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="si">}</span><span class="s2"> value </span><span class="si">{</span><span class="n">target_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; - current value: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span>
+            <span class="s2">&quot;Value equals target value&quot;</span><span class="p">,</span> <span class="n">target_valuevalue</span><span class="o">=</span><span class="n">target_value</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>
