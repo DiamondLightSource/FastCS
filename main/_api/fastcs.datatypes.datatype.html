@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.datatypes.datatype &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
+    <title>fastcs.datatypes.datatype &#8212; FastCS 0.11.4.dev10+g49e799e5f documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=bba35bb6"></script>
+    <script src="../_static/documentation_options.js?v=3d4ff0e3"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -567,20 +567,29 @@
 <p class="rubric">Members</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DType_T</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.datatypes.datatype.DType" title="fastcs.datatypes.datatype.DType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DType</span></code></a></p></td>
 <td><p>A builtin (or numpy) type supported by a corresponding FastCS Attribute DataType</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.datatypes.datatype.DataType" title="fastcs.datatypes.datatype.DataType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataType</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DType_T</span></code></a></p></td>
+<td><p>A TypeVar of <a class="reference internal" href="#fastcs.datatypes.datatype.DType" title="fastcs.datatypes.datatype.DType"><code class="xref any py py-data docutils literal notranslate"><span class="pre">DType</span></code></a> for use in generic classes and functions</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.datatypes.datatype.DataType" title="fastcs.datatypes.datatype.DataType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataType</span></code></a></p></td>
 <td><p>Generic datatype mapping to a python type, with additional metadata.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="fastcs.datatypes.datatype.DType">
+<span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.datatype.</span></span><span class="sig-name descname"><span class="pre">DType</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">enum.Enum</span> <span class="pre">|</span> <span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#fastcs.datatypes.datatype.DType" title="Link to this definition">#</a></dt>
+<dd><p>A builtin (or numpy) type supported by a corresponding FastCS Attribute DataType</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="fastcs.datatypes.datatype.DType_T">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.datatypes.datatype.</span></span><span class="sig-name descname"><span class="pre">DType_T</span></span><a class="headerlink" href="#fastcs.datatypes.datatype.DType_T" title="Link to this definition">#</a></dt>
-<dd><p>A builtin (or numpy) type supported by a corresponding FastCS Attribute DataType</p>
-<p>alias of TypeVar(‘DType_T’, int, float, bool, str, ~enum.Enum, ~numpy.ndarray)</p>
+<dd><p>A TypeVar of <a class="reference internal" href="#fastcs.datatypes.datatype.DType" title="fastcs.datatypes.datatype.DType"><code class="xref any py py-data docutils literal notranslate"><span class="pre">DType</span></code></a> for use in generic classes and functions</p>
+<p>alias of TypeVar(‘DType_T’, bound=<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> | <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>)</p>
 </dd></dl>
 
 <dl class="py class">
@@ -659,6 +668,7 @@ validation of the coerced type.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.datatype.DType"><code class="docutils literal notranslate"><span class="pre">DType</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.datatype.DType_T"><code class="docutils literal notranslate"><span class="pre">DType_T</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.datatype.DataType"><code class="docutils literal notranslate"><span class="pre">DataType</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.datatypes.datatype.DataType.validate"><code class="docutils literal notranslate"><span class="pre">DataType.validate()</span></code></a></li>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transports.epics.pva.types &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
+    <title>fastcs.transports.epics.pva.types &#8212; FastCS 0.11.4.dev10+g49e799e5f documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=bba35bb6"></script>
+    <script src="../../../../../_static/documentation_options.js?v=3d4ff0e3"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -458,7 +458,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">p4p.nt</span><span class="w"> </span><span class="kn">import</span> <span class="n">NTEnum</span><span class="p">,</span> <span class="n">NTNDArray</span><span class="p">,</span> <span class="n">NTScalar</span><span class="p">,</span> <span class="n">NTTable</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrW</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">DType_T</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Waveform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">DType</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Waveform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes.datatype</span><span class="w"> </span><span class="kn">import</span> <span class="n">DType_T</span>
 
 <span class="n">P4P_ALLOWED_DATATYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">Int</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Waveform</span><span class="p">,</span> <span class="n">Table</span><span class="p">)</span>
 
@@ -546,7 +547,9 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts from a p4p value to a FastCS `Attribute` value.&quot;&quot;&quot;</span>
     <span class="k">match</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">:</span>
         <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">index</span><span class="p">])</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">),</span> <span class="s2">&quot;Got non-enum p4p.Value for Enum DataType&quot;</span>
+            <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">index</span>  <span class="c1"># pyright: ignore[reportAttributeAccessIssue]</span>
+            <span class="k">return</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
         <span class="k">case</span> <span class="n">Waveform</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">):</span>
             <span class="c1"># p4p sends a flattened array</span>
             <span class="k">assert</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">),)</span>
@@ -620,7 +623,7 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_p4p_check_numeric_for_alarm_states</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">Int</span> <span class="o">|</span> <span class="n">Float</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DType_T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_p4p_check_numeric_for_alarm_states</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">Int</span> <span class="o">|</span> <span class="n">Float</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="n">low</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">datatype</span><span class="o">.</span><span class="n">min_alarm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">datatype</span><span class="o">.</span><span class="n">min_alarm</span>  <span class="c1"># type: ignore</span>
     <span class="n">high</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">datatype</span><span class="o">.</span><span class="n">max_alarm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">datatype</span><span class="o">.</span><span class="n">max_alarm</span>  <span class="c1"># type: ignore</span>
     <span class="n">severity</span> <span class="o">=</span> <span class="p">(</span>

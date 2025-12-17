@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.datatypes.datatype &#8212; FastCS 0.11.4.dev9+g40aa634af documentation</title>
+    <title>fastcs.datatypes.datatype &#8212; FastCS 0.11.4.dev10+g49e799e5f documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=bba35bb6"></script>
+    <script src="../../../_static/documentation_options.js?v=3d4ff0e3"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -464,17 +464,10 @@
     <span class="o">|</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span>  <span class="c1"># Enum</span>
     <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>  <span class="c1"># Waveform / Table</span>
 <span class="p">)</span>
-
-<span class="n">DType_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span>
-    <span class="s2">&quot;DType_T&quot;</span><span class="p">,</span>
-    <span class="nb">int</span><span class="p">,</span>  <span class="c1"># Int</span>
-    <span class="nb">float</span><span class="p">,</span>  <span class="c1"># Float</span>
-    <span class="nb">bool</span><span class="p">,</span>  <span class="c1"># Bool</span>
-    <span class="nb">str</span><span class="p">,</span>  <span class="c1"># String</span>
-    <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span>  <span class="c1"># Enum</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>  <span class="c1"># Waveform / Table</span>
-<span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;A builtin (or numpy) type supported by a corresponding FastCS Attribute DataType&quot;&quot;&quot;</span>
+
+<span class="n">DType_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;DType_T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">DType</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;A TypeVar of `DType` for use in generic classes and functions&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="DataType">
