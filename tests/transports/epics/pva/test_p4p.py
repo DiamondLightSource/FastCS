@@ -394,7 +394,8 @@ def test_pvi_grouping():
         }
 
 
-def test_more_exotic_datatypes():
+@pytest.mark.asyncio
+async def test_more_exotic_datatypes():
     table_columns: list[tuple[str, DTypeLike]] = [
         ("A", "i"),
         ("B", "i"),
@@ -439,7 +440,6 @@ def test_more_exotic_datatypes():
     client_put_enum_value = "C"
 
     async def _wait_and_set_attrs():
-        await asyncio.sleep(0.1)
         # This demonstrates an update from hardware,
         # resulting in only a change in the read back.
         await asyncio.gather(
@@ -449,7 +449,6 @@ def test_more_exotic_datatypes():
         )
 
     async def _wait_and_put_pvs():
-        await asyncio.sleep(0.3)
         ctxt = Context("pva")
         # This demonstrates a client put,
         # resulting in a change in the demand and read back.
@@ -471,72 +470,62 @@ def test_more_exotic_datatypes():
         enum_values.append,
     )
 
-    serve = asyncio.ensure_future(fastcs.serve(interactive=False))
-    wait_and_set_attrs = asyncio.ensure_future(_wait_and_set_attrs())
-    wait_and_put_pvs = asyncio.ensure_future(_wait_and_put_pvs())
-    try:
-        asyncio.get_event_loop().run_until_complete(
-            asyncio.wait_for(
-                asyncio.gather(serve, wait_and_set_attrs, wait_and_put_pvs),
-                timeout=0.6,
-            )
+    serve = asyncio.create_task(fastcs.serve(interactive=False))
+    await asyncio.sleep(0.1)  # Wait for task to start
+
+    await _wait_and_set_attrs()
+    await _wait_and_put_pvs()
+    await asyncio.sleep(0.1)  # Wait for monitors to return
+
+    waveform_monitor.close()
+    table_monitor.close()
+    enum_monitor.close()
+    serve.cancel()
+
+    expected_waveform_gets = [
+        initial_waveform_value,
+        server_set_waveform_value,
+        client_put_waveform_value,
+    ]
+
+    for expected_waveform, actual_waveform in zip(
+        expected_waveform_gets, waveform_values, strict=True
+    ):
+        np.testing.assert_array_equal(
+            expected_waveform, actual_waveform.todict()["value"].reshape(10, 10)
         )
-    except TimeoutError:
-        ...
-    finally:
-        waveform_monitor.close()
-        table_monitor.close()
-        enum_monitor.close()
-        serve.cancel()
-        wait_and_set_attrs.cancel()
-        wait_and_put_pvs.cancel()
 
-        expected_waveform_gets = [
-            initial_waveform_value,
-            server_set_waveform_value,
-            client_put_waveform_value,
-        ]
-
-        for expected_waveform, actual_waveform in zip(
-            expected_waveform_gets, waveform_values, strict=True
+    expected_table_gets = [
+        NTTable(columns=table_columns).wrap(initial_table_value),
+        NTTable(columns=table_columns).wrap(server_set_table_value),
+        client_put_table_value,
+    ]
+    for expected_table, actual_table in zip(
+        expected_table_gets, table_values, strict=True
+    ):
+        expected_table = expected_table.todict()["value"]
+        actual_table = actual_table.todict()["value"]
+        for expected_column, actual_column in zip(
+            expected_table.values(), actual_table.values(), strict=True
         ):
-            np.testing.assert_array_equal(
-                expected_waveform, actual_waveform.todict()["value"].reshape(10, 10)
-            )
+            if isinstance(expected_column, np.ndarray):
+                np.testing.assert_array_equal(expected_column, actual_column)
+            else:
+                assert expected_column == actual_column and actual_column is None
 
-        expected_table_gets = [
-            NTTable(columns=table_columns).wrap(initial_table_value),
-            NTTable(columns=table_columns).wrap(server_set_table_value),
-            client_put_table_value,
-        ]
-        for expected_table, actual_table in zip(
-            expected_table_gets, table_values, strict=True
-        ):
-            expected_table = expected_table.todict()["value"]
-            actual_table = actual_table.todict()["value"]
-            for expected_column, actual_column in zip(
-                expected_table.values(), actual_table.values(), strict=True
-            ):
-                if isinstance(expected_column, np.ndarray):
-                    np.testing.assert_array_equal(expected_column, actual_column)
-                else:
-                    assert expected_column == actual_column and actual_column is None
+    expected_enum_gets = [
+        initial_enum_value,
+        server_set_enum_value,
+        AnEnum.C,
+    ]
 
-        expected_enum_gets = [
-            initial_enum_value,
-            server_set_enum_value,
-            AnEnum.C,
-        ]
-
-        for expected_enum, actual_enum in zip(
-            expected_enum_gets, enum_values, strict=True
-        ):
-            assert (
-                expected_enum
-                == controller.some_enum.datatype.members[  # type: ignore
-                    actual_enum.todict()["value"]["index"]
-                ]
-            )
+    for expected_enum, actual_enum in zip(expected_enum_gets, enum_values, strict=True):
+        assert (
+            expected_enum
+            == controller.some_enum.datatype.members[  # type: ignore
+                actual_enum.todict()["value"]["index"]
+            ]
+        )
 
 
 @pytest.mark.timeout(4)
