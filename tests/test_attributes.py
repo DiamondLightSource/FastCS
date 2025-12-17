@@ -8,9 +8,7 @@ from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW, AttrW
 from fastcs.controllers import Controller
-from fastcs.datatypes import DType_T, Float, Int, String
-
-NumberT = TypeVar("NumberT", int, float)
+from fastcs.datatypes import Float, Int, String
 
 
 def test_attr_r():
@@ -125,7 +123,7 @@ async def test_attribute_io():
         cool: int
 
     class MyAttributeIO(AttributeIO[int, MyAttributeIORef]):
-        async def update(self, attr: AttrR[DType_T, MyAttributeIORef]):
+        async def update(self, attr: AttrR[int, MyAttributeIORef]):
             print("I am updating", self.ref_type, attr.io_ref.cool)
 
     class MyController(Controller):
@@ -221,6 +219,9 @@ class DummyConnection:
             self._float_value = value
 
 
+NumberT = TypeVar("NumberT", int, float)
+
+
 @pytest.mark.asyncio()
 async def test_dynamic_attribute_io_specification():
     @dataclass
@@ -314,11 +315,9 @@ async def test_attribute_no_io(mocker: MockerFixture):
         c = MyController()
         c._connect_attribute_ios()
 
-    class SimpleAttributeIO(AttributeIO[DType_T]):
+    class SimpleAttributeIO(AttributeIO[int]):
         async def update(self, attr):
-            match attr:
-                case AttrR(datatype=Int()):
-                    await attr.update(100)
+            await attr.update(100)
 
     with pytest.raises(
         RuntimeError, match="More than one AttributeIO class handles AttributeIORef"

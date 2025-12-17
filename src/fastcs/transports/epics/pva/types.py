@@ -7,7 +7,8 @@ from p4p import Value
 from p4p.nt import NTEnum, NTNDArray, NTScalar, NTTable
 
 from fastcs.attributes import Attribute, AttrR, AttrW
-from fastcs.datatypes import Bool, DType_T, Enum, Float, Int, String, Table, Waveform
+from fastcs.datatypes import Bool, DType, Enum, Float, Int, String, Table, Waveform
+from fastcs.datatypes.datatype import DType_T
 
 P4P_ALLOWED_DATATYPES = (Int, Float, String, Bool, Enum, Waveform, Table)
 
@@ -90,7 +91,9 @@ def cast_from_p4p_value(attribute: Attribute[DType_T], value: object) -> DType_T
     """Converts from a p4p value to a FastCS `Attribute` value."""
     match attribute.datatype:
         case Enum():
-            return attribute.datatype.validate(attribute.datatype.members[value.index])
+            assert hasattr(value, "index"), "Got non-enum p4p.Value for Enum DataType"
+            index: int = value.index  # pyright: ignore[reportAttributeAccessIssue]
+            return attribute.datatype.validate(attribute.datatype.members[index])
         case Waveform(shape=shape):
             # p4p sends a flattened array
             assert value.shape == (math.prod(shape),)
@@ -154,7 +157,7 @@ def p4p_display(attribute: Attribute) -> dict:
     return {}
 
 
-def _p4p_check_numeric_for_alarm_states(datatype: Int | Float, value: DType_T) -> dict:
+def _p4p_check_numeric_for_alarm_states(datatype: Int | Float, value: DType) -> dict:
     low = None if datatype.min_alarm is None else value < datatype.min_alarm  # type: ignore
     high = None if datatype.max_alarm is None else value > datatype.max_alarm  # type: ignore
     severity = (

@@ -1,8 +1,7 @@
 from collections.abc import Sequence
 
-from fastcs.attributes import AttributeIO, AttributeIORefT
+from fastcs.attributes import AnyAttributeIO
 from fastcs.controllers.base_controller import BaseController
-from fastcs.datatypes import DType_T
 
 
 class Controller(BaseController):
@@ -11,7 +10,7 @@ class Controller(BaseController):
     def __init__(
         self,
         description: str | None = None,
-        ios: Sequence[AttributeIO[DType_T, AttributeIORefT]] | None = None,
+        ios: Sequence[AnyAttributeIO] | None = None,
     ) -> None:
         super().__init__(description=description, ios=ios)
 
