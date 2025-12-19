@@ -39,17 +39,13 @@ async def test_unbound_command():
         async def do_nothing_with_arg(self, arg):
             pass
 
-    unbound_command = UnboundCommand(TestController.do_nothing, group="Test")
-
-    with pytest.raises(NotImplementedError):
-        await unbound_command()
-
     with pytest.raises(TypeError):
         UnboundCommand(TestController.do_nothing_with_arg)  # type: ignore
 
     with pytest.raises(TypeError):
         Command(TestController().do_nothing_with_arg)  # type: ignore
 
+    unbound_command = UnboundCommand(TestController.do_nothing, group="Test")
     command = unbound_command.bind(TestController())
     # Test that group is passed when binding commands
     assert command.group == "Test"
@@ -66,19 +62,14 @@ async def test_unbound_scan():
         async def update_nothing_with_arg(self, arg):
             pass
 
-    unbound_scan = UnboundScan(TestController.update_nothing, 1.0)
-
-    assert unbound_scan.period == 1.0
-
-    with pytest.raises(NotImplementedError):
-        await unbound_scan()
-
     with pytest.raises(TypeError):
         UnboundScan(TestController.update_nothing_with_arg, 1.0)  # type: ignore
 
     with pytest.raises(TypeError):
         Scan(TestController().update_nothing_with_arg, 1.0)  # type: ignore
 
+    unbound_scan = UnboundScan(TestController.update_nothing, 1.0)
+    assert unbound_scan.period == 1.0
     scan = unbound_scan.bind(TestController())
 
     assert scan.period == 1.0

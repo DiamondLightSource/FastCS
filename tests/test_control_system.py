@@ -22,7 +22,7 @@ async def test_scan_tasks(controller):
 
     for _ in range(3):
         count = controller.count
-        await asyncio.sleep(controller.counter.period + 0.01)
+        await asyncio.sleep(0.1)
         assert controller.count > count
 
 

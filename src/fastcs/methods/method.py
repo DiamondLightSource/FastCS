@@ -1,14 +1,16 @@
 from asyncio import iscoroutinefunction
 from collections.abc import Callable, Coroutine
 from inspect import Signature, getdoc, signature
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from fastcs.controllers.base_controller import BaseController
 from fastcs.tracer import Tracer
+
+if TYPE_CHECKING:
+    from fastcs.controllers import BaseController  # noqa: F401
 
 MethodCallback = Callable[..., Coroutine[None, None, None]]
 """Generic protocol for all `Controller` Method callbacks"""
-Controller_T = TypeVar("Controller_T", bound=BaseController)
+Controller_T = TypeVar("Controller_T", bound="BaseController")  # noqa: F821
 """Generic `Controller` class that an unbound method must be called with as `self`"""
 
 
