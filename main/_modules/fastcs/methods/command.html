@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.methods.command &#8212; FastCS 0.11.4.dev12+gd3a485818 documentation</title>
+    <title>fastcs.methods.command &#8212; FastCS 0.11.4.dev15+g9ebdf4db8 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=b727068b"></script>
+    <script src="../../../_static/documentation_options.js?v=7597d8e3"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -451,9 +451,15 @@
   <h1>Source code for fastcs.methods.command</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Coroutine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">MethodType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">bind_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods.method</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller_T</span><span class="p">,</span> <span class="n">Method</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span>  <span class="c1"># noqa: F401</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">bind_logger</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">UnboundCommandCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Controller_T</span><span class="p">],</span> <span class="n">Coroutine</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
 <span class="sd">&quot;&quot;&quot;A Command callback that is unbound and must be called with a `Controller` instance&quot;&quot;&quot;</span>
@@ -463,7 +469,7 @@
 
 <div class="viewcode-block" id="Command">
 <a class="viewcode-back" href="../../../_api/fastcs.methods.command.html#fastcs.methods.command.Command">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Command</span><span class="p">(</span><span class="n">Method</span><span class="p">[</span><span class="n">BaseController</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Command</span><span class="p">(</span><span class="n">Method</span><span class="p">[</span><span class="s2">&quot;BaseController&quot;</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A `Controller` `Method` that performs a single action when called.</span>
 
 <span class="sd">    This class contains a function that is bound to a specific `Controller` instance and</span>
@@ -481,7 +487,18 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Command method cannot have arguments: </span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fn</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CommandCallback</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">command</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fn</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Command failed&quot;</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fn</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+        <span class="k">return</span> <span class="n">command</span></div>
 
 
 
@@ -510,12 +527,7 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Command method cannot have arguments&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">:</span> <span class="n">Controller_T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Command</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Command</span><span class="p">(</span><span class="n">MethodType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span> <span class="n">controller</span><span class="p">),</span> <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;Method must be bound to a controller instance to be callable&quot;</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Command</span><span class="p">(</span><span class="n">MethodType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">,</span> <span class="n">controller</span><span class="p">),</span> <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">)</span></div>
 
 
 
@@ -523,7 +535,9 @@
 <a class="viewcode-back" href="../../../_api/fastcs.methods.command.html#fastcs.methods.command.command">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">command</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">UnboundCommandCallback</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]],</span> <span class="n">UnboundCommand</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span>
+    <span class="p">[</span><span class="n">UnboundCommandCallback</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]],</span> <span class="n">UnboundCommandCallback</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]</span>
+<span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to register a `Controller` method as a `Command`</span>
 
 <span class="sd">    The `Command` will be passed to the transport layer to expose in the API</span>
@@ -534,8 +548,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span>
         <span class="n">fn</span><span class="p">:</span> <span class="n">UnboundCommandCallback</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">],</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnboundCommand</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">UnboundCommand</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnboundCommandCallback</span><span class="p">[</span><span class="n">Controller_T</span><span class="p">]:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;__unbound_command__&quot;</span><span class="p">,</span> <span class="n">UnboundCommand</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">))</span>  <span class="c1"># noqa: B010</span>
+
+        <span class="k">return</span> <span class="n">fn</span>
 
     <span class="k">return</span> <span class="n">wrapper</span></div>
 
