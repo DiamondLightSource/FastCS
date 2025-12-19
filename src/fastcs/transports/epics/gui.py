@@ -61,8 +61,10 @@ class EpicsGUI:
         match fastcs_datatype:
             case Bool():
                 return LED()
-            case Int() | Float():
-                return TextRead()
+            case Int():
+                return TextRead(precision=0)
+            case Float(prec=precision):
+                return TextRead(precision=precision)
             case String():
                 return TextRead(format=TextFormat.string)
             case Enum():
@@ -80,8 +82,10 @@ class EpicsGUI:
         match fastcs_datatype:
             case Bool():
                 return ToggleButton()
-            case Int() | Float():
-                return TextWrite()
+            case Int():
+                return TextWrite(precision=0)
+            case Float(prec=precision):
+                return TextWrite(precision=precision)
             case String():
                 return TextWrite(format=TextFormat.string)
             case Enum():

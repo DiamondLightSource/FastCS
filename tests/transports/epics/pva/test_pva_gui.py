@@ -64,7 +64,7 @@ def test_get_attribute_component_table_write():
     assert isinstance(attribute_component, SignalW)
     assert isinstance(attribute_component.write_widget, TableWrite)
     assert attribute_component.write_widget.widgets == [
-        TextWrite(),
+        TextWrite(precision=0),
         CheckBox(),
         TextWrite(format=TextFormat.string),
     ]
@@ -90,7 +90,7 @@ def test_get_attribute_component_table_read():
     assert isinstance(attribute_component, SignalR)
     assert isinstance(attribute_component.read_widget, TableRead)
     assert attribute_component.read_widget.widgets == [
-        TextRead(),
+        TextRead(precision=0),
         LED(),
         TextRead(format=TextFormat.string),
     ]
