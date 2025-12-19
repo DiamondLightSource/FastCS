@@ -1,4 +1,5 @@
 import asyncio
+import os
 import signal
 from collections.abc import Coroutine, Sequence
 from functools import partial
@@ -45,8 +46,9 @@ class FastCS:
     def run(self, interactive: bool = True):
         serve = asyncio.ensure_future(self.serve(interactive=interactive))
 
-        self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
-        self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
+        if os.name != "nt":
+            self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
+            self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
         self._loop.run_until_complete(serve)
 
     async def _run_initial_coros(self):

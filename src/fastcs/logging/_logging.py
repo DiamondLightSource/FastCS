@@ -1,5 +1,6 @@
 import getpass
 import os
+import sys
 from enum import StrEnum
 from logging import LogRecord
 from typing import TYPE_CHECKING, Any
@@ -30,8 +31,9 @@ def _configure_logger(
     graylog_env_fields: GraylogEnvFields | None = None,
 ):
     logger.remove()
+    is_pytest_on_windows = "PYTEST_VERSION" in os.environ and os.name == "nt"
     logger.add(
-        sink=StdoutProxy(raw=True),  # type: ignore
+        sink=sys.stdout if is_pytest_on_windows else StdoutProxy(raw=True),  # type: ignore
         colorize=True,
         format=format_record,
         level=level or "INFO",
