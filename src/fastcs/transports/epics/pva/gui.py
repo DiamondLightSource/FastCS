@@ -13,6 +13,8 @@ from fastcs.transports.epics.gui import EpicsGUI
 class PvaEpicsGUI(EpicsGUI):
     """For creating gui in the PVA EPICS transport."""
 
+    command_value = "true"
+
     def _get_pv(self, attr_path: list[str], name: str):
         return f"pva://{super()._get_pv(attr_path, name)}"
 
