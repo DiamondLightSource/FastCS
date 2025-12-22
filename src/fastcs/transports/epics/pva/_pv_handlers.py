@@ -7,7 +7,7 @@ from p4p.server import ServerOperation
 from p4p.server.asyncio import SharedPV
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.datatypes import Table
+from fastcs.datatypes import Enum, Table
 from fastcs.methods import CommandCallback
 from fastcs.tracer import Tracer
 
@@ -49,6 +49,10 @@ class WritePvHandler:
         tracer.log_event("PV put", topic=self._attr_w, pv=pv, value=cast_value)
         await self._attr_w.put(cast_value)
         op.done()
+        if isinstance(self._attr_w.datatype, Enum):
+            pv.post(cast_to_p4p_value(self._attr_w, cast_value))
+        else:
+            pv.post(value)
 
 
 class CommandPvHandler:
