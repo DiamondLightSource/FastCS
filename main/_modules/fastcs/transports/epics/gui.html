@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transports.epics.gui &#8212; FastCS 0.11.4.dev15+g9ebdf4db8 documentation</title>
+    <title>fastcs.transports.epics.gui &#8212; FastCS 0.11.4.dev16+g3edcc067b documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=7597d8e3"></script>
+    <script src="../../../../_static/documentation_options.js?v=fe0736a3"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -452,6 +452,7 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pvi._format.dls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DLSFormatter</span>  <span class="c1"># type: ignore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pvi.device</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">LED</span><span class="p">,</span>
+    <span class="n">ArrayTrace</span><span class="p">,</span>
     <span class="n">ButtonPanel</span><span class="p">,</span>
     <span class="n">ComboBox</span><span class="p">,</span>
     <span class="n">ComponentUnion</span><span class="p">,</span>
@@ -519,8 +520,12 @@
                 <span class="k">return</span> <span class="n">TextRead</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="n">TextFormat</span><span class="o">.</span><span class="n">string</span><span class="p">)</span>
             <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
                 <span class="k">return</span> <span class="n">TextRead</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="n">TextFormat</span><span class="o">.</span><span class="n">string</span><span class="p">)</span>
-            <span class="k">case</span> <span class="n">Waveform</span><span class="p">():</span>
-                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">case</span> <span class="n">Waveform</span><span class="p">()</span> <span class="k">as</span> <span class="n">waveform</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">waveform</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;EPICS CA transport only supports 1D waveforms&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+
+                <span class="k">return</span> <span class="n">ArrayTrace</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
             <span class="k">case</span> <span class="n">datatype</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">datatype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
