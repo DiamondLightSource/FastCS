@@ -20,7 +20,7 @@ class Waveform(DataType[np.ndarray]):
         return np.zeros(self.shape, dtype=self.array_dtype)
 
     def validate(self, value: np.ndarray) -> np.ndarray:
-        _value = super().validate(value)
+        _value = super().validate(np.asarray(value).astype(self.array_dtype))
 
         if self.array_dtype != _value.dtype:
             raise ValueError(

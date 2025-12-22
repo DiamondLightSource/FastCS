@@ -34,8 +34,7 @@ def test_base_validate():
         (Float, {"min": 1}, 0.0),
         (Float, {"max": -1}, 0.0),
         (Enum, {"enum_cls": int}, 0),
-        (Waveform, {"array_dtype": "U64", "shape": (1,)}, np.ndarray([1])),
-        (Waveform, {"array_dtype": "float64", "shape": (1, 1)}, np.ndarray([1])),
+        (Waveform, {"array_dtype": "uint64", "shape": (1, 1)}, np.ndarray([1])),
     ],
 )
 def test_validate(datatype, init_args, value):
