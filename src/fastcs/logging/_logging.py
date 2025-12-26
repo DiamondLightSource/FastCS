@@ -31,9 +31,16 @@ def _configure_logger(
     graylog_env_fields: GraylogEnvFields | None = None,
 ):
     logger.remove()
-    is_pytest_on_windows = "PYTEST_VERSION" in os.environ and os.name == "nt"
+
+    try:
+        out = StdoutProxy(raw=True)
+    except Exception:
+        # e.g. prompt_toolkit.output.win32.NoConsoleScreenBufferError on windows
+        # But it isn't exported from prompt_toolkit in a cross-platform way.
+        out = sys.stdout
+
     logger.add(
-        sink=sys.stdout if is_pytest_on_windows else StdoutProxy(raw=True),  # type: ignore
+        sink=out,  # type: ignore
         colorize=True,
         format=format_record,
         level=level or "INFO",
