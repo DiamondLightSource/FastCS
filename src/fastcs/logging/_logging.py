@@ -1,5 +1,6 @@
 import getpass
 import os
+import sys
 from enum import StrEnum
 from logging import LogRecord
 from typing import TYPE_CHECKING, Any
@@ -30,8 +31,16 @@ def _configure_logger(
     graylog_env_fields: GraylogEnvFields | None = None,
 ):
     logger.remove()
+
+    try:
+        out = StdoutProxy(raw=True)
+    except Exception:
+        # e.g. prompt_toolkit.output.win32.NoConsoleScreenBufferError on windows
+        # But it isn't exported from prompt_toolkit in a cross-platform way.
+        out = sys.stdout
+
     logger.add(
-        sink=StdoutProxy(raw=True),  # type: ignore
+        sink=out,  # type: ignore
         colorize=True,
         format=format_record,
         level=level or "INFO",
