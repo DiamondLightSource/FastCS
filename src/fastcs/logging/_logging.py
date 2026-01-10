@@ -33,18 +33,24 @@ def _configure_logger(
     logger.remove()
 
     try:
-        out = StdoutProxy(raw=True)
+        sink = StdoutProxy(raw=True)
     except Exception:
         # e.g. prompt_toolkit.output.win32.NoConsoleScreenBufferError on windows
         # But it isn't exported from prompt_toolkit in a cross-platform way.
-        out = sys.stdout
+        sink = sys.stdout
 
     logger.add(
-        sink=out,  # type: ignore
+        sink=sink,  # type: ignore
         colorize=True,
         format=format_record,
         level=level or "INFO",
     )
+
+    if sink == sys.stdout:
+        logger.warning(
+            "Unable to use prompt_toolkit.patch_stdout.StdoutProxy "
+            "as a logging sink; falling back to using sys.stdout"
+        )
 
     if graylog_endpoint is not None:
         static_fields = {
