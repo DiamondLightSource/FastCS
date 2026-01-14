@@ -37,7 +37,7 @@ def run(pv_prefix="SOFTIOC_TEST_DEVICE"):
             )
         ],
     )
-    fastcs.run(interactive=True)
+    fastcs.run(interactive=False)
 
 
 if __name__ == "__main__":

@@ -72,6 +72,7 @@ nitpick_ignore = [
     ("py:class", "'bool'"),
     ("py:class", "'object'"),
     ("py:class", "'id'"),
+    ("py:class", "DTypeLike"),
     ("py:class", "typing_extensions.Literal"),
     # Doesn't work even with asyncio intersphinx mapping
     ("py:class", "asyncio.events.AbstractEventLoop"),

@@ -143,7 +143,7 @@ def run_ioc_as_subprocess(
             if time.monotonic() - start_time > ioc_startup_timeout:
                 raise ioc_startup_timeout_error
 
-        time.sleep(0.1)
+        time.sleep(0.5)
         yield pv_prefix, stdout_queue
 
     finally:
