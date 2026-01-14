@@ -1,6 +1,7 @@
 from pvi._format.dls import DLSFormatter  # type: ignore
 from pvi.device import (
     LED,
+    ArrayTrace,
     ButtonPanel,
     ComboBox,
     ComponentUnion,
@@ -44,6 +45,8 @@ logger = bind_logger(logger_name=__name__)
 class EpicsGUI:
     """For creating gui in the EPICS transports."""
 
+    command_value = "1"
+
     def __init__(self, controller_api: ControllerAPI, pv_prefix: str) -> None:
         self._controller_api = controller_api
         self._pv_prefix = pv_prefix
@@ -58,14 +61,20 @@ class EpicsGUI:
         match fastcs_datatype:
             case Bool():
                 return LED()
-            case Int() | Float():
-                return TextRead()
+            case Int():
+                return TextRead(precision=0)
+            case Float(prec=precision):
+                return TextRead(precision=precision)
             case String():
                 return TextRead(format=TextFormat.string)
             case Enum():
                 return TextRead(format=TextFormat.string)
-            case Waveform():
-                return None
+            case Waveform() as waveform:
+                if len(waveform.shape) > 1:
+                    logger.warning("EPICS CA transport only supports 1D waveforms")
+                    return None
+
+                return ArrayTrace(axis="x")
             case datatype:
                 raise TypeError(f"Unsupported type {type(datatype)}: {datatype}")
 
@@ -73,8 +82,10 @@ class EpicsGUI:
         match fastcs_datatype:
             case Bool():
                 return ToggleButton()
-            case Int() | Float():
-                return TextWrite()
+            case Int():
+                return TextWrite(precision=0)
+            case Float(prec=precision):
+                return TextWrite(precision=precision)
             case String():
                 return TextWrite(format=TextFormat.string)
             case Enum():
@@ -133,8 +144,7 @@ class EpicsGUI:
         return SignalX(
             name=name,
             write_pv=pv,
-            value="1",
-            write_widget=ButtonPanel(actions={name: "1"}),
+            write_widget=ButtonPanel(actions={name: self.command_value}),
         )
 
     def create_gui(self, options: EpicsGUIOptions | None = None) -> None:

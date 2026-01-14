@@ -70,6 +70,10 @@ class Attribute(Generic[DType_T, AttributeIORefT], Tracer):
     def path(self) -> list[str]:
         return self._path
 
+    @property
+    def full_name(self) -> str:
+        return ".".join(self._path + [self._name])
+
     def add_update_datatype_callback(
         self, callback: Callable[[DataType[DType_T]], None]
     ) -> None:
@@ -102,7 +106,7 @@ class Attribute(Generic[DType_T, AttributeIORefT], Tracer):
 
     def __repr__(self):
         name = self.__class__.__name__
-        path = ".".join(self._path + [self._name]) or None
+        full_name = self.full_name or None
         datatype = self._datatype.__class__.__name__
 
-        return f"{name}(path={path}, datatype={datatype}, io_ref={self._io_ref})"
+        return f"{name}(name={full_name}, datatype={datatype}, io_ref={self._io_ref})"

@@ -88,7 +88,7 @@ def _add_attribute_update_tasks(
 
 
 def _get_periodic_scan_coros(
-    scan_dict: dict[float, list[Scan]],
+    scan_dict: dict[float, list[ScanCallback]],
 ) -> list[ScanCallback]:
     periodic_scan_coros: list[ScanCallback] = []
     for period, methods in scan_dict.items():
@@ -97,11 +97,13 @@ def _get_periodic_scan_coros(
     return periodic_scan_coros
 
 
-def _create_periodic_scan_coro(period: float, scans: list[Scan]) -> ScanCallback:
+def _create_periodic_scan_coro(
+    period: float, scans: list[ScanCallback]
+) -> ScanCallback:
     async def _sleep():
         await asyncio.sleep(period)
 
-    methods = [_sleep] + scans  # Create periodic behavior
+    methods = [_sleep] + list(scans)  # Create periodic behavior
 
     async def scan_coro() -> None:
         while True:

@@ -1,4 +1,5 @@
 import asyncio
+import os
 import signal
 from collections.abc import Coroutine, Sequence
 from functools import partial
@@ -8,7 +9,7 @@ from IPython.terminal.embed import InteractiveShellEmbed
 
 from fastcs.controllers import BaseController, Controller
 from fastcs.logging import bind_logger
-from fastcs.methods import Command, Scan, ScanCallback
+from fastcs.methods import ScanCallback
 from fastcs.tracer import Tracer
 from fastcs.transports import ControllerAPI, Transport
 
@@ -45,8 +46,9 @@ class FastCS:
     def run(self, interactive: bool = True):
         serve = asyncio.ensure_future(self.serve(interactive=interactive))
 
-        self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
-        self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
+        if os.name != "nt":
+            self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
+            self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
         self._loop.run_until_complete(serve)
 
     async def _run_initial_coros(self):
@@ -174,23 +176,11 @@ def build_controller_api(controller: Controller) -> ControllerAPI:
 
 
 def _build_controller_api(controller: BaseController, path: list[str]) -> ControllerAPI:
-    scan_methods: dict[str, Scan] = {}
-    command_methods: dict[str, Command] = {}
-    for attr_name in dir(controller):
-        attr = getattr(controller, attr_name)
-        match attr:
-            case Scan(enabled=True):
-                scan_methods[attr_name] = attr
-            case Command(enabled=True):
-                command_methods[attr_name] = attr
-            case _:
-                pass
-
     return ControllerAPI(
         path=path,
         attributes=controller.attributes,
-        scan_methods=scan_methods,
-        command_methods=command_methods,
+        command_methods=controller.command_methods,
+        scan_methods=controller.scan_methods,
         sub_apis={
             name: _build_controller_api(sub_controller, path + [name])
             for name, sub_controller in controller.sub_controllers.items()

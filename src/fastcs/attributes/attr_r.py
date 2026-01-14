@@ -6,6 +6,7 @@ from typing import Any
 
 from fastcs.attributes.attribute import Attribute
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
+from fastcs.attributes.util import AttrValuePredicate, PredicateEvent
 from fastcs.datatypes import DataType, DType_T
 from fastcs.logging import bind_logger
 
@@ -39,6 +40,8 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         """Callback to update the value of the attribute with an IO to the source"""
         self._on_update_callbacks: list[AttrOnUpdateCallback[DType_T]] | None = None
         """Callbacks to publish changes to the value of the attribute"""
+        self._on_update_events: set[PredicateEvent[DType_T]] = set()
+        """Events to set when the value satisifies some predicate"""
 
     def get(self) -> DType_T:
         """Get the cached value of the attribute."""
@@ -50,6 +53,9 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         This sets the cached value of the attribute presented in the API. It should
         generally only be called from an IO or a controller that is updating the value
         from some underlying source.
+
+        Any update callbacks will be called with the new value and any update events
+        with predicates satisfied by the new value will be set.
 
         To request a change to the setpoint of the attribute, use the ``put`` method,
         which will attempt to apply the change to the underlying source.
@@ -66,6 +72,10 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         )
 
         self._value = self._datatype.validate(value)
+
+        self._on_update_events -= {
+            e for e in self._on_update_events if e.set(self._value)
+        }
 
         if self._on_update_callbacks is not None:
             try:
@@ -115,3 +125,69 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
                 raise
 
         return update_attribute
+
+    async def wait_for_predicate(
+        self, predicate: AttrValuePredicate[DType_T], *, timeout: float
+    ):
+        """Wait for the predicate to be satisfied when called with the current value
+
+        Args:
+            predicate: The predicate to test - a callable that takes the attribute
+                value and returns True if the event should be set
+            timeout: The timeout in seconds
+
+        """
+        if predicate(self._value):
+            self.log_event(
+                "Predicate already satisfied", predicate=predicate, attribute=self
+            )
+            return
+
+        self._on_update_events.add(update_event := PredicateEvent(predicate))
+
+        self.log_event("Waiting for predicate", predicate=predicate, attribute=self)
+        try:
+            await asyncio.wait_for(update_event.wait(), timeout)
+        except TimeoutError:
+            self._on_update_events.remove(update_event)
+            raise TimeoutError(
+                f"Timeout waiting {timeout}s for {self.full_name} predicate {predicate}"
+                f" - current value: {self._value}"
+            ) from None
+
+        self.log_event("Predicate satisfied", predicate=predicate, attribute=self)
+
+    async def wait_for_value(self, target_value: DType_T, *, timeout: float):
+        """Wait for self._value to equal the target value
+
+        Args:
+            target_value: The target value to wait for
+            timeout: The timeout in seconds
+
+        Raises:
+            TimeoutError: If the attribute does not reach the target value within the
+                timeout
+
+        """
+        if self._value == target_value:
+            self.log_event(
+                "Current value already equals target value",
+                target_value=target_value,
+                attribute=self,
+            )
+            return
+
+        def predicate(v: DType_T) -> bool:
+            return v == target_value
+
+        try:
+            await self.wait_for_predicate(predicate, timeout=timeout)
+        except TimeoutError:
+            raise TimeoutError(
+                f"Timeout waiting {timeout}s for {self.full_name} value {target_value}"
+                f" - current value: {self._value}"
+            ) from None
+
+        self.log_event(
+            "Value equals target value", target_valuevalue=target_value, attribute=self
+        )

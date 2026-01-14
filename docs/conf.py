@@ -77,6 +77,7 @@ nitpick_ignore = [
     ("py:class", "asyncio.events.AbstractEventLoop"),
     ("py:class", "asyncio.streams.StreamReader"),
     ("py:class", "asyncio.streams.StreamWriter"),
+    ("py:class", "asyncio.locks.Event"),
     # Annoying error:
     #     docstring of collections.abc.Callable:1: WARNING:
     #     'any' reference target not found: self [ref.any]
@@ -88,7 +89,7 @@ nitpick_ignore = [
     ("py:class", "p4p.nt.ndarray.NTNDArray"),
     ("py:class", "p4p.nt.NTTable"),
     # Problems in FastCS itself
-    ("py:class", "T"),
+    ("py:class", "BaseController"),
     ("py:class", "AttrIOUpdateCallback"),
     ("py:class", "fastcs.transports.epics.pva.pvi_tree._PviSignalInfo"),
     ("py:class", "fastcs.logging._logging.LogLevel"),

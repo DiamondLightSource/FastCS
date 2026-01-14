@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 from functools import partial
 from typing import Generic, TypeVar
@@ -7,12 +8,10 @@ from pytest_mock import MockerFixture
 
 from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW, AttrW
 from fastcs.controllers import Controller
-from fastcs.datatypes import DType_T, Float, Int, String
-
-NumberT = TypeVar("NumberT", int, float)
+from fastcs.datatypes import Float, Int, String
 
 
-def test_attribute():
+def test_attr_r():
     attr = AttrR(String(), group="test group")
 
     with pytest.raises(RuntimeError):
@@ -37,6 +36,57 @@ def test_attribute():
         attr.set_path(["test_path"])
 
     assert attr.get() == ""
+
+
+@pytest.mark.asyncio
+async def test_wait_for_predicate(mocker: MockerFixture):
+    attr = AttrR(Int(), initial_value=0)
+
+    async def update(attr: AttrR):
+        while True:
+            await asyncio.sleep(0.1)
+            await attr.update(attr.get() + 3)  # 3, 6, 9, 12 != 10
+
+    asyncio.create_task(update(attr))
+
+    # We won't see exactly 10 so check for greater than
+    def predicate(v: int) -> bool:
+        return v > 10
+
+    wait_mock = mocker.spy(asyncio, "wait_for")
+    with pytest.raises(TimeoutError):
+        await attr.wait_for_predicate(predicate, timeout=0.2)
+
+    await attr.wait_for_predicate(predicate, timeout=1)
+
+    assert wait_mock.call_count == 2
+
+    # Returns immediately without creating event if value already as expected
+    await attr.wait_for_predicate(predicate, timeout=1)
+    assert wait_mock.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_wait_for_value(mocker: MockerFixture):
+    attr = AttrR(Int(), initial_value=0)
+
+    async def update(attr: AttrR):
+        await asyncio.sleep(0.5)
+        await attr.update(1)
+
+    asyncio.create_task(update(attr))
+
+    wait_mock = mocker.spy(asyncio, "wait_for")
+    with pytest.raises(TimeoutError):
+        await attr.wait_for_value(10, timeout=0.2)
+
+    await attr.wait_for_value(1, timeout=1)
+
+    assert wait_mock.call_count == 2
+
+    # Returns immediately without creating event if value already as expected
+    await attr.wait_for_value(1, timeout=1)
+    assert wait_mock.call_count == 2
 
 
 @pytest.mark.asyncio
@@ -73,7 +123,7 @@ async def test_attribute_io():
         cool: int
 
     class MyAttributeIO(AttributeIO[int, MyAttributeIORef]):
-        async def update(self, attr: AttrR[DType_T, MyAttributeIORef]):
+        async def update(self, attr: AttrR[int, MyAttributeIORef]):
             print("I am updating", self.ref_type, attr.io_ref.cool)
 
     class MyController(Controller):
@@ -169,6 +219,9 @@ class DummyConnection:
             self._float_value = value
 
 
+NumberT = TypeVar("NumberT", int, float)
+
+
 @pytest.mark.asyncio()
 async def test_dynamic_attribute_io_specification():
     @dataclass
@@ -262,11 +315,9 @@ async def test_attribute_no_io(mocker: MockerFixture):
         c = MyController()
         c._connect_attribute_ios()
 
-    class SimpleAttributeIO(AttributeIO[DType_T]):
+    class SimpleAttributeIO(AttributeIO[int]):
         async def update(self, attr):
-            match attr:
-                case AttrR(datatype=Int()):
-                    await attr.update(100)
+            await attr.update(100)
 
     with pytest.raises(
         RuntimeError, match="More than one AttributeIO class handles AttributeIORef"

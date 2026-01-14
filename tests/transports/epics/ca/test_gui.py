@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from pvi.device import (
     LED,
+    ArrayTrace,
     ButtonPanel,
     ComboBox,
     Group,
@@ -23,8 +24,8 @@ from fastcs.transports import ControllerAPI
 from fastcs.transports.epics.gui import EpicsGUI
 
 
-def test_get_pv(controller_api):
-    gui = EpicsGUI(controller_api, "DEVICE")
+def test_get_pv():
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
 
     assert gui._get_pv([], "A") == "DEVICE:A"
     assert gui._get_pv(["B"], "C") == "DEVICE:B:C"
@@ -39,15 +40,27 @@ def test_get_pv(controller_api):
         (Float(), TextRead()),
         (String(), TextRead(format=TextFormat.string)),
         (Enum(ColourEnum), TextRead(format=TextFormat.string)),
-        # (Waveform(array_dtype=np.int32), None),
+        (Waveform(array_dtype=np.int32), ArrayTrace(axis="x")),
     ],
 )
-def test_get_attribute_component_r(datatype, widget, controller_api):
-    gui = EpicsGUI(controller_api, "DEVICE")
+def test_get_attribute_component_r(datatype, widget):
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
 
     assert gui._get_attribute_component([], "Attr", AttrR(datatype)) == SignalR(
         name="Attr", read_pv="Attr", read_widget=widget
     )
+
+
+@pytest.mark.parametrize(
+    "datatype",
+    [
+        (Waveform(array_dtype=np.int32, shape=(10, 10))),
+    ],
+)
+def test_get_attribute_component_r_signal_none(datatype):
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
+
+    assert gui._get_attribute_component([], "Attr", AttrR(datatype)) is None
 
 
 @pytest.mark.parametrize(
@@ -60,16 +73,16 @@ def test_get_attribute_component_r(datatype, widget, controller_api):
         (Enum(ColourEnum), ComboBox(choices=["RED", "GREEN", "BLUE"])),
     ],
 )
-def test_get_attribute_component_w(datatype, widget, controller_api):
-    gui = EpicsGUI(controller_api, "DEVICE")
+def test_get_attribute_component_w(datatype, widget):
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
 
     assert gui._get_attribute_component([], "Attr", AttrW(datatype)) == SignalW(
         name="Attr", write_pv="Attr", write_widget=widget
     )
 
 
-def test_get_attribute_component_none(mocker, controller_api):
-    gui = EpicsGUI(controller_api, "DEVICE")
+def test_get_attribute_component_none(mocker):
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
 
     mocker.patch.object(gui, "_get_read_widget", return_value=None)
     mocker.patch.object(gui, "_get_write_widget", return_value=None)
@@ -78,13 +91,8 @@ def test_get_attribute_component_none(mocker, controller_api):
     assert gui._get_attribute_component([], "Attr", AttrRW(Int())) is None
 
 
-def test_get_read_widget_none(controller_api):
-    gui = EpicsGUI(controller_api, "DEVICE")
-    assert gui._get_read_widget(fastcs_datatype=Waveform(np.int32)) is None
-
-
-def test_get_write_widget_none(controller_api):
-    gui = EpicsGUI(controller_api, "DEVICE")
+def test_get_write_widget_none():
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
     assert gui._get_write_widget(fastcs_datatype=Waveform(np.int32)) is None
 
 
@@ -164,3 +172,12 @@ def test_get_components_none(mocker):
     components = gui.extract_api_components(controller_api)
 
     assert components == []
+
+
+def test_get_command_component():
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
+
+    component = gui._get_command_component([], "Command")
+
+    assert isinstance(component, SignalX)
+    assert component.write_widget == ButtonPanel(actions={"Command": "1"})

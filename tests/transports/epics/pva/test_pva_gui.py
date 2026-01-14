@@ -1,9 +1,13 @@
 import numpy as np
+import pytest
 from pvi.device import (
     LED,
+    ButtonPanel,
     CheckBox,
+    ImageRead,
     SignalR,
     SignalW,
+    SignalX,
     TableRead,
     TableWrite,
     TextFormat,
@@ -12,20 +16,36 @@ from pvi.device import (
 )
 
 from fastcs.attributes import AttrR, AttrW
-from fastcs.datatypes import Table
+from fastcs.datatypes import Table, Waveform
+from fastcs.transports import ControllerAPI
+from fastcs.transports.epics.gui import EpicsGUI
 from fastcs.transports.epics.pva.gui import PvaEpicsGUI
 
 
-def test_get_pv_in_pva(controller_api):
-    gui = PvaEpicsGUI(controller_api, "DEVICE")
+@pytest.mark.parametrize(
+    "datatype, widget",
+    [
+        (Waveform(array_dtype=np.int32), ImageRead()),
+    ],
+)
+def test_pva_get_attribute_component_r(datatype, widget):
+    gui = EpicsGUI(ControllerAPI(), "DEVICE")
+
+    assert gui._get_attribute_component([], "Attr", AttrR(datatype)) == SignalR(
+        name="Attr", read_pv="Attr", read_widget=widget
+    )
+
+
+def test_get_pv_in_pva():
+    gui = PvaEpicsGUI(ControllerAPI(), "DEVICE")
 
     assert gui._get_pv([], "A") == "pva://DEVICE:A"
     assert gui._get_pv(["B"], "C") == "pva://DEVICE:B:C"
     assert gui._get_pv(["D", "E"], "F") == "pva://DEVICE:D:E:F"
 
 
-def test_get_attribute_component_table_write(controller_api):
-    gui = PvaEpicsGUI(controller_api, "DEVICE")
+def test_get_attribute_component_table_write():
+    gui = PvaEpicsGUI(ControllerAPI(), "DEVICE")
 
     attribute_component = gui._get_attribute_component(
         [],
@@ -44,14 +64,14 @@ def test_get_attribute_component_table_write(controller_api):
     assert isinstance(attribute_component, SignalW)
     assert isinstance(attribute_component.write_widget, TableWrite)
     assert attribute_component.write_widget.widgets == [
-        TextWrite(),
+        TextWrite(precision=0),
         CheckBox(),
         TextWrite(format=TextFormat.string),
     ]
 
 
-def test_get_attribute_component_table_read(controller_api):
-    gui = PvaEpicsGUI(controller_api, "DEVICE")
+def test_get_attribute_component_table_read():
+    gui = PvaEpicsGUI(ControllerAPI(), "DEVICE")
 
     attribute_component = gui._get_attribute_component(
         [],
@@ -70,7 +90,16 @@ def test_get_attribute_component_table_read(controller_api):
     assert isinstance(attribute_component, SignalR)
     assert isinstance(attribute_component.read_widget, TableRead)
     assert attribute_component.read_widget.widgets == [
-        TextRead(),
+        TextRead(precision=0),
         LED(),
         TextRead(format=TextFormat.string),
     ]
+
+
+def test_get_command_component():
+    gui = PvaEpicsGUI(ControllerAPI(), "DEVICE")
+
+    component = gui._get_command_component([], "Command")
+
+    assert isinstance(component, SignalX)
+    assert component.write_widget == ButtonPanel(actions={"Command": "true"})

@@ -187,7 +187,7 @@ def test_make_output_record(
 
     kwargs.update(record_metadata_from_datatype(attribute.datatype, out_record=True))
     kwargs.update(record_metadata_from_attribute(attribute))
-    kwargs.update({"always_update": True, "on_update": update})
+    kwargs.update({"always_update": True, "on_update": update, "blocking": True})
 
     getattr(builder, record_type).assert_called_once_with(
         pv,
@@ -265,6 +265,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     builder.aOut.assert_any_call(
         f"{DEVICE}:ReadWriteFloat",
         always_update=True,
+        blocking=True,
         on_update=mocker.ANY,
         **record_metadata_from_attribute(
             epics_controller_api.attributes["read_write_float"]
@@ -286,6 +287,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     builder.longOut.assert_called_with(
         f"{DEVICE}:ReadWriteInt",
         always_update=True,
+        blocking=True,
         on_update=mocker.ANY,
         **record_metadata_from_attribute(
             epics_controller_api.attributes["read_write_int"]
@@ -304,6 +306,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     builder.mbbOut.assert_called_once_with(
         f"{DEVICE}:Enum",
         always_update=True,
+        blocking=True,
         on_update=mocker.ANY,
         **record_metadata_from_attribute(epics_controller_api.attributes["enum"]),
         **record_metadata_from_datatype(
@@ -313,6 +316,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     builder.boolOut.assert_called_once_with(
         f"{DEVICE}:WriteBool",
         always_update=True,
+        blocking=True,
         on_update=mocker.ANY,
         **record_metadata_from_attribute(epics_controller_api.attributes["write_bool"]),
         **record_metadata_from_datatype(
@@ -460,6 +464,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     builder.longOut.assert_called_once_with(
         f"{DEVICE}:{short_pv_name}",
         always_update=True,
+        blocking=True,
         on_update=mocker.ANY,
         **record_metadata_from_datatype(
             long_name_controller_api.attributes["attr_rw_short_name"].datatype,
@@ -500,6 +505,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
         builder.longOut.assert_called_once_with(
             f"{DEVICE}:{long_rw_pv_name}",
             always_update=True,
+            blocking=True,
             on_update=mocker.ANY,
         )
     with pytest.raises(AssertionError):
