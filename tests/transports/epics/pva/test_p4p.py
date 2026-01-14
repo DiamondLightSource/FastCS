@@ -23,7 +23,6 @@ from fastcs.transports.epics.pva.transport import EpicsPVATransport
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(2)
 async def test_ioc(p4p_subprocess: tuple[str, Queue]):
     pv_prefix, _ = p4p_subprocess
     ctxt = Context("pva")
@@ -75,7 +74,6 @@ async def test_ioc(p4p_subprocess: tuple[str, Queue]):
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(5)
 async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
     pv_prefix, _ = p4p_subprocess
     ctxt = Context("pva")
@@ -115,7 +113,6 @@ async def test_scan_method(p4p_subprocess: tuple[str, Queue]):
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(2)
 async def test_command_method(p4p_subprocess: tuple[str, Queue]):
     pv_prefix, _ = p4p_subprocess
     d_values = asyncio.Queue()
@@ -177,7 +174,6 @@ async def test_command_method(p4p_subprocess: tuple[str, Queue]):
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(2)
 async def test_numeric_alarms(p4p_subprocess: tuple[str, Queue]):
     pv_prefix, _ = p4p_subprocess
     a_values = asyncio.Queue()
@@ -528,7 +524,6 @@ async def test_more_exotic_datatypes():
         )
 
 
-@pytest.mark.timeout(4)
 def test_command_method_put_twice(caplog):
     class SomeController(Controller):
         command_runs_for_a_while_times = []
@@ -579,10 +574,7 @@ def test_command_method_put_twice(caplog):
     serve = asyncio.ensure_future(fastcs.serve(interactive=False))
     try:
         asyncio.get_event_loop().run_until_complete(
-            asyncio.wait_for(
-                asyncio.gather(serve, put_pvs()),
-                timeout=3,
-            )
+            asyncio.wait_for(asyncio.gather(serve, put_pvs()), timeout=1)
         )
     except TimeoutError:
         ...

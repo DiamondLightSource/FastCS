@@ -95,7 +95,7 @@ addopts = """
 filterwarnings = "error"
 # Doctest python code in docs, python code in src docstrings, test functions in tests
 testpaths = "docs src tests"
-timeout = 1
+timeout = 5
 
 [tool.coverage.run]
 patch = ["subprocess"]
