@@ -49,7 +49,6 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
 
     @property
     def access_mode(self) -> AttributeAccessMode:
-        """The access mode of this attribute."""
         return "r"
 
     async def update(self, value: Any) -> None:

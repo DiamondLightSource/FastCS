@@ -39,7 +39,6 @@ class AttrW(Attribute[DType_T, AttributeIORefT]):
 
     @property
     def access_mode(self) -> AttributeAccessMode:
-        """The access mode of this attribute."""
         return "w"
 
     async def put(self, setpoint: DType_T, sync_setpoint: bool = False) -> None:

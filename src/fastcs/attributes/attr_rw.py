@@ -28,7 +28,6 @@ class AttrRW(AttrR[DType_T, AttributeIORefT], AttrW[DType_T, AttributeIORefT]):
 
     @property
     def access_mode(self) -> AttributeAccessMode:
-        """The access mode of this attribute."""
         return "rw"
 
     async def _internal_update(
