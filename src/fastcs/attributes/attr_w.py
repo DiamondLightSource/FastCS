@@ -2,7 +2,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from fastcs.attributes.attribute import Attribute
+from fastcs.attributes.attribute import Attribute, AttributeAccessMode
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.datatypes import DataType, DType_T
 from fastcs.logging import bind_logger
@@ -36,6 +36,11 @@ class AttrW(Attribute[DType_T, AttributeIORefT]):
         """Callback to action a change to the setpoint of the attribute"""
         self._sync_setpoint_callbacks: list[AttrSyncSetpointCallback[DType_T]] = []
         """Callbacks to publish changes to the setpoint of the attribute"""
+
+    @property
+    def access_mode(self) -> AttributeAccessMode:
+        """The access mode of this attribute."""
+        return "w"
 
     async def put(self, setpoint: DType_T, sync_setpoint: bool = False) -> None:
         """Set the setpoint of the attribute

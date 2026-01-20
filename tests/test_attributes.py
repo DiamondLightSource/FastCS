@@ -6,9 +6,36 @@ from typing import Generic, TypeVar
 import pytest
 from pytest_mock import MockerFixture
 
-from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW, AttrW
+from fastcs.attributes import (
+    AttributeAccessMode,
+    AttributeIO,
+    AttributeIORef,
+    AttrR,
+    AttrRW,
+    AttrW,
+)
 from fastcs.controllers import Controller
 from fastcs.datatypes import Float, Int, String
+
+
+def test_attribute_access_mode():
+    """Test that attributes have the correct access_mode property."""
+    attr_r = AttrR(String())
+    attr_w = AttrW(String())
+    attr_rw = AttrRW(String())
+
+    assert attr_r.access_mode == "r"
+    assert attr_w.access_mode == "w"
+    assert attr_rw.access_mode == "rw"
+
+    # Verify type compatibility
+    mode_r: AttributeAccessMode = attr_r.access_mode
+    mode_w: AttributeAccessMode = attr_w.access_mode
+    mode_rw: AttributeAccessMode = attr_rw.access_mode
+
+    assert isinstance(mode_r, str)
+    assert isinstance(mode_w, str)
+    assert isinstance(mode_rw, str)
 
 
 def test_attr_r():

@@ -6,26 +6,12 @@ from p4p.nt.common import alarm, timeStamp
 from p4p.server import StaticProvider
 from p4p.server.asyncio import SharedPV
 
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.transports.controller_api import ControllerAPI
 from fastcs.util import snake_to_pascal
 
 from .types import p4p_alarm_states, p4p_timestamp_now
 
 AccessModeType = Literal["r", "w", "rw", "d", "x"]
-
-
-# TODO: This should be removed after https://github.com/DiamondLightSource/FastCS/issues/260
-def _attribute_to_access(attribute: Attribute) -> AccessModeType:
-    match attribute:
-        case AttrRW():
-            return "rw"
-        case AttrR():
-            return "r"
-        case AttrW():
-            return "w"
-        case _:
-            raise ValueError(f"Unknown attribute type {type(attribute)}")
 
 
 def add_pvi_info(
@@ -79,7 +65,7 @@ def _make_p4p_raw_value(pv_prefix: str, controller_api: ControllerAPI) -> dict:
     for pv_leaf, attribute in controller_api.attributes.items():
         # Add attribute entry
         pv = f"{pv_prefix}:{snake_to_pascal(pv_leaf)}"
-        p4p_raw_value[pv_leaf][_attribute_to_access(attribute)] = pv
+        p4p_raw_value[pv_leaf][attribute.access_mode] = pv
     for pv_leaf, _ in controller_api.command_methods.items():
         pv = f"{pv_prefix}:{snake_to_pascal(pv_leaf)}"
         p4p_raw_value[pv_leaf]["x"] = pv

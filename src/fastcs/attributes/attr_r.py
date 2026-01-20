@@ -4,7 +4,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from fastcs.attributes.attribute import Attribute
+from fastcs.attributes.attribute import Attribute, AttributeAccessMode
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.attributes.util import AttrValuePredicate, PredicateEvent
 from fastcs.datatypes import DataType, DType_T
@@ -46,6 +46,11 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
     def get(self) -> DType_T:
         """Get the cached value of the attribute."""
         return self._value
+
+    @property
+    def access_mode(self) -> AttributeAccessMode:
+        """The access mode of this attribute."""
+        return "r"
 
     async def update(self, value: Any) -> None:
         """Update the value of the attibute

@@ -1,5 +1,6 @@
 from fastcs.attributes.attr_r import AttrR
 from fastcs.attributes.attr_w import AttrW
+from fastcs.attributes.attribute import AttributeAccessMode
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.datatypes import DataType, DType_T
 from fastcs.logging import bind_logger
@@ -24,6 +25,11 @@ class AttrRW(AttrR[DType_T, AttributeIORefT], AttrW[DType_T, AttributeIORefT]):
 
         if io_ref is None:
             self.set_on_put_callback(self._internal_update)
+
+    @property
+    def access_mode(self) -> AttributeAccessMode:
+        """The access mode of this attribute."""
+        return "rw"
 
     async def _internal_update(
         self, attr: AttrW[DType_T, AttributeIORefT], value: DType_T

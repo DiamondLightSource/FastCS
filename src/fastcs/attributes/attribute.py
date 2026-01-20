@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import Generic
+from typing import Generic, Literal
 
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.datatypes import DataType, DType, DType_T
@@ -8,8 +9,10 @@ from fastcs.tracer import Tracer
 
 logger = bind_logger(logger_name=__name__)
 
+AttributeAccessMode = Literal["r", "w", "rw"]
 
-class Attribute(Generic[DType_T, AttributeIORefT], Tracer):
+
+class Attribute(Generic[DType_T, AttributeIORefT], Tracer, ABC):
     """Base FastCS attribute.
 
     Instances of this class added to a ``Controller`` will be used by the FastCS class.
@@ -73,6 +76,12 @@ class Attribute(Generic[DType_T, AttributeIORefT], Tracer):
     @property
     def full_name(self) -> str:
         return ".".join(self._path + [self._name])
+
+    @property
+    @abstractmethod
+    def access_mode(self) -> AttributeAccessMode:
+        """The access mode of this attribute."""
+        ...
 
     def add_update_datatype_callback(
         self, callback: Callable[[DataType[DType_T]], None]
