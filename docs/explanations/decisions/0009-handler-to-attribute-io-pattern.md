@@ -10,31 +10,27 @@ Accepted
 
 ## Context
 
-In the original FastCS architecture, the `Handler` pattern was used to manage attribute I/O operations. The design had several classes:
+Currently the `Handler` pattern is used to manage attribute I/O operations. This design has several classes:
 
-**Original Handler Architecture:**
 - `AttrHandlerR` previously `Updater` - Protocol for reading/updating attribute values
 - `AttrHandlerW` previously `Sender` - Protocol for writing/setting attribute values
 - `AttrHandlerRW` previously `Handler` - Combined read-write handler
 - `SimpleAttrHandler` - Basic implementation for internal parameters
 
-**Limitations of the Handler Pattern:**
+There are a few limitations with this architecture:
 
-1. **Handler Instance per Attribute:** Every attribute needed its own Handler instance because that's where the specification connecting the attribute to a unique resource lived. This created:
-   - Heavy memory overhead for controllers with many attributes
-   - Redundant Handler instances when multiple attributes used the same I/O pattern
-   - Difficulty sharing I/O logic across attributes
+1. **Handler Instance per Attribute:** Every attribute needed its own Handler instance because that's where the specification connecting the attribute to a unique resource live is defined. This means redundant Handler instances when multiple attributes use the same I/O pattern
 
-2. **Circular Reference Loop:** The architecture created circular dependencies:
+2. **Circular Reference Loop:** The architecture has circular dependencies:
    - Controller → Attributes (controller owns attributes)
    - Attributes → Handlers (each attribute has a handler)
    - Handlers → Controller (handlers need controller reference to communicate with device)
 
-3. **Tight Coupling to Controllers:** Handlers needed direct references to Controllers, coupling I/O logic to the controller structure rather than just to the underlying connections (e.g., hardware interfaces, network connections)
+3. **Tight Coupling to Controllers:** Handlers need direct references to Controllers, coupling I/O logic to the controller structure rather than just to the underlying connections (e.g., hardware interfaces, network connections)
 
-4. **Mixed Concerns:** Handlers combined resource specification (what to connect to) with I/O behavior (how to read/write), making both harder to reason about
+4. **Mixed Concerns:** Handlers combine resource specification (what to connect to) with I/O behavior (how to read/write), making both harder to reason about
 
-The system needed a more flexible way to:
+The system needs a more flexible way to:
 - Share a single AttributeIO instance across multiple attributes
 - Use lightweight AttributeIORef instances to specify resource connections per-attribute
 - Break the circular dependency chain
@@ -43,34 +39,21 @@ The system needed a more flexible way to:
 
 ## Decision
 
-We replaced the `Handler` pattern with a two-component system: `AttributeIO` for behavior and `AttributeIORef` for configuration.
+Replace the `Handler` pattern with a two-component system: `AttributeIO` for behavior and `AttributeIORef` for configuration.
 
-### New Architecture
+Key architectural changes:
 
-1. **AttributeIORef - Lightweight Resource Specification:**
-```python
-@dataclass(kw_only=True)
-class AttributeIORef:
-    update_period: float | None = None
-```
-   - Lightweight dataclass specifying resource connection details per-attribute
+1. **AttributeIORef** - Lightweight resource specification per-attribute:
+   - Lightweight dataclass specifying resource connection details
    - Can be subclassed to add fields like resource names, register addresses, etc.
-   - Multiple attributes can have their own AttributeIORef instances
+   - Attributes have unique AttributeIORef instances
    - Dynamically connected to a single AttributeIO instance at runtime
 
-2. **AttributeIO - Shared I/O Behavior:**
-```python
-class AttributeIO(Generic[T, AttributeIORefT]):
-    async def update(self, attr: AttrR[T, AttributeIORefT]) -> None:
-        raise NotImplementedError()
-
-    async def send(self, attr: AttrRW[T, AttributeIORefT], value: T) -> None:
-        raise NotImplementedError()
-```
-   - Single instance per Controller can handle multiple Attributes
+2. **AttributeIO** - Shared I/O behavior:
+   - Single instance per Controller handles multiple Attributes
    - Generic class parameterized by data type `T` and reference type `AttributeIORefT`
-   - Receives the AttributeIORef for each attribute to know which resource to access
-   - Only needs to know about connections (e.g. resource name, hardware interface)
+   - Accesses the AttributeIORef from the attribute to know which resource to access
+   - Only needs to know about connections, not controllers
 
 3. **Parameterized Attributes:**
    - Attributes are now parameterized with `AttributeIORef` types
@@ -80,34 +63,13 @@ class AttributeIO(Generic[T, AttributeIORefT]):
 
 4. **Initialization Validation:**
    - Controller validates at initialization that it has exactly one AttributeIO to handle each Attribute
-   - Ensures all attributes are properly connected before the serving the Controller API
-
-### Key Improvements
-
-- **Breaks Circular Dependencies:** AttributeIO only needs connections, not Controllers
-- **Memory Efficiency:** Single AttributeIO instance serves many Attributes
-- **Separation of Concerns:**
-  - AttributeIORef: lightweight resource specification (what to connect to)
-  - AttributeIO: shared I/O behavior (how to read/write)
-- **Validated Coverage:** Initialization ensures every Attribute has an AttributeIO handler
-- **Type Safety:** Generic types ensure AttributeIO and AttributeIORef match
-- **Extensibility:** Easy to create custom Ref types with resource-specific fields
+   - Ensures all attributes are properly connected before serving the Controller API
 
 ## Consequences
 
-### Technical Changes
-
-- 519 insertions, 290 deletions across 20 files
-- Created new files:
-  - `src/fastcs/attribute_io.py` - AttributeIO base class
-  - `src/fastcs/attribute_io_ref.py` - AttributeIORef base class
-- Updated attribute system to use generic parameterization
-- Refactored all tests to use new pattern
-- Updated callbacks to `AttrUpdateCallback` and `AttrSetCallback`
-
 ### Migration Impact
 
-Users and developers needed to:
+Users and developers need to:
 
 **Before (Handler pattern - one instance per attribute):**
 ```python
@@ -166,5 +128,3 @@ ramp_rate = AttrRW(Float(), io_ref=TempControllerIORef(name="R"))
 power = AttrR(Float(), io_ref=TempControllerIORef(name="P"))
 setpoint = AttrRW(Float(), io_ref=TempControllerIORef(name="S"))
 ```
-
-This decision established a more flexible, type-safe foundation for attribute I/O operations, enabling better extensibility and maintainability for controller implementations.

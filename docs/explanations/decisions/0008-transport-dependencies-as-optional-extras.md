@@ -10,182 +10,59 @@ Accepted
 
 ## Context
 
-FastCS supports multiple transport protocols for exposing controller APIs: EPICS CA, EPICS PVA, Tango, REST, and GraphQL. Originally, all transport dependencies were required dependencies, meaning they were always installed regardless of which transports users actually needed.
+Currently all transport dependencies are installed regardless of which transports users actually needed.
 
-**Original Architecture - All Dependencies Required:**
-
-```toml
-# pyproject.toml
-[project]
-dependencies = [
-    "fastapi[standard]",  # For REST
-    "numpy",
-    "pydantic",
-    "pvi~=0.11.0",        # For EPICS GUI generation
-    "pytango",            # For Tango
-    "softioc>=4.5.0",     # For EPICS CA
-    "strawberry-graphql",  # For GraphQL
-    "p4p",                # For EPICS PVA
-    "IPython",
-    "ruamel.yaml",
-]
-```
-
-This meant every FastCS installation included:
-- Python bindings for EPICS CA (softioc)
-- Python bindings for EPICS PVA (p4p)
-- Python bindings for Tango (pytango)
-- Web frameworks (FastAPI, Strawberry GraphQL)
-- GUI generation tools (pvi)
-
-**Problems with Required Dependencies:**
-
-The system needed a way to:
-- Install only the dependencies for transports actually being used
-- Allow minimal installations for simple use cases
-- Make dependency relationships explicit and documented
-- Support "install everything" for development
-- Reduce installation failures for unused transports
+Problems with required dependencies:
+- Minimal installations bloated by unused transport dependencies
+- Unclear dependency relationships for each transport
+- No way to install just the core FastCS functionality
 
 ## Decision
 
-We split transport dependencies into optional extras in `pyproject.toml`, allowing users to install only what they need.
+Split transport dependencies into optional extras in `pyproject.toml`, allowing users to install only what they need.
 
-### New Architecture
+The core FastCS package now requires only essential dependencies (pydantic, numpy, ruamel.yaml, IPython). Each transport is available as an optional extra, with convenience groups like `[all]`, `[epics]`, and `[dev]` for common installation patterns.
 
-**Core Dependencies (Minimal):**
+Key architectural changes:
+- Core dependencies: pydantic, numpy, ruamel.yaml, IPython
+- Individual transport extras: `[epicsca]`, `[epicspva]`, `[tango]`, `[graphql]`, `[rest]`
+- Convenience groups: `[epics]`, `[all]`, `[dev]`, `[demo]`
+- Each transport declares its own dependencies explicitly
 
-```toml
-[project]
-dependencies = [
-    "pydantic",      # Core data validation
-    "numpy",         # Numeric types
-    "ruamel.yaml",   # YAML config parsing
-    "IPython",       # Interactive shell
-]
-```
+## Consequences
 
-**Transport-Specific Extras:**
+### Benefits
 
-```toml
-[project.optional-dependencies]
-# Individual transports
-epicsca = ["pvi~=0.11.0", "softioc>=4.5.0"]
-epicspva = ["p4p", "pvi~=0.11.0"]
-tango = ["pytango"]
-graphql = ["strawberry-graphql", "uvicorn[standard]>=0.12.0"]
-rest = ["fastapi[standard]", "numpy", "uvicorn[standard]>=0.12.0"]
+- **Minimal Core Installation:** Users can install FastCS core without transport dependencies
+- **Explicit Dependency Relationships:** Each transport declares what it needs
+- **Flexible Installation:** Users choose exactly what they need: `pip install fastcs[epicspva,rest]`
+- **Development Convenience:** `pip install fastcs[dev]` includes everything for development
+- **Clear Documentation:** Installation commands are self-documenting
 
-# Convenience groups
-epics = ["fastcs[epicsca]", "fastcs[epicspva]"]
-all = ["fastcs[epics]", "fastcs[tango]", "fastcs[graphql]", "fastcs[rest]"]
+### Installation Patterns
 
-# Development and demos
-demo = ["tickit~=0.4.3"]
-dev = [
-    "fastcs[all]",  # Dev installs everything
-    "fastcs[demo]",
-    # ... test tools, docs tools, etc.
-]
-```
-
-### Installation Examples
-
-**1. Minimal Installation (Core only):**
+**Minimal (core only):**
 ```bash
 pip install fastcs
-# Only: pydantic, numpy, ruamel.yaml, IPython
 ```
 
-**2. Single Transport:**
+**Single transport:**
 ```bash
-pip install fastcs[epicspva]  # EPICS PVA only
-pip install fastcs[rest]      # REST API only
-pip install fastcs[tango]     # Tango only
+pip install fastcs[epicspva]  # EPICS PVA
+pip install fastcs[rest]      # REST API
 ```
 
-**3. Multiple Transports:**
+**Multiple transports:**
 ```bash
 pip install fastcs[epics,rest]  # EPICS CA + PVA + REST
 ```
 
-**4. All Transports:**
+**All transports:**
 ```bash
-pip install fastcs[all]  # Everything
-```
-
-**5. Development:**
-```bash
-pip install fastcs[dev]  # All transports + dev tools
-```
-
-### Key Benefits
-
-1. **Clearer Documentation:**
-   - Extras make dependencies explicit: `pip install fastcs[epicspva]`
-   - Users understand what each transport needs
-   - Self-documenting installation commands
-
-2. **Development Convenience:**
-   - `fastcs[dev]` installs everything for development
-   - `fastcs[all]` installs all transports without dev tools
-   - Clear separation of concerns
-
-## Consequences
-
-### Technical Changes
-
-- Updated `pyproject.toml`:
-  - Moved transport dependencies from `dependencies` to `optional-dependencies`
-  - Created extras: `epicsca`, `epicspva`, `tango`, `graphql`, `rest`
-  - Created convenience groups: `epics`, `all`, `dev`, `demo`
-  - Kept only core dependencies in main `dependencies` list
-
-### Migration Impact
-
-For existing users:
-
-**Before:**
-```bash
-pip install fastcs  # Gets everything
-```
-
-**After:**
-```bash
-# Option 1: Get everything (same as before)
 pip install fastcs[all]
-
-# Option 2: Get only what you need
-pip install fastcs[epicspva]
-pip install fastcs[rest,epics]
 ```
 
-For developers:
-
-**Before:**
+**Development:**
 ```bash
-pip install -e .[dev]  # Got everything
+pip install fastcs[dev]
 ```
-
-**After:**
-```bash
-pip install -e .[dev]  # Still gets everything (includes [all])
-```
-
-### Architectural Impact
-
-This decision established a flexible dependency model:
-
-```
-fastcs (core)
-    ├── fastcs[epicsca] → softioc, pvi
-    ├── fastcs[epicspva] → p4p, pvi
-    ├── fastcs[tango] → pytango
-    ├── fastcs[graphql] → strawberry-graphql, uvicorn
-    ├── fastcs[rest] → fastapi, uvicorn
-    ├── fastcs[epics] → [epicsca] + [epicspva]
-    ├── fastcs[all] → all transports
-    └── fastcs[dev] → [all] + dev tools
-```
-
-The split into optional extras aligned with FastCS's philosophy of supporting multiple transports while keeping the core lightweight. Users can now install exactly what they need, reducing friction and improving deployment efficiency, while developers can still easily install everything with `fastcs[dev]`.
