@@ -19,13 +19,12 @@ Move initialisation logic into Backend so that it:
 - Runs `controller.initialise()` before creating the Mapping
 - Creates the Mapping from the initialized controller
 - Runs initial tasks including `controller.connect()`
-- Delegates to transport-specific implementations
 
 Controller then has two hooks: `initialise()` for pre-API setup (hardware introspection, dynamic attribute creation) and `connect()` for post-API connection logic.
 
 ## Consequences
 
-The new design the initialisation of the application and makes the API for writing controllers and transports simpler and more flexible.
+The new design the initialisation of the application is easier to understand and makes the API for writing controllers and transports simpler and more flexible.
 
 ### Migration Pattern
 

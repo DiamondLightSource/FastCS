@@ -19,22 +19,17 @@ Currently the `Handler` pattern is used to manage attribute I/O operations. This
 
 There are a few limitations with this architecture:
 
-1. **Handler Instance per Attribute:** Every attribute needed its own Handler instance because that's where the specification connecting the attribute to a unique resource live is defined. This means redundant Handler instances when multiple attributes use the same I/O pattern
+1. **Handler Instance per Attribute:** Every attribute needs its own Handler instance because that's where the specification connecting the attribute to a unique resource is defined. This means redundant Handler instances when multiple attributes use the same I/O pattern.
 
-2. **Circular Reference Loop:** The architecture has circular dependencies:
+2. **Circular Reference Loop:**
    - Controller → Attributes (controller owns attributes)
    - Attributes → Handlers (each attribute has a handler)
    - Handlers → Controller (handlers need controller reference to communicate with device)
 
 3. **Tight Coupling to Controllers:** Handlers need direct references to Controllers, coupling I/O logic to the controller structure rather than just to the underlying connections (e.g., hardware interfaces, network connections)
 
-4. **Mixed Concerns:** Handlers combine resource specification (what to connect to) with I/O behavior (how to read/write), making both harder to reason about
-
 The system needs a more flexible way to:
-- Share a single AttributeIO instance across multiple attributes
-- Use lightweight AttributeIORef instances to specify resource connections per-attribute
 - Break the circular dependency chain
-- Validate that Controllers have exactly one AttributeIO to handle each Attribute
 - Separate resource specification from I/O behavior
 
 ## Decision
@@ -45,7 +40,7 @@ Key architectural changes:
 
 1. **AttributeIORef** - Lightweight resource specification per-attribute:
    - Lightweight dataclass specifying resource connection details
-   - Can be subclassed to add fields like resource names, register addresses, etc.
+   - Containers static fields like resource names, register addresses, etc.
    - Attributes have unique AttributeIORef instances
    - Dynamically connected to a single AttributeIO instance at runtime
 
@@ -59,7 +54,7 @@ Key architectural changes:
    - Attributes are now parameterized with `AttributeIORef` types
    - `AttrR[T, AttributeIORefT]` - Read-only attribute with typed I/O reference
    - `AttrRW[T, AttributeIORefT]` - Read-write attribute with typed I/O reference
-   - Type system ensures matching between AttributeIO and AttributeIORef
+   - Type system and programmatic validation ensures matching between AttributeIO and AttributeIORef
 
 4. **Initialization Validation:**
    - Controller validates at initialization that it has exactly one AttributeIO to handle each Attribute
@@ -69,9 +64,7 @@ Key architectural changes:
 
 ### Migration Impact
 
-Users and developers need to:
-
-**Before (Handler pattern - one instance per attribute):**
+**Before:**
 ```python
 # Temperature controller that communicates via TCP/IP
 class TempControllerHandler(AttrHandlerRW):
@@ -101,7 +94,7 @@ power = AttrR(Float(), handler=TempControllerHandler("P", controller))
 setpoint = AttrRW(Float(), handler=TempControllerHandler("S", controller))
 ```
 
-**After (AttributeIO pattern - shared instance):**
+**After:**
 ```python
 @dataclass
 class TempControllerIORef(AttributeIORef):

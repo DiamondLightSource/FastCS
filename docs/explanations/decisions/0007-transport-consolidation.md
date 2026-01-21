@@ -25,10 +25,8 @@ All transports should follow a unified pattern: configuration fields are datacla
 
 Key architectural changes:
 - All transports use `@dataclass` decorator combining configuration and implementation
-- Standardized `connect(controller_api, loop)` method for deferred initialization
-- Standardized `async serve()` method for running the transport
-- Removed pattern matching logic from FastCS
-- Configuration fields are direct attributes (not nested in options object)
+- Standardized `connect(controller_api, loop)` method to load controller API into transport
+- Standardized `async serve()` method for running the transport service
 
 ## Consequences
 
@@ -37,9 +35,6 @@ Key architectural changes:
 - **Reduced API Surface:** 5 classes instead of 10 (one Transport per protocol)
 - **Simpler Mental Model:** Configuration and implementation in one place
 - **Consistent Interface:** All transports follow same initialization pattern
-- **Less Boilerplate:** No pattern matching needed in FastCS
-- **Easier Maintenance:** Transport parameters defined once in dataclass fields
-- **Better Type Safety:** Consistent constructor signatures across all transports
 
 ### Migration Pattern
 

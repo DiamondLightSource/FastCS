@@ -10,7 +10,7 @@ Accepted
 
 ## Context
 
-Many devices have multiple identical components that need individual control: multi-axis motion stages, multi-channel power supplies, camera ROI regions, etc. Before ControllerVector, developers manually registered each indexed controller with string-based names:
+Many devices have multiple identical components that need individual control: multi-axis motion stages, multi-channel power supplies, multiple file writers, etc. Developers must manually register each indexed controller with string-based names and check for this pattern throughout the code to perform different logic
 
 ```python
 for i in range(num_axes):
@@ -24,7 +24,7 @@ This approach lacks collection semantics. Accessing controllers requires string 
 
 Introduce `ControllerVector`, a specialized controller type for managing collections of indexed sub-controllers with dict-like semantics.
 
-ControllerVector implements `MutableMapping` with integer-only keys, providing natural indexing, iteration, and length operations. It supports non-contiguous indices and can have shared attributes alongside the indexed sub-controllers.
+`ControllerVector` implements `MutableMapping` with integer-only keys, providing natural indexing, iteration, and length operations. It supports non-contiguous indices and can have shared attributes alongside the indexed sub-controllers.
 
 Key architectural changes:
 - `ControllerVector` implements `__getitem__`, `__setitem__`, `__iter__`, `__len__`
@@ -73,18 +73,4 @@ class StageController(Controller):
         first = self.axes[0]
         for i, motor in self.axes.items():
             print(f"Motor {i}: {motor}")
-```
-
-**With Shared Attributes:**
-```python
-class AxesVector(ControllerVector):
-    enabled = AttrRW(Bool())  # Shared across all axes
-
-class StageController(Controller):
-    def __init__(self, num_axes: int):
-        super().__init__()
-        self.axes = AxesVector(
-            {i: MotorController() for i in range(num_axes)},
-            description="Motor axes"
-        )
 ```

@@ -10,10 +10,10 @@ Accepted
 
 ## Context
 
-FastCS provides two separate classes for building controller hierarchies: `Controller` for top-level controllers and `SubController` for nested components. This has become a purely philosophical distinction and now just adds limitations for now benefit:
+FastCS provides two separate classes for building controller hierarchies: `Controller` for top-level controllers and `SubController` for nested components. This has become a purely philosophical distinction and now just adds limitations for no benefit:
 
-- **Design-Time Commitment:** Developers had to choose class at definition time, before knowing all contexts where components might be used
-- **Reduced Reusability:** A component designed as `SubController` couldn't be reused as a top-level controller without changing its base class
+- **Design-Time Commitment:** Developers have to choose class at definition time, before knowing all contexts where components might be used
+- **Reduced Reusability:** A component designed as `SubController` can't be reused as a top-level controller without changing its base class
 
 ## Decision
 
@@ -22,7 +22,6 @@ Unify `Controller` and `SubController` into a single `Controller` class that can
 Key architectural changes:
 - Remove `SubController` class entirely
 - Move `root_attribute` property to `Controller`
-- Rename `register_sub_controller()` to `add_sub_controller()` for consistency
 - Any Controller instance can now be nested in any other Controller
 
 ## Consequences

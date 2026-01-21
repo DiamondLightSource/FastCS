@@ -10,11 +10,11 @@ Accepted
 
 ## Context
 
-Transports currently access `Controller` instances directly to extract attributes, methods, and metadata for serving over their protocols. This tight coupling creates a few problems:
+Transports currently access `Controller` instances directly to extract attributes, methods, and metadata for serving over their protocols. This creates a few problems:
 
 - **Tight Coupling:** Transports are coupled to internal Controller structure, making evolution difficult
 - **Code Duplication:** Every transport re-implemented similar traversal logic for discovering attributes and methods
-- **No Encapsulation:** Transports had direct access to mutable controller state
+- **No Encapsulation:** Transports have direct access to mutable controller state
 - **No Static View:** No complete, immutable snapshot of controller API after initialization
 
 ## Decision
@@ -27,7 +27,7 @@ Key architectural changes:
 - `ControllerAPI` dataclass represents the complete, hierarchical structure of what a controller exposes
 - Separate dictionaries for attributes, command_methods, put_methods, and scan_methods
 - `walk_api()` method provides depth-first traversal of the API tree
-- Backend creates ControllerAPI once during initialization, before passing to transports
+- Backend creates ControllerAPI during initialization and passes to transports
 
 ## Consequences
 
