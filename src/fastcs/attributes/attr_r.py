@@ -4,6 +4,8 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import Any
 
+import numpy as np
+
 from fastcs.attributes.attribute import Attribute
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.attributes.util import AttrValuePredicate, PredicateEvent
@@ -81,11 +83,16 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         }
 
         if self._on_update_callbacks is not None:
+            if isinstance(self._value, np.ndarray):
+                assert isinstance(_previous_value, np.ndarray)
+                _is_changed = not np.array_equal(self._value, _previous_value)
+            else:
+                _is_changed = self._value != _previous_value
+
             callbacks_to_call: list[AttrOnUpdateCallback[DType_T]] = [
-                cb
-                for cb, always in self._on_update_callbacks
-                if always or self._value != _previous_value
+                cb for cb, always in self._on_update_callbacks if always or _is_changed
             ]
+
             try:
                 await asyncio.gather(*[cb(self._value) for cb in callbacks_to_call])
             except Exception as e:
