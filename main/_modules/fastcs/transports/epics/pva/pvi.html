@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transports.epics.pva.pvi &#8212; FastCS 0.12.0a2.dev7+gc43f71bc6 documentation</title>
+    <title>fastcs.transports.epics.pva.pvi &#8212; FastCS 0.12.0a2.dev8+g95247e2ff documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=db724c33"></script>
+    <script src="../../../../../_static/documentation_options.js?v=9a5826f1"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -457,26 +457,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">p4p.server</span><span class="w"> </span><span class="kn">import</span> <span class="n">StaticProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">p4p.server.asyncio</span><span class="w"> </span><span class="kn">import</span> <span class="n">SharedPV</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">snake_to_pascal</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">p4p_alarm_states</span><span class="p">,</span> <span class="n">p4p_timestamp_now</span>
 
 <span class="n">AccessModeType</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;rw&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
-
-
-<span class="c1"># TODO: This should be removed after https://github.com/DiamondLightSource/FastCS/issues/260</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_attribute_to_access</span><span class="p">(</span><span class="n">attribute</span><span class="p">:</span> <span class="n">Attribute</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessModeType</span><span class="p">:</span>
-    <span class="k">match</span> <span class="n">attribute</span><span class="p">:</span>
-        <span class="k">case</span> <span class="n">AttrRW</span><span class="p">():</span>
-            <span class="k">return</span> <span class="s2">&quot;rw&quot;</span>
-        <span class="k">case</span> <span class="n">AttrR</span><span class="p">():</span>
-            <span class="k">return</span> <span class="s2">&quot;r&quot;</span>
-        <span class="k">case</span> <span class="n">AttrW</span><span class="p">():</span>
-            <span class="k">return</span> <span class="s2">&quot;w&quot;</span>
-        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown attribute type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="add_pvi_info">
@@ -533,7 +519,7 @@
     <span class="k">for</span> <span class="n">pv_leaf</span><span class="p">,</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># Add attribute entry</span>
         <span class="n">pv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">snake_to_pascal</span><span class="p">(</span><span class="n">pv_leaf</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">p4p_raw_value</span><span class="p">[</span><span class="n">pv_leaf</span><span class="p">][</span><span class="n">_attribute_to_access</span><span class="p">(</span><span class="n">attribute</span><span class="p">)]</span> <span class="o">=</span> <span class="n">pv</span>
+        <span class="n">p4p_raw_value</span><span class="p">[</span><span class="n">pv_leaf</span><span class="p">][</span><span class="n">attribute</span><span class="o">.</span><span class="n">access_mode</span><span class="p">]</span> <span class="o">=</span> <span class="n">pv</span>
     <span class="k">for</span> <span class="n">pv_leaf</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">command_methods</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">pv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">snake_to_pascal</span><span class="p">(</span><span class="n">pv_leaf</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">p4p_raw_value</span><span class="p">[</span><span class="n">pv_leaf</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pv</span>

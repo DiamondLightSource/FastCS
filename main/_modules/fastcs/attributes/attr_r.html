@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.attributes.attr_r &#8212; FastCS 0.12.0a2.dev7+gc43f71bc6 documentation</title>
+    <title>fastcs.attributes.attr_r &#8212; FastCS 0.12.0a2.dev8+g95247e2ff documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=db724c33"></script>
+    <script src="../../../_static/documentation_options.js?v=9a5826f1"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -455,7 +455,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Awaitable</span><span class="p">,</span> <span class="n">Callable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.attribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.attribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttributeAccessMode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORefT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrValuePredicate</span><span class="p">,</span> <span class="n">PredicateEvent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">DType_T</span>
@@ -502,6 +502,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the cached value of the attribute.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span></div>
 
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">access_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AttributeAccessMode</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;r&quot;</span>
 
 <div class="viewcode-block" id="AttrR.update">
 <a class="viewcode-back" href="../../../_api/fastcs.attributes.attr_r.html#fastcs.attributes.attr_r.AttrR.update">[docs]</a>
