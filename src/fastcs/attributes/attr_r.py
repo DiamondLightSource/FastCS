@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable, Coroutine
 from typing import Any
 
 from fastcs.attributes.attribute import Attribute
@@ -13,11 +13,11 @@ from fastcs.logging import bind_logger
 logger = bind_logger(logger_name=__name__)
 
 
-AttrIOUpdateCallback = Callable[["AttrR[DType_T, Any]"], Awaitable[None]]
+AttrIOUpdateCallback = Callable[["AttrR[DType_T, Any]"], Coroutine[None, None, None]]
 """An AttributeIO callback that takes an AttrR and updates its value"""
-AttrUpdateCallback = Callable[[], Awaitable[None]]
+AttrUpdateCallback = Callable[[], Coroutine[None, None, None]]
 """A callback to be called periodically to update an attribute"""
-AttrOnUpdateCallback = Callable[[DType_T], Awaitable[None]]
+AttrOnUpdateCallback = Callable[[DType_T], Coroutine[None, None, None]]
 """A callback to be called when the value of the attribute is updated"""
 
 
@@ -121,12 +121,8 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
             update_callback = self._update_callback
 
         async def update_attribute():
-            try:
-                self.log_event("Update attribute", topic=self)
-                await update_callback(self)
-            except Exception:
-                logger.error("Attribute update loop stopped", attribute=self)
-                raise
+            self.log_event("Update attribute", topic=self)
+            await update_callback(self)
 
         return update_attribute
 
