@@ -3,7 +3,7 @@ import asyncio
 from p4p.server import Server, StaticProvider
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.transports.controller_api import ControllerAPI
+from fastcs.controllers import ControllerAPI
 from fastcs.transports.epics.util import controller_pv_prefix
 from fastcs.util import snake_to_pascal
 

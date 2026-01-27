@@ -3,7 +3,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, ClassVar, Union
 
-from fastcs.transports.controller_api import ControllerAPI
+from fastcs.controllers import ControllerAPI
 
 
 @dataclass

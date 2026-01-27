@@ -6,11 +6,9 @@ from typing import Literal
 from pytest_mock import MockerFixture, MockType
 
 from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW, AttrW
-from fastcs.control_system import build_controller_api
-from fastcs.controllers import Controller
+from fastcs.controllers import Controller, ControllerAPI
 from fastcs.datatypes import DType_T, Int
 from fastcs.methods import command, scan
-from fastcs.transports import ControllerAPI
 
 
 @dataclass
@@ -49,7 +47,6 @@ class MyTestController(Controller):
             self.add_sub_controller(f"SubController{index:02d}", controller)
 
     initialised = False
-    connected = False
     count = 0
 
     async def initialise(self) -> None:
@@ -57,10 +54,10 @@ class MyTestController(Controller):
         self.initialised = True
 
     async def connect(self) -> None:
-        self.connected = True
+        self._connected = True
 
     async def disconnect(self) -> None:
-        self.connected = False
+        self._connected = False
 
     @command()
     async def go(self):
@@ -79,7 +76,7 @@ class AssertableControllerAPI(ControllerAPI):
         self.command_method_spys: dict[str, MockType] = {}
 
         # Build a ControllerAPI from the given Controller
-        controller_api = build_controller_api(controller)
+        controller_api = controller._build_api([])
         # Copy its fields
         self.attributes = controller_api.attributes
         self.command_methods = controller_api.command_methods

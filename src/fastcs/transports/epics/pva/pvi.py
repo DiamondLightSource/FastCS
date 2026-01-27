@@ -6,7 +6,7 @@ from p4p.nt.common import alarm, timeStamp
 from p4p.server import StaticProvider
 from p4p.server.asyncio import SharedPV
 
-from fastcs.transports.controller_api import ControllerAPI
+from fastcs.controllers import ControllerAPI
 from fastcs.util import snake_to_pascal
 
 from .types import p4p_alarm_states, p4p_timestamp_now

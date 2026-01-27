@@ -19,8 +19,8 @@ from pvi.device import (
 from tests.util import ColourEnum
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controllers import ControllerAPI
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
-from fastcs.transports import ControllerAPI
 from fastcs.transports.epics.gui import EpicsGUI
 
 

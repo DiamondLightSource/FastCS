@@ -24,6 +24,7 @@ from pvi.device import (
 from pydantic import ValidationError
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.controllers import ControllerAPI
 from fastcs.datatypes import (
     Bool,
     Enum,
@@ -34,7 +35,6 @@ from fastcs.datatypes import (
 )
 from fastcs.logging import logger
 from fastcs.methods import Command
-from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics.options import EpicsGUIFormat, EpicsGUIOptions
 from fastcs.util import snake_to_pascal
 

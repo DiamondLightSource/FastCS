@@ -6,10 +6,10 @@ from fastapi import FastAPI
 from pydantic import create_model
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controllers import ControllerAPI
 from fastcs.datatypes.datatype import DType_T
 from fastcs.logging import intercept_std_logger
 from fastcs.methods import CommandCallback
-from fastcs.transports.controller_api import ControllerAPI
 
 from .options import RestServerOptions
 from .util import (

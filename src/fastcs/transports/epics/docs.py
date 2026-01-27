@@ -1,4 +1,4 @@
-from fastcs.transports.controller_api import ControllerAPI
+from fastcs.controllers import ControllerAPI
 
 from .options import EpicsDocsOptions
 

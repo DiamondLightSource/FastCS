@@ -8,10 +8,10 @@ from strawberry.tools import create_type
 from strawberry.types.field import StrawberryField
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controllers import ControllerAPI
 from fastcs.datatypes.datatype import DType_T
 from fastcs.exceptions import FastCSError
 from fastcs.logging import intercept_std_logger
-from fastcs.transports.controller_api import ControllerAPI
 
 from .options import GraphQLServerOptions
 

@@ -80,6 +80,13 @@ class IPConnection(Tracer):
             return response
 
     async def close(self):
+        if self.__connection is None:
+            return
+
         async with self._connection as connection:
-            await connection.close()
-            self.__connection = None
+            try:
+                await connection.close()
+            except ConnectionResetError:
+                pass
+
+        self.__connection = None
