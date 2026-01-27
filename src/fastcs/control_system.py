@@ -1,17 +1,21 @@
 import asyncio
 import os
 import signal
+from collections import defaultdict
 from collections.abc import Coroutine, Sequence
 from functools import partial
 from typing import Any
 
 from IPython.terminal.embed import InteractiveShellEmbed
 
+from fastcs.attributes.attr_r import AttrR
+from fastcs.attributes.attribute_io_ref import AttributeIORef
 from fastcs.controllers import BaseController, Controller
 from fastcs.logging import bind_logger
 from fastcs.methods import ScanCallback
 from fastcs.tracer import Tracer
 from fastcs.transports import ControllerAPI, Transport
+from fastcs.util import ONCE
 
 tracer = Tracer(name=__name__)
 logger = bind_logger(logger_name=__name__)
@@ -43,6 +47,8 @@ class FastCS:
 
         self._scan_tasks: set[asyncio.Task] = set()
 
+        self.connected = False
+
     def run(self, interactive: bool = True):
         serve = asyncio.ensure_future(self.serve(interactive=interactive))
 
@@ -57,15 +63,6 @@ class FastCS:
 
     async def _start_scan_tasks(self):
         self._scan_tasks = {self._loop.create_task(coro()) for coro in self._scan_coros}
-
-        for task in self._scan_tasks:
-            task.add_done_callback(self._scan_done)
-
-    def _scan_done(self, task: asyncio.Task):
-        try:
-            task.result()
-        except Exception:
-            logger.exception("Exception raised in scan task")
 
     def _stop_scan_tasks(self):
         for task in self._scan_tasks:
@@ -84,9 +81,7 @@ class FastCS:
         self._controller.post_initialise()
 
         self.controller_api = build_controller_api(self._controller)
-        self._scan_coros, self._initial_coros = (
-            self.controller_api.get_scan_and_initial_coros()
-        )
+        self._scan_coros, self._initial_coros = self.get_scan_and_initial_coros()
 
         context = {
             "controller": self._controller,
@@ -94,6 +89,7 @@ class FastCS:
             "transports": [
                 transport.__class__.__name__ for transport in self._transports
             ],
+            "reconnect": self.reconnect,
         }
 
         coros: list[Coroutine] = []
@@ -130,6 +126,8 @@ class FastCS:
         await self._run_initial_coros()
         await self._start_scan_tasks()
 
+        self.connected = True
+
         try:
             await asyncio.gather(*coros)
         except asyncio.CancelledError:
@@ -140,6 +138,10 @@ class FastCS:
             logger.info("Shutting down FastCS")
             self._stop_scan_tasks()
             await self._controller.disconnect()
+
+    def reconnect(self):
+        """Attempt to continue scan tasks"""
+        self.connected = True
 
     async def _interactive_shell(self, context: dict[str, Any]):
         """Spawn interactive shell in another thread and wait for it to complete."""
@@ -169,6 +171,57 @@ class FastCS:
 
     def __del__(self):
         self._stop_scan_tasks()
+
+    def get_scan_and_initial_coros(
+        self,
+    ) -> tuple[list[ScanCallback], list[ScanCallback]]:
+        scan_dict: dict[float, list[ScanCallback]] = defaultdict(list)
+        initial_coros: list[ScanCallback] = []
+
+        for controller_api in self.controller_api.walk_api():
+            for method in controller_api.scan_methods.values():
+                if method.period is ONCE:
+                    initial_coros.append(method.fn)
+                else:
+                    scan_dict[method.period].append(method.fn)
+
+            for attribute in controller_api.attributes.values():
+                match attribute:
+                    case AttrR(_io_ref=AttributeIORef(update_period=update_period)):
+                        if update_period is ONCE:
+                            initial_coros.append(attribute.bind_update_callback())
+                        elif update_period is not None:
+                            scan_dict[update_period].append(
+                                attribute.bind_update_callback()
+                            )
+
+        periodic_scan_coros: list[ScanCallback] = []
+        for period, methods in scan_dict.items():
+            periodic_scan_coros.append(self._create_periodic_scan_coro(period, methods))
+
+        return periodic_scan_coros, initial_coros
+
+    def _create_periodic_scan_coro(
+        self, period: float, scans: Sequence[ScanCallback]
+    ) -> ScanCallback:
+        async def scan_coro() -> None:
+            while True:
+                if not self.connected:
+                    await asyncio.sleep(1)
+                    continue
+
+                try:
+                    await asyncio.gather(
+                        asyncio.sleep(period), *[scan() for scan in scans]
+                    )
+                except Exception:
+                    logger.exception("Exception in scan task", period=period)
+                    self.connected = False
+
+                    await asyncio.sleep(1)  # Wait so this message appears last
+                    logger.error("Pausing scan tasks and waiting for reconnect")
+
+        return scan_coro
 
 
 def build_controller_api(controller: Controller) -> ControllerAPI:

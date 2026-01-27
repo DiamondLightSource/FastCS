@@ -126,40 +126,6 @@ async def test_update_periods():
 
 
 @pytest.mark.asyncio
-async def test_scan_raises_exception_via_callback():
-    class MyTestController(Controller):
-        def __init__(self):
-            super().__init__()
-
-        @scan(0.1)
-        async def raise_exception(self):
-            raise ValueError("Scan Exception")
-
-    controller = MyTestController()
-    loop = asyncio.get_event_loop()
-    transport_options = []
-    fastcs = FastCS(controller, transport_options, loop)
-
-    exception_info = {}
-    # This will intercept the exception raised in _scan_done
-    loop.set_exception_handler(
-        lambda _loop, context: exception_info.update(
-            {"exception": context.get("exception")}
-        )
-    )
-
-    task = asyncio.create_task(fastcs.serve(interactive=False))
-    # This allows scan time to run
-    await asyncio.sleep(0.2)
-    for task in fastcs._scan_tasks:
-        internal_exception = task.exception()
-        assert internal_exception
-        # The task exception comes from scan method raise_exception
-        assert isinstance(internal_exception, ValueError)
-        assert "Scan Exception" == str(internal_exception)
-
-
-@pytest.mark.asyncio
 async def test_controller_connect_disconnect():
     class MyTestController(Controller):
         def __init__(self):
