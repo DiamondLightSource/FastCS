@@ -94,10 +94,6 @@ def configure_logging(
     )
 
 
-# Configure logger with defaults - INFO level and disabled
-_configure_logger(logger)
-
-
 class _StdLoggingInterceptHandler(logging.Handler):
     """A std logging handler to forward messages to loguru with nice formatting."""
 
