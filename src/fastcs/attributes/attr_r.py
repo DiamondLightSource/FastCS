@@ -38,7 +38,9 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         )
         self._update_callback: AttrIOUpdateCallback[DType_T] | None = None
         """Callback to update the value of the attribute with an IO to the source"""
-        self._on_update_callbacks: list[AttrOnUpdateCallback[DType_T]] | None = None
+        self._on_update_callbacks: (
+            list[tuple[AttrOnUpdateCallback[DType_T], bool]] | None
+        ) = None
         """Callbacks to publish changes to the value of the attribute"""
         self._on_update_events: set[PredicateEvent[DType_T]] = set()
         """Events to set when the value satisifies some predicate"""
@@ -75,6 +77,7 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
             "Attribute set", value=value, value_type=type(value), attribute=self
         )
 
+        _previous_value = self._value
         self._value = self._datatype.validate(value)
 
         self._on_update_events -= {
@@ -82,17 +85,22 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         }
 
         if self._on_update_callbacks is not None:
+            callbacks_to_call: list[AttrOnUpdateCallback[DType_T]] = [
+                cb
+                for cb, always in self._on_update_callbacks
+                if always or not self.datatype.equal(self._value, _previous_value)
+            ]
             try:
-                await asyncio.gather(
-                    *[cb(self._value) for cb in self._on_update_callbacks]
-                )
+                await asyncio.gather(*[cb(self._value) for cb in callbacks_to_call])
             except Exception as e:
                 logger.opt(exception=e).error(
                     "On update callbacks failed", attribute=self, value=value
                 )
                 raise
 
-    def add_on_update_callback(self, callback: AttrOnUpdateCallback[DType_T]) -> None:
+    def add_on_update_callback(
+        self, callback: AttrOnUpdateCallback[DType_T], always: bool = False
+    ) -> None:
         """Add a callback to be called when the value of the attribute is updated
 
         The callback will be called with the updated value.
@@ -100,7 +108,7 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         """
         if self._on_update_callbacks is None:
             self._on_update_callbacks = []
-        self._on_update_callbacks.append(callback)
+        self._on_update_callbacks.append((callback, always))
 
     def set_update_callback(self, callback: AttrIOUpdateCallback[DType_T]):
         """Set the callback to update the value of the attribute from the source
