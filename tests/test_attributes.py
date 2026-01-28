@@ -11,6 +11,18 @@ from fastcs.controllers import Controller
 from fastcs.datatypes import Float, Int, String
 
 
+def test_attribute_access_mode():
+    """Test that attributes have the correct access_mode property."""
+    attr_r = AttrR(String())
+    assert attr_r.access_mode == "r"
+
+    attr_w = AttrW(String())
+    assert attr_w.access_mode == "w"
+
+    attr_rw = AttrRW(String())
+    assert attr_rw.access_mode == "rw"
+
+
 def test_attr_r():
     attr = AttrR(String(), group="test group")
 
