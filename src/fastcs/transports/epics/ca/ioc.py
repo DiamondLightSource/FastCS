@@ -8,6 +8,7 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import DataType, DType_T
+from fastcs.datatypes.waveform import Waveform
 from fastcs.logging import bind_logger
 from fastcs.methods import Command
 from fastcs.tracer import Tracer
@@ -131,12 +132,21 @@ def _create_and_link_attribute_pvs(
         pv_prefix = controller_pv_prefix(root_pv_prefix, controller_api)
 
         for attr_name, attribute in controller_api.attributes.items():
-            pv_name = snake_to_pascal(attr_name)
+            if (
+                isinstance(attribute.datatype, Waveform)
+                and len(attribute.datatype.shape) != 1
+            ):
+                logger.warning(
+                    "Only 1D Waveform attributes are supported in EPICS CA transport",
+                    attribute=attribute,
+                )
+                continue
 
+            pv_name = snake_to_pascal(attr_name)
             full_pv_name_length = len(f"{pv_prefix}:{pv_name}")
             if full_pv_name_length > EPICS_MAX_NAME_LENGTH:
                 attribute.enabled = False
-                print(
+                logger.warning(
                     f"Not creating PV for {attr_name} for controller"
                     f" {controller_api.path} as full name would exceed"
                     f" {EPICS_MAX_NAME_LENGTH} characters"
@@ -146,7 +156,7 @@ def _create_and_link_attribute_pvs(
             match attribute:
                 case AttrRW():
                     if full_pv_name_length > (EPICS_MAX_NAME_LENGTH - 4):
-                        print(
+                        logger.warning(
                             f"Not creating PVs for {attr_name} as _RBV PV"
                             f" name would exceed {EPICS_MAX_NAME_LENGTH}"
                             " characters"

@@ -536,6 +536,26 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
         )
 
 
+def test_non_1d_waveforms_discarded(mocker: MockerFixture):
+    api = ControllerAPI(
+        attributes={
+            "waveform_0d": AttrR(Waveform(np.int32, shape=())),
+            "waveform_1d": AttrR(Waveform(np.int32, shape=(10,))),
+            "waveform_2d": AttrR(Waveform(np.int32, shape=(10, 2))),
+            "waveform_3d": AttrR(Waveform(np.int32, shape=(10, 2, 3))),
+        }
+    )
+
+    create_mock = mocker.patch(
+        "fastcs.transports.epics.ca.ioc._create_and_link_read_pv"
+    )
+    EpicsCAIOC("DEVICE", api)
+
+    create_mock.assert_called_once_with(
+        "DEVICE", "Waveform1d", "waveform_1d", api.attributes["waveform_1d"]
+    )
+
+
 def test_update_datatype(mocker: MockerFixture):
     builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
 
