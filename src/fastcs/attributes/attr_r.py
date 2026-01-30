@@ -73,12 +73,12 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
             ValueError: If the value fails to be validated to DType_T
 
         """
-        self.log_event(
-            "Attribute set", value=value, value_type=type(value), attribute=self
-        )
+        self.log_event("Attribute set", value=repr(value), attribute=self)
 
         _previous_value = self._value
         self._value = self._datatype.validate(value)
+
+        self.log_event("Value validated", value=repr(self._value), attribute=self)
 
         self._on_update_events -= {
             e for e in self._on_update_events if e.set(self._value)
@@ -94,7 +94,7 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
                 await asyncio.gather(*[cb(self._value) for cb in callbacks_to_call])
             except Exception as e:
                 logger.opt(exception=e).error(
-                    "On update callbacks failed", attribute=self, value=value
+                    "On update callbacks failed", attribute=self, value=repr(value)
                 )
                 raise
 
