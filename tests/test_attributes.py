@@ -51,6 +51,33 @@ def test_attr_r():
 
 
 @pytest.mark.asyncio
+async def test_attr_update(mocker: MockerFixture):
+    attr = AttrRW(Int())
+
+    await attr.update(42)
+    assert attr.get() == 42
+
+    await attr.update("100")  # type: ignore
+    assert attr.get() == 100
+
+    with pytest.raises(ValueError, match="Failed to cast"):
+        await attr.update("not_an_int")  # type: ignore
+
+    attr = AttrRW(Int())
+    sync_setpoint_mock = mocker.AsyncMock()
+    attr.add_sync_setpoint_callback(sync_setpoint_mock)
+
+    await attr.update("200")  # type: ignore
+    assert attr.get() == 200
+    sync_setpoint_mock.assert_called_once_with(200)
+
+    sync_setpoint_mock.reset_mock()
+    await attr.update(20)
+    assert attr.get() == 20
+    sync_setpoint_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_wait_for_predicate(mocker: MockerFixture):
     attr = AttrR(Int(), initial_value=0)
 
