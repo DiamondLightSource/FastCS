@@ -104,10 +104,11 @@ async def test_wait_for_value(mocker: MockerFixture):
 @pytest.mark.asyncio
 async def test_attributes():
     device = {"state": "Idle", "number": 1, "count": False}
-    ui = {"state": "", "number": 0, "count": False}
+    ui = {"state": "", "number": 0, "count": False, "update_count": 0}
 
     async def update_ui(value, key):
         ui[key] = value
+        ui["update_count"] += 1
 
     async def send(_attr, value, key):
         device[key] = value
@@ -116,9 +117,14 @@ async def test_attributes():
         device["number"] += 1
 
     attr_r = AttrR(String())
-    attr_r.add_on_update_callback(partial(update_ui, key="state"))
+    attr_r.add_on_update_callback(partial(update_ui, key="state"), always=False)
     await attr_r.update(device["state"])
     assert ui["state"] == "Idle"
+    # Update with new value triggers callback
+    assert ui["update_count"] == 1
+    await attr_r.update(device["state"])
+    # Identical update does not trigger callback as always=False
+    assert ui["update_count"] == 1
 
     attr_rw = AttrRW(Int())
     attr_rw._on_put_callback = partial(send, key="number")

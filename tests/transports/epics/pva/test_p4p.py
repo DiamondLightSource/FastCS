@@ -232,8 +232,9 @@ def test_read_signal_set():
         await controller.a.update(40_000)
         await controller.b.update(-0.99)
         await asyncio.sleep(0.05)
-        await controller.a.update(-100)
         await controller.b.update(-0.99)
+        # Identical value, so will not cause a readback update
+        await controller.a.update(-100)
         await controller.b.update(-0.9111111)
 
     a_values, b_values = [], []
@@ -253,7 +254,7 @@ def test_read_signal_set():
         serve.cancel()
         wait_and_set_attr_r.cancel()
         assert a_values == [0, 40_000, -100]
-        assert b_values == [0.0, -0.99, -0.99, -0.91]  # Last is -0.91 because of prec
+        assert b_values == [0.0, -0.99, -0.91]  # Last is -0.91 because of prec
 
 
 def test_pvi_grouping():
