@@ -171,7 +171,9 @@ def _create_and_link_read_pv(
     pv = f"{pv_prefix}:{pv_name}"
 
     async def async_record_set(value: DType_T):
-        tracer.log_event("PV set from attribute", topic=attribute, pv=pv, value=value)
+        tracer.log_event(
+            "PV set from attribute", topic=attribute, pv=pv, value=repr(value)
+        )
 
         record.set(cast_to_epics_type(attribute.datatype, value))
 
@@ -217,13 +219,13 @@ def _create_and_link_write_pv(
     pv = f"{pv_prefix}:{pv_name}"
 
     async def on_update(value):
-        logger.info("PV put: {pv} = {value}", pv=pv, value=value)
+        logger.info("PV put: {pv} = {value}", pv=pv, value=repr(value))
 
         await attribute.put(cast_from_epics_type(attribute.datatype, value))
 
     async def set_setpoint_without_process(value: DType_T):
         tracer.log_event(
-            "PV setpoint set from attribute", topic=attribute, pv=pv, value=value
+            "PV setpoint set from attribute", topic=attribute, pv=pv, value=repr(value)
         )
 
         record.set(cast_to_epics_type(attribute.datatype, value), process=False)

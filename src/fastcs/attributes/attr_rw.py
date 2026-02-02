@@ -41,5 +41,5 @@ class AttrRW(AttrR[DType_T, AttributeIORefT], AttrW[DType_T, AttributeIORefT]):
         await super().update(value)
 
         if not self._setpoint_initialised:
-            await self._call_sync_setpoint_callbacks(value)
+            await self._call_sync_setpoint_callbacks(self._value)
             self._setpoint_initialised = True
