@@ -104,3 +104,12 @@ def test_dataset_equal(fastcs_datatype: DataType, value1, value2, expected):
 )
 def test_dataset_all_equal(fastcs_datatype: DataType, values, expected):
     assert fastcs_datatype.all_equal(values) is expected
+
+
+def test_string_length():
+    assert String(length=10).validate("12345678901") == "1234567890"
+
+    assert String().validate("12345678901") == "12345678901"
+
+    with pytest.raises(ValueError):
+        String(length=0)

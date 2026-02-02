@@ -77,7 +77,8 @@ class ShortMixedEnum(enum.Enum):
         (Int(), 4, 4),
         (Float(), 1.0, 1.0),
         (Bool(), True, True),
-        (String(), "hey", "hey"),
+        (String(), "a" * 257, "a" * 256),
+        (String(length=3), "1234", "123"),
         # shorter enums can be represented by integers from 0-15
         (Enum(ShortMixedEnum), ShortMixedEnum.STRING_MEMBER, 0),
         (Enum(ShortMixedEnum), ShortMixedEnum.INT_MEMBER, 1),
