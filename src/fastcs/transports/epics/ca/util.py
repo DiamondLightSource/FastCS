@@ -146,7 +146,10 @@ def cast_to_epics_type(datatype: DataType[DType_T], value: DType_T) -> Any:
             else:  # enum backed by string record
                 return datatype.validate(value).name
         case String() as string:
-            return value[: string.length]
+            if string.length is not None:
+                return value[: string.length]
+            else:
+                return value[:DEFAULT_STRING_WAVEFORM_LENGTH]
         case datatype if issubclass(type(datatype), EPICS_ALLOWED_DATATYPES):
             return value
         case _:
