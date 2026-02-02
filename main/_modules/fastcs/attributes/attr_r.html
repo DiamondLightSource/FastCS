@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.attributes.attr_r &#8212; FastCS 0.12.0a2.dev9+g3fe7b0c9d documentation</title>
+    <title>fastcs.attributes.attr_r &#8212; FastCS 0.12.0a2.dev10+ga9db2b678 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ae502f02"></script>
+    <script src="../../../_static/documentation_options.js?v=9815016c"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -531,12 +531,12 @@
 <span class="sd">            ValueError: If the value fails to be validated to DType_T</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span>
-            <span class="s2">&quot;Attribute set&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Attribute set&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="n">_previous_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Value validated&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">),</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_events</span> <span class="o">-=</span> <span class="p">{</span>
             <span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_update_events</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span>
@@ -552,7 +552,9 @@
                 <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">cb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="n">callbacks_to_call</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="s2">&quot;On update callbacks failed&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span>
+                    <span class="s2">&quot;On update callbacks failed&quot;</span><span class="p">,</span>
+                    <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="k">raise</span></div>
 
@@ -674,7 +676,7 @@
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span>
-            <span class="s2">&quot;Value equals target value&quot;</span><span class="p">,</span> <span class="n">target_valuevalue</span><span class="o">=</span><span class="n">target_value</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span>
+            <span class="s2">&quot;Value equals target value&quot;</span><span class="p">,</span> <span class="n">target_value</span><span class="o">=</span><span class="n">target_value</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span>
         <span class="p">)</span></div>
 </div>
 
