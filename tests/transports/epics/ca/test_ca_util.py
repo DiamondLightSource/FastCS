@@ -1,12 +1,9 @@
 import enum
 
 import pytest
-from softioc import builder
 
-from fastcs.attributes import AttrRW
 from fastcs.datatypes import Bool, Enum, Float, Int, String
 from fastcs.transports.epics.ca.util import (
-    builder_callable_from_attribute,
     cast_from_epics_type,
     cast_to_epics_type,
     record_metadata_from_datatype,
@@ -135,21 +132,6 @@ def test_cast_from_epics_type(datatype, from_epics, result):
 def test_cast_from_epics_validations(datatype, input):
     with pytest.raises(ValueError):
         cast_from_epics_type(datatype, input)
-
-
-@pytest.mark.parametrize(
-    "datatype,in_record,out_record",
-    [
-        (Enum(ShortEnum), builder.mbbIn, builder.mbbOut),
-        # long enums use string even if all values are ints
-        (Enum(LongEnum), builder.longStringIn, builder.longStringOut),
-        (Enum(LongMixedEnum), builder.longStringIn, builder.longStringOut),
-    ],
-)
-def test_builder_callable_enum_types(datatype, in_record, out_record):
-    attr = AttrRW(datatype)
-    assert builder_callable_from_attribute(attr, False) == out_record
-    assert builder_callable_from_attribute(attr, True) == in_record
 
 
 def test_drive_metadata_from_datatype():

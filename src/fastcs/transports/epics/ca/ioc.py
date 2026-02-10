@@ -7,14 +7,14 @@ from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.datatypes import DataType, DType_T
-from fastcs.datatypes.waveform import Waveform
+from fastcs.datatypes import Bool, DataType, DType_T, Enum, Float, Int, String, Waveform
+from fastcs.exceptions import FastCSError
 from fastcs.logging import bind_logger
 from fastcs.methods import Command
 from fastcs.tracer import Tracer
 from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics.ca.util import (
-    builder_callable_from_attribute,
+    MBB_MAX_CHOICES,
     cast_from_epics_type,
     cast_to_epics_type,
     record_metadata_from_attribute,
@@ -196,7 +196,35 @@ def _make_record(
     on_update: Callable | None = None,
     out_record: bool = False,
 ) -> RecordWrapper:
-    builder_callable = builder_callable_from_attribute(attribute, on_update is None)
+    match attribute.datatype:
+        case Bool():
+            builder_callable = builder.boolIn if on_update is None else builder.boolOut
+        case Int():
+            builder_callable = builder.longIn if on_update is None else builder.longOut
+        case Float():
+            builder_callable = builder.aIn if on_update is None else builder.aOut
+        case String():
+            builder_callable = (
+                builder.longStringIn if on_update is None else builder.longStringOut
+            )
+        case Enum():
+            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
+                builder_callable = (
+                    builder.longStringIn if on_update is None else builder.longStringOut
+                )
+            else:
+                builder_callable = (
+                    builder.mbbIn if on_update is None else builder.mbbOut
+                )
+        case Waveform():
+            builder_callable = (
+                builder.WaveformIn if on_update is None else builder.WaveformOut
+            )
+        case _:
+            raise FastCSError(
+                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
+            )
+
     datatype_record_metadata = record_metadata_from_datatype(
         attribute.datatype, out_record
     )

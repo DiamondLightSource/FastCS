@@ -91,7 +91,7 @@ def test_make_input_record(
     kwargs: dict[str, Any],
     mocker: MockerFixture,
 ):
-    builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
+    builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
 
     pv = "PV"
     _make_record(pv, attribute)
@@ -179,7 +179,7 @@ def test_make_output_record(
     kwargs: dict[str, Any],
     mocker: MockerFixture,
 ):
-    builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
+    builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
     update = mocker.MagicMock()
 
     pv = "PV"
@@ -196,7 +196,7 @@ def test_make_output_record(
 
 
 def test_long_enum_validator(mocker: MockerFixture):
-    builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
+    builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
     update = mocker.MagicMock()
     attribute = AttrRW(Enum(LongEnum))
     pv = "PV"
@@ -230,7 +230,7 @@ def epics_controller_api(class_mocker: MockerFixture):
 
 def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     ioc_builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
-    builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
+    #    builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
     add_pvi_info = mocker.patch("fastcs.transports.epics.ca.ioc._add_pvi_info")
     add_sub_controller_pvi_info = mocker.patch(
         "fastcs.transports.epics.ca.ioc._add_sub_controller_pvi_info"
@@ -239,21 +239,21 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     EpicsCAIOC(DEVICE, epics_controller_api)
 
     # Check records are created
-    builder.boolIn.assert_called_once_with(
+    ioc_builder.boolIn.assert_called_once_with(
         f"{DEVICE}:ReadBool",
         **record_metadata_from_attribute(epics_controller_api.attributes["read_bool"]),
         **record_metadata_from_datatype(
             epics_controller_api.attributes["read_bool"].datatype
         ),
     )
-    builder.longIn.assert_any_call(
+    ioc_builder.longIn.assert_any_call(
         f"{DEVICE}:ReadInt",
         **record_metadata_from_attribute(epics_controller_api.attributes["read_int"]),
         **record_metadata_from_datatype(
             epics_controller_api.attributes["read_int"].datatype
         ),
     )
-    builder.aIn.assert_called_once_with(
+    ioc_builder.aIn.assert_called_once_with(
         f"{DEVICE}:ReadWriteFloat_RBV",
         **record_metadata_from_attribute(
             epics_controller_api.attributes["read_write_float"]
@@ -262,7 +262,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
             epics_controller_api.attributes["read_write_float"].datatype
         ),
     )
-    builder.aOut.assert_any_call(
+    ioc_builder.aOut.assert_any_call(
         f"{DEVICE}:ReadWriteFloat",
         always_update=True,
         blocking=True,
@@ -275,7 +275,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
             out_record=True,
         ),
     )
-    builder.longIn.assert_any_call(
+    ioc_builder.longIn.assert_any_call(
         f"{DEVICE}:ReadWriteInt_RBV",
         **record_metadata_from_attribute(
             epics_controller_api.attributes["read_write_int"]
@@ -284,7 +284,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
             epics_controller_api.attributes["read_write_int"].datatype
         ),
     )
-    builder.longOut.assert_called_with(
+    ioc_builder.longOut.assert_called_with(
         f"{DEVICE}:ReadWriteInt",
         always_update=True,
         blocking=True,
@@ -296,14 +296,14 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
             epics_controller_api.attributes["read_write_int"].datatype, out_record=True
         ),
     )
-    builder.mbbIn.assert_called_once_with(
+    ioc_builder.mbbIn.assert_called_once_with(
         f"{DEVICE}:Enum_RBV",
         **record_metadata_from_attribute(epics_controller_api.attributes["enum"]),
         **record_metadata_from_datatype(
             epics_controller_api.attributes["enum"].datatype
         ),
     )
-    builder.mbbOut.assert_called_once_with(
+    ioc_builder.mbbOut.assert_called_once_with(
         f"{DEVICE}:Enum",
         always_update=True,
         blocking=True,
@@ -313,7 +313,7 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
             epics_controller_api.attributes["enum"].datatype, out_record=True
         ),
     )
-    builder.boolOut.assert_called_once_with(
+    ioc_builder.boolOut.assert_called_once_with(
         f"{DEVICE}:WriteBool",
         always_update=True,
         blocking=True,
@@ -450,7 +450,6 @@ class ControllerLongNames(Controller):
 
 def test_long_pv_names_discarded(mocker: MockerFixture):
     ioc_builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
-    builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
     long_name_controller_api = AssertableControllerAPI(ControllerLongNames(), mocker)
     long_attr_name = "attr_r_with_reallyreallyreallyreallyreallyreallyreally_long_name"
     long_rw_name = "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_RBV"
@@ -461,7 +460,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     assert not long_name_controller_api.attributes[long_attr_name].enabled
 
     short_pv_name = "attr_rw_short_name".title().replace("_", "")
-    builder.longOut.assert_called_once_with(
+    ioc_builder.longOut.assert_called_once_with(
         f"{DEVICE}:{short_pv_name}",
         always_update=True,
         blocking=True,
@@ -474,7 +473,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
             long_name_controller_api.attributes["attr_rw_short_name"]
         ),
     )
-    builder.longIn.assert_called_once_with(
+    ioc_builder.longIn.assert_called_once_with(
         f"{DEVICE}:{short_pv_name}_RBV",
         **record_metadata_from_datatype(
             long_name_controller_api.attributes[
@@ -490,7 +489,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
 
     long_pv_name = long_attr_name.title().replace("_", "")
     with pytest.raises(AssertionError):
-        builder.longIn.assert_called_once_with(f"{DEVICE}:{long_pv_name}")
+        ioc_builder.longIn.assert_called_once_with(f"{DEVICE}:{long_pv_name}")
 
     long_rw_pv_name = long_rw_name.title().replace("_", "")
     # neither the readback nor setpoint PV gets made if the full pv name with _RBV
@@ -502,14 +501,14 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     )
 
     with pytest.raises(AssertionError):
-        builder.longOut.assert_called_once_with(
+        ioc_builder.longOut.assert_called_once_with(
             f"{DEVICE}:{long_rw_pv_name}",
             always_update=True,
             blocking=True,
             on_update=mocker.ANY,
         )
     with pytest.raises(AssertionError):
-        builder.longIn.assert_called_once_with(f"{DEVICE}:{long_rw_pv_name}_RBV")
+        ioc_builder.longIn.assert_called_once_with(f"{DEVICE}:{long_rw_pv_name}_RBV")
 
     assert long_name_controller_api.command_methods["command_short_name"].enabled
     long_command_name = (
@@ -528,7 +527,7 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     )
     with pytest.raises(AssertionError):
         long_command_pv_name = long_command_name.title().replace("_", "")
-        builder.aOut.assert_called_once_with(
+        ioc_builder.aOut.assert_called_once_with(
             f"{DEVICE}:{long_command_pv_name}",
             initial_value=0,
             always_update=True,
@@ -557,7 +556,7 @@ def test_non_1d_waveforms_discarded(mocker: MockerFixture):
 
 
 def test_update_datatype(mocker: MockerFixture):
-    builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
+    builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
 
     pv_name = f"{DEVICE}:Attr"
 

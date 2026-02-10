@@ -2,12 +2,9 @@ import enum
 from dataclasses import asdict
 from typing import Any
 
-from softioc import builder
-
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.attributes import Attribute, AttrR, AttrW
 from fastcs.datatypes import Bool, DType_T, Enum, Float, Int, String, Waveform
 from fastcs.datatypes.datatype import DataType
-from fastcs.exceptions import FastCSError
 
 _MBB_FIELD_PREFIXES = (
     "ZR",
@@ -154,29 +151,3 @@ def cast_to_epics_type(datatype: DataType[DType_T], value: DType_T) -> Any:
             return value
         case _:
             raise ValueError(f"Unsupported datatype {datatype}")
-
-
-def builder_callable_from_attribute(
-    attribute: AttrR | AttrW | AttrRW, make_in_record: bool
-):
-    """Returns a callable to make the softioc record from an attribute instance."""
-    match attribute.datatype:
-        case Bool():
-            return builder.boolIn if make_in_record else builder.boolOut
-        case Int():
-            return builder.longIn if make_in_record else builder.longOut
-        case Float():
-            return builder.aIn if make_in_record else builder.aOut
-        case String():
-            return builder.longStringIn if make_in_record else builder.longStringOut
-        case Enum():
-            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                return builder.longStringIn if make_in_record else builder.longStringOut
-            else:
-                return builder.mbbIn if make_in_record else builder.mbbOut
-        case Waveform():
-            return builder.WaveformIn if make_in_record else builder.WaveformOut
-        case _:
-            raise FastCSError(
-                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
-            )
