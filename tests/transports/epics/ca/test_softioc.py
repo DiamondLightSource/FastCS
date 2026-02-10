@@ -27,7 +27,8 @@ from fastcs.transports.epics.ca.ioc import (
     _add_sub_controller_pvi_info,
     _create_and_link_read_pv,
     _create_and_link_write_pv,
-    _make_record,
+    _make_in_record,
+    _make_out_record,
 )
 from fastcs.transports.epics.ca.util import (
     record_metadata_from_attribute,
@@ -46,7 +47,7 @@ class OnOffStates(enum.IntEnum):
 
 @pytest.mark.asyncio
 async def test_create_and_link_read_pv(mocker: MockerFixture):
-    make_record = mocker.patch("fastcs.transports.epics.ca.ioc._make_record")
+    make_record = mocker.patch("fastcs.transports.epics.ca.ioc._make_in_record")
     add_attr_pvi_info = mocker.patch(
         "fastcs.transports.epics.ca.ioc._add_attr_pvi_info"
     )
@@ -94,7 +95,7 @@ def test_make_input_record(
     builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
 
     pv = "PV"
-    _make_record(pv, attribute)
+    _make_in_record(pv, attribute)
     kwargs.update(record_metadata_from_datatype(attribute.datatype))
     kwargs.update(record_metadata_from_attribute(attribute))
 
@@ -105,14 +106,15 @@ def test_make_input_record(
 
 
 def test_make_record_raises(mocker: MockerFixture):
+    mocker.patch("fastcs.transports.epics.ca.ioc.record_metadata_from_datatype")
     # Pass a mock as attribute to provoke the fallback case matching on datatype
     with pytest.raises(FastCSError):
-        _make_record("PV", mocker.MagicMock())
+        _make_in_record("PV", mocker.MagicMock())
 
 
 @pytest.mark.asyncio
 async def test_create_and_link_write_pv(mocker: MockerFixture):
-    make_record = mocker.patch("fastcs.transports.epics.ca.ioc._make_record")
+    make_record = mocker.patch("fastcs.transports.epics.ca.ioc._make_out_record")
     add_attr_pvi_info = mocker.patch(
         "fastcs.transports.epics.ca.ioc._add_attr_pvi_info"
     )
@@ -124,9 +126,7 @@ async def test_create_and_link_write_pv(mocker: MockerFixture):
 
     _create_and_link_write_pv("PREFIX", "PV", "attr", attribute)
 
-    make_record.assert_called_once_with(
-        "PREFIX:PV", attribute, on_update=mocker.ANY, out_record=True
-    )
+    make_record.assert_called_once_with("PREFIX:PV", attribute, on_update=mocker.ANY)
     add_attr_pvi_info.assert_called_once_with(record, "PREFIX", "attr", "w")
 
     # Extract the write update callback generated and set in the function and call it
@@ -183,7 +183,7 @@ def test_make_output_record(
     update = mocker.MagicMock()
 
     pv = "PV"
-    _make_record(pv, attribute, on_update=update, out_record=True)
+    _make_out_record(pv, attribute, on_update=update)
 
     kwargs.update(record_metadata_from_datatype(attribute.datatype, out_record=True))
     kwargs.update(record_metadata_from_attribute(attribute))
@@ -200,16 +200,17 @@ def test_long_enum_validator(mocker: MockerFixture):
     update = mocker.MagicMock()
     attribute = AttrRW(Enum(LongEnum))
     pv = "PV"
-    record = _make_record(pv, attribute, on_update=update, out_record=True)
+    record = _make_out_record(pv, attribute, on_update=update)
     validator = builder.longStringOut.call_args.kwargs["validate"]
     assert validator(record, "THIS")  # value is one of the Enum names
     assert not validator(record, "an invalid string value")
 
 
 def test_get_output_record_raises(mocker: MockerFixture):
+    mocker.patch("fastcs.transports.epics.ca.ioc.record_metadata_from_datatype")
     # Pass a mock as attribute to provoke the fallback case matching on datatype
     with pytest.raises(FastCSError):
-        _make_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
+        _make_out_record("PV", mocker.MagicMock(), on_update=mocker.MagicMock())
 
 
 class EpicsController(MyTestController):
@@ -561,7 +562,7 @@ def test_update_datatype(mocker: MockerFixture):
     pv_name = f"{DEVICE}:Attr"
 
     attr_r = AttrR(Int())
-    record_r = _make_record(pv_name, attr_r)
+    record_r = _make_in_record(pv_name, attr_r)
 
     builder.longIn.assert_called_once_with(
         pv_name,
@@ -580,7 +581,7 @@ def test_update_datatype(mocker: MockerFixture):
         attr_r.update_datatype(String())  # type: ignore
 
     attr_w = AttrW(Int())
-    record_w = _make_record(pv_name, attr_w, on_update=mocker.ANY, out_record=True)
+    record_w = _make_out_record(pv_name, attr_w, on_update=mocker.ANY)
 
     builder.longIn.assert_called_once_with(
         pv_name,

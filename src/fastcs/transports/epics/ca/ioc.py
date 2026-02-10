@@ -184,64 +184,128 @@ def _create_and_link_read_pv(
 
         record.set(cast_to_epics_type(attribute.datatype, value))
 
-    record = _make_record(pv, attribute)
+    record = _make_in_record(pv, attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
     attribute.add_on_update_callback(async_record_set)
 
 
-def _make_record(
+def _make_in_record(
     pv: str,
     attribute: AttrR | AttrW | AttrRW,
-    on_update: Callable | None = None,
-    out_record: bool = False,
 ) -> RecordWrapper:
+    datatype_record_metadata = record_metadata_from_datatype(attribute.datatype)
+    attribute_record_metadata = record_metadata_from_attribute(attribute)
+
+    update = {}
+
     match attribute.datatype:
         case Bool():
-            builder_callable = builder.boolIn if on_update is None else builder.boolOut
+            record = builder.boolIn(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+            )
         case Int():
-            builder_callable = builder.longIn if on_update is None else builder.longOut
+            record = builder.longIn(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+            )
         case Float():
-            builder_callable = builder.aIn if on_update is None else builder.aOut
+            record = builder.aIn(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+            )
         case String():
-            builder_callable = (
-                builder.longStringIn if on_update is None else builder.longStringOut
+            record = builder.longStringIn(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
             )
         case Enum():
             if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                builder_callable = (
-                    builder.longStringIn if on_update is None else builder.longStringOut
+                record = builder.longStringIn(
+                    pv,
+                    **update,
+                    **datatype_record_metadata,
+                    **attribute_record_metadata,
                 )
             else:
-                builder_callable = (
-                    builder.mbbIn if on_update is None else builder.mbbOut
+                record = builder.mbbIn(
+                    pv,
+                    **update,
+                    **datatype_record_metadata,
+                    **attribute_record_metadata,
                 )
         case Waveform():
-            builder_callable = (
-                builder.WaveformIn if on_update is None else builder.WaveformOut
+            record = builder.WaveformIn(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
             )
         case _:
             raise FastCSError(
                 f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
             )
 
+    def datatype_updater(datatype: DataType):
+        for name, value in record_metadata_from_datatype(datatype).items():
+            record.set_field(name, value)
+
+    attribute.add_update_datatype_callback(datatype_updater)
+    return record
+
+
+def _make_out_record(
+    pv: str,
+    attribute: AttrR | AttrW | AttrRW,
+    on_update: Callable,
+) -> RecordWrapper:
     datatype_record_metadata = record_metadata_from_datatype(
-        attribute.datatype, out_record
+        attribute.datatype, out_record=True
     )
     attribute_record_metadata = record_metadata_from_attribute(attribute)
 
-    update = (
-        {"on_update": on_update, "always_update": True, "blocking": True}
-        if on_update
-        else {}
-    )
+    update = {"on_update": on_update, "always_update": True, "blocking": True}
 
-    record = builder_callable(
-        pv, **update, **datatype_record_metadata, **attribute_record_metadata
-    )
+    match attribute.datatype:
+        case Bool():
+            record = builder.boolOut(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+            )
+        case Int():
+            record = builder.longOut(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+            )
+        case Float():
+            record = builder.aOut(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+            )
+        case String():
+            record = builder.longStringOut(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+            )
+        case Enum():
+            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
+                record = builder.longStringOut(
+                    pv,
+                    **update,
+                    **datatype_record_metadata,
+                    **attribute_record_metadata,
+                )
+
+            else:
+                record = builder.mbbOut(
+                    pv,
+                    **update,
+                    **datatype_record_metadata,
+                    **attribute_record_metadata,
+                )
+        case Waveform():
+            record = builder.WaveformOut(
+                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+            )
+        case _:
+            raise FastCSError(
+                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
+            )
 
     def datatype_updater(datatype: DataType):
-        for name, value in record_metadata_from_datatype(datatype, out_record).items():
+        for name, value in record_metadata_from_datatype(
+            datatype, out_record=True
+        ).items():
             record.set_field(name, value)
 
     attribute.add_update_datatype_callback(datatype_updater)
@@ -265,7 +329,7 @@ def _create_and_link_write_pv(
 
         record.set(cast_to_epics_type(attribute.datatype, value), process=False)
 
-    record = _make_record(pv, attribute, on_update=on_update, out_record=True)
+    record = _make_out_record(pv, attribute, on_update=on_update)
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 
