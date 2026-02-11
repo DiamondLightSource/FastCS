@@ -206,6 +206,14 @@ def test_long_enum_validator(mocker: MockerFixture):
     assert not validator(record, "an invalid string value")
 
 
+def test_long_enum_in_creation(mocker: MockerFixture):
+    builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
+    attribute = AttrR(Enum(LongEnum))
+    pv = "PV"
+    _make_in_record(pv, attribute)
+    assert builder.longStringIn.call_args.kwargs["initial_value"] == "THIS"
+
+
 def test_get_output_record_raises(mocker: MockerFixture):
     mocker.patch("fastcs.transports.epics.ca.ioc.record_metadata_from_datatype")
     # Pass a mock as attribute to provoke the fallback case matching on datatype
