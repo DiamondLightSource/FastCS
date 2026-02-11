@@ -590,7 +590,7 @@ def test_update_datatype(mocker: MockerFixture):
     attr_w = AttrW(Int())
     record_w = _make_out_record(pv_name, attr_w, on_update=mocker.ANY)
 
-    builder.longIn.assert_called_once_with(
+    builder.longOut.assert_called_once_with(
         pv_name,
         **record_metadata_from_attribute(attr_w),
         **record_metadata_from_datatype(attr_w.datatype),
