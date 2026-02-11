@@ -239,7 +239,6 @@ def epics_controller_api(class_mocker: MockerFixture):
 
 def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     ioc_builder = mocker.patch("fastcs.transports.epics.ca.ioc.builder")
-    #    builder = mocker.patch("fastcs.transports.epics.ca.util.builder")
     add_pvi_info = mocker.patch("fastcs.transports.epics.ca.ioc._add_pvi_info")
     add_sub_controller_pvi_info = mocker.patch(
         "fastcs.transports.epics.ca.ioc._add_sub_controller_pvi_info"

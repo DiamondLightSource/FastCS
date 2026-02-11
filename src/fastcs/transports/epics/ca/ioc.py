@@ -197,43 +197,39 @@ def _make_in_record(
     datatype_record_metadata = record_metadata_from_datatype(attribute.datatype)
     attribute_record_metadata = record_metadata_from_attribute(attribute)
 
-    update = {}
-
     match attribute.datatype:
         case Bool():
             record = builder.boolIn(
-                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+                pv, **datatype_record_metadata, **attribute_record_metadata
             )
         case Int():
             record = builder.longIn(
-                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+                pv, **datatype_record_metadata, **attribute_record_metadata
             )
         case Float():
             record = builder.aIn(
-                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+                pv, **datatype_record_metadata, **attribute_record_metadata
             )
         case String():
             record = builder.longStringIn(
-                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+                pv, **datatype_record_metadata, **attribute_record_metadata
             )
         case Enum():
             if len(attribute.datatype.members) > MBB_MAX_CHOICES:
                 record = builder.longStringIn(
                     pv,
-                    **update,
                     **datatype_record_metadata,
                     **attribute_record_metadata,
                 )
             else:
                 record = builder.mbbIn(
                     pv,
-                    **update,
                     **datatype_record_metadata,
                     **attribute_record_metadata,
                 )
         case Waveform():
             record = builder.WaveformIn(
-                pv, **update, **datatype_record_metadata, **attribute_record_metadata
+                pv, **datatype_record_metadata, **attribute_record_metadata
             )
         case _:
             raise FastCSError(
