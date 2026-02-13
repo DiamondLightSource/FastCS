@@ -2,7 +2,6 @@ import enum
 from dataclasses import asdict
 from typing import Any
 
-from fastcs.attributes import Attribute, AttrR, AttrW
 from fastcs.datatypes import Bool, DType_T, Enum, Float, Int, String, Waveform
 from fastcs.datatypes.datatype import DataType
 
@@ -43,21 +42,6 @@ DATATYPE_FIELD_TO_RECORD_FIELD = {
 }
 
 
-def record_metadata_from_attribute(attribute: Attribute[DType_T]) -> dict[str, Any]:
-    """Converts attributes on the `Attribute` to the
-    field name/value in the record metadata."""
-    metadata: dict[str, Any] = {"DESC": attribute.description}
-    initial = None
-    match attribute:
-        case AttrR():
-            initial = attribute.get()
-        case AttrW():
-            initial = attribute.datatype.initial_value
-    if initial is not None:
-        metadata["initial_value"] = cast_to_epics_type(attribute.datatype, initial)
-    return metadata
-
-
 def record_metadata_from_datatype(
     datatype: DataType[Any], out_record: bool = False
 ) -> dict[str, str]:
@@ -87,14 +71,7 @@ def record_metadata_from_datatype(
             arguments["length"] = datatype.shape[0]
         case Enum():
             if len(datatype.members) <= MBB_MAX_CHOICES:
-                state_keys = dict(
-                    zip(
-                        MBB_STATE_FIELDS,
-                        datatype.names,
-                        strict=False,
-                    )
-                )
-                arguments.update(state_keys)
+                arguments.update(create_state_keys(datatype))
             elif out_record:  # no validators for in type records
 
                 def _verify_in_datatype(_, value):
@@ -106,6 +83,16 @@ def record_metadata_from_datatype(
             arguments["ONAM"] = "True"
 
     return arguments
+
+
+def create_state_keys(datatype: Enum):
+    return dict(
+        zip(
+            MBB_STATE_FIELDS,
+            datatype.names,
+            strict=False,
+        )
+    )
 
 
 def cast_from_epics_type(datatype: DataType[DType_T], value: object) -> DType_T:
