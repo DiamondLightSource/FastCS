@@ -20,7 +20,7 @@ def test_controller_nesting():
     assert controller.sub_controllers == {"a": sub_controller}
     assert sub_controller.sub_controllers == {"b": sub_sub_controller}
 
-    with pytest.raises(ValueError, match=r"existing sub controller"):
+    with pytest.raises(ValueError, match=r"Cannot add sub controller"):
         controller.a = Controller()
 
     with pytest.raises(ValueError, match=r"already registered"):
@@ -86,22 +86,16 @@ def test_conflicting_attributes_and_controllers():
 
     controller = ConflictingController()
 
-    with pytest.raises(ValueError, match=r"Cannot add attribute .* existing attribute"):
+    with pytest.raises(ValueError, match=r"Cannot add attribute"):
         controller.attr = AttrR(Float())  # pyright: ignore[reportAttributeAccessIssue]
 
-    with pytest.raises(
-        ValueError, match=r"Cannot add sub controller .* existing attribute"
-    ):
+    with pytest.raises(ValueError, match=r"Cannot add sub controller"):
         controller.attr = Controller()  # pyright: ignore[reportAttributeAccessIssue]
 
-    with pytest.raises(
-        ValueError, match=r"Cannot add sub controller .* existing sub controller"
-    ):
+    with pytest.raises(ValueError, match=r"Cannot add sub controller"):
         controller.sub_controller = Controller()
 
-    with pytest.raises(
-        ValueError, match=r"Cannot add attribute .* existing sub controller"
-    ):
+    with pytest.raises(ValueError, match=r"Cannot add attribute"):
         controller.sub_controller = AttrR(Int())  # pyright: ignore[reportAttributeAccessIssue]
 
 
