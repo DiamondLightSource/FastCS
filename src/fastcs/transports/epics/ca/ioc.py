@@ -340,9 +340,13 @@ def _make_out_record(
             )
 
     def datatype_updater(datatype: DataType):
+        # Filter out keys that can't be set via set field
+        builder_only_keys = {"validate", "length"}
         for name, value in record_metadata_from_datatype(
             datatype, out_record=True
         ).items():
+            if name in builder_only_keys:
+                continue
             record.set_field(name, value)
 
     attribute.add_update_datatype_callback(datatype_updater)
