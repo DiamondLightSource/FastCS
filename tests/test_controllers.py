@@ -5,6 +5,7 @@ import pytest
 from fastcs.attributes import AttrR, AttrRW
 from fastcs.controllers import Controller, ControllerVector
 from fastcs.datatypes import Enum, Float, Int
+from fastcs.methods import Command, Scan
 
 
 def test_controller_nesting():
@@ -76,9 +77,30 @@ def test_attribute_parsing():
     }
 
 
-def test_conflicting_attributes_and_controllers():
+async def noop() -> None:
+    pass
+
+
+@pytest.mark.parametrize(
+    "member_name, member_value, expected_error",
+    [
+        ("attr", AttrR(Float()), r"Cannot add attribute"),
+        ("attr", Controller(), r"Cannot add sub controller"),
+        ("attr", Command(noop), r"Cannot add command"),
+        ("sub_controller", AttrR(Int()), r"Cannot add attribute"),
+        ("sub_controller", Controller(), r"Cannot add sub controller"),
+        ("sub_controller", Command(noop), r"Cannot add command"),
+        ("cmd", AttrR(Int()), r"Cannot add attribute"),
+        ("cmd", Controller(), r"Cannot add sub controller"),
+        ("cmd", Command(noop), r"Cannot add command"),
+    ],
+)
+def test_conflicting_attributes_and_controllers_and_commands(
+    member_name, member_value, expected_error
+):
     class ConflictingController(Controller):
         attr = AttrR(Int())
+        cmd = Command(noop)
 
         def __init__(self):
             super().__init__()
@@ -86,17 +108,8 @@ def test_conflicting_attributes_and_controllers():
 
     controller = ConflictingController()
 
-    with pytest.raises(ValueError, match=r"Cannot add attribute"):
-        controller.attr = AttrR(Float())  # pyright: ignore[reportAttributeAccessIssue]
-
-    with pytest.raises(ValueError, match=r"Cannot add sub controller"):
-        controller.attr = Controller()  # pyright: ignore[reportAttributeAccessIssue]
-
-    with pytest.raises(ValueError, match=r"Cannot add sub controller"):
-        controller.sub_controller = Controller()
-
-    with pytest.raises(ValueError, match=r"Cannot add attribute"):
-        controller.sub_controller = AttrR(Int())  # pyright: ignore[reportAttributeAccessIssue]
+    with pytest.raises(ValueError, match=expected_error):
+        setattr(controller, member_name, member_value)
 
 
 def test_controller_raises_error_if_passed_numeric_sub_controller_name():
@@ -196,4 +209,22 @@ async def test_sub_controller_hint_validation():
         controller.add_sub_controller("child", Controller())
 
     controller.add_sub_controller("child", SomeSubController())
+    controller._validate_type_hints()
+
+
+@pytest.mark.asyncio
+async def test_method_hint_validation():
+    class HintedController(Controller):
+        method: Scan
+
+    controller = HintedController()
+
+    with pytest.raises(RuntimeError, match="failed to introspect hinted method"):
+        controller._validate_type_hints()
+
+    with pytest.raises(RuntimeError, match="Cannot add command method"):
+        controller.add_command("method", Command(noop))
+
+    controller.add_scan("method", Scan(fn=noop, period=0.1))
+
     controller._validate_type_hints()

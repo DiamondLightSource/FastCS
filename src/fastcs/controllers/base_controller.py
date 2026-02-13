@@ -351,11 +351,23 @@ class BaseController(Tracer):
     def sub_controllers(self) -> dict[str, BaseController]:
         return self.__sub_controllers
 
+    def _validated_added_method(self, name: str, method: Method):
+        if name in self.__hinted_methods:
+            hint = self.__hinted_methods[name]
+            if not isinstance(method, hint):
+                raise RuntimeError(
+                    f"Controller '{self.__class__.__name__}' introspection of "
+                    f"hinted method '{name}' does not match defined type. "
+                    f"Expected '{hint.__name__}' got "
+                    f"'{method.__class__.__name__}'."
+                )
+
     def add_command(self, name: str, command: Command):
         try:
             self._check_for_name_clash(name)
-        except ValueError as exc:
-            raise ValueError(f"Cannot add command method {command}.") from exc
+            self._validated_added_method(name, command)
+        except (ValueError, RuntimeError) as exc:
+            raise exc.__class__(f"Cannot add command method {command}.") from exc
 
         self.__command_methods[name] = command
         super().__setattr__(name, command)
@@ -367,8 +379,9 @@ class BaseController(Tracer):
     def add_scan(self, name: str, scan: Scan):
         try:
             self._check_for_name_clash(name)
-        except ValueError as exc:
-            raise ValueError(f"Cannot add scan method {scan}.") from exc
+            self._validated_added_method(name, scan)
+        except (ValueError, RuntimeError) as exc:
+            raise exc.__class__(f"Cannot add command method {scan}.") from exc
 
         self.__scan_methods[name] = scan
         super().__setattr__(name, scan)
