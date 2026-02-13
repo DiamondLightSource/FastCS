@@ -187,7 +187,7 @@ class BaseController(Tracer):
             subcontroller._validate_type_hints()  # noqa: SLF001
 
     def _validate_hinted_member(self, name: str, expected_type: type):
-        """Validate thata hinted member exists on the controller"""
+        """Validate that a hinted member exists on the controller"""
         member = getattr(self, name, None)
         if member is None or not isinstance(member, expected_type):
             raise RuntimeError()
@@ -381,7 +381,7 @@ class BaseController(Tracer):
             self._check_for_name_clash(name)
             self._validated_added_method(name, scan)
         except (ValueError, RuntimeError) as exc:
-            raise exc.__class__(f"Cannot add command method {scan}.") from exc
+            raise exc.__class__(f"Cannot add scan method {scan}.") from exc
 
         self.__scan_methods[name] = scan
         super().__setattr__(name, scan)
