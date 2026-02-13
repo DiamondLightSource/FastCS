@@ -72,7 +72,6 @@ async def test_initial_values_set_in_ca(mocker):
             wrapper.name: wrapper.get()
             for wrapper in record_spy.spy_return_list + record_spy_out.spy_return_list
         }
-        print(f"{initial_values}")
         for name, value in {
             "SOFTIOC_INITIAL_DEVICE:Bool": 1,
             "SOFTIOC_INITIAL_DEVICE:BoolR": 0,
@@ -110,7 +109,6 @@ async def test_initial_values_set_in_ca(mocker):
             "SOFTIOC_INITIAL_DEVICE:WaveformW": 10 * [0],
             "SOFTIOC_INITIAL_DEVICE:Waveform_RBV": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         }.items():
-            print(f"{name}  =>  {value}  {initial_values[name]}")
             assert np.array_equal(value, initial_values[name])
     except Exception as e:
         raise e
