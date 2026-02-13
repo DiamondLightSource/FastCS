@@ -86,6 +86,7 @@ def record_metadata_from_datatype(
 
 
 def create_state_keys(datatype: Enum):
+    """Creates a dictionary of state field keys to names"""
     return dict(
         zip(
             MBB_STATE_FIELDS,
