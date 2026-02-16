@@ -13,7 +13,6 @@ from fastcs.logging import bind_logger
 from fastcs.methods import Command
 from fastcs.tracer import Tracer
 from fastcs.transports.controller_api import ControllerAPI
-from fastcs.transports.epics import EpicsIOCOptions
 from fastcs.transports.epics.ca.util import (
     builder_callable_from_attribute,
     cast_from_epics_type,
@@ -38,9 +37,7 @@ class EpicsCAIOC:
         self,
         pv_prefix: str,
         controller_api: ControllerAPI,
-        options: EpicsIOCOptions | None = None,
     ):
-        self._options = options or EpicsIOCOptions()
         self._controller_api = controller_api
         _add_pvi_info(f"{pv_prefix}:PVI")
         _add_sub_controller_pvi_info(pv_prefix, controller_api)
