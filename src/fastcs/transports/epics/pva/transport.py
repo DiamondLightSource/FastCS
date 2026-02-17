@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import dataclass, field
 
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics import (
     EpicsDocsOptions,
@@ -13,8 +13,6 @@ from fastcs.transports.epics.pva.gui import PvaEpicsGUI
 from fastcs.transports.transport import Transport
 
 from .ioc import P4PIOC
-
-logger = bind_logger(logger_name=__name__)
 
 
 @dataclass

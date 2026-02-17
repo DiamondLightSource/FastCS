@@ -2,13 +2,12 @@ from collections.abc import Callable, Coroutine
 from types import MethodType
 from typing import TYPE_CHECKING
 
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.methods.method import Controller_T, Method
 
 if TYPE_CHECKING:
     from fastcs.controllers import BaseController  # noqa: F401
 
-logger = bind_logger(logger_name=__name__)
 
 UnboundCommandCallback = Callable[[Controller_T], Coroutine[None, None, None]]
 """A Command callback that is unbound and must be called with a `Controller` instance"""

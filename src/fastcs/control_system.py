@@ -8,13 +8,12 @@ from typing import Any
 from IPython.terminal.embed import InteractiveShellEmbed
 
 from fastcs.controllers import BaseController, Controller
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.methods import ScanCallback
 from fastcs.tracer import Tracer
 from fastcs.transports import ControllerAPI, Transport
 
 tracer = Tracer(name=__name__)
-logger = bind_logger(logger_name=__name__)
 
 
 class FastCS:

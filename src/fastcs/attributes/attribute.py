@@ -4,10 +4,7 @@ from typing import Generic, Literal
 
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.datatypes import DataType, DType, DType_T
-from fastcs.logging import bind_logger
 from fastcs.tracer import Tracer
-
-logger = bind_logger(logger_name=__name__)
 
 AttributeAccessMode = Literal["r", "w", "rw"]
 

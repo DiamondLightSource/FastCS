@@ -4,13 +4,11 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 
 from fastcs.attributes import Attribute, AttributeIORef, AttrR
-from fastcs.logging import bind_logger
 from fastcs.methods import Command, Scan, ScanCallback
 from fastcs.tracer import Tracer
 from fastcs.util import ONCE
 
 tracer = Tracer(name=__name__)
-logger = bind_logger(logger_name=__name__)
 
 
 @dataclass

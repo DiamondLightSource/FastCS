@@ -33,13 +33,11 @@ from fastcs.datatypes import (
     String,
     Waveform,
 )
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.methods import Command
 from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics.options import EpicsGUIFormat, EpicsGUIOptions
 from fastcs.util import snake_to_pascal
-
-logger = bind_logger(logger_name=__name__)
 
 
 class EpicsGUI:
