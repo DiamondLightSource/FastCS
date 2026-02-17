@@ -409,10 +409,7 @@ DEMO:R1:Enabled_RBV            Off
 
 FastCS has convenient logging support to provide status and metrics from the
 application. To enable logging from the core framework call `configure_logging` with no
-arguments (the default logging level is INFO). To log messages from a driver, either
-import the singleton `logger` directly, or to provide more context to the message, call
-`bind_logger` with a name (usually either the name of the module or the name of the
-class).
+arguments (the default logging level is INFO). To log messages from a driver, import the singleton `logger` directly.
 
 Create a module-level logger to log status of the application start up. Create a class
 logger for `TemperatureControllerAttributeIO` to log the commands it sends.
