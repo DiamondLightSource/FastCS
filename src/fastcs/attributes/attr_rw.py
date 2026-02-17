@@ -3,9 +3,6 @@ from fastcs.attributes.attr_w import AttrW
 from fastcs.attributes.attribute import AttributeAccessMode
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.datatypes import DataType, DType_T
-from fastcs.logging import bind_logger
-
-logger = bind_logger(logger_name=__name__)
 
 
 class AttrRW(AttrR[DType_T, AttributeIORefT], AttrW[DType_T, AttributeIORefT]):

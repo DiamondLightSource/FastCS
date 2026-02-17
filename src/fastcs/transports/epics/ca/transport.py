@@ -4,7 +4,7 @@ from typing import Any
 
 from softioc import softioc
 
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics import (
     EpicsDocsOptions,
@@ -15,8 +15,6 @@ from fastcs.transports.epics.ca.ioc import EpicsCAIOC
 from fastcs.transports.epics.docs import EpicsDocs
 from fastcs.transports.epics.gui import EpicsGUI
 from fastcs.transports.transport import Transport
-
-logger = bind_logger(logger_name=__name__)
 
 
 @dataclass

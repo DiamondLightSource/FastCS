@@ -10,12 +10,10 @@ from fastcs.connections import IPConnection, IPConnectionSettings
 from fastcs.controllers import Controller
 from fastcs.datatypes import Enum, Float, Int, String
 from fastcs.launch import FastCS
-from fastcs.logging import bind_logger, configure_logging
+from fastcs.logging import configure_logging, logger
 from fastcs.methods import command, scan
 from fastcs.transports.epics import EpicsGUIOptions, EpicsIOCOptions
 from fastcs.transports.epics.ca import EpicsCATransport
-
-logger = bind_logger(__name__)
 
 NumberT = TypeVar("NumberT", int, float)
 
@@ -33,8 +31,6 @@ class TemperatureControllerAttributeIO(
     def __init__(self, connection: IPConnection, suffix: str = ""):
         super().__init__()
 
-        self.logger = bind_logger(__class__.__name__)
-
         self._connection = connection
         self._suffix = suffix
 
@@ -49,7 +45,7 @@ class TemperatureControllerAttributeIO(
     ) -> None:
         command = f"{attr.io_ref.name}{self._suffix}={attr.dtype(value)}"
 
-        self.logger.info("Sending attribute value", command=command, attribute=attr)
+        logger.info("Sending attribute value", command=command, attribute=attr)
 
         await self._connection.send_command(f"{command}\r\n")
 
