@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transports.epics.ca.ioc &#8212; FastCS 0.12.0a2.dev12+g5d6b41c2a documentation</title>
+    <title>fastcs.transports.epics.ca.ioc &#8212; FastCS 0.12.0a2.dev13+g4992357f5 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=a8273b6d"></script>
+    <script src="../../../../../_static/documentation_options.js?v=958eedcb"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -464,7 +464,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics</span><span class="w"> </span><span class="kn">import</span> <span class="n">EpicsIOCOptions</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">builder_callable_from_attribute</span><span class="p">,</span>
     <span class="n">cast_from_epics_type</span><span class="p">,</span>
@@ -491,9 +490,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pv_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">controller_api</span><span class="p">:</span> <span class="n">ControllerAPI</span><span class="p">,</span>
-        <span class="n">options</span><span class="p">:</span> <span class="n">EpicsIOCOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="n">EpicsIOCOptions</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_controller_api</span> <span class="o">=</span> <span class="n">controller_api</span>
         <span class="n">_add_pvi_info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pv_prefix</span><span class="si">}</span><span class="s2">:PVI&quot;</span><span class="p">)</span>
         <span class="n">_add_sub_controller_pvi_info</span><span class="p">(</span><span class="n">pv_prefix</span><span class="p">,</span> <span class="n">controller_api</span><span class="p">)</span>
