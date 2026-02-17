@@ -418,7 +418,7 @@ logger for `TemperatureControllerAttributeIO` to log the commands it sends.
 :class: dropdown, hint
 
 :::{literalinclude} /snippets/static14.py
-:emphasize-lines: 15,20-21,53-55,116,123
+:emphasize-lines: 13,51,113,120
 :::
 
 ::::
