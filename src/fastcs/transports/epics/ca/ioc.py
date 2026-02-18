@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import Callable
+from dataclasses import asdict
 from typing import Any, Literal
 
 from softioc import builder, softioc
@@ -14,12 +15,13 @@ from fastcs.methods import Command
 from fastcs.tracer import Tracer
 from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics.ca.util import (
+    DATATYPE_FIELD_TO_IN_RECORD_FIELD,
+    DATATYPE_FIELD_TO_OUT_RECORD_FIELD,
     DEFAULT_STRING_WAVEFORM_LENGTH,
     MBB_MAX_CHOICES,
     cast_from_epics_type,
     cast_to_epics_type,
     create_state_keys,
-    record_metadata_from_datatype,
 )
 from fastcs.transports.epics.util import controller_pv_prefix
 from fastcs.util import snake_to_pascal
@@ -247,8 +249,9 @@ def _make_in_record(pv: str, attribute: AttrR) -> RecordWrapper:
             )
 
     def datatype_updater(datatype: DataType):
-        for name, value in record_metadata_from_datatype(datatype).items():
-            record.set_field(name, value)
+        for name, value in asdict(datatype).items():
+            if name in DATATYPE_FIELD_TO_IN_RECORD_FIELD:
+                record.set_field(DATATYPE_FIELD_TO_IN_RECORD_FIELD[name], value)
 
     attribute.add_update_datatype_callback(datatype_updater)
     return record
@@ -340,14 +343,9 @@ def _make_out_record(
             )
 
     def datatype_updater(datatype: DataType):
-        # Filter out keys that can't be set via set field
-        builder_only_keys = {"validate", "length"}
-        for name, value in record_metadata_from_datatype(
-            datatype, out_record=True
-        ).items():
-            if name in builder_only_keys:
-                continue
-            record.set_field(name, value)
+        for name, value in asdict(datatype).items():
+            if name in DATATYPE_FIELD_TO_OUT_RECORD_FIELD:
+                record.set_field(DATATYPE_FIELD_TO_OUT_RECORD_FIELD[name], value)
 
     attribute.add_update_datatype_callback(datatype_updater)
     return record

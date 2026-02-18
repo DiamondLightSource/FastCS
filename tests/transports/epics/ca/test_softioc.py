@@ -30,9 +30,6 @@ from fastcs.transports.epics.ca.ioc import (
     _make_in_record,
     _make_out_record,
 )
-from fastcs.transports.epics.ca.util import (
-    record_metadata_from_datatype,
-)
 
 DEVICE = "DEVICE"
 
@@ -71,7 +68,11 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
 @pytest.mark.parametrize(
     "attribute,record_type,kwargs",
     (
-        (AttrR(String()), "longStringIn", {"DESC": None, "initial_value": ""}),
+        (
+            AttrR(String()),
+            "longStringIn",
+            {"length": 256, "DESC": None, "initial_value": ""},
+        ),
         (
             AttrR(Enum(ColourEnum)),
             "mbbIn",
@@ -100,11 +101,8 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
             "WaveformIn",
             {
                 "DESC": None,
-                # array(
-                #    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.int32
-                # ),
+                "length": 10,
             },
-            #            {"DESC": None, "initial_value": None},
         ),
     ),
 )
@@ -118,7 +116,6 @@ def test_make_input_record(
 
     pv = "PV"
     _make_in_record(pv, attribute)
-    kwargs.update(record_metadata_from_datatype(attribute.datatype))
 
     if record_type == "WaveformIn":
         kwargs["initial_value"] = mocker.ANY
@@ -129,7 +126,6 @@ def test_make_input_record(
 
 
 def test_make_record_raises(mocker: MockerFixture):
-    mocker.patch("fastcs.transports.epics.ca.ioc.record_metadata_from_datatype")
     mocker.patch("fastcs.transports.epics.ca.ioc.cast_to_epics_type")
     # Pass a mock as attribute to provoke the fallback case matching on datatype
     with pytest.raises(FastCSError):
@@ -214,7 +210,6 @@ def test_make_output_record(
     pv = "PV"
     _make_out_record(pv, attribute, on_update=update)
 
-    kwargs.update(record_metadata_from_datatype(attribute.datatype, out_record=True))
     kwargs.update({"always_update": True, "on_update": update, "blocking": True})
 
     getattr(builder, record_type).assert_called_once_with(
@@ -243,7 +238,6 @@ def test_long_enum_in_creation(mocker: MockerFixture):
 
 
 def test_get_output_record_raises(mocker: MockerFixture):
-    mocker.patch("fastcs.transports.epics.ca.ioc.record_metadata_from_datatype")
     mocker.patch("fastcs.transports.epics.ca.ioc.cast_to_epics_type")
     # Pass a mock as attribute to provoke the fallback case matching on datatype
     with pytest.raises(FastCSError):
@@ -279,76 +273,80 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
     ioc_builder.boolIn.assert_called_once_with(
         f"{DEVICE}:ReadBool",
         DESC=None,
+        ZNAM="False",
+        ONAM="True",
         initial_value=False,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["read_bool"].datatype
-        ),
     )
     ioc_builder.longIn.assert_any_call(
         f"{DEVICE}:ReadInt",
         DESC=None,
+        EGU=None,
+        LOPR=None,
+        HOPR=None,
         initial_value=0,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["read_int"].datatype
-        ),
     )
     ioc_builder.aIn.assert_called_once_with(
         f"{DEVICE}:ReadWriteFloat_RBV",
         DESC=None,
+        LOPR=None,
+        HOPR=None,
+        EGU=None,
+        PREC=2,
         initial_value=0.0,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["read_write_float"].datatype
-        ),
     )
-    ioc_builder.aOut.assert_any_call(
+    ioc_builder.aOut.assert_called_once_with(
         f"{DEVICE}:ReadWriteFloat",
         DESC=None,
+        LOPR=None,
+        HOPR=None,
+        EGU=None,
+        PREC=2,
+        DRVL=None,
+        DRVH=None,
         initial_value=0.0,
         always_update=True,
         blocking=True,
         on_update=mocker.ANY,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["read_write_float"].datatype,
-            out_record=True,
-        ),
     )
     ioc_builder.longIn.assert_any_call(
         f"{DEVICE}:ReadWriteInt_RBV",
         DESC=None,
+        LOPR=None,
+        HOPR=None,
+        EGU=None,
         initial_value=0,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["read_write_int"].datatype
-        ),
     )
     ioc_builder.longOut.assert_called_with(
         f"{DEVICE}:ReadWriteInt",
+        LOPR=None,
+        HOPR=None,
+        EGU=None,
+        DRVL=None,
+        DRVH=None,
         DESC=None,
         initial_value=0,
         always_update=True,
         blocking=True,
         on_update=mocker.ANY,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["read_write_int"].datatype, out_record=True
-        ),
     )
     ioc_builder.mbbIn.assert_called_once_with(
         f"{DEVICE}:Enum_RBV",
         DESC=None,
         initial_value=0,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["enum"].datatype
-        ),
+        ZRST="RED",
+        ONST="GREEN",
+        TWST="BLUE",
     )
     ioc_builder.mbbOut.assert_called_once_with(
         f"{DEVICE}:Enum",
         DESC=None,
         initial_value=0,
+        ZRST="RED",
+        ONST="GREEN",
+        TWST="BLUE",
         always_update=True,
         blocking=True,
         on_update=mocker.ANY,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["enum"].datatype, out_record=True
-        ),
     )
     ioc_builder.boolOut.assert_called_once_with(
         f"{DEVICE}:WriteBool",
@@ -356,10 +354,9 @@ def test_ioc(mocker: MockerFixture, epics_controller_api: ControllerAPI):
         blocking=True,
         on_update=mocker.ANY,
         DESC=None,
+        ZNAM="False",
+        ONAM="True",
         initial_value=False,
-        **record_metadata_from_datatype(
-            epics_controller_api.attributes["write_bool"].datatype, out_record=True
-        ),
     )
     ioc_builder.Action.assert_any_call(
         f"{DEVICE}:Go",
@@ -501,24 +498,23 @@ def test_long_pv_names_discarded(mocker: MockerFixture):
     ioc_builder.longOut.assert_called_once_with(
         f"{DEVICE}:{short_pv_name}",
         always_update=True,
+        LOPR=None,
+        HOPR=None,
+        EGU=None,
+        DRVL=None,
+        DRVH=None,
         blocking=True,
         on_update=mocker.ANY,
         DESC=None,
         initial_value=0,
-        **record_metadata_from_datatype(
-            long_name_controller_api.attributes["attr_rw_short_name"].datatype,
-            out_record=True,
-        ),
     )
     ioc_builder.longIn.assert_called_once_with(
         f"{DEVICE}:{short_pv_name}_RBV",
         DESC=None,
         initial_value=0,
-        **record_metadata_from_datatype(
-            long_name_controller_api.attributes[
-                "attr_rw_with_a_reallyreally_long_name_that_is_too_long_for_rbv"
-            ].datatype
-        ),
+        LOPR=None,
+        HOPR=None,
+        EGU=None,
     )
 
     long_pv_name = long_attr_name.title().replace("_", "")
@@ -599,7 +595,9 @@ def test_update_datatype(mocker: MockerFixture):
 
     builder.longIn.assert_called_once_with(
         pv_name,
-        **record_metadata_from_datatype(attr_r.datatype),
+        LOPR=None,
+        HOPR=None,
+        EGU=None,
         DESC=None,
         initial_value=0,
     )
@@ -619,8 +617,10 @@ def test_update_datatype(mocker: MockerFixture):
 
     builder.longOut.assert_called_once_with(
         pv_name,
-        **record_metadata_from_datatype(attr_w.datatype),
         DESC=None,
+        LOPR=None,
+        HOPR=None,
+        EGU=None,
         initial_value=0,
         DRVL=None,
         DRVH=None,

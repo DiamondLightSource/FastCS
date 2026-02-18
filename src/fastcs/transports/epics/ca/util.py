@@ -1,5 +1,4 @@
 import enum
-from dataclasses import asdict
 from typing import Any
 
 from fastcs.datatypes import Bool, DType_T, Enum, Float, Int, String, Waveform
@@ -32,7 +31,14 @@ MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 EPICS_ALLOWED_DATATYPES = (Bool, Enum, Float, Int, String, Waveform)
 DEFAULT_STRING_WAVEFORM_LENGTH = 256
 
-DATATYPE_FIELD_TO_RECORD_FIELD = {
+DATATYPE_FIELD_TO_IN_RECORD_FIELD = {
+    "prec": "PREC",
+    "units": "EGU",
+    "min_alarm": "LOPR",
+    "max_alarm": "HOPR",
+}
+
+DATATYPE_FIELD_TO_OUT_RECORD_FIELD = {
     "prec": "PREC",
     "units": "EGU",
     "min": "DRVL",
@@ -40,49 +46,6 @@ DATATYPE_FIELD_TO_RECORD_FIELD = {
     "min_alarm": "LOPR",
     "max_alarm": "HOPR",
 }
-
-
-def record_metadata_from_datatype(
-    datatype: DataType[Any], out_record: bool = False
-) -> dict[str, str]:
-    """Converts attributes on the `DataType` to the
-    field name/value in the record metadata."""
-
-    arguments = {
-        DATATYPE_FIELD_TO_RECORD_FIELD[field]: value
-        for field, value in asdict(datatype).items()
-        if field in DATATYPE_FIELD_TO_RECORD_FIELD
-    }
-
-    if not out_record:
-        # in type records don't have DRVL/DRVH fields
-        arguments.pop("DRVL", None)
-        arguments.pop("DRVH", None)
-
-    match datatype:
-        case String():
-            arguments["length"] = datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH
-        case Waveform():
-            if len(datatype.shape) != 1:
-                raise TypeError(
-                    f"Unsupported shape {datatype.shape}, the EPICS transport only "
-                    "supports to 1D arrays"
-                )
-            arguments["length"] = datatype.shape[0]
-        case Enum():
-            if len(datatype.members) <= MBB_MAX_CHOICES:
-                arguments.update(create_state_keys(datatype))
-            elif out_record:  # no validators for in type records
-
-                def _verify_in_datatype(_, value):
-                    return value in datatype.names
-
-                arguments["validate"] = _verify_in_datatype
-        case Bool():
-            arguments["ZNAM"] = "False"
-            arguments["ONAM"] = "True"
-
-    return arguments
 
 
 def create_state_keys(datatype: Enum):

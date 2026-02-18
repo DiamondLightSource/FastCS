@@ -6,7 +6,6 @@ from fastcs.datatypes import Bool, Enum, Float, Int, String
 from fastcs.transports.epics.ca.util import (
     cast_from_epics_type,
     cast_to_epics_type,
-    record_metadata_from_datatype,
 )
 
 
@@ -132,18 +131,3 @@ def test_cast_from_epics_type(datatype, from_epics, result):
 def test_cast_from_epics_validations(datatype, input):
     with pytest.raises(ValueError):
         cast_from_epics_type(datatype, input)
-
-
-def test_drive_metadata_from_datatype():
-    dtype = Float(units="mm", min=-10.0, max=10.0, min_alarm=-5, max_alarm=5, prec=3)
-    out_arguments = record_metadata_from_datatype(dtype, True)
-    assert out_arguments == {
-        "DRVH": 10.0,
-        "DRVL": -10.0,
-        "EGU": "mm",
-        "HOPR": 5,
-        "LOPR": -5,
-        "PREC": 3,
-    }
-    in_arguments = record_metadata_from_datatype(dtype, False)
-    assert in_arguments == {"EGU": "mm", "HOPR": 5, "LOPR": -5, "PREC": 3}
