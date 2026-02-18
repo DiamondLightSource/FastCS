@@ -196,11 +196,11 @@ class BaseController(Tracer):
         """Check that a `Method` with the given name exists on the controller"""
         try:
             method = self._validate_hinted_member(name, Method)
-        except RuntimeError as exc:
+        except RuntimeError:
             raise RuntimeError(
                 f"Controller `{self.__class__.__name__}` failed to introspect "
                 f"hinted method `{name}` during initialisation"
-            ) from exc
+            ) from None
 
         logger.debug(
             "Validated hinted method", name=name, controller=self, method=method
@@ -210,11 +210,11 @@ class BaseController(Tracer):
         """Check that an `Attribute` with the given name exists on the controller"""
         try:
             attr = self._validate_hinted_member(name, Attribute)
-        except RuntimeError as exc:
+        except RuntimeError:
             raise RuntimeError(
                 f"Controller `{self.__class__.__name__}` failed to introspect "
                 f"hinted attribute `{name}` during initialisation"
-            ) from exc
+            ) from None
 
         logger.debug(
             "Validated hinted attribute", name=name, controller=self, attribute=attr
@@ -224,11 +224,11 @@ class BaseController(Tracer):
         """Check that a sub controller with the given name exists on the controller"""
         try:
             controller = self._validate_hinted_member(name, BaseController)
-        except RuntimeError as exc:
+        except RuntimeError:
             raise RuntimeError(
                 f"Controller `{self.__class__.__name__}` failed to introspect "
                 f"hinted controller `{name}` during initialisation"
-            ) from exc
+            ) from None
 
         logger.debug(
             "Validated hinted sub controller",
