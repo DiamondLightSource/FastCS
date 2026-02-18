@@ -51,8 +51,8 @@ class BaseController(Tracer):
         self.__scan_methods: dict[str, Scan] = {}
 
         self.__hinted_attributes: dict[str, HintedAttribute] = {}
-        self.__hinted_sub_controllers: dict[str, type[BaseController]] = {}
         self.__hinted_methods: dict[str, type[Method]] = {}
+        self.__hinted_sub_controllers: dict[str, type[BaseController]] = {}
         self._find_type_hints()
 
         self._bind_attrs()
@@ -172,8 +172,7 @@ class BaseController(Tracer):
         self._connect_attribute_ios()
 
     def _validate_type_hints(self):
-        """Validate all `Attribute`, `Controller`, and `Method`
-        type-hints were introspected"""
+        """Validate all type-hints were introspected"""
         for name in self.__hinted_attributes:
             self._validate_hinted_attribute(name)
 
@@ -204,10 +203,7 @@ class BaseController(Tracer):
             ) from exc
 
         logger.debug(
-            "Validated hinted method",
-            name=name,
-            controller=self,
-            method=method,
+            "Validated hinted method", name=name, controller=self, method=method
         )
 
     def _validate_hinted_attribute(self, name: str):
@@ -221,10 +217,7 @@ class BaseController(Tracer):
             ) from exc
 
         logger.debug(
-            "Validated hinted attribute",
-            name=name,
-            controller=self,
-            attribute=attr,
+            "Validated hinted attribute", name=name, controller=self, attribute=attr
         )
 
     def _validate_hinted_controller(self, name: str):
