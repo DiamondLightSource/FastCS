@@ -26,7 +26,6 @@ from pydantic import ValidationError
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.datatypes import (
     Bool,
-    DataType,
     Enum,
     Float,
     Int,
@@ -81,8 +80,8 @@ class EpicsGUI:
             case datatype:
                 raise TypeError(f"Unsupported type {type(datatype)}: {datatype}")
 
-    def _get_write_widget(self, fastcs_datatype: DataType) -> WriteWidgetUnion | None:
-        match fastcs_datatype:
+    def _get_write_widget(self, attribute: Attribute) -> WriteWidgetUnion | None:
+        match attribute.datatype:
             case Bool():
                 return ToggleButton()
             case Int():
@@ -92,7 +91,7 @@ class EpicsGUI:
             case String():
                 return TextWrite(format=TextFormat.string)
             case Enum():
-                return ComboBox(choices=fastcs_datatype.names)
+                return ComboBox(choices=attribute.datatype.names)
             case Waveform():
                 return None
             case datatype:
@@ -106,7 +105,7 @@ class EpicsGUI:
         match attribute:
             case AttrRW():
                 read_widget = self._get_read_widget(attribute)
-                write_widget = self._get_write_widget(attribute.datatype)
+                write_widget = self._get_write_widget(attribute)
                 if write_widget is None or read_widget is None:
                     return None
                 return SignalRW(
@@ -128,7 +127,7 @@ class EpicsGUI:
                     read_widget=read_widget,
                 )
             case AttrW():
-                write_widget = self._get_write_widget(attribute.datatype)
+                write_widget = self._get_write_widget(attribute)
                 if write_widget is None:
                     return None
                 return SignalW(

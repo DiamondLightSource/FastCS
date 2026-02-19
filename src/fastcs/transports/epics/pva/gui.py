@@ -10,7 +10,7 @@ from pvi.device import (
 
 from fastcs.attributes.attr_r import AttrR
 from fastcs.attributes.attribute import Attribute
-from fastcs.datatypes import Bool, DataType, Table, Waveform, numpy_to_fastcs_datatype
+from fastcs.datatypes import Bool, Table, Waveform, numpy_to_fastcs_datatype
 from fastcs.transports.epics.gui import EpicsGUI
 
 
@@ -44,18 +44,19 @@ class PvaEpicsGUI(EpicsGUI):
             case _:
                 return super()._get_read_widget(attribute)
 
-    def _get_write_widget(self, fastcs_datatype: DataType) -> WriteWidgetUnion | None:
-        match fastcs_datatype:
+    def _get_write_widget(self, attribute: Attribute) -> WriteWidgetUnion | None:
+        datatype = attribute.datatype
+        match attribute.datatype:
             case Table():
                 widgets = []
-                for _, datatype in fastcs_datatype.structured_dtype:
+                for _, datatype in attribute.datatype.structured_dtype:
                     fastcs_datatype = numpy_to_fastcs_datatype(datatype)
                     if isinstance(fastcs_datatype, Bool):
                         # Replace with compact version for Table row
                         widget = CheckBox()
                     else:
-                        widget = super()._get_write_widget(fastcs_datatype)
+                        widget = super()._get_write_widget(AttrR(fastcs_datatype))
                     widgets.append(widget)
                 return TableWrite(widgets=widgets)
             case _:
-                return super()._get_write_widget(fastcs_datatype)
+                return super()._get_write_widget(attribute)
