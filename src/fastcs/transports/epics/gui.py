@@ -72,8 +72,8 @@ class EpicsGUI:
             case Waveform() as waveform:
                 if len(waveform.shape) > 1:
                     logger.warning(
-                        "EPICS CA transport only supports 1D waveforms,"
-                        + f"{attribute} is a {waveform.shape} waveform"
+                        "EPICS CA transport only supports 1D waveforms, "
+                        f"{attribute} is a {waveform.shape}D waveform"
                     )
                     return None
 
