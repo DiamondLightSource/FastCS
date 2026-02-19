@@ -45,7 +45,6 @@ class PvaEpicsGUI(EpicsGUI):
                 return super()._get_read_widget(attribute)
 
     def _get_write_widget(self, attribute: Attribute) -> WriteWidgetUnion | None:
-        datatype = attribute.datatype
         match attribute.datatype:
             case Table():
                 widgets = []
