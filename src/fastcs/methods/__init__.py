@@ -2,6 +2,7 @@ from .command import Command as Command
 from .command import CommandCallback as CommandCallback
 from .command import UnboundCommand as UnboundCommand
 from .command import command as command
+from .method import Method as Method
 from .scan import Scan as Scan
 from .scan import ScanCallback as ScanCallback
 from .scan import UnboundScan as UnboundScan
