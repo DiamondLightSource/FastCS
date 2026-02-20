@@ -3,8 +3,6 @@
         
         
         
-        
-        
 
 .. automodule:: fastcs.transports.epics.ca.util
     :members:
@@ -20,10 +18,8 @@
     .. autosummary::
         :nosignatures:
     
-        builder_callable_from_attribute
         cast_from_epics_type
         cast_to_epics_type
-        record_metadata_from_attribute
-        record_metadata_from_datatype
+        create_state_keys
     
     

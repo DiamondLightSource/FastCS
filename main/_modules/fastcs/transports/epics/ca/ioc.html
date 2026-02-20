@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transports.epics.ca.ioc &#8212; FastCS 0.12.0a2.dev14+g02d634a2d documentation</title>
+    <title>fastcs.transports.epics.ca.ioc &#8212; FastCS 0.12.0a2.dev15+gdbb85c4e1 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=b35e6618"></script>
+    <script src="../../../../../_static/documentation_options.js?v=1ef0e54f"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -450,7 +450,6 @@
                   
   <h1>Source code for fastcs.transports.epics.ca.ioc</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">softioc</span><span class="w"> </span><span class="kn">import</span> <span class="n">builder</span><span class="p">,</span> <span class="n">softioc</span>
@@ -458,18 +457,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">softioc.pythonSoftIoc</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordWrapper</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">DType_T</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes.waveform</span><span class="w"> </span><span class="kn">import</span> <span class="n">Waveform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DType_T</span><span class="p">,</span> <span class="n">Waveform</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">bind_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.ca.util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">builder_callable_from_attribute</span><span class="p">,</span>
+    <span class="n">_make_in_record</span><span class="p">,</span>
+    <span class="n">_make_out_record</span><span class="p">,</span>
     <span class="n">cast_from_epics_type</span><span class="p">,</span>
     <span class="n">cast_to_epics_type</span><span class="p">,</span>
-    <span class="n">record_metadata_from_attribute</span><span class="p">,</span>
-    <span class="n">record_metadata_from_datatype</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports.epics.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">controller_pv_prefix</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">snake_to_pascal</span>
@@ -638,40 +635,10 @@
 
         <span class="n">record</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cast_to_epics_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
-    <span class="n">record</span> <span class="o">=</span> <span class="n">_make_record</span><span class="p">(</span><span class="n">pv</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">_make_in_record</span><span class="p">(</span><span class="n">pv</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
     <span class="n">_add_attr_pvi_info</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">pv_prefix</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
     <span class="n">attribute</span><span class="o">.</span><span class="n">add_on_update_callback</span><span class="p">(</span><span class="n">async_record_set</span><span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_make_record</span><span class="p">(</span>
-    <span class="n">pv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">attribute</span><span class="p">:</span> <span class="n">AttrR</span> <span class="o">|</span> <span class="n">AttrW</span> <span class="o">|</span> <span class="n">AttrRW</span><span class="p">,</span>
-    <span class="n">on_update</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">out_record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RecordWrapper</span><span class="p">:</span>
-    <span class="n">builder_callable</span> <span class="o">=</span> <span class="n">builder_callable_from_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">on_update</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">datatype_record_metadata</span> <span class="o">=</span> <span class="n">record_metadata_from_datatype</span><span class="p">(</span>
-        <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">out_record</span>
-    <span class="p">)</span>
-    <span class="n">attribute_record_metadata</span> <span class="o">=</span> <span class="n">record_metadata_from_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
-
-    <span class="n">update</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">{</span><span class="s2">&quot;on_update&quot;</span><span class="p">:</span> <span class="n">on_update</span><span class="p">,</span> <span class="s2">&quot;always_update&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;blocking&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
-        <span class="k">if</span> <span class="n">on_update</span>
-        <span class="k">else</span> <span class="p">{}</span>
-    <span class="p">)</span>
-
-    <span class="n">record</span> <span class="o">=</span> <span class="n">builder_callable</span><span class="p">(</span>
-        <span class="n">pv</span><span class="p">,</span> <span class="o">**</span><span class="n">update</span><span class="p">,</span> <span class="o">**</span><span class="n">datatype_record_metadata</span><span class="p">,</span> <span class="o">**</span><span class="n">attribute_record_metadata</span>
-    <span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">datatype_updater</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">record_metadata_from_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">out_record</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">set_field</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-
-    <span class="n">attribute</span><span class="o">.</span><span class="n">add_update_datatype_callback</span><span class="p">(</span><span class="n">datatype_updater</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">record</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_create_and_link_write_pv</span><span class="p">(</span>
@@ -691,7 +658,7 @@
 
         <span class="n">record</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cast_to_epics_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="n">process</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="n">record</span> <span class="o">=</span> <span class="n">_make_record</span><span class="p">(</span><span class="n">pv</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">on_update</span><span class="o">=</span><span class="n">on_update</span><span class="p">,</span> <span class="n">out_record</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">_make_out_record</span><span class="p">(</span><span class="n">pv</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">on_update</span><span class="o">=</span><span class="n">on_update</span><span class="p">)</span>
 
     <span class="n">_add_attr_pvi_info</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">pv_prefix</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
 

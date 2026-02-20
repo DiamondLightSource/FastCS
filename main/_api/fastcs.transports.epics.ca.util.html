@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.transports.epics.ca.util &#8212; FastCS 0.12.0a2.dev14+g02d634a2d documentation</title>
+    <title>fastcs.transports.epics.ca.util &#8212; FastCS 0.12.0a2.dev15+gdbb85c4e1 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=b35e6618"></script>
+    <script src="../_static/documentation_options.js?v=1ef0e54f"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -573,36 +573,22 @@
 <p class="rubric">Members</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transports.epics.ca.util.builder_callable_from_attribute" title="fastcs.transports.epics.ca.util.builder_callable_from_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">builder_callable_from_attribute</span></code></a></p></td>
-<td><p>Returns a callable to make the softioc record from an attribute instance.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.transports.epics.ca.util.cast_from_epics_type" title="fastcs.transports.epics.ca.util.cast_from_epics_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_from_epics_type</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transports.epics.ca.util.cast_from_epics_type" title="fastcs.transports.epics.ca.util.cast_from_epics_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_from_epics_type</span></code></a></p></td>
 <td><p>Casts from an EPICS datatype to a FastCS datatype.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transports.epics.ca.util.cast_to_epics_type" title="fastcs.transports.epics.ca.util.cast_to_epics_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_to_epics_type</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.transports.epics.ca.util.cast_to_epics_type" title="fastcs.transports.epics.ca.util.cast_to_epics_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_to_epics_type</span></code></a></p></td>
 <td><p>Casts from an attribute's datatype to an EPICS datatype.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#fastcs.transports.epics.ca.util.record_metadata_from_attribute" title="fastcs.transports.epics.ca.util.record_metadata_from_attribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">record_metadata_from_attribute</span></code></a></p></td>
-<td><p>Converts attributes on the <a class="reference internal" href="fastcs.attributes.attribute.html#fastcs.attributes.attribute.Attribute" title="fastcs.attributes.attribute.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> to the field name/value in the record metadata.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transports.epics.ca.util.record_metadata_from_datatype" title="fastcs.transports.epics.ca.util.record_metadata_from_datatype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">record_metadata_from_datatype</span></code></a></p></td>
-<td><p>Converts attributes on the <a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DataType" title="fastcs.datatypes.datatype.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> to the field name/value in the record metadata.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#fastcs.transports.epics.ca.util.create_state_keys" title="fastcs.transports.epics.ca.util.create_state_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_state_keys</span></code></a></p></td>
+<td><p>Creates a dictionary of state field keys to names</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transports.epics.ca.util.record_metadata_from_attribute">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transports.epics.ca.util.</span></span><span class="sig-name descname"><span class="pre">record_metadata_from_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.attributes.attribute.html#fastcs.attributes.attribute.Attribute" title="fastcs.attributes.attribute.Attribute"><span class="pre">Attribute</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="fastcs.attributes.attribute_io_ref.html#fastcs.attributes.attribute_io_ref.AttributeIORef" title="fastcs.attributes.attribute_io_ref.AttributeIORef"><span class="pre">AttributeIORef</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/fastcs/transports/epics/ca/util.html#record_metadata_from_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transports.epics.ca.util.record_metadata_from_attribute" title="Link to this definition">#</a></dt>
-<dd><p>Converts attributes on the <a class="reference internal" href="fastcs.attributes.attribute.html#fastcs.attributes.attribute.Attribute" title="fastcs.attributes.attribute.Attribute"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></a> to the
-field name/value in the record metadata.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transports.epics.ca.util.record_metadata_from_datatype">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transports.epics.ca.util.</span></span><span class="sig-name descname"><span class="pre">record_metadata_from_datatype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DataType" title="fastcs.datatypes.datatype.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/fastcs/transports/epics/ca/util.html#record_metadata_from_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transports.epics.ca.util.record_metadata_from_datatype" title="Link to this definition">#</a></dt>
-<dd><p>Converts attributes on the <a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DataType" title="fastcs.datatypes.datatype.DataType"><code class="xref any py py-class docutils literal notranslate"><span class="pre">DataType</span></code></a> to the
-field name/value in the record metadata.</p>
+<dt class="sig sig-object py" id="fastcs.transports.epics.ca.util.create_state_keys">
+<span class="sig-prename descclassname"><span class="pre">fastcs.transports.epics.ca.util.</span></span><span class="sig-name descname"><span class="pre">create_state_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.enum.html#fastcs.datatypes.enum.Enum" title="fastcs.datatypes.enum.Enum"><span class="pre">Enum</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/transports/epics/ca/util.html#create_state_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transports.epics.ca.util.create_state_keys" title="Link to this definition">#</a></dt>
+<dd><p>Creates a dictionary of state field keys to names</p>
 </dd></dl>
 
 <dl class="py function">
@@ -615,12 +601,6 @@ field name/value in the record metadata.</p>
 <dt class="sig sig-object py" id="fastcs.transports.epics.ca.util.cast_to_epics_type">
 <span class="sig-prename descclassname"><span class="pre">fastcs.transports.epics.ca.util.</span></span><span class="sig-name descname"><span class="pre">cast_to_epics_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DataType" title="fastcs.datatypes.datatype.DataType"><span class="pre">DataType</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType_T" title="fastcs.datatypes.datatype.DType_T"><span class="pre">DType_T</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="../_modules/fastcs/transports/epics/ca/util.html#cast_to_epics_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transports.epics.ca.util.cast_to_epics_type" title="Link to this definition">#</a></dt>
 <dd><p>Casts from an attribute’s datatype to an EPICS datatype.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="fastcs.transports.epics.ca.util.builder_callable_from_attribute">
-<span class="sig-prename descclassname"><span class="pre">fastcs.transports.epics.ca.util.</span></span><span class="sig-name descname"><span class="pre">builder_callable_from_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fastcs.attributes.attr_r.html#fastcs.attributes.attr_r.AttrR" title="fastcs.attributes.attr_r.AttrR"><span class="pre">AttrR</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="fastcs.attributes.attr_w.html#fastcs.attributes.attr_w.AttrW" title="fastcs.attributes.attr_w.AttrW"><span class="pre">AttrW</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="fastcs.attributes.attr_rw.html#fastcs.attributes.attr_rw.AttrRW" title="fastcs.attributes.attr_rw.AttrRW"><span class="pre">AttrRW</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_in_record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/transports/epics/ca/util.html#builder_callable_from_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.transports.epics.ca.util.builder_callable_from_attribute" title="Link to this definition">#</a></dt>
-<dd><p>Returns a callable to make the softioc record from an attribute instance.</p>
 </dd></dl>
 
 </section>
@@ -672,11 +652,9 @@ field name/value in the record metadata.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transports.epics.ca.util.record_metadata_from_attribute"><code class="docutils literal notranslate"><span class="pre">record_metadata_from_attribute()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transports.epics.ca.util.record_metadata_from_datatype"><code class="docutils literal notranslate"><span class="pre">record_metadata_from_datatype()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transports.epics.ca.util.create_state_keys"><code class="docutils literal notranslate"><span class="pre">create_state_keys()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transports.epics.ca.util.cast_from_epics_type"><code class="docutils literal notranslate"><span class="pre">cast_from_epics_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transports.epics.ca.util.cast_to_epics_type"><code class="docutils literal notranslate"><span class="pre">cast_to_epics_type()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.transports.epics.ca.util.builder_callable_from_attribute"><code class="docutils literal notranslate"><span class="pre">builder_callable_from_attribute()</span></code></a></li>
 </ul>
   </nav></div>
 

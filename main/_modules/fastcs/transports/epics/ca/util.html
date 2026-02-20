@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.transports.epics.ca.util &#8212; FastCS 0.12.0a2.dev14+g02d634a2d documentation</title>
+    <title>fastcs.transports.epics.ca.util &#8212; FastCS 0.12.0a2.dev15+gdbb85c4e1 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../../_static/documentation_options.js?v=b35e6618"></script>
+    <script src="../../../../../_static/documentation_options.js?v=1ef0e54f"></script>
     <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -450,14 +450,15 @@
                   
   <h1>Source code for fastcs.transports.epics.ca.util</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">softioc</span><span class="w"> </span><span class="kn">import</span> <span class="n">builder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">softioc.pythonSoftIoc</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordWrapper</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">DType_T</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Waveform</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes.datatype</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">DType_T</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Waveform</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastCSError</span>
 
 <span class="n">_MBB_FIELD_PREFIXES</span> <span class="o">=</span> <span class="p">(</span>
@@ -487,7 +488,14 @@
 <span class="n">EPICS_ALLOWED_DATATYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">Bool</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Waveform</span><span class="p">)</span>
 <span class="n">DEFAULT_STRING_WAVEFORM_LENGTH</span> <span class="o">=</span> <span class="mi">256</span>
 
-<span class="n">DATATYPE_FIELD_TO_RECORD_FIELD</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">DATATYPE_FIELD_TO_IN_RECORD_FIELD</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;prec&quot;</span><span class="p">:</span> <span class="s2">&quot;PREC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;EGU&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;min_alarm&quot;</span><span class="p">:</span> <span class="s2">&quot;LOPR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;max_alarm&quot;</span><span class="p">:</span> <span class="s2">&quot;HOPR&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">DATATYPE_FIELD_TO_OUT_RECORD_FIELD</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;prec&quot;</span><span class="p">:</span> <span class="s2">&quot;PREC&quot;</span><span class="p">,</span>
     <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;EGU&quot;</span><span class="p">,</span>
     <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="s2">&quot;DRVL&quot;</span><span class="p">,</span>
@@ -497,74 +505,162 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="record_metadata_from_attribute">
-<a class="viewcode-back" href="../../../../../_api/fastcs.transports.epics.ca.util.html#fastcs.transports.epics.ca.util.record_metadata_from_attribute">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">record_metadata_from_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">:</span> <span class="n">Attribute</span><span class="p">[</span><span class="n">DType_T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts attributes on the `Attribute` to the</span>
-<span class="sd">    field name/value in the record metadata.&quot;&quot;&quot;</span>
-    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;DESC&quot;</span><span class="p">:</span> <span class="n">attribute</span><span class="o">.</span><span class="n">description</span><span class="p">}</span>
-    <span class="n">initial</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">match</span> <span class="n">attribute</span><span class="p">:</span>
-        <span class="k">case</span> <span class="n">AttrR</span><span class="p">():</span>
-            <span class="n">initial</span> <span class="o">=</span> <span class="n">attribute</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-        <span class="k">case</span> <span class="n">AttrW</span><span class="p">():</span>
-            <span class="n">initial</span> <span class="o">=</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">initial_value</span>
-    <span class="k">if</span> <span class="n">initial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;initial_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast_to_epics_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">initial</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">metadata</span></div>
-
-
-
-<div class="viewcode-block" id="record_metadata_from_datatype">
-<a class="viewcode-back" href="../../../../../_api/fastcs.transports.epics.ca.util.html#fastcs.transports.epics.ca.util.record_metadata_from_datatype">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">record_metadata_from_datatype</span><span class="p">(</span>
-    <span class="n">datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">out_record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts attributes on the `DataType` to the</span>
-<span class="sd">    field name/value in the record metadata.&quot;&quot;&quot;</span>
-
-    <span class="n">arguments</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">DATATYPE_FIELD_TO_RECORD_FIELD</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span> <span class="n">value</span>
-        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">asdict</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">DATATYPE_FIELD_TO_RECORD_FIELD</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_in_record</span><span class="p">(</span><span class="n">pv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">AttrR</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RecordWrapper</span><span class="p">:</span>
+    <span class="n">common_fields</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;DESC&quot;</span><span class="p">:</span> <span class="n">attribute</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="s2">&quot;initial_value&quot;</span><span class="p">:</span> <span class="n">cast_to_epics_type</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">attribute</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">out_record</span><span class="p">:</span>
-        <span class="c1"># in type records don&#39;t have DRVL/DRVH fields</span>
-        <span class="n">arguments</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;DRVL&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">arguments</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;DRVH&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="k">match</span> <span class="n">datatype</span><span class="p">:</span>
+    <span class="k">match</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">Bool</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">boolIn</span><span class="p">(</span><span class="n">pv</span><span class="p">,</span> <span class="n">ZNAM</span><span class="o">=</span><span class="s2">&quot;False&quot;</span><span class="p">,</span> <span class="n">ONAM</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">common_fields</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">Int</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">longIn</span><span class="p">(</span>
+                <span class="n">pv</span><span class="p">,</span>
+                <span class="n">LOPR</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">min_alarm</span><span class="p">,</span>
+                <span class="n">HOPR</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">max_alarm</span><span class="p">,</span>
+                <span class="n">EGU</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">case</span> <span class="n">Float</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">aIn</span><span class="p">(</span>
+                <span class="n">pv</span><span class="p">,</span>
+                <span class="n">LOPR</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">min_alarm</span><span class="p">,</span>
+                <span class="n">HOPR</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">max_alarm</span><span class="p">,</span>
+                <span class="n">EGU</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                <span class="n">PREC</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">prec</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">case</span> <span class="n">String</span><span class="p">():</span>
-            <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datatype</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">DEFAULT_STRING_WAVEFORM_LENGTH</span>
-        <span class="k">case</span> <span class="n">Waveform</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unsupported shape </span><span class="si">{</span><span class="n">datatype</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, the EPICS transport only &quot;</span>
-                    <span class="s2">&quot;supports to 1D arrays&quot;</span>
-                <span class="p">)</span>
-            <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datatype</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringIn</span><span class="p">(</span>
+                <span class="n">pv</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">DEFAULT_STRING_WAVEFORM_LENGTH</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">MBB_MAX_CHOICES</span><span class="p">:</span>
-                <span class="n">state_keys</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                    <span class="nb">zip</span><span class="p">(</span>
-                        <span class="n">MBB_STATE_FIELDS</span><span class="p">,</span>
-                        <span class="n">datatype</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
-                        <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MBB_MAX_CHOICES</span><span class="p">:</span>
+                <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringIn</span><span class="p">(</span>
+                    <span class="n">pv</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="n">arguments</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state_keys</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">out_record</span><span class="p">:</span>  <span class="c1"># no validators for in type records</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">common_fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">create_state_keys</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">))</span>
+                <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">mbbIn</span><span class="p">(</span>
+                    <span class="n">pv</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">case</span> <span class="n">Waveform</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">WaveformIn</span><span class="p">(</span>
+                <span class="n">pv</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">common_fields</span>
+            <span class="p">)</span>
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;EPICS unsupported datatype on </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">datatype_updater</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">asdict</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">DATATYPE_FIELD_TO_IN_RECORD_FIELD</span><span class="p">:</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">set_field</span><span class="p">(</span><span class="n">DATATYPE_FIELD_TO_IN_RECORD_FIELD</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="n">attribute</span><span class="o">.</span><span class="n">add_update_datatype_callback</span><span class="p">(</span><span class="n">datatype_updater</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">record</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_out_record</span><span class="p">(</span><span class="n">pv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">AttrW</span><span class="p">,</span> <span class="n">on_update</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RecordWrapper</span><span class="p">:</span>
+    <span class="n">common_fields</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;DESC&quot;</span><span class="p">:</span> <span class="n">attribute</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="s2">&quot;initial_value&quot;</span><span class="p">:</span> <span class="n">cast_to_epics_type</span><span class="p">(</span>
+            <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span>
+            <span class="n">attribute</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">initial_value</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;on_update&quot;</span><span class="p">:</span> <span class="n">on_update</span><span class="p">,</span>
+        <span class="s2">&quot;always_update&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;blocking&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">match</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">Bool</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">boolOut</span><span class="p">(</span><span class="n">pv</span><span class="p">,</span> <span class="n">ZNAM</span><span class="o">=</span><span class="s2">&quot;False&quot;</span><span class="p">,</span> <span class="n">ONAM</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">common_fields</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">Int</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">longOut</span><span class="p">(</span>
+                <span class="n">pv</span><span class="p">,</span>
+                <span class="n">LOPR</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">min_alarm</span><span class="p">,</span>
+                <span class="n">HOPR</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">max_alarm</span><span class="p">,</span>
+                <span class="n">EGU</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                <span class="n">DRVL</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+                <span class="n">DRVH</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">case</span> <span class="n">Float</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">aOut</span><span class="p">(</span>
+                <span class="n">pv</span><span class="p">,</span>
+                <span class="n">LOPR</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">min_alarm</span><span class="p">,</span>
+                <span class="n">HOPR</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">max_alarm</span><span class="p">,</span>
+                <span class="n">EGU</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                <span class="n">PREC</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">prec</span><span class="p">,</span>
+                <span class="n">DRVL</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+                <span class="n">DRVH</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">case</span> <span class="n">String</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringOut</span><span class="p">(</span>
+                <span class="n">pv</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">length</span> <span class="ow">or</span> <span class="n">DEFAULT_STRING_WAVEFORM_LENGTH</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MBB_MAX_CHOICES</span><span class="p">:</span>
+                <span class="n">datatype</span><span class="p">:</span> <span class="n">Enum</span> <span class="o">=</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span>
 
                 <span class="k">def</span><span class="w"> </span><span class="nf">_verify_in_datatype</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
                     <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">datatype</span><span class="o">.</span><span class="n">names</span>
 
-                <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;validate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_verify_in_datatype</span>
-        <span class="k">case</span> <span class="n">Bool</span><span class="p">():</span>
-            <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;ZNAM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;False&quot;</span>
-            <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;ONAM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;True&quot;</span>
+                <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringOut</span><span class="p">(</span>
+                    <span class="n">pv</span><span class="p">,</span>
+                    <span class="n">validate</span><span class="o">=</span><span class="n">_verify_in_datatype</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+                <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">arguments</span></div>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">common_fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">create_state_keys</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">))</span>
+                <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">mbbOut</span><span class="p">(</span>
+                    <span class="n">pv</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">case</span> <span class="n">Waveform</span><span class="p">():</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">WaveformOut</span><span class="p">(</span>
+                <span class="n">pv</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="o">**</span><span class="n">common_fields</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;EPICS unsupported datatype on </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">datatype_updater</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">DataType</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">asdict</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">DATATYPE_FIELD_TO_OUT_RECORD_FIELD</span><span class="p">:</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">set_field</span><span class="p">(</span><span class="n">DATATYPE_FIELD_TO_OUT_RECORD_FIELD</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="n">attribute</span><span class="o">.</span><span class="n">add_update_datatype_callback</span><span class="p">(</span><span class="n">datatype_updater</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">record</span>
+
+
+<div class="viewcode-block" id="create_state_keys">
+<a class="viewcode-back" href="../../../../../_api/fastcs.transports.epics.ca.util.html#fastcs.transports.epics.ca.util.create_state_keys">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_state_keys</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a dictionary of state field keys to names&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">MBB_STATE_FIELDS</span><span class="p">,</span>
+            <span class="n">datatype</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+            <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
 
 
 
@@ -616,35 +712,6 @@
             <span class="k">return</span> <span class="n">value</span>
         <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported datatype </span><span class="si">{</span><span class="n">datatype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="builder_callable_from_attribute">
-<a class="viewcode-back" href="../../../../../_api/fastcs.transports.epics.ca.util.html#fastcs.transports.epics.ca.util.builder_callable_from_attribute">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">builder_callable_from_attribute</span><span class="p">(</span>
-    <span class="n">attribute</span><span class="p">:</span> <span class="n">AttrR</span> <span class="o">|</span> <span class="n">AttrW</span> <span class="o">|</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">make_in_record</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a callable to make the softioc record from an attribute instance.&quot;&quot;&quot;</span>
-    <span class="k">match</span> <span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="p">:</span>
-        <span class="k">case</span> <span class="n">Bool</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">boolIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">boolOut</span>
-        <span class="k">case</span> <span class="n">Int</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">longIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">longOut</span>
-        <span class="k">case</span> <span class="n">Float</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">aIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">aOut</span>
-        <span class="k">case</span> <span class="n">String</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringOut</span>
-        <span class="k">case</span> <span class="n">Enum</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">members</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MBB_MAX_CHOICES</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">longStringOut</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">mbbIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">mbbOut</span>
-        <span class="k">case</span> <span class="n">Waveform</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">WaveformIn</span> <span class="k">if</span> <span class="n">make_in_record</span> <span class="k">else</span> <span class="n">builder</span><span class="o">.</span><span class="n">WaveformOut</span>
-        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FastCSError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;EPICS unsupported datatype on </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">attribute</span><span class="o">.</span><span class="n">datatype</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span></div>
 
 </pre></div>
 
