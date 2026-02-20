@@ -8,8 +8,7 @@ from pvi.device import (
     WriteWidgetUnion,
 )
 
-from fastcs.attributes.attr_r import AttrR
-from fastcs.attributes.attribute import Attribute
+from fastcs.attributes import Attribute, AttrR, AttrW
 from fastcs.datatypes import Bool, Table, Waveform, numpy_to_fastcs_datatype
 from fastcs.transports.epics.gui import EpicsGUI
 
@@ -54,7 +53,7 @@ class PvaEpicsGUI(EpicsGUI):
                         # Replace with compact version for Table row
                         widget = CheckBox()
                     else:
-                        widget = super()._get_write_widget(AttrR(fastcs_datatype))
+                        widget = super()._get_write_widget(AttrW(fastcs_datatype))
                     widgets.append(widget)
                 return TableWrite(widgets=widgets)
             case _:
