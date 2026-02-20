@@ -1,6 +1,4 @@
 import asyncio
-from collections.abc import Callable
-from dataclasses import asdict
 from typing import Any, Literal
 
 from softioc import builder, softioc
@@ -8,20 +6,16 @@ from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.datatypes import Bool, DataType, DType_T, Enum, Float, Int, String, Waveform
-from fastcs.exceptions import FastCSError
+from fastcs.datatypes import DType_T, Waveform
 from fastcs.logging import bind_logger
 from fastcs.methods import Command
 from fastcs.tracer import Tracer
 from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics.ca.util import (
-    DATATYPE_FIELD_TO_IN_RECORD_FIELD,
-    DATATYPE_FIELD_TO_OUT_RECORD_FIELD,
-    DEFAULT_STRING_WAVEFORM_LENGTH,
-    MBB_MAX_CHOICES,
+    _make_in_record,
+    _make_out_record,
     cast_from_epics_type,
     cast_to_epics_type,
-    create_state_keys,
 )
 from fastcs.transports.epics.util import controller_pv_prefix
 from fastcs.util import snake_to_pascal
@@ -191,164 +185,6 @@ def _create_and_link_read_pv(
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
     attribute.add_on_update_callback(async_record_set)
-
-
-def _make_in_record(pv: str, attribute: AttrR) -> RecordWrapper:
-    attribute_record_metadata = {
-        "DESC": attribute.description,
-        "initial_value": cast_to_epics_type(attribute.datatype, attribute.get()),
-    }
-
-    match attribute.datatype:
-        case Bool():
-            record = builder.boolIn(
-                pv, ZNAM="False", ONAM="True", **attribute_record_metadata
-            )
-        case Int():
-            record = builder.longIn(
-                pv,
-                LOPR=attribute.datatype.min_alarm,
-                HOPR=attribute.datatype.max_alarm,
-                EGU=attribute.datatype.units,
-                **attribute_record_metadata,
-            )
-        case Float():
-            record = builder.aIn(
-                pv,
-                LOPR=attribute.datatype.min_alarm,
-                HOPR=attribute.datatype.max_alarm,
-                EGU=attribute.datatype.units,
-                PREC=attribute.datatype.prec,
-                **attribute_record_metadata,
-            )
-        case String():
-            record = builder.longStringIn(
-                pv,
-                length=attribute.datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH,
-                **attribute_record_metadata,
-            )
-        case Enum():
-            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                record = builder.longStringIn(
-                    pv,
-                    **attribute_record_metadata,
-                )
-            else:
-                attribute_record_metadata.update(create_state_keys(attribute.datatype))
-                record = builder.mbbIn(
-                    pv,
-                    **attribute_record_metadata,
-                )
-        case Waveform():
-            record = builder.WaveformIn(
-                pv, length=attribute.datatype.shape[0], **attribute_record_metadata
-            )
-        case _:
-            raise FastCSError(
-                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
-            )
-
-    def datatype_updater(datatype: DataType):
-        for name, value in asdict(datatype).items():
-            if name in DATATYPE_FIELD_TO_IN_RECORD_FIELD:
-                record.set_field(DATATYPE_FIELD_TO_IN_RECORD_FIELD[name], value)
-
-    attribute.add_update_datatype_callback(datatype_updater)
-    return record
-
-
-def _make_out_record(
-    pv: str,
-    attribute: AttrW | AttrRW,
-    on_update: Callable,
-) -> RecordWrapper:
-    attribute_record_metadata = {
-        "DESC": attribute.description,
-        "initial_value": cast_to_epics_type(
-            attribute.datatype,
-            attribute.get()
-            if isinstance(attribute, AttrR)
-            else attribute.datatype.initial_value,
-        ),
-    }
-
-    update = {"on_update": on_update, "always_update": True, "blocking": True}
-
-    match attribute.datatype:
-        case Bool():
-            record = builder.boolOut(
-                pv, ZNAM="False", ONAM="True", **update, **attribute_record_metadata
-            )
-        case Int():
-            record = builder.longOut(
-                pv,
-                LOPR=attribute.datatype.min_alarm,
-                HOPR=attribute.datatype.max_alarm,
-                EGU=attribute.datatype.units,
-                DRVL=attribute.datatype.min,
-                DRVH=attribute.datatype.max,
-                **update,
-                **attribute_record_metadata,
-            )
-        case Float():
-            record = builder.aOut(
-                pv,
-                LOPR=attribute.datatype.min_alarm,
-                HOPR=attribute.datatype.max_alarm,
-                EGU=attribute.datatype.units,
-                PREC=attribute.datatype.prec,
-                DRVL=attribute.datatype.min,
-                DRVH=attribute.datatype.max,
-                **update,
-                **attribute_record_metadata,
-            )
-        case String():
-            record = builder.longStringOut(
-                pv,
-                length=attribute.datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH,
-                **update,
-                **attribute_record_metadata,
-            )
-        case Enum():
-            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                datatype: Enum = attribute.datatype
-
-                def _verify_in_datatype(_, value):
-                    return value in datatype.names
-
-                record = builder.longStringOut(
-                    pv,
-                    validate=_verify_in_datatype,
-                    **update,
-                    **attribute_record_metadata,
-                )
-
-            else:
-                attribute_record_metadata.update(create_state_keys(attribute.datatype))
-                record = builder.mbbOut(
-                    pv,
-                    **update,
-                    **attribute_record_metadata,
-                )
-        case Waveform():
-            record = builder.WaveformOut(
-                pv,
-                length=attribute.datatype.shape[0],
-                **update,
-                **attribute_record_metadata,
-            )
-        case _:
-            raise FastCSError(
-                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
-            )
-
-    def datatype_updater(datatype: DataType):
-        for name, value in asdict(datatype).items():
-            if name in DATATYPE_FIELD_TO_OUT_RECORD_FIELD:
-                record.set_field(DATATYPE_FIELD_TO_OUT_RECORD_FIELD[name], value)
-
-    attribute.add_update_datatype_callback(datatype_updater)
-    return record
 
 
 def _create_and_link_write_pv(
