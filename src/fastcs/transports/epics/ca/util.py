@@ -1,12 +1,13 @@
 import enum
+from collections.abc import Callable
 from dataclasses import asdict
 from typing import Any
 
 from softioc import builder
+from softioc.pythonSoftIoc import RecordWrapper
 
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.datatypes import Bool, DType_T, Enum, Float, Int, String, Waveform
-from fastcs.datatypes.datatype import DataType
+from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.datatypes import Bool, DataType, DType_T, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSError
 
 _MBB_FIELD_PREFIXES = (
@@ -36,7 +37,14 @@ MBB_MAX_CHOICES = len(_MBB_FIELD_PREFIXES)
 EPICS_ALLOWED_DATATYPES = (Bool, Enum, Float, Int, String, Waveform)
 DEFAULT_STRING_WAVEFORM_LENGTH = 256
 
-DATATYPE_FIELD_TO_RECORD_FIELD = {
+DATATYPE_FIELD_TO_IN_RECORD_FIELD = {
+    "prec": "PREC",
+    "units": "EGU",
+    "min_alarm": "LOPR",
+    "max_alarm": "HOPR",
+}
+
+DATATYPE_FIELD_TO_OUT_RECORD_FIELD = {
     "prec": "PREC",
     "units": "EGU",
     "min": "DRVL",
@@ -46,69 +54,160 @@ DATATYPE_FIELD_TO_RECORD_FIELD = {
 }
 
 
-def record_metadata_from_attribute(attribute: Attribute[DType_T]) -> dict[str, Any]:
-    """Converts attributes on the `Attribute` to the
-    field name/value in the record metadata."""
-    metadata: dict[str, Any] = {"DESC": attribute.description}
-    initial = None
-    match attribute:
-        case AttrR():
-            initial = attribute.get()
-        case AttrW():
-            initial = attribute.datatype.initial_value
-    if initial is not None:
-        metadata["initial_value"] = cast_to_epics_type(attribute.datatype, initial)
-    return metadata
-
-
-def record_metadata_from_datatype(
-    datatype: DataType[Any], out_record: bool = False
-) -> dict[str, str]:
-    """Converts attributes on the `DataType` to the
-    field name/value in the record metadata."""
-
-    arguments = {
-        DATATYPE_FIELD_TO_RECORD_FIELD[field]: value
-        for field, value in asdict(datatype).items()
-        if field in DATATYPE_FIELD_TO_RECORD_FIELD
+def _make_in_record(pv: str, attribute: AttrR) -> RecordWrapper:
+    common_fields = {
+        "DESC": attribute.description,
+        "initial_value": cast_to_epics_type(attribute.datatype, attribute.get()),
     }
 
-    if not out_record:
-        # in type records don't have DRVL/DRVH fields
-        arguments.pop("DRVL", None)
-        arguments.pop("DRVH", None)
-
-    match datatype:
+    match attribute.datatype:
+        case Bool():
+            record = builder.boolIn(pv, ZNAM="False", ONAM="True", **common_fields)
+        case Int():
+            record = builder.longIn(
+                pv,
+                LOPR=attribute.datatype.min_alarm,
+                HOPR=attribute.datatype.max_alarm,
+                EGU=attribute.datatype.units,
+                **common_fields,
+            )
+        case Float():
+            record = builder.aIn(
+                pv,
+                LOPR=attribute.datatype.min_alarm,
+                HOPR=attribute.datatype.max_alarm,
+                EGU=attribute.datatype.units,
+                PREC=attribute.datatype.prec,
+                **common_fields,
+            )
         case String():
-            arguments["length"] = datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH
-        case Waveform():
-            if len(datatype.shape) != 1:
-                raise TypeError(
-                    f"Unsupported shape {datatype.shape}, the EPICS transport only "
-                    "supports to 1D arrays"
-                )
-            arguments["length"] = datatype.shape[0]
+            record = builder.longStringIn(
+                pv,
+                length=attribute.datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH,
+                **common_fields,
+            )
         case Enum():
-            if len(datatype.members) <= MBB_MAX_CHOICES:
-                state_keys = dict(
-                    zip(
-                        MBB_STATE_FIELDS,
-                        datatype.names,
-                        strict=False,
-                    )
+            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
+                record = builder.longStringIn(
+                    pv,
+                    **common_fields,
                 )
-                arguments.update(state_keys)
-            elif out_record:  # no validators for in type records
+            else:
+                common_fields.update(create_state_keys(attribute.datatype))
+                record = builder.mbbIn(
+                    pv,
+                    **common_fields,
+                )
+        case Waveform():
+            record = builder.WaveformIn(
+                pv, length=attribute.datatype.shape[0], **common_fields
+            )
+        case _:
+            raise FastCSError(
+                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
+            )
+
+    def datatype_updater(datatype: DataType):
+        for name, value in asdict(datatype).items():
+            if name in DATATYPE_FIELD_TO_IN_RECORD_FIELD:
+                record.set_field(DATATYPE_FIELD_TO_IN_RECORD_FIELD[name], value)
+
+    attribute.add_update_datatype_callback(datatype_updater)
+    return record
+
+
+def _make_out_record(pv: str, attribute: AttrW, on_update: Callable) -> RecordWrapper:
+    common_fields = {
+        "DESC": attribute.description,
+        "initial_value": cast_to_epics_type(
+            attribute.datatype,
+            attribute.get()
+            if isinstance(attribute, AttrRW)
+            else attribute.datatype.initial_value,
+        ),
+        "on_update": on_update,
+        "always_update": True,
+        "blocking": True,
+    }
+
+    match attribute.datatype:
+        case Bool():
+            record = builder.boolOut(pv, ZNAM="False", ONAM="True", **common_fields)
+        case Int():
+            record = builder.longOut(
+                pv,
+                LOPR=attribute.datatype.min_alarm,
+                HOPR=attribute.datatype.max_alarm,
+                EGU=attribute.datatype.units,
+                DRVL=attribute.datatype.min,
+                DRVH=attribute.datatype.max,
+                **common_fields,
+            )
+        case Float():
+            record = builder.aOut(
+                pv,
+                LOPR=attribute.datatype.min_alarm,
+                HOPR=attribute.datatype.max_alarm,
+                EGU=attribute.datatype.units,
+                PREC=attribute.datatype.prec,
+                DRVL=attribute.datatype.min,
+                DRVH=attribute.datatype.max,
+                **common_fields,
+            )
+        case String():
+            record = builder.longStringOut(
+                pv,
+                length=attribute.datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH,
+                **common_fields,
+            )
+        case Enum():
+            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
+                datatype: Enum = attribute.datatype
 
                 def _verify_in_datatype(_, value):
                     return value in datatype.names
 
-                arguments["validate"] = _verify_in_datatype
-        case Bool():
-            arguments["ZNAM"] = "False"
-            arguments["ONAM"] = "True"
+                record = builder.longStringOut(
+                    pv,
+                    validate=_verify_in_datatype,
+                    **common_fields,
+                )
 
-    return arguments
+            else:
+                common_fields.update(create_state_keys(attribute.datatype))
+                record = builder.mbbOut(
+                    pv,
+                    **common_fields,
+                )
+        case Waveform():
+            record = builder.WaveformOut(
+                pv,
+                length=attribute.datatype.shape[0],
+                **common_fields,
+            )
+        case _:
+            raise FastCSError(
+                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
+            )
+
+    def datatype_updater(datatype: DataType):
+        for name, value in asdict(datatype).items():
+            if name in DATATYPE_FIELD_TO_OUT_RECORD_FIELD:
+                record.set_field(DATATYPE_FIELD_TO_OUT_RECORD_FIELD[name], value)
+
+    attribute.add_update_datatype_callback(datatype_updater)
+    return record
+
+
+def create_state_keys(datatype: Enum):
+    """Creates a dictionary of state field keys to names"""
+    return dict(
+        zip(
+            MBB_STATE_FIELDS,
+            datatype.names,
+            strict=False,
+        )
+    )
 
 
 def cast_from_epics_type(datatype: DataType[DType_T], value: object) -> DType_T:
@@ -154,29 +253,3 @@ def cast_to_epics_type(datatype: DataType[DType_T], value: DType_T) -> Any:
             return value
         case _:
             raise ValueError(f"Unsupported datatype {datatype}")
-
-
-def builder_callable_from_attribute(
-    attribute: AttrR | AttrW | AttrRW, make_in_record: bool
-):
-    """Returns a callable to make the softioc record from an attribute instance."""
-    match attribute.datatype:
-        case Bool():
-            return builder.boolIn if make_in_record else builder.boolOut
-        case Int():
-            return builder.longIn if make_in_record else builder.longOut
-        case Float():
-            return builder.aIn if make_in_record else builder.aOut
-        case String():
-            return builder.longStringIn if make_in_record else builder.longStringOut
-        case Enum():
-            if len(attribute.datatype.members) > MBB_MAX_CHOICES:
-                return builder.longStringIn if make_in_record else builder.longStringOut
-            else:
-                return builder.mbbIn if make_in_record else builder.mbbOut
-        case Waveform():
-            return builder.WaveformIn if make_in_record else builder.WaveformOut
-        case _:
-            raise FastCSError(
-                f"EPICS unsupported datatype on {attribute}: {attribute.datatype}"
-            )
