@@ -35,7 +35,7 @@ class EpicsCATransport(Transport):
         self._controller_api = controller_api
         self._loop = loop
         self._pv_prefix = self.epicsca.pv_prefix
-        self._ioc = EpicsCAIOC(self.epicsca.pv_prefix, controller_api, self.epicsca)
+        self._ioc = EpicsCAIOC(self.epicsca.pv_prefix, controller_api)
 
         if self.docs is not None:
             EpicsDocs(self._controller_api).create_docs(self.docs)
