@@ -3,7 +3,13 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Sequence
 from copy import deepcopy
-from typing import _GenericAlias, get_args, get_origin, get_type_hints  # type: ignore
+from typing import (  # type: ignore
+    TypeVar,
+    _GenericAlias,  # type: ignore
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 from fastcs.attributes import AnyAttributeIO, Attribute, AttrR, AttrW, HintedAttribute
 from fastcs.logging import bind_logger
@@ -11,6 +17,7 @@ from fastcs.methods import Command, Method, Scan, UnboundCommand, UnboundScan
 from fastcs.tracer import Tracer
 
 logger = bind_logger(logger_name=__name__)
+T = TypeVar("T")
 
 
 class BaseController(Tracer):
@@ -185,7 +192,7 @@ class BaseController(Tracer):
         for subcontroller in self.sub_controllers.values():
             subcontroller._validate_type_hints()  # noqa: SLF001
 
-    def _validate_hinted_member(self, name: str, expected_type: type):
+    def _validate_hinted_member(self, name: str, expected_type: type[T]) -> T:
         """Validate that a hinted member exists on the controller"""
         member = getattr(self, name, None)
         if member is None or not isinstance(member, expected_type):
@@ -344,7 +351,7 @@ class BaseController(Tracer):
     def sub_controllers(self) -> dict[str, BaseController]:
         return self.__sub_controllers
 
-    def _validated_added_method(self, name: str, method: Method):
+    def _validated_method(self, name: str, method: Method):
         if name in self.__hinted_methods:
             hint = self.__hinted_methods[name]
             if not isinstance(method, hint):
@@ -358,7 +365,7 @@ class BaseController(Tracer):
     def add_command(self, name: str, command: Command):
         try:
             self._check_for_name_clash(name)
-            self._validated_added_method(name, command)
+            self._validated_method(name, command)
         except (ValueError, RuntimeError) as exc:
             raise exc.__class__(f"Cannot add command method {command}.") from exc
 
@@ -372,7 +379,7 @@ class BaseController(Tracer):
     def add_scan(self, name: str, scan: Scan):
         try:
             self._check_for_name_clash(name)
-            self._validated_added_method(name, scan)
+            self._validated_method(name, scan)
         except (ValueError, RuntimeError) as exc:
             raise exc.__class__(f"Cannot add scan method {scan}.") from exc
 
