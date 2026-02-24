@@ -108,8 +108,8 @@ def format_record(record) -> str:
 
     return f"""\
 <level>[{time} {record["level"].name[0]}]</level> \
-{record["message"]} \
-{f"[{record['file'].path}:{record['line']}]":<80} \
+{record["message"]:<80} \
+[{record["file"].path}:{record["line"]}] \
 <green>[{name}]</green> \
 {extras}
 {{exception}}\
