@@ -90,6 +90,7 @@ def format_record(record) -> str:
     time = f"{_time}{_timezone}"
 
     name = record["extra"].pop("logger_name", None) or record["name"]
+    message_pad = max(0, 100 - len(name))
 
     sep = "<white>,</white> "
     if "extra" in record:
@@ -108,9 +109,8 @@ def format_record(record) -> str:
 
     return f"""\
 <level>[{time} {record["level"].name[0]}]</level> \
-{record["message"]:<80} \
-[{record["file"].path}:{record["line"]}] \
-<green>[{name}]</green> \
+{record["message"]:<{message_pad}} \
+<green>{name} [{record["file"].path}:{record["line"]}]</green> \
 {extras}
 {{exception}}\
 """

@@ -13,7 +13,7 @@ from fastcs.methods import ScanCallback
 from fastcs.tracer import Tracer
 from fastcs.transports import ControllerAPI, Transport
 
-tracer = Tracer(name=__name__)
+tracer = Tracer()
 
 
 class FastCS:

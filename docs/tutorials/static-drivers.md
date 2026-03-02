@@ -409,7 +409,8 @@ DEMO:R1:Enabled_RBV            Off
 
 FastCS has convenient logging support to provide status and metrics from the
 application. To enable logging from the core framework call `configure_logging` with no
-arguments (the default logging level is INFO). To log messages from a driver, import the singleton `logger` directly.
+arguments (the default logging level is INFO). To log messages from a driver, import the
+singleton `logger` directly.
 
 Create a module-level logger to log status of the application start up. Create a class
 logger for `TemperatureControllerAttributeIO` to log the commands it sends.
@@ -431,7 +432,7 @@ Try setting a PV and check the console for the log message it prints.
 
 A similar log message could be added for the update method of the IO, but this would be
 very verbose. For this use case FastCS provides the `Tracer` class, which is inherited
-by `AttributeIO`, among other core FastCS classes. This adds a  enables logging `TRACE`
+by `AttributeIO`, among other core FastCS classes. This enables the logging of `TRACE`
 level log messages that are disabled by default, but can be enabled at runtime.
 
 Update the `send` method of the IO to log a message showing the query that was sent and
@@ -449,7 +450,8 @@ visible.
 ::::
 
 Enable tracing on the `power` attribute by calling `enable_tracing` and then enable a
-ramp so that the value updates. Check the console to see the messages.  Call `disable_tracing` to disable the log messages for `power.
+ramp so that the value updates. Check the console to see the messages.  Call
+`disable_tracing` to disable the log messages for `power`.
 
 ```
 In [1]: controller.power.enable_tracing()
@@ -469,7 +471,7 @@ In [1]: controller.power.enable_tracing()
 In [2]: controller.power.disable_tracing()
 ```
 
-These log messages includes other trace loggers that log messages with `power` as the
+These log messages include other trace loggers that log messages with `power` as the
 `topic`, so they also appear automatically, so the log messages show changes to the
 attribute throughout the stack: the query to the device and its response, the value the
 attribute is set to, and the value that the PV in the EPICS CA transport is set to.
@@ -481,7 +483,7 @@ The `Tracer` can also be used as a module-level instance for use in free functio
 ```python
 from fastcs.tracer import Tracer
 
-tracer = Tracer(__name__)
+tracer = Tracer()
 
 def handle_attribute(attr):
     tracer.log_event("Handling attribute", topic=attr)

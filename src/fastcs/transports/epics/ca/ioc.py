@@ -27,7 +27,7 @@ from fastcs.util import snake_to_pascal
 EPICS_MAX_NAME_LENGTH = 60
 
 
-tracer = Tracer(name=__name__)
+tracer = Tracer()
 
 
 class EpicsCAIOC:
