@@ -73,7 +73,11 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         self.log_event("Attribute set", value=repr(value), attribute=self)
 
         _previous_value = self._value
-        self._value = self._datatype.validate(value)
+        try:
+            self._value = self._datatype.validate(value)
+        except ValueError:
+            logger.error("Failed to validate value", value=repr(value), attribute=self)
+            raise
 
         self.log_event("Value validated", value=repr(self._value), attribute=self)
 
