@@ -8,10 +8,7 @@ from fastcs.attributes.attribute import Attribute, AttributeAccessMode
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.attributes.util import AttrValuePredicate, PredicateEvent
 from fastcs.datatypes import DataType, DType_T
-from fastcs.logging import bind_logger
-
-logger = bind_logger(logger_name=__name__)
-
+from fastcs.logging import logger
 
 AttrIOUpdateCallback = Callable[["AttrR[DType_T, Any]"], Awaitable[None]]
 """An AttributeIO callback that takes an AttrR and updates its value"""
@@ -76,7 +73,11 @@ class AttrR(Attribute[DType_T, AttributeIORefT]):
         self.log_event("Attribute set", value=repr(value), attribute=self)
 
         _previous_value = self._value
-        self._value = self._datatype.validate(value)
+        try:
+            self._value = self._datatype.validate(value)
+        except ValueError:
+            logger.error("Failed to validate value", value=repr(value), attribute=self)
+            raise
 
         self.log_event("Value validated", value=repr(self._value), attribute=self)
 

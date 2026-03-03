@@ -12,11 +12,10 @@ from typing import (  # type: ignore
 )
 
 from fastcs.attributes import AnyAttributeIO, Attribute, AttrR, AttrW, HintedAttribute
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.methods import Command, Method, Scan, UnboundCommand, UnboundScan
 from fastcs.tracer import Tracer
 
-logger = bind_logger(logger_name=__name__)
 T = TypeVar("T")
 
 

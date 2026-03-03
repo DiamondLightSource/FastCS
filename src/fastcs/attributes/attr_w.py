@@ -5,10 +5,7 @@ from typing import Any
 from fastcs.attributes.attribute import Attribute, AttributeAccessMode
 from fastcs.attributes.attribute_io_ref import AttributeIORefT
 from fastcs.datatypes import DataType, DType_T
-from fastcs.logging import bind_logger
-
-logger = bind_logger(logger_name=__name__)
-
+from fastcs.logging import logger
 
 AttrOnPutCallback = Callable[["AttrW[DType_T, Any]", DType_T], Awaitable[None]]
 """Callbacks to be called when the setpoint of an attribute is changed"""
