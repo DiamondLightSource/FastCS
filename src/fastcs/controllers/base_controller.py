@@ -350,7 +350,7 @@ class BaseController(Tracer):
     def sub_controllers(self) -> dict[str, BaseController]:
         return self.__sub_controllers
 
-    def _validated_method(self, name: str, method: Method):
+    def _validate_method(self, name: str, method: Method):
         if name in self.__hinted_methods:
             hint = self.__hinted_methods[name]
             if not isinstance(method, hint):
@@ -364,7 +364,7 @@ class BaseController(Tracer):
     def add_command(self, name: str, command: Command):
         try:
             self._check_for_name_clash(name)
-            self._validated_method(name, command)
+            self._validate_method(name, command)
         except (ValueError, RuntimeError) as exc:
             raise exc.__class__(f"Cannot add command method {command}.") from exc
 
@@ -378,7 +378,7 @@ class BaseController(Tracer):
     def add_scan(self, name: str, scan: Scan):
         try:
             self._check_for_name_clash(name)
-            self._validated_method(name, scan)
+            self._validate_method(name, scan)
         except (ValueError, RuntimeError) as exc:
             raise exc.__class__(f"Cannot add scan method {scan}.") from exc
 
