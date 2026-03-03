@@ -6,11 +6,9 @@ from copy import deepcopy
 from typing import _GenericAlias, get_args, get_origin, get_type_hints  # type: ignore
 
 from fastcs.attributes import AnyAttributeIO, Attribute, AttrR, AttrW, HintedAttribute
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.methods import Command, Scan, UnboundCommand, UnboundScan
 from fastcs.tracer import Tracer
-
-logger = bind_logger(logger_name=__name__)
 
 
 class BaseController(Tracer):

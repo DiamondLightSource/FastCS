@@ -1,7 +1,10 @@
 from collections import defaultdict
 from typing import Any
 
-from fastcs.logging import logger
+from fastcs.logging import logger as _logger
+
+# Pass depth so that reported line number in log messages is `log_event` call site
+logger = _logger.opt(depth=1)
 
 
 class Tracer:
@@ -16,9 +19,9 @@ class Tracer:
     object, or from another ``Tracer`` that uses the object as the ``topic``, will be
     logged.
 
-    Note: The global logger level must be set to ``TRACE`` for the messages to be logged
+    Note: The logger level must be set to ``TRACE`` for the messages to be logged
 
-    Example usage:
+    Example usage in interactive shell:
     .. code-block:: python
 
         controller.ramp_rate.enable_tracing()
@@ -27,23 +30,20 @@ class Tracer:
         controller.connection.add_tracing_filter("query", "V?")
         controller.connection.remove_tracing_filter("query", "V?")
         controller.connection.disable_tracing()
-
-    :param name: The name of the logger. Attached to log messages as ``logger_name``.
-
     """
 
-    def __init__(self, name: str | None = None):
+    def __init__(self):
         self.__tracing_enabled: bool = False
         self.__tracing_filters: dict[str, list[Any]] = defaultdict(list)
-        self.__logger_name = name if name is not None else self.__class__.__name__
 
     def log_event(self, event: str, topic: "Tracer | None" = None, *args, **kwargs):
         """Log an event only if tracing is enabled and the filter matches
 
-        :param event: A message describing the event
-        :param topic: Another `Tracer` related to this event to enable it to be logged
-        :param args: Positional arguments for underlying logger
-        :param kwargs: Keyword arguments for underlying logger
+        Args:
+            event: A message describing the event
+            topic: Another `Tracer` related to this event to enable it to be logged
+            args: Positional arguments for underlying logger
+            kwargs: Keyword arguments for underlying logger
 
         """
         if self.__tracing_enabled or (topic is not None and topic.__tracing_enabled):  # noqa: SLF001
@@ -54,7 +54,7 @@ class Tracer:
                 else:
                     return
 
-            logger.trace(event, *args, logger_name=self.__logger_name, **kwargs)
+            logger.trace(event, *args, **kwargs)
 
     def enable_tracing(self):
         """Enable trace logging for this object"""

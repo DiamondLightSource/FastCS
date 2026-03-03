@@ -7,7 +7,7 @@ from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import DType_T, Waveform
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.methods import Command
 from fastcs.tracer import Tracer
 from fastcs.transports.controller_api import ControllerAPI
@@ -23,8 +23,7 @@ from fastcs.util import snake_to_pascal
 EPICS_MAX_NAME_LENGTH = 60
 
 
-tracer = Tracer(name=__name__)
-logger = bind_logger(logger_name=__name__)
+tracer = Tracer()
 
 
 class EpicsCAIOC:

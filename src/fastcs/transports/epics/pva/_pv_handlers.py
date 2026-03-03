@@ -21,7 +21,7 @@ from .types import (
     p4p_timestamp_now,
 )
 
-tracer = Tracer(name=__name__)
+tracer = Tracer()
 
 
 class WritePvHandler:
