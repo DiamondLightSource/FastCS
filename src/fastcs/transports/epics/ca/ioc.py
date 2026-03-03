@@ -1,5 +1,4 @@
 import asyncio
-from collections.abc import Callable
 from typing import Any, Literal
 
 from softioc import builder, softioc
@@ -7,19 +6,16 @@ from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.datatypes import DataType, DType_T
-from fastcs.datatypes.waveform import Waveform
+from fastcs.datatypes import DType_T, Waveform
 from fastcs.logging import logger
 from fastcs.methods import Command
 from fastcs.tracer import Tracer
 from fastcs.transports.controller_api import ControllerAPI
-from fastcs.transports.epics import EpicsIOCOptions
 from fastcs.transports.epics.ca.util import (
-    builder_callable_from_attribute,
+    _make_in_record,
+    _make_out_record,
     cast_from_epics_type,
     cast_to_epics_type,
-    record_metadata_from_attribute,
-    record_metadata_from_datatype,
 )
 from fastcs.transports.epics.util import controller_pv_prefix
 from fastcs.util import snake_to_pascal
@@ -37,9 +33,7 @@ class EpicsCAIOC:
         self,
         pv_prefix: str,
         controller_api: ControllerAPI,
-        options: EpicsIOCOptions | None = None,
     ):
-        self._options = options or EpicsIOCOptions()
         self._controller_api = controller_api
         _add_pvi_info(f"{pv_prefix}:PVI")
         _add_sub_controller_pvi_info(pv_prefix, controller_api)
@@ -186,40 +180,10 @@ def _create_and_link_read_pv(
 
         record.set(cast_to_epics_type(attribute.datatype, value))
 
-    record = _make_record(pv, attribute)
+    record = _make_in_record(pv, attribute)
     _add_attr_pvi_info(record, pv_prefix, attr_name, "r")
 
     attribute.add_on_update_callback(async_record_set)
-
-
-def _make_record(
-    pv: str,
-    attribute: AttrR | AttrW | AttrRW,
-    on_update: Callable | None = None,
-    out_record: bool = False,
-) -> RecordWrapper:
-    builder_callable = builder_callable_from_attribute(attribute, on_update is None)
-    datatype_record_metadata = record_metadata_from_datatype(
-        attribute.datatype, out_record
-    )
-    attribute_record_metadata = record_metadata_from_attribute(attribute)
-
-    update = (
-        {"on_update": on_update, "always_update": True, "blocking": True}
-        if on_update
-        else {}
-    )
-
-    record = builder_callable(
-        pv, **update, **datatype_record_metadata, **attribute_record_metadata
-    )
-
-    def datatype_updater(datatype: DataType):
-        for name, value in record_metadata_from_datatype(datatype, out_record).items():
-            record.set_field(name, value)
-
-    attribute.add_update_datatype_callback(datatype_updater)
-    return record
 
 
 def _create_and_link_write_pv(
@@ -239,7 +203,7 @@ def _create_and_link_write_pv(
 
         record.set(cast_to_epics_type(attribute.datatype, value), process=False)
 
-    record = _make_record(pv, attribute, on_update=on_update, out_record=True)
+    record = _make_out_record(pv, attribute, on_update=on_update)
 
     _add_attr_pvi_info(record, pv_prefix, attr_name, "w")
 

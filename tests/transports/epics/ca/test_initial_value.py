@@ -59,16 +59,18 @@ async def test_initial_values_set_in_ca(mocker):
         loop,
     )
 
-    record_spy = mocker.spy(ca_ioc, "_make_record")
+    record_spy = mocker.spy(ca_ioc, "_make_in_record")
+    record_spy_out = mocker.spy(ca_ioc, "_make_out_record")
 
     task = asyncio.create_task(fastcs.serve(interactive=False))
     try:
         async with asyncio.timeout(3):
-            while not record_spy.spy_return_list:
+            while not record_spy.spy_return_list or not record_spy_out.spy_return_list:
                 await asyncio.sleep(0)
 
         initial_values = {
-            wrapper.name: wrapper.get() for wrapper in record_spy.spy_return_list
+            wrapper.name: wrapper.get()
+            for wrapper in record_spy.spy_return_list + record_spy_out.spy_return_list
         }
         for name, value in {
             "SOFTIOC_INITIAL_DEVICE:Bool": 1,
