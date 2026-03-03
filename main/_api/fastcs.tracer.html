@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.tracer &#8212; FastCS 0.12.0a2.dev15+gdbb85c4e1 documentation</title>
+    <title>fastcs.tracer &#8212; FastCS 0.12.0a2.dev17+gaff634106 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=1ef0e54f"></script>
+    <script src="../_static/documentation_options.js?v=e2653769"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -572,7 +572,7 @@
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="fastcs.tracer.Tracer">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.tracer.</span></span><span class="sig-name descname"><span class="pre">Tracer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/tracer.html#Tracer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.tracer.Tracer" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.tracer.</span></span><span class="sig-name descname"><span class="pre">Tracer</span></span><a class="reference internal" href="../_modules/fastcs/tracer.html#Tracer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.tracer.Tracer" title="Link to this definition">#</a></dt>
 <dd><p>A mixin or standalone class for conditionally logging trace events.</p>
 <p>This can be used for verbose logging that is disabled by default and enabled on a
 per-instance basis, with filtering based on specific key-value pairs on the event.</p>
@@ -581,8 +581,8 @@ inherit this class, such as <code class="docutils literal notranslate"><span cla
 <code class="docutils literal notranslate"><span class="pre">Tracer</span></code>, such as <code class="docutils literal notranslate"><span class="pre">fastcs.launch</span></code>. When enabled, any event logged from the
 object, or from another <code class="docutils literal notranslate"><span class="pre">Tracer</span></code> that uses the object as the <code class="docutils literal notranslate"><span class="pre">topic</span></code>, will be
 logged.</p>
-<p>Note: The global logger level must be set to <code class="docutils literal notranslate"><span class="pre">TRACE</span></code> for the messages to be logged</p>
-<p>Example usage:
+<p>Note: The logger level must be set to <code class="docutils literal notranslate"><span class="pre">TRACE</span></code> for the messages to be logged</p>
+<p>Example usage in interactive shell:
 .. code-block:: python</p>
 <blockquote>
 <div><p>controller.ramp_rate.enable_tracing()
@@ -592,11 +592,6 @@ controller.connection.add_tracing_filter(“query”, “V?”)
 controller.connection.remove_tracing_filter(“query”, “V?”)
 controller.connection.disable_tracing()</p>
 </div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> – The name of the logger. Attached to log messages as <code class="docutils literal notranslate"><span class="pre">logger_name</span></code>.</p>
-</dd>
-</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="fastcs.tracer.Tracer.log_event">
 <span class="sig-name descname"><span class="pre">log_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcs.tracer.Tracer" title="fastcs.tracer.Tracer"><span class="pre">Tracer</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/tracer.html#Tracer.log_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.tracer.Tracer.log_event" title="Link to this definition">#</a></dt>

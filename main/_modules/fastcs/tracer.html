@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.tracer &#8212; FastCS 0.12.0a2.dev15+gdbb85c4e1 documentation</title>
+    <title>fastcs.tracer &#8212; FastCS 0.12.0a2.dev17+gaff634106 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=1ef0e54f"></script>
+    <script src="../../_static/documentation_options.js?v=e2653769"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -452,7 +452,10 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span> <span class="k">as</span> <span class="n">_logger</span>
+
+<span class="c1"># Pass depth so that reported line number in log messages is `log_event` call site</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">_logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Tracer">
@@ -469,9 +472,9 @@
 <span class="sd">    object, or from another ``Tracer`` that uses the object as the ``topic``, will be</span>
 <span class="sd">    logged.</span>
 
-<span class="sd">    Note: The global logger level must be set to ``TRACE`` for the messages to be logged</span>
+<span class="sd">    Note: The logger level must be set to ``TRACE`` for the messages to be logged</span>
 
-<span class="sd">    Example usage:</span>
+<span class="sd">    Example usage in interactive shell:</span>
 <span class="sd">    .. code-block:: python</span>
 
 <span class="sd">        controller.ramp_rate.enable_tracing()</span>
@@ -480,25 +483,22 @@
 <span class="sd">        controller.connection.add_tracing_filter(&quot;query&quot;, &quot;V?&quot;)</span>
 <span class="sd">        controller.connection.remove_tracing_filter(&quot;query&quot;, &quot;V?&quot;)</span>
 <span class="sd">        controller.connection.disable_tracing()</span>
-
-<span class="sd">    :param name: The name of the logger. Attached to log messages as ``logger_name``.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__tracing_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__tracing_filters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__logger_name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 
 <div class="viewcode-block" id="Tracer.log_event">
 <a class="viewcode-back" href="../../_api/fastcs.tracer.html#fastcs.tracer.Tracer.log_event">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">log_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="s2">&quot;Tracer | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Log an event only if tracing is enabled and the filter matches</span>
 
-<span class="sd">        :param event: A message describing the event</span>
-<span class="sd">        :param topic: Another `Tracer` related to this event to enable it to be logged</span>
-<span class="sd">        :param args: Positional arguments for underlying logger</span>
-<span class="sd">        :param kwargs: Keyword arguments for underlying logger</span>
+<span class="sd">        Args:</span>
+<span class="sd">            event: A message describing the event</span>
+<span class="sd">            topic: Another `Tracer` related to this event to enable it to be logged</span>
+<span class="sd">            args: Positional arguments for underlying logger</span>
+<span class="sd">            kwargs: Keyword arguments for underlying logger</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tracing_enabled</span> <span class="ow">or</span> <span class="p">(</span><span class="n">topic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">topic</span><span class="o">.</span><span class="n">__tracing_enabled</span><span class="p">):</span>  <span class="c1"># noqa: SLF001</span>
@@ -509,7 +509,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">return</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">logger_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__logger_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Tracer.enable_tracing">

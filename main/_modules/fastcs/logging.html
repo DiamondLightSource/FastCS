@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.logging &#8212; FastCS 0.12.0a2.dev15+gdbb85c4e1 documentation</title>
+    <title>fastcs.logging &#8212; FastCS 0.12.0a2.dev17+gaff634106 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=1ef0e54f"></script>
+    <script src="../../_static/documentation_options.js?v=e2653769"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -458,7 +458,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">._graylog</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraylogStaticFields</span> <span class="k">as</span> <span class="n">GraylogStaticFields</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._graylog</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_graylog_env_fields</span> <span class="k">as</span> <span class="n">parse_graylog_env_fields</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._graylog</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_graylog_static_fields</span> <span class="k">as</span> <span class="n">parse_graylog_static_fields</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">._logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">LogLevel</span><span class="p">,</span> <span class="n">_configure_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogLevel</span><span class="p">,</span> <span class="n">_configure_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">_logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="s2">&quot;fastcs&quot;</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;FastCS logger</span>
@@ -472,8 +472,7 @@
 <span class="sd">and metrics in graylog.</span>
 
 <span class="sd">It is best to keep the message short and use extra fields for additional information for</span>
-<span class="sd">messages to be formatted nicely in the console. To add kwargs to format the message</span>
-<span class="sd">without them appearing as extra fields, prepend the key with ``_``.</span>
+<span class="sd">messages to be formatted nicely in the console.</span>
 
 <span class="sd">.. code-block:: python</span>
 
@@ -481,24 +480,22 @@
 
 <span class="sd">    logger.info(&quot;PV put: {pv} = {value}&quot;, pv=pv, value=value)</span>
 
-<span class="sd">By default messages will be logged with the name ``fastcs``. Within different modules</span>
-<span class="sd">and classes it can be useful to override this name. This can be done with the ``bind``</span>
-<span class="sd">method. To create a module logger with its name</span>
+<span class="sd">To add kwargs to format the message without them appearing as extra fields, prepend the</span>
+<span class="sd">key with ``_``.</span>
+
+<span class="sd">By default messages will be logged with the name ``fastcs``. Within a driver it may be</span>
+<span class="sd">useful to set a distinct logger name. This can be done with the ``bind`` method. To</span>
+<span class="sd">create a new logger with the the name of the driver, use the following in a logging.py</span>
+<span class="sd">module and use it throughout the package instead of the fastcs logger:</span>
 
 <span class="sd">.. code-block:: python</span>
 
 <span class="sd">    from fastcs.logging import logger as _logger</span>
 
-<span class="sd">    logger = _logger.bind(logger_name=__name__)</span>
-
-<span class="sd">or to create a class logger with its name</span>
-
-<span class="sd">.. code-block:: python</span>
-
-<span class="sd">    self.logger = _logger.bind(logger_name=__class__.__name__)</span>
+<span class="sd">    logger = _logger.bind(logger_name=&quot;fastcs-driver&quot;)</span>
 
 <span class="sd">As standard ``loguru`` supports ``trace`` level monitoring, but it should not be used in</span>
-<span class="sd">fastcs. Instead there is a ``Tracer`` class for verbose logging with fine-grained</span>
+<span class="sd">fastcs. Instead there is a `Tracer` class for verbose logging with fine-grained</span>
 <span class="sd">controls that can be enabled by the user at runtime.</span>
 
 <span class="sd">Use ``configure_logging`` to re-configure the logger at runtime. For more advanced</span>
@@ -506,21 +503,6 @@
 
 <span class="sd">See the ``loguru`` docs for more information: https://loguru.readthedocs.io</span>
 <span class="sd">&quot;&quot;&quot;</span>
-
-
-<div class="viewcode-block" id="bind_logger">
-<a class="viewcode-back" href="../../_api/fastcs.logging.html#fastcs.logging.bind_logger">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">bind_logger</span><span class="p">(</span><span class="n">logger_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Logger</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a wrapper of the singleton fastcs logger with the given name bound</span>
-
-<span class="sd">    The name will be displayed in all log messages from the returned wrapper.</span>
-
-<span class="sd">    See the docstring for ``fastcs.logging.logger`` for more information.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">logger_name</span><span class="o">=</span><span class="n">logger_name</span><span class="p">)</span></div>
-
 
 
 <div class="viewcode-block" id="configure_logging">
@@ -549,10 +531,6 @@
         <span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">graylog_endpoint</span><span class="p">,</span> <span class="n">graylog_static_fields</span><span class="p">,</span> <span class="n">graylog_env_fields</span>
     <span class="p">)</span></div>
 
-
-
-<span class="c1"># Configure logger with defaults - INFO level and disabled</span>
-<span class="n">_configure_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_StdLoggingInterceptHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
