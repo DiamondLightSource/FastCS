@@ -3,9 +3,10 @@ from collections.abc import Iterator, Mapping, MutableMapping, Sequence
 from fastcs.attributes import AnyAttributeIO
 from fastcs.controllers.base_controller import BaseController
 from fastcs.controllers.controller import Controller
+from fastcs.util import Controller_T
 
 
-class ControllerVector(MutableMapping[int, Controller], BaseController):
+class ControllerVector(MutableMapping[int, Controller_T], BaseController):
     """Controller containing Attributes and indexed sub Controllers
 
     The sub controllers registered with this Controller should be instances of the same
@@ -15,12 +16,12 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
 
     def __init__(
         self,
-        children: Mapping[int, Controller],
+        children: Mapping[int, Controller_T],
         description: str | None = None,
         ios: Sequence[AnyAttributeIO] | None = None,
     ) -> None:
         super().__init__(description=description, ios=ios)
-        self._children: dict[int, Controller] = {}
+        self._children: dict[int, Controller_T] = {}
         for index, child in children.items():
             self[index] = child
 
@@ -31,7 +32,7 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
             "E.g., vector[1] = Controller()"
         )
 
-    def __getitem__(self, key: int) -> Controller:
+    def __getitem__(self, key: int) -> Controller_T:
         try:
             return self._children[key]
         except KeyError as exception:
@@ -39,7 +40,7 @@ class ControllerVector(MutableMapping[int, Controller], BaseController):
                 f"ControllerVector does not have Controller with key {key}"
             ) from exception
 
-    def __setitem__(self, key: int, value: Controller) -> None:
+    def __setitem__(self, key: int, value: Controller_T) -> None:
         if not isinstance(key, int):
             msg = f"Expected int, got {key}"
             raise TypeError(msg)

@@ -1,4 +1,11 @@
 import re
+from typing import TYPE_CHECKING, TypeVar
+
+if TYPE_CHECKING:
+    from fastcs.controllers import BaseController  # noqa: F401
+
+Controller_T = TypeVar("Controller_T", bound="BaseController")  # noqa: F821
+"""Generic `Controller` class that an unbound method must be called with as `self`"""
 
 ONCE = float("inf")
 """Sentinel value to call a ``scan`` or io ``update`` method once on start up"""
