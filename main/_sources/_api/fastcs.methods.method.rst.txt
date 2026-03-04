@@ -2,7 +2,6 @@
 =========================
         
         
-        
 
 .. automodule:: fastcs.methods.method
     :members:
@@ -18,7 +17,6 @@
     .. autosummary::
         :nosignatures:
     
-        Controller_T
         Method
         MethodCallback
     
