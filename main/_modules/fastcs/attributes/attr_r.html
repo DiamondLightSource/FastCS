@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.attributes.attr_r &#8212; FastCS 0.12.0a2.dev16+g1008960cf documentation</title>
+    <title>fastcs.attributes.attr_r &#8212; FastCS 0.12.0a2.dev18+g5ed503e27 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=c1051ba3"></script>
+    <script src="../../../_static/documentation_options.js?v=4714fea5"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -531,7 +531,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Attribute set&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="n">_previous_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to validate value&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">raise</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Value validated&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">),</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
