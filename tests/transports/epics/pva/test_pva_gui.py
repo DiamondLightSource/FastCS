@@ -16,8 +16,8 @@ from pvi.device import (
 )
 
 from fastcs.attributes import AttrR, AttrW
+from fastcs.controllers import ControllerAPI
 from fastcs.datatypes import Table, Waveform
-from fastcs.transports import ControllerAPI
 from fastcs.transports.epics.gui import EpicsGUI
 from fastcs.transports.epics.pva.gui import PvaEpicsGUI
 

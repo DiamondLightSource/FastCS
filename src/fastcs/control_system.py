@@ -7,11 +7,11 @@ from typing import Any
 
 from IPython.terminal.embed import InteractiveShellEmbed
 
-from fastcs.controllers import BaseController, Controller
+from fastcs.controllers import Controller
 from fastcs.logging import logger
 from fastcs.methods import ScanCallback
 from fastcs.tracer import Tracer
-from fastcs.transports import ControllerAPI, Transport
+from fastcs.transports import Transport
 
 tracer = Tracer()
 
@@ -57,15 +57,6 @@ class FastCS:
     async def _start_scan_tasks(self):
         self._scan_tasks = {self._loop.create_task(coro()) for coro in self._scan_coros}
 
-        for task in self._scan_tasks:
-            task.add_done_callback(self._scan_done)
-
-    def _scan_done(self, task: asyncio.Task):
-        try:
-            task.result()
-        except Exception:
-            logger.exception("Exception raised in scan task")
-
     def _stop_scan_tasks(self):
         for task in self._scan_tasks:
             if not task.done():
@@ -82,9 +73,8 @@ class FastCS:
         await self._controller.initialise()
         self._controller.post_initialise()
 
-        self.controller_api = build_controller_api(self._controller)
-        self._scan_coros, self._initial_coros = (
-            self.controller_api.get_scan_and_initial_coros()
+        self.controller_api, self._scan_coros, self._initial_coros = (
+            self._controller.create_api_and_tasks()
         )
 
         context = {
@@ -168,21 +158,3 @@ class FastCS:
 
     def __del__(self):
         self._stop_scan_tasks()
-
-
-def build_controller_api(controller: Controller) -> ControllerAPI:
-    return _build_controller_api(controller, [])
-
-
-def _build_controller_api(controller: BaseController, path: list[str]) -> ControllerAPI:
-    return ControllerAPI(
-        path=path,
-        attributes=controller.attributes,
-        command_methods=controller.command_methods,
-        scan_methods=controller.scan_methods,
-        sub_apis={
-            name: _build_controller_api(sub_controller, path + [name])
-            for name, sub_controller in controller.sub_controllers.items()
-        },
-        description=controller.description,
-    )

@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import dataclass, field
 
-from fastcs.transports.controller_api import ControllerAPI
+from fastcs.controllers import ControllerAPI
 from fastcs.transports.transport import Transport
 
 from .dsr import TangoDSR, TangoDSROptions

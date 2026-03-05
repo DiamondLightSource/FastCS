@@ -6,11 +6,11 @@ from softioc.asyncio_dispatcher import AsyncioDispatcher
 from softioc.pythonSoftIoc import RecordWrapper
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controllers import ControllerAPI
 from fastcs.datatypes import DType_T, Waveform
 from fastcs.logging import logger
 from fastcs.methods import Command
 from fastcs.tracer import Tracer
-from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics.ca.util import (
     _make_in_record,
     _make_out_record,
