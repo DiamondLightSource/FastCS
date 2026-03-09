@@ -16,7 +16,7 @@ import fastcs
 # -- General configuration ------------------------------------------------
 
 # General information about the project.
-project = "FastCS"
+project = "fastcs"
 
 # The full version, including alpha/beta/rc tags.
 release = fastcs.__version__
@@ -172,7 +172,7 @@ copybutton_prompt_is_regexp = True
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
-github_repo = "FastCS"
+github_repo = "fastcs"
 github_user = "DiamondLightSource"
 switcher_json = f"https://{github_user}.github.io/{github_repo}/switcher.json"
 switcher_exists = requests.get(switcher_json).ok

@@ -76,7 +76,7 @@ dev = [
 fastcs-demo = "fastcs.demo.__main__:main"
 
 [project.urls]
-GitHub = "https://github.com/DiamondLightSource/FastCS"
+GitHub = "https://github.com/DiamondLightSource/fastcs"
 
 [tool.setuptools_scm]
 version_file = "src/fastcs/_version.py"
