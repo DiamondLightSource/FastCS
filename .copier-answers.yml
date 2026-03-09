@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: 5.0.1
+_commit: 5.0.2
 _src_path: https://github.com/DiamondLightSource/python-copier-template
 author_email: gary.yendell@diamond.ac.uk
 author_name: Gary Yendell
@@ -15,6 +15,6 @@ git_platform: github.com
 github_org: DiamondLightSource
 package_name: fastcs
 pypi: true
-repo_name: FastCS
+repo_name: fastcs
 strict_typing: false
 type_checker: pyright

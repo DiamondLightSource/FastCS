@@ -31,7 +31,7 @@ If you require a feature that is not currently released you can also install
 from github:
 
 ```
-$ python3 -m pip install git+https://github.com/DiamondLightSource/FastCS.git
+$ python3 -m pip install git+https://github.com/DiamondLightSource/fastcs.git
 ```
 
 The library should now be installed. There is no application entrypoint, but the library can be imported:

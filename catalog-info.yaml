@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: fastcs
-  title: FastCS
+  title: fastcs
   description: Control system agnostic framework for building Device support in Python that will work for both EPICS and Tango
 spec:
   type: library

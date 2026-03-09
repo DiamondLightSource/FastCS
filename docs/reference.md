@@ -8,5 +8,5 @@ Technical reference material including APIs and release notes.
 
 API <_api/fastcs>
 genindex
-Release Notes <https://github.com/DiamondLightSource/FastCS/releases>
+Release Notes <https://github.com/DiamondLightSource/fastcs/releases>
 ```
