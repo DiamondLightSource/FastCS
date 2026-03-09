@@ -280,4 +280,5 @@ async def test_scan_exception_sets_disconnected_and_reconnect_resumes():
     assert controller._connected
 
     task.cancel()
-    await asyncio.sleep(0.01)
+    with pytest.raises(asyncio.CancelledError):
+        await task

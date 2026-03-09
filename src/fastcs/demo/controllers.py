@@ -10,6 +10,7 @@ from fastcs.attributes import AttributeIO, AttributeIORef, AttrR, AttrRW, AttrW
 from fastcs.connections import IPConnection, IPConnectionSettings
 from fastcs.controllers import Controller
 from fastcs.datatypes import Enum, Float, Int, Waveform
+from fastcs.logging import logger
 from fastcs.methods import command, scan
 
 NumberT = TypeVar("NumberT", int, float)
@@ -96,8 +97,12 @@ class TemperatureController(Controller):
         await self.connection.connect(self._settings.ip_settings)
 
     async def reconnect(self):
-        await self.connection.close()
-        await self.connection.connect(self._settings.ip_settings)
+        try:
+            await self.connection.close()
+            await self.connection.connect(self._settings.ip_settings)
+        except BaseException:
+            logger.exception("Reconnect failed")
+            return
 
         self._connected = True
 

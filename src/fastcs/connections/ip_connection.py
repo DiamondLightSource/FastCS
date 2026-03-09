@@ -88,5 +88,5 @@ class IPConnection(Tracer):
                 await connection.close()
             except ConnectionResetError:
                 pass
-
-        self.__connection = None
+            finally:
+                self.__connection = None
