@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; FastCS 0.12.0a2.dev19+g5fc0836ce documentation</title>
+    <title>Index &#8212; FastCS 0.12.0a3.dev1+g4d6164180 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=ccfa9438"></script>
+    <script src="_static/documentation_options.js?v=eb61a915"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -418,6 +418,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="_api/fastcs.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="_api/fastcs.controllers.base_controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.base_controller</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="_api/fastcs.controllers.controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="_api/fastcs.controllers.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_api</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="_api/fastcs.controllers.controller_vector.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_vector</span></code></a></li>
 </ul>
 </details></li>
@@ -451,7 +452,6 @@
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="_api/fastcs.tracer.html"><code class="docutils literal notranslate"><span class="pre">fastcs.tracer</span></code></a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_api/fastcs.transports.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="_api/fastcs.transports.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.controller_api</span></code></a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_api/fastcs.transports.epics.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="_api/fastcs.transports.epics.ca.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.ca</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="_api/fastcs.transports.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.docs</span></code></a></li>
@@ -640,23 +640,27 @@
 </li>
       <li><a href="_api/fastcs.methods.command.html#fastcs.methods.command.Command">Command (class in fastcs.methods.command)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_api/fastcs.methods.command.html#fastcs.methods.command.command">command() (in module fastcs.methods.command)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_api/fastcs.methods.command.html#fastcs.methods.command.CommandCallback">CommandCallback (in module fastcs.methods.command)</a>
 </li>
       <li><a href="_api/fastcs.logging.html#fastcs.logging.configure_logging">configure_logging() (in module fastcs.logging)</a>
+</li>
+      <li><a href="_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller.connect">connect() (fastcs.controllers.controller.Controller method)</a>
 </li>
       <li><a href="_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller">Controller (class in fastcs.controllers.controller)</a>
 </li>
       <li><a href="_api/fastcs.util.html#fastcs.util.Controller_T">Controller_T (class in fastcs.util)</a>
 </li>
-      <li><a href="_api/fastcs.transports.controller_api.html#fastcs.transports.controller_api.ControllerAPI">ControllerAPI (class in fastcs.transports.controller_api)</a>
+      <li><a href="_api/fastcs.controllers.controller_api.html#fastcs.controllers.controller_api.ControllerAPI">ControllerAPI (class in fastcs.controllers.controller_api)</a>
 </li>
       <li><a href="_api/fastcs.controllers.controller_vector.html#fastcs.controllers.controller_vector.ControllerVector">ControllerVector (class in fastcs.controllers.controller_vector)</a>
 </li>
       <li><a href="_api/fastcs.transports.rest.util.html#fastcs.transports.rest.util.convert_datatype">convert_datatype() (in module fastcs.transports.rest.util)</a>
+</li>
+      <li><a href="_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller.create_api_and_tasks">create_api_and_tasks() (fastcs.controllers.controller.Controller method)</a>
 </li>
       <li><a href="_api/fastcs.transports.graphql.graphql.html#fastcs.transports.graphql.graphql.GraphQLAPI.create_schema">create_schema() (fastcs.transports.graphql.graphql.GraphQLAPI method)</a>
 </li>
@@ -672,10 +676,12 @@
 </li>
       <li><a href="_api/fastcs.tracer.html#fastcs.tracer.Tracer.disable_tracing">disable_tracing() (fastcs.tracer.Tracer method)</a>
 </li>
-      <li><a href="_api/fastcs.connections.ip_connection.html#fastcs.connections.ip_connection.DisconnectedError">DisconnectedError</a>
+      <li><a href="_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller.disconnect">disconnect() (fastcs.controllers.controller.Controller method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_api/fastcs.connections.ip_connection.html#fastcs.connections.ip_connection.DisconnectedError">DisconnectedError</a>
+</li>
       <li><a href="_api/fastcs.attributes.hinted_attribute.html#fastcs.attributes.hinted_attribute.HintedAttribute.dtype">dtype (fastcs.attributes.hinted_attribute.HintedAttribute attribute)</a>
 </li>
       <li><a href="_api/fastcs.datatypes.datatype.html#fastcs.datatypes.datatype.DType">DType (in module fastcs.datatypes.datatype)</a>
@@ -844,6 +850,13 @@
 </li>
       </ul></li>
       <li>
+    fastcs.controllers.controller_api
+
+      <ul>
+        <li><a href="_api/fastcs.controllers.controller_api.html#module-fastcs.controllers.controller_api">module</a>
+</li>
+      </ul></li>
+      <li>
     fastcs.controllers.controller_vector
 
       <ul>
@@ -969,6 +982,8 @@
         <li><a href="_api/fastcs.methods.html#module-fastcs.methods">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     fastcs.methods.command
 
@@ -976,8 +991,6 @@
         <li><a href="_api/fastcs.methods.command.html#module-fastcs.methods.command">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     fastcs.methods.method
 
@@ -1004,13 +1017,6 @@
 
       <ul>
         <li><a href="_api/fastcs.transports.html#module-fastcs.transports">module</a>
-</li>
-      </ul></li>
-      <li>
-    fastcs.transports.controller_api
-
-      <ul>
-        <li><a href="_api/fastcs.transports.controller_api.html#module-fastcs.transports.controller_api">module</a>
 </li>
       </ul></li>
       <li>
@@ -1356,6 +1362,8 @@
 </li>
         <li><a href="_api/fastcs.controllers.controller.html#module-fastcs.controllers.controller">fastcs.controllers.controller</a>
 </li>
+        <li><a href="_api/fastcs.controllers.controller_api.html#module-fastcs.controllers.controller_api">fastcs.controllers.controller_api</a>
+</li>
         <li><a href="_api/fastcs.controllers.controller_vector.html#module-fastcs.controllers.controller_vector">fastcs.controllers.controller_vector</a>
 </li>
         <li><a href="_api/fastcs.datatypes.html#module-fastcs.datatypes">fastcs.datatypes</a>
@@ -1401,8 +1409,6 @@
         <li><a href="_api/fastcs.tracer.html#module-fastcs.tracer">fastcs.tracer</a>
 </li>
         <li><a href="_api/fastcs.transports.html#module-fastcs.transports">fastcs.transports</a>
-</li>
-        <li><a href="_api/fastcs.transports.controller_api.html#module-fastcs.transports.controller_api">fastcs.transports.controller_api</a>
 </li>
         <li><a href="_api/fastcs.transports.epics.html#module-fastcs.transports.epics">fastcs.transports.epics</a>
 </li>
@@ -1504,7 +1510,7 @@
       <li><a href="_api/fastcs.controllers.base_controller.html#fastcs.controllers.base_controller.BaseController.path">path (fastcs.controllers.base_controller.BaseController property)</a>
 
       <ul>
-        <li><a href="_api/fastcs.transports.controller_api.html#fastcs.transports.controller_api.ControllerAPI.path">(fastcs.transports.controller_api.ControllerAPI attribute)</a>
+        <li><a href="_api/fastcs.controllers.controller_api.html#fastcs.controllers.controller_api.ControllerAPI.path">(fastcs.controllers.controller_api.ControllerAPI attribute)</a>
 </li>
       </ul></li>
       <li><a href="_api/fastcs.controllers.base_controller.html#fastcs.controllers.base_controller.BaseController.post_initialise">post_initialise() (fastcs.controllers.base_controller.BaseController method)</a>
@@ -1521,14 +1527,16 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller.reconnect">reconnect() (fastcs.controllers.controller.Controller method)</a>
+</li>
       <li><a href="_api/fastcs.attributes.attribute_io.html#fastcs.attributes.attribute_io.AttributeIO.ref_type">ref_type (fastcs.attributes.attribute_io.AttributeIO attribute)</a>
 </li>
       <li><a href="_api/fastcs.transports.tango.dsr.html#fastcs.transports.tango.dsr.register_dev">register_dev() (in module fastcs.transports.tango.dsr)</a>
 </li>
-      <li><a href="_api/fastcs.tracer.html#fastcs.tracer.Tracer.remove_tracing_filter">remove_tracing_filter() (fastcs.tracer.Tracer method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_api/fastcs.tracer.html#fastcs.tracer.Tracer.remove_tracing_filter">remove_tracing_filter() (fastcs.tracer.Tracer method)</a>
+</li>
       <li><a href="_api/fastcs.transports.rest.rest.html#fastcs.transports.rest.rest.RestServer">RestServer (class in fastcs.transports.rest.rest)</a>
 </li>
       <li><a href="_api/fastcs.transports.rest.options.html#fastcs.transports.rest.options.RestServerOptions">RestServerOptions (class in fastcs.transports.rest.options)</a>
@@ -1565,7 +1573,7 @@
 </li>
       <li><a href="_api/fastcs.datatypes.string.html#fastcs.datatypes.string.String">String (class in fastcs.datatypes.string)</a>
 </li>
-      <li><a href="_api/fastcs.transports.controller_api.html#fastcs.transports.controller_api.ControllerAPI.sub_apis">sub_apis (fastcs.transports.controller_api.ControllerAPI attribute)</a>
+      <li><a href="_api/fastcs.controllers.controller_api.html#fastcs.controllers.controller_api.ControllerAPI.sub_apis">sub_apis (fastcs.controllers.controller_api.ControllerAPI attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1637,7 +1645,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_api/fastcs.attributes.attr_r.html#fastcs.attributes.attr_r.AttrR.wait_for_value">wait_for_value() (fastcs.attributes.attr_r.AttrR method)</a>
 </li>
-      <li><a href="_api/fastcs.transports.controller_api.html#fastcs.transports.controller_api.ControllerAPI.walk_api">walk_api() (fastcs.transports.controller_api.ControllerAPI method)</a>
+      <li><a href="_api/fastcs.controllers.controller_api.html#fastcs.controllers.controller_api.ControllerAPI.walk_api">walk_api() (fastcs.controllers.controller_api.ControllerAPI method)</a>
 </li>
       <li><a href="_api/fastcs.datatypes.waveform.html#fastcs.datatypes.waveform.Waveform">Waveform (class in fastcs.datatypes.waveform)</a>
 </li>

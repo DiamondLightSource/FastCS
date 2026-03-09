@@ -15,6 +15,7 @@
     
         base_controller
         controller
+        controller_api
         controller_vector
     
     

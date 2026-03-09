@@ -1,7 +1,6 @@
 ``fastcs.control_system``
 =========================
         
-        
 
 .. automodule:: fastcs.control_system
     :members:
@@ -18,6 +17,5 @@
         :nosignatures:
     
         FastCS
-        build_controller_api
     
     

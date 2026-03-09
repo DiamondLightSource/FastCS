@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.connections.serial_connection &#8212; FastCS 0.12.0a3.dev1+g4d6164180 documentation</title>
+    <title>fastcs.controllers.controller_api &#8212; FastCS 0.12.0a3.dev1+g4d6164180 documentation</title>
   
   
   
@@ -53,7 +53,7 @@
     <script src="../../../_static/togglebutton.js?v=1ae7504c"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fastcs/connections/serial_connection';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fastcs/controllers/controller_api';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://DiamondLightSource.github.io/FastCS/switcher.json';
@@ -431,7 +431,7 @@
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fastcs.connections.serial_connection</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fastcs.controllers.controller_api</span></li>
   </ul>
 </nav>
 </div>
@@ -448,71 +448,50 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for fastcs.connections.serial_connection</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+  <h1>Source code for fastcs.controllers.controller_api</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">aioserial</span>
-
-
-<div class="viewcode-block" id="NotOpenedError">
-<a class="viewcode-back" href="../../../_api/fastcs.connections.serial_connection.html#fastcs.connections.serial_connection.NotOpenedError">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">NotOpenedError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;If the serial stream is not opened.&quot;&quot;&quot;</span>
-
-    <span class="k">pass</span></div>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span><span class="p">,</span> <span class="n">Scan</span>
 
 
-
-<div class="viewcode-block" id="SerialConnectionSettings">
-<a class="viewcode-back" href="../../../_api/fastcs.connections.serial_connection.html#fastcs.connections.serial_connection.SerialConnectionSettings">[docs]</a>
+<div class="viewcode-block" id="ControllerAPI">
+<a class="viewcode-back" href="../../../_api/fastcs.controllers.controller_api.html#fastcs.controllers.controller_api.ControllerAPI">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SerialConnectionSettings</span><span class="p">:</span>
-    <span class="n">port</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">baud</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">115200</span></div>
+<span class="k">class</span><span class="w"> </span><span class="nc">ControllerAPI</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Attributes, Methods and sub APIs of a `Controller` to expose in a transport&quot;&quot;&quot;</span>
+
+    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Path within controller tree (empty if this is the root)&quot;&quot;&quot;</span>
+    <span class="n">attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">command_methods</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Command</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">scan_methods</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Scan</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">sub_apis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;ControllerAPI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;APIs of the sub controllers of the `Controller` this API was built from&quot;&quot;&quot;</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ControllerAPI.walk_api">
+<a class="viewcode-back" href="../../../_api/fastcs.controllers.controller_api.html#fastcs.controllers.controller_api.ControllerAPI.walk_api">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">walk_api</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="s2">&quot;ControllerAPI&quot;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Walk through all the nested `ControllerAPI` s of this `ControllerAPI`.</span>
+
+<span class="sd">        Yields the `ControllerAPI` s from a depth-first traversal of the tree,</span>
+<span class="sd">        including self.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">yield</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">api</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_apis</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">yield from</span> <span class="n">api</span><span class="o">.</span><span class="n">walk_api</span><span class="p">()</span></div>
 
 
-
-<div class="viewcode-block" id="SerialConnection">
-<a class="viewcode-back" href="../../../_api/fastcs.connections.serial_connection.html#fastcs.connections.serial_connection.SerialConnection">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SerialConnection</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A serial connection.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SerialConnectionSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__stream</span> <span class="o">=</span> <span class="n">aioserial</span><span class="o">.</span><span class="n">AioSerial</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">baudrate</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">baud</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">aioserial</span><span class="o">.</span><span class="n">AioSerial</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stream</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NotOpenedError</span><span class="p">(</span>
-                <span class="s2">&quot;Need to call connect() before using SerialConnection.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stream</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send_message</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">response_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send_message</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_receive_response</span><span class="p">(</span><span class="n">response_size</span><span class="p">)</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_send_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">write_async</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_receive_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read_async</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
-
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__stream</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;ControllerAPI(&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;path=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;sub_apis=[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_apis</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">]&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;)&quot;</span>
+        <span class="p">)</span></div>
 
 </pre></div>
 

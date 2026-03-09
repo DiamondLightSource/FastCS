@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.attributes.attr_r &#8212; FastCS 0.12.0a2.dev19+g5fc0836ce documentation</title>
+    <title>fastcs.attributes.attr_r &#8212; FastCS 0.12.0a3.dev1+g4d6164180 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ccfa9438"></script>
+    <script src="../../../_static/documentation_options.js?v=eb61a915"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -452,7 +452,7 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Awaitable</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Coroutine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.attribute</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttributeAccessMode</span>
@@ -461,11 +461,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">DType_T</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 
-<span class="n">AttrIOUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;AttrR[DType_T, Any]&quot;</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]</span>
+<span class="n">AttrIOUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;AttrR[DType_T, Any]&quot;</span><span class="p">],</span> <span class="n">Coroutine</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
 <span class="sd">&quot;&quot;&quot;An AttributeIO callback that takes an AttrR and updates its value&quot;&quot;&quot;</span>
-<span class="n">AttrUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]</span>
+<span class="n">AttrUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Coroutine</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
 <span class="sd">&quot;&quot;&quot;A callback to be called periodically to update an attribute&quot;&quot;&quot;</span>
-<span class="n">AttrOnUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DType_T</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]</span>
+<span class="n">AttrOnUpdateCallback</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DType_T</span><span class="p">],</span> <span class="n">Coroutine</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
 <span class="sd">&quot;&quot;&quot;A callback to be called when the value of the attribute is updated&quot;&quot;&quot;</span>
 
 
@@ -599,12 +599,8 @@
             <span class="n">update_callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_callback</span>
 
         <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_attribute</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Update attribute&quot;</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-                <span class="k">await</span> <span class="n">update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Attribute update loop stopped&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-                <span class="k">raise</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_event</span><span class="p">(</span><span class="s2">&quot;Update attribute&quot;</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">update_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">update_attribute</span></div>
 

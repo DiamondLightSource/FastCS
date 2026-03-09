@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.connections.ip_connection &#8212; FastCS 0.12.0a2.dev19+g5fc0836ce documentation</title>
+    <title>fastcs.connections.ip_connection &#8212; FastCS 0.12.0a3.dev1+g4d6164180 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ccfa9438"></script>
+    <script src="../../../_static/documentation_options.js?v=eb61a915"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -542,9 +542,16 @@
             <span class="k">return</span> <span class="n">response</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connection</span> <span class="k">as</span> <span class="n">connection</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__connection</span> <span class="o">=</span> <span class="kc">None</span></div>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">ConnectionResetError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__connection</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 </pre></div>
 

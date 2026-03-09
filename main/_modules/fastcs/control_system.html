@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.control_system &#8212; FastCS 0.12.0a2.dev19+g5fc0836ce documentation</title>
+    <title>fastcs.control_system &#8212; FastCS 0.12.0a3.dev1+g4d6164180 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=ccfa9438"></script>
+    <script src="../../_static/documentation_options.js?v=eb61a915"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -458,11 +458,11 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.terminal.embed</span><span class="w"> </span><span class="kn">import</span> <span class="n">InteractiveShellEmbed</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanCallback</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.tracer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span><span class="p">,</span> <span class="n">Transport</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.transports</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transport</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 
@@ -510,15 +510,6 @@
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_start_scan_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scan_tasks</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">coro</span><span class="p">())</span> <span class="k">for</span> <span class="n">coro</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan_coros</span><span class="p">}</span>
 
-        <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan_tasks</span><span class="p">:</span>
-            <span class="n">task</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scan_done</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_scan_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">task</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Exception raised in scan task&quot;</span><span class="p">)</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_stop_scan_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan_tasks</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
@@ -535,9 +526,8 @@
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">initialise</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">post_initialise</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span> <span class="o">=</span> <span class="n">build_controller_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_scan_coros</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_coros</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span><span class="o">.</span><span class="n">get_scan_and_initial_coros</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller_api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scan_coros</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_coros</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">create_api_and_tasks</span><span class="p">()</span>
         <span class="p">)</span>
 
         <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
@@ -622,24 +612,6 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stop_scan_tasks</span><span class="p">()</span></div>
 
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">build_controller_api</span><span class="p">(</span><span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ControllerAPI</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">_build_controller_api</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="p">[])</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_build_controller_api</span><span class="p">(</span><span class="n">controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ControllerAPI</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">ControllerAPI</span><span class="p">(</span>
-        <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
-        <span class="n">attributes</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">attributes</span><span class="p">,</span>
-        <span class="n">command_methods</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">command_methods</span><span class="p">,</span>
-        <span class="n">scan_methods</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">scan_methods</span><span class="p">,</span>
-        <span class="n">sub_apis</span><span class="o">=</span><span class="p">{</span>
-            <span class="n">name</span><span class="p">:</span> <span class="n">_build_controller_api</span><span class="p">(</span><span class="n">sub_controller</span><span class="p">,</span> <span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">name</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sub_controller</span> <span class="ow">in</span> <span class="n">controller</span><span class="o">.</span><span class="n">sub_controllers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">},</span>
-        <span class="n">description</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-    <span class="p">)</span>
 </pre></div>
 
                 </article>

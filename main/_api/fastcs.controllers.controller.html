@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fastcs.controllers.controller &#8212; FastCS 0.12.0a2.dev19+g5fc0836ce documentation</title>
+    <title>fastcs.controllers.controller &#8212; FastCS 0.12.0a3.dev1+g4d6164180 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=ccfa9438"></script>
+    <script src="../_static/documentation_options.js?v=eb61a915"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -65,7 +65,7 @@
     <link rel="icon" href="../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fastcs.controllers.controller_vector" href="fastcs.controllers.controller_vector.html" />
+    <link rel="next" title="fastcs.controllers.controller_api" href="fastcs.controllers.controller_api.html" />
     <link rel="prev" title="fastcs.controllers.base_controller" href="fastcs.controllers.base_controller.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -425,6 +425,7 @@
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="fastcs.controllers.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.base_controller.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.base_controller</span></code></a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_api</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="fastcs.controllers.controller_vector.html"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_vector</span></code></a></li>
 </ul>
 </details></li>
@@ -458,7 +459,6 @@
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="fastcs.tracer.html"><code class="docutils literal notranslate"><span class="pre">fastcs.tracer</span></code></a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="fastcs.transports.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="fastcs.transports.controller_api.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.controller_api</span></code></a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="fastcs.transports.epics.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.ca.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.ca</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="fastcs.transports.epics.docs.html"><code class="docutils literal notranslate"><span class="pre">fastcs.transports.epics.docs</span></code></a></li>
@@ -577,6 +577,49 @@
 <dt class="sig sig-object py" id="fastcs.controllers.controller.Controller">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fastcs.controllers.controller.</span></span><span class="sig-name descname"><span class="pre">Controller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ios</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="fastcs.attributes.attribute_io.html#fastcs.attributes.attribute_io.AttributeIO" title="fastcs.attributes.attribute_io.AttributeIO"><span class="pre">AttributeIO</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="fastcs.attributes.attribute_io_ref.html#fastcs.attributes.attribute_io_ref.AttributeIORef" title="fastcs.attributes.attribute_io_ref.AttributeIORef"><span class="pre">AttributeIORef</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/controllers/controller.html#Controller"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controllers.controller.Controller" title="Link to this definition">#</a></dt>
 <dd><p>Controller containing Attributes and named sub Controllers</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.controllers.controller.Controller.connect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/controllers/controller.html#Controller.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controllers.controller.Controller.connect" title="Link to this definition">#</a></dt>
+<dd><p>Hook to perform initial connection to device</p>
+<p>This should set <code class="docutils literal notranslate"><span class="pre">_connected</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> if the connection was successful to
+enable scan tasks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.controllers.controller.Controller.reconnect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reconnect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fastcs/controllers/controller.html#Controller.reconnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controllers.controller.Controller.reconnect" title="Link to this definition">#</a></dt>
+<dd><p>Hook to reconnect to device after an error</p>
+<p>This should set <code class="docutils literal notranslate"><span class="pre">_connected</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> if the connection was successful to
+enable scan tasks.</p>
+<p>If the connection cannot be re-established it should log an error with the
+reason. It should not raise an exception.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.controllers.controller.Controller.disconnect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/fastcs/controllers/controller.html#Controller.disconnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controllers.controller.Controller.disconnect" title="Link to this definition">#</a></dt>
+<dd><p>Hook to tidy up resources before stopping the application</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcs.controllers.controller.Controller.create_api_and_tasks">
+<span class="sig-name descname"><span class="pre">create_api_and_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="fastcs.controllers.controller_api.html#fastcs.controllers.controller_api.ControllerAPI" title="fastcs.controllers.controller_api.ControllerAPI"><span class="pre">ControllerAPI</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Coroutine" title="(in Python v3.14)"><span class="pre">Coroutine</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Coroutine" title="(in Python v3.14)"><span class="pre">Coroutine</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/fastcs/controllers/controller.html#Controller.create_api_and_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fastcs.controllers.controller.Controller.create_api_and_tasks" title="Link to this definition">#</a></dt>
+<dd><p>Create api for transports tasks for FastCS backend</p>
+<dl class="simple">
+<dt>Creates a tuple of</dt><dd><ul class="simple">
+<li><p>The <a class="reference internal" href="fastcs.controllers.controller_api.html#fastcs.controllers.controller_api.ControllerAPI" title="fastcs.controllers.controller_api.ControllerAPI"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ControllerAPI</span></code></a> for this controller</p></li>
+<li><p>Initial coroutines to be run once on startup</p></li>
+<li><p>Periodic coroutines to run as background tasks</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[ControllerAPI, list[ScanCallback], list[ScanCallback]]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -601,11 +644,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="fastcs.controllers.controller_vector.html"
+       href="fastcs.controllers.controller_api.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_vector</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">fastcs.controllers.controller_api</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -628,7 +671,13 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controllers.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controllers.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controllers.controller.Controller.connect"><code class="docutils literal notranslate"><span class="pre">Controller.connect()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controllers.controller.Controller.reconnect"><code class="docutils literal notranslate"><span class="pre">Controller.reconnect()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controllers.controller.Controller.disconnect"><code class="docutils literal notranslate"><span class="pre">Controller.disconnect()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fastcs.controllers.controller.Controller.create_api_and_tasks"><code class="docutils literal notranslate"><span class="pre">Controller.create_api_and_tasks()</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

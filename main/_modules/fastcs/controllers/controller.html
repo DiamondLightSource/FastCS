@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs.controllers.controller &#8212; FastCS 0.12.0a2.dev19+g5fc0836ce documentation</title>
+    <title>fastcs.controllers.controller &#8212; FastCS 0.12.0a3.dev1+g4d6164180 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=ccfa9438"></script>
+    <script src="../../../_static/documentation_options.js?v=eb61a915"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -449,10 +449,18 @@
                 <article class="bd-article">
                   
   <h1>Source code for fastcs.controllers.controller</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnyAttributeIO</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.attr_r</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttrR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes.attribute_io_ref</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeIORef</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers.base_controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseController</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controllers.controller_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ControllerAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanCallback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">ONCE</span>
 
 
 <div class="viewcode-block" id="Controller">
@@ -466,6 +474,7 @@
         <span class="n">ios</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AnyAttributeIO</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">ios</span><span class="o">=</span><span class="n">ios</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connected</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">add_sub_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sub_controller</span><span class="p">:</span> <span class="n">BaseController</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
@@ -475,11 +484,121 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_sub_controller</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sub_controller</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Controller.connect">
+<a class="viewcode-back" href="../../../_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller.connect">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hook to perform initial connection to device</span>
 
+<span class="sd">        This should set ``_connected`` to ``True`` if the connection was successful to</span>
+<span class="sd">        enable scan tasks.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connected</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Controller.reconnect">
+<a class="viewcode-back" href="../../../_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller.reconnect">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">reconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hook to reconnect to device after an error</span>
+
+<span class="sd">        This should set ``_connected`` to ``True`` if the connection was successful to</span>
+<span class="sd">        enable scan tasks.</span>
+
+<span class="sd">        If the connection cannot be re-established it should log an error with the</span>
+<span class="sd">        reason. It should not raise an exception.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connected</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Controller.disconnect">
+<a class="viewcode-back" href="../../../_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller.disconnect">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hook to tidy up resources before stopping the application&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Controller.create_api_and_tasks">
+<a class="viewcode-back" href="../../../_api/fastcs.controllers.controller.html#fastcs.controllers.controller.Controller.create_api_and_tasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_api_and_tasks</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ControllerAPI</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ScanCallback</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">ScanCallback</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create api for transports tasks for FastCS backend</span>
+
+<span class="sd">        Creates a tuple of</span>
+<span class="sd">            - The `ControllerAPI` for this controller</span>
+<span class="sd">            - Initial coroutines to be run once on startup</span>
+<span class="sd">            - Periodic coroutines to run as background tasks</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[ControllerAPI, list[ScanCallback], list[ScanCallback]]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">controller_api</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_api</span><span class="p">([])</span>
+
+        <span class="n">scan_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ScanCallback</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">initial_coros</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ScanCallback</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">api</span> <span class="ow">in</span> <span class="n">controller_api</span><span class="o">.</span><span class="n">walk_api</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">api</span><span class="o">.</span><span class="n">scan_methods</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">period</span> <span class="ow">is</span> <span class="n">ONCE</span><span class="p">:</span>
+                    <span class="n">initial_coros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">scan_dict</span><span class="p">[</span><span class="n">method</span><span class="o">.</span><span class="n">period</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">api</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">match</span> <span class="n">attribute</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="n">AttrR</span><span class="p">(</span><span class="n">_io_ref</span><span class="o">=</span><span class="n">AttributeIORef</span><span class="p">(</span><span class="n">update_period</span><span class="o">=</span><span class="n">update_period</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">update_period</span> <span class="ow">is</span> <span class="n">ONCE</span><span class="p">:</span>
+                            <span class="n">initial_coros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attribute</span><span class="o">.</span><span class="n">bind_update_callback</span><span class="p">())</span>
+                        <span class="k">elif</span> <span class="n">update_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">scan_dict</span><span class="p">[</span><span class="n">update_period</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="n">attribute</span><span class="o">.</span><span class="n">bind_update_callback</span><span class="p">()</span>
+                            <span class="p">)</span>
+
+        <span class="n">periodic_scan_coros</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ScanCallback</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">period</span><span class="p">,</span> <span class="n">methods</span> <span class="ow">in</span> <span class="n">scan_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">periodic_scan_coros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_periodic_scan_coro</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">methods</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">controller_api</span><span class="p">,</span> <span class="n">periodic_scan_coros</span><span class="p">,</span> <span class="n">initial_coros</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_periodic_scan_coro</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scans</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ScanCallback</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScanCallback</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a coroutine to run scans at a given period</span>
+
+<span class="sd">        This returns a coroutine that runs scans at a given period. If an exception is</span>
+<span class="sd">        raised in a callback it is caught and the updates for the controller are</span>
+<span class="sd">        paused, waiting for `_connected` to be set back to true via the `reconnect`</span>
+<span class="sd">        method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            period: The period to run the scans at</span>
+<span class="sd">            scans: A list of `ScanCallback` to run periodically</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A wrapper `ScanCallback` that runs all of the callbacks at a given period</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">scan_coro</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+                        <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">period</span><span class="p">),</span> <span class="o">*</span><span class="p">[</span><span class="n">scan</span><span class="p">()</span> <span class="k">for</span> <span class="n">scan</span> <span class="ow">in</span> <span class="n">scans</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Exception in scan task&quot;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_connected</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Wait so this message appears last</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Pausing scan tasks and waiting for reconnect&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">scan_coro</span></div>
 
 </pre></div>
 
