@@ -8,8 +8,8 @@ from pytest_mock import MockerFixture
 from tests.assertable_controller import AssertableControllerAPI, MyTestController
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controllers import ControllerAPI
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
-from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.rest.transport import RestTransport
 
 

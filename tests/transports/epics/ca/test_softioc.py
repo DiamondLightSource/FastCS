@@ -13,11 +13,10 @@ from tests.assertable_controller import (
 from tests.util import ColourEnum
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
-from fastcs.controllers import Controller
+from fastcs.controllers import Controller, ControllerAPI
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
 from fastcs.exceptions import FastCSError
 from fastcs.methods import Command
-from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics.ca import EpicsCATransport
 from fastcs.transports.epics.ca.ioc import (
     EPICS_MAX_NAME_LENGTH,

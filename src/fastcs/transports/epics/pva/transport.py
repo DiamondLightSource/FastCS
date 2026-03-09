@@ -1,8 +1,8 @@
 import asyncio
 from dataclasses import dataclass, field
 
+from fastcs.controllers import ControllerAPI
 from fastcs.logging import logger
-from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics import (
     EpicsDocsOptions,
     EpicsGUIOptions,

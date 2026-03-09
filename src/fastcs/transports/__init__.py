@@ -1,4 +1,3 @@
-from .controller_api import ControllerAPI as ControllerAPI
 from .transport import Transport as Transport
 
 try:

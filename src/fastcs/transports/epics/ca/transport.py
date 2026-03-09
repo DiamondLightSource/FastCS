@@ -4,8 +4,8 @@ from typing import Any
 
 from softioc import softioc
 
+from fastcs.controllers import ControllerAPI
 from fastcs.logging import logger
-from fastcs.transports.controller_api import ControllerAPI
 from fastcs.transports.epics import (
     EpicsDocsOptions,
     EpicsGUIOptions,

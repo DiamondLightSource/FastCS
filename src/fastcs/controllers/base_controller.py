@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Sequence
 from copy import deepcopy
-from typing import (  # type: ignore
+from typing import (
     TypeVar,
     _GenericAlias,  # type: ignore
     get_args,
@@ -12,6 +12,7 @@ from typing import (  # type: ignore
 )
 
 from fastcs.attributes import AnyAttributeIO, Attribute, AttrR, AttrW, HintedAttribute
+from fastcs.controllers.controller_api import ControllerAPI
 from fastcs.logging import logger
 from fastcs.methods import Command, Method, Scan, UnboundCommand, UnboundScan
 from fastcs.tracer import Tracer
@@ -388,3 +389,16 @@ class BaseController(Tracer):
     @property
     def scan_methods(self) -> dict[str, Scan]:
         return self.__scan_methods
+
+    def _build_api(self, path: list[str]) -> ControllerAPI:
+        return ControllerAPI(
+            path=path,
+            attributes=self.attributes,
+            command_methods=self.command_methods,
+            scan_methods=self.scan_methods,
+            sub_apis={
+                name: sub_controller._build_api(path + [name])  # noqa: SLF001
+                for name, sub_controller in self.sub_controllers.items()
+            },
+            description=self.description,
+        )

@@ -7,8 +7,8 @@ from tango import AttrWriteType, Database, DbDevInfo, DevState, server
 from tango.server import Device
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.controllers import ControllerAPI
 from fastcs.methods import CommandCallback
-from fastcs.transports.controller_api import ControllerAPI
 
 from .options import TangoDSROptions
 from .util import (
