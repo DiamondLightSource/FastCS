@@ -72,7 +72,12 @@ async def test_create_and_link_read_pv(mocker: MockerFixture):
         (
             AttrR(String()),
             "longStringIn",
-            {"length": 256, "DESC": None, "initial_value": ""},
+            {"length": 257, "DESC": None, "initial_value": ""},
+        ),
+        (
+            AttrR(String(length=10)),
+            "longStringIn",
+            {"length": 11, "DESC": None, "initial_value": ""},
         ),
         (
             AttrR(Enum(ColourEnum)),
@@ -196,6 +201,16 @@ class LongEnum(enum.Enum):
                 "DESC": None,
                 "initial_value": 0,
             },
+        ),
+        (
+            AttrW(String()),
+            "longStringOut",
+            {"length": 257, "DESC": None, "initial_value": ""},
+        ),
+        (
+            AttrW(String(length=10)),
+            "longStringOut",
+            {"length": 11, "DESC": None, "initial_value": ""},
         ),
     ),
 )
