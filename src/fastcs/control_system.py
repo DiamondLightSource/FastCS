@@ -35,7 +35,14 @@ class FastCS:
     ):
         self._controller = controller
         self._transports = transports
-        self._loop = loop or asyncio.get_event_loop()
+
+        if loop is not None:
+            self._loop = loop
+            self._close_loop_on_stop = False
+        else:
+            self._loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self._loop)
+            self._close_loop_on_stop = True
 
         self._scan_coros: list[ScanCallback] = []
         self._initial_coros: list[ScanCallback] = []
@@ -158,3 +165,5 @@ class FastCS:
 
     def __del__(self):
         self._stop_scan_tasks()
+        if self._close_loop_on_stop and not self._loop.is_closed():
+            self._loop.close()
