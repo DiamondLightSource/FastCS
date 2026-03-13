@@ -64,10 +64,16 @@ def create_test_context(tango_controller_api: AssertableControllerAPI):
         asyncio.set_event_loop(None)
 
         # Close any event loops created internally by DeviceTestContext so that
-        # gc.collect() does not trigger ResourceWarning from their __del__
+        # gc.collect() does not trigger ResourceWarning from their __del__.
+        # Use try/except because on some Python 3.11.x versions the loop's
+        # internal self-pipe may already be invalidated (fd=-1) even though
+        # is_closed() returns False, causing a ValueError in close().
         for obj in gc.get_objects():
             if isinstance(obj, asyncio.AbstractEventLoop) and not obj.is_closed():
-                obj.close()
+                try:
+                    obj.close()
+                except Exception:
+                    pass
         gc.collect()
 
 
