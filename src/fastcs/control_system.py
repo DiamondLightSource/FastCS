@@ -32,11 +32,9 @@ class FastCS:
         self,
         controller: Controller,
         transports: Sequence[Transport],
-        loop: asyncio.AbstractEventLoop | None = None,
     ):
         self._controller = controller
         self._transports = transports
-        self._loop = loop or asyncio.get_event_loop()
 
         self._scan_coros: list[ScanCallback] = []
         self._initial_coros: list[ScanCallback] = []
@@ -47,24 +45,20 @@ class FastCS:
         """Run the application
 
         This is a convenience method to call `serve` in a synchronous context.
+        To use in an async context, call `serve` directly.
 
         Args:
             interactive: Whether to create an interactive IPython shell
 
         """
-        serve = asyncio.ensure_future(self.serve(interactive=interactive))
-
-        if os.name != "nt":
-            self._loop.add_signal_handler(signal.SIGINT, serve.cancel)
-            self._loop.add_signal_handler(signal.SIGTERM, serve.cancel)
-        self._loop.run_until_complete(serve)
+        asyncio.run(self.serve(interactive=interactive))
 
     async def _run_initial_coros(self):
         for coro in self._initial_coros:
             await coro()
 
     async def _start_scan_tasks(self):
-        self._scan_tasks = {self._loop.create_task(coro()) for coro in self._scan_coros}
+        self._scan_tasks = {asyncio.create_task(coro()) for coro in self._scan_coros}
 
     def _stop_scan_tasks(self):
         for task in self._scan_tasks:
@@ -93,6 +87,13 @@ class FastCS:
             interactive: Whether to create an interactive IPython shell
 
         """
+        loop = asyncio.get_running_loop()
+        if os.name != "nt":
+            task = asyncio.current_task()
+            if task is not None:
+                loop.add_signal_handler(signal.SIGINT, task.cancel)
+                loop.add_signal_handler(signal.SIGTERM, task.cancel)
+
         await self._controller.initialise()
         self._controller.post_initialise()
 
@@ -110,7 +111,7 @@ class FastCS:
 
         coros: list[Coroutine] = []
         for transport in self._transports:
-            transport.connect(controller_api=self.controller_api, loop=self._loop)
+            transport.connect(controller_api=self.controller_api)
             coros.append(transport.serve())
             common_context = context.keys() & transport.context.keys()
             if common_context:
@@ -155,6 +156,7 @@ class FastCS:
 
     async def _interactive_shell(self, context: dict[str, Any]):
         """Spawn interactive shell in another thread and wait for it to complete."""
+        loop = asyncio.get_running_loop()
 
         def run(coro: Coroutine[None, None, None]):
             """Run coroutine on FastCS event loop from IPython thread."""
@@ -162,7 +164,7 @@ class FastCS:
             def wrapper():
                 asyncio.create_task(coro)
 
-            self._loop.call_soon_threadsafe(wrapper)
+            loop.call_soon_threadsafe(wrapper)
 
         async def interactive_shell(
             context: dict[str, object], stop_event: asyncio.Event
@@ -176,7 +178,7 @@ class FastCS:
         context["run"] = run
 
         stop_event = asyncio.Event()
-        self._loop.create_task(interactive_shell(context, stop_event))
+        asyncio.create_task(interactive_shell(context, stop_event))
         await stop_event.wait()
 
     def __del__(self):

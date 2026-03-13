@@ -13,7 +13,7 @@ from tests.assertable_controller import (
 
 from fastcs.attributes import AttrR, AttrRW, AttrW
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Waveform
-from fastcs.transports.tango.transport import TangoTransport
+from fastcs.transports.tango.dsr import TangoDSR
 
 
 async def patch_run_threadsafe_blocking(coro, loop):
@@ -47,15 +47,28 @@ def tango_controller_api(class_mocker: MockerFixture) -> AssertableControllerAPI
 
 
 def create_test_context(tango_controller_api: AssertableControllerAPI):
-    tango_transport = TangoTransport()
-    tango_transport.connect(
-        tango_controller_api,
-        asyncio.get_event_loop(),
-    )
-    device = tango_transport._dsr._device
-    # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
-    with DeviceTestContext(device, debug=0) as proxy:
-        yield proxy
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        dsr = TangoDSR(tango_controller_api, loop)
+        device = dsr._device
+        # https://tango-controls.readthedocs.io/projects/pytango/en/v9.5.1/testing/test_context.html
+        with DeviceTestContext(device, debug=0) as proxy:
+            yield proxy
+    finally:
+        import gc
+
+        # Flush pending callbacks and force GC to close Tango C-level resources
+        loop.run_until_complete(asyncio.sleep(0))
+        loop.close()
+        asyncio.set_event_loop(None)
+
+        # Close any event loops created internally by DeviceTestContext so that
+        # gc.collect() does not trigger ResourceWarning from their __del__
+        for obj in gc.get_objects():
+            if isinstance(obj, asyncio.AbstractEventLoop) and not obj.is_closed():
+                obj.close()
+        gc.collect()
 
 
 class TestTangoDevice:

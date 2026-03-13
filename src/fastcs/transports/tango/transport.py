@@ -13,13 +13,8 @@ class TangoTransport(Transport):
 
     tango: TangoDSROptions = field(default_factory=TangoDSROptions)
 
-    def connect(
-        self,
-        controller_api: ControllerAPI,
-        loop: asyncio.AbstractEventLoop,
-    ):
-        self._dsr = TangoDSR(controller_api, loop)
+    def connect(self, controller_api: ControllerAPI):
+        self._dsr = TangoDSR(controller_api, asyncio.get_running_loop())
 
     async def serve(self) -> None:
-        coro = asyncio.to_thread(self._dsr.run, self.tango)
-        await coro
+        await asyncio.to_thread(self._dsr.run, self.tango)

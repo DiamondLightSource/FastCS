@@ -1,4 +1,3 @@
-import asyncio
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, ClassVar, Union
@@ -24,13 +23,12 @@ class Transport:
         return Union[tuple(cls.subclasses)]  # noqa: UP007
 
     @abstractmethod
-    def connect(
-        self, controller_api: ControllerAPI, loop: asyncio.AbstractEventLoop
-    ) -> None:
+    def connect(self, controller_api: ControllerAPI) -> None:
         """Connect the ``Transport`` to the control system
 
-        The `ControllerAPI` should be exposed over the transport. The provided event
-        loop should be used where required instead of creating a new one.
+        The `ControllerAPI` should be exposed over the transport. Transports that
+        require the event loop should retrieve it with `asyncio.get_running_loop`,
+        as this method is called from within an async context.
 
         """
         pass
