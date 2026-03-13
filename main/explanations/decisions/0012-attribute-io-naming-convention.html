@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>8. Split Transport Dependencies into Optional Extras &#8212; fastcs 0.12.1.dev2+ga61df13aa documentation</title>
+    <title>12. AttributeIO and AttributeIORef Naming Convention &#8212; fastcs 0.12.1.dev2+ga61df13aa documentation</title>
   
   
   
@@ -54,7 +54,7 @@
     <script src="../../_static/togglebutton.js?v=1ae7504c"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'explanations/decisions/0008-transport-dependencies-as-optional-extras';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'explanations/decisions/0012-attribute-io-naming-convention';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://DiamondLightSource.github.io/fastcs/switcher.json';
@@ -65,8 +65,8 @@
     <link rel="icon" href="../../_static/fastcs.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="9. Replace Handler with AttributeIO/AttributeIORef Pattern" href="0009-handler-to-attribute-io-pattern.html" />
-    <link rel="prev" title="7. Merge TransportAdapter and TransportOptions into Transport" href="0007-transport-consolidation.html" />
+    <link rel="next" title="Reference" href="../../reference.html" />
+    <link rel="prev" title="11. Introduce ControllerVector for Indexed Sub-Controllers" href="0011-controller-vector-implementation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="main" />
@@ -412,11 +412,11 @@
 <li class="toctree-l2"><a class="reference internal" href="0005-background-thread-removal.html">5. Remove Background Thread from Backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0006-controller-api-abstraction-layer.html">6. Create ControllerAPI Abstraction Layer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0007-transport-consolidation.html">7. Merge TransportAdapter and TransportOptions into Transport</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">8. Split Transport Dependencies into Optional Extras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0008-transport-dependencies-as-optional-extras.html">8. Split Transport Dependencies into Optional Extras</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0009-handler-to-attribute-io-pattern.html">9. Replace Handler with AttributeIO/AttributeIORef Pattern</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0010-subcontroller-removal.html">10. Remove SubController Class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="0011-controller-vector-implementation.html">11. Introduce ControllerVector for Indexed Sub-Controllers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0012-attribute-io-naming-convention.html">12. AttributeIO and AttributeIORef Naming Convention</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">12. AttributeIO and AttributeIORef Naming Convention</a></li>
 </ul>
 </details></li>
 </ul>
@@ -465,7 +465,7 @@
     
     <li class="breadcrumb-item"><a href="../decisions.html" class="nav-link">Architectural Decision Records</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">8. Split Transport Dependencies into Optional Extras</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">12. AttributeIO and AttributeIORef Naming Convention</span></li>
   </ul>
 </nav>
 </div>
@@ -482,72 +482,54 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="split-transport-dependencies-into-optional-extras">
-<h1>8. Split Transport Dependencies into Optional Extras<a class="headerlink" href="#split-transport-dependencies-into-optional-extras" title="Link to this heading">#</a></h1>
-<p>Date: 2025-09-30</p>
-<p><strong>Related:</strong> <a class="reference external" href="https://github.com/DiamondLightSource/FastCS/pull/221">PR #221</a></p>
+  <section id="attributeio-and-attributeioref-naming-convention">
+<h1>12. AttributeIO and AttributeIORef Naming Convention<a class="headerlink" href="#attributeio-and-attributeioref-naming-convention" title="Link to this heading">#</a></h1>
+<p>Date: 2026-03-12</p>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
 <p>Accepted</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
-<p>Currently all transport dependencies are installed regardless of which transports users actually needed.</p>
-<p>Problems with required dependencies:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">AttributeIO</span></code> and <code class="docutils literal notranslate"><span class="pre">AttributeIORef</span></code> classes introduced in <a class="reference internal" href="0009-handler-to-attribute-io-pattern.html"><span class="std std-doc">ADR9</span></a>
+have descriptive, unambiguous names that clearly communicate their role within fastcs.
+However, their length leads to verbose class names when drivers subclass them:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TempControllerAttributeIO</span><span class="p">(</span><span class="n">AttributeIO</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TempControllerIORef</span><span class="p">]):</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TempControllerIORef</span><span class="p">(</span><span class="n">AttributeIORef</span><span class="p">):</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>Alternative names were considered but none offered a meaningful improvement:</p>
 <ul class="simple">
-<li><p>Minimal installations bloated by unused transport dependencies</p></li>
-<li><p>Unclear dependency relationships for each transport</p></li>
-<li><p>No way to install just the core FastCS functionality</p></li>
+<li><p>Shorter names (e.g. <code class="docutils literal notranslate"><span class="pre">IO</span></code>, <code class="docutils literal notranslate"><span class="pre">Ref</span></code>) are too terse in isolation and lose the context that
+these are attribute-scoped constructs within fastcs.</p></li>
+<li><p>Alternative descriptive names introduce new terminology without reducing confusion.</p></li>
 </ul>
+<p>The verbosity is felt most in driver code, where developers repeatedly type the full
+parent class name. In the fastcs internals and documentation, the full names remain
+appropriate.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
-<p>Split transport dependencies into optional extras in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, allowing users to install only what they need.</p>
-<p>The core FastCS package now requires only essential dependencies (pydantic, numpy, ruamel.yaml, IPython). Each transport is available as an optional extra, with convenience groups like <code class="docutils literal notranslate"><span class="pre">[all]</span></code>, <code class="docutils literal notranslate"><span class="pre">[epics]</span></code>, and <code class="docutils literal notranslate"><span class="pre">[dev]</span></code> for common installation patterns.</p>
-<p>Key architectural changes:</p>
-<ul class="simple">
-<li><p>Core dependencies: pydantic, numpy, ruamel.yaml, IPython</p></li>
-<li><p>Individual transport extras: <code class="docutils literal notranslate"><span class="pre">[epicsca]</span></code>, <code class="docutils literal notranslate"><span class="pre">[epicspva]</span></code>, <code class="docutils literal notranslate"><span class="pre">[tango]</span></code>, <code class="docutils literal notranslate"><span class="pre">[graphql]</span></code>, <code class="docutils literal notranslate"><span class="pre">[rest]</span></code></p></li>
-<li><p>Convenience groups: <code class="docutils literal notranslate"><span class="pre">[epics]</span></code>, <code class="docutils literal notranslate"><span class="pre">[all]</span></code>, <code class="docutils literal notranslate"><span class="pre">[dev]</span></code>, <code class="docutils literal notranslate"><span class="pre">[demo]</span></code></p></li>
-<li><p>Each transport declares its own dependencies explicitly</p></li>
-</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">AttributeIO</span></code> and <code class="docutils literal notranslate"><span class="pre">AttributeIORef</span></code> class names are retained unchanged. Driver
+authors are encouraged to introduce shorter driver-specific aliases by subclassing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyIO</span><span class="p">(</span><span class="n">AttributeIO</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">MyRef</span><span class="p">]):</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyRef</span><span class="p">(</span><span class="n">AttributeIORef</span><span class="p">):</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>The subclass name is left to the driver author’s discretion. The inheritance
+relationship ensures the full fastcs name (<code class="docutils literal notranslate"><span class="pre">AttributeIO</span></code>, <code class="docutils literal notranslate"><span class="pre">AttributeIORef</span></code>) remains
+visible in the class hierarchy and in documentation, preserving discoverability for
+anyone unfamiliar with the driver.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
-<section id="benefits">
-<h3>Benefits<a class="headerlink" href="#benefits" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p><strong>Minimal Core Installation:</strong> Users can install FastCS core without transport dependencies</p></li>
-<li><p><strong>Explicit Dependency Relationships:</strong> Each transport declares what it needs</p></li>
-<li><p><strong>Flexible Installation:</strong> Users choose exactly what they need: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">fastcs[epicspva,rest]</span></code></p></li>
-<li><p><strong>Development Convenience:</strong> <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">fastcs[dev]</span></code> includes everything for development</p></li>
-<li><p><strong>Clear Documentation:</strong> Installation commands are self-documenting</p></li>
+<li><p>Driver code is less verbose without sacrificing clarity at the fastcs API level.</p></li>
+<li><p>The parent class is always visible via IDE tooling, so developers encountering a short
+name like <code class="docutils literal notranslate"><span class="pre">MyRef</span></code> can immediately understand its role by inspecting the inheritance.</p></li>
+<li><p>Over time, as developers become more familiar with the pattern, informal shorthand
+(“the IO”, “the Ref”) is expected to emerge in discussions to make this less of an issue.</p></li>
 </ul>
-</section>
-<section id="installation-patterns">
-<h3>Installation Patterns<a class="headerlink" href="#installation-patterns" title="Link to this heading">#</a></h3>
-<p><strong>Minimal (core only):</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>fastcs
-</pre></div>
-</div>
-<p><strong>Single transport:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">[</span>epicspva<span class="o">]</span><span class="w">  </span><span class="c1"># EPICS PVA</span>
-pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">[</span>rest<span class="o">]</span><span class="w">      </span><span class="c1"># REST API</span>
-</pre></div>
-</div>
-<p><strong>Multiple transports:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">[</span>epics,rest<span class="o">]</span><span class="w">  </span><span class="c1"># EPICS CA + PVA + REST</span>
-</pre></div>
-</div>
-<p><strong>All transports:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">[</span>all<span class="o">]</span>
-</pre></div>
-</div>
-<p><strong>Development:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">[</span>dev<span class="o">]</span>
-</pre></div>
-</div>
-</section>
 </section>
 </section>
 
@@ -562,20 +544,20 @@ pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="0007-transport-consolidation.html"
+       href="0011-controller-vector-implementation.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">7. Merge TransportAdapter and TransportOptions into Transport</p>
+        <p class="prev-next-title">11. Introduce ControllerVector for Indexed Sub-Controllers</p>
       </div>
     </a>
     <a class="right-next"
-       href="0009-handler-to-attribute-io-pattern.html"
+       href="../../reference.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">9. Replace Handler with AttributeIO/AttributeIORef Pattern</p>
+        <p class="prev-next-title">Reference</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -601,11 +583,7 @@ pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#status">Status</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#context">Context</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decision">Decision</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#benefits">Benefits</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-patterns">Installation Patterns</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequences">Consequences</a></li>
 </ul>
   </nav></div>
 
@@ -613,7 +591,7 @@ pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/DiamondLightSource/fastcs/edit/main/docs/explanations/decisions/0008-transport-dependencies-as-optional-extras.md">
+    <a href="https://github.com/DiamondLightSource/fastcs/edit/main/docs/explanations/decisions/0012-attribute-io-naming-convention.md">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -629,7 +607,7 @@ pip<span class="w"> </span>install<span class="w"> </span>fastcs<span class="o">
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/explanations/decisions/0008-transport-dependencies-as-optional-extras.md.txt"
+      <li><a href="../../_sources/explanations/decisions/0012-attribute-io-naming-convention.md.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>
