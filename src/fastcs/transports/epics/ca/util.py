@@ -83,7 +83,9 @@ def _make_in_record(pv: str, attribute: AttrR) -> RecordWrapper:
         case String():
             record = builder.longStringIn(
                 pv,
-                length=attribute.datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH,
+                length=(attribute.datatype.length + 1)
+                if attribute.datatype.length
+                else DEFAULT_STRING_WAVEFORM_LENGTH + 1,
                 **common_fields,
             )
         case Enum():
@@ -157,7 +159,9 @@ def _make_out_record(pv: str, attribute: AttrW, on_update: Callable) -> RecordWr
         case String():
             record = builder.longStringOut(
                 pv,
-                length=attribute.datatype.length or DEFAULT_STRING_WAVEFORM_LENGTH,
+                length=(attribute.datatype.length + 1)
+                if attribute.datatype.length
+                else DEFAULT_STRING_WAVEFORM_LENGTH + 1,
                 **common_fields,
             )
         case Enum():
