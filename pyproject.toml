@@ -92,7 +92,14 @@ addopts = """
     """
 # https://iscinumpy.gitlab.io/post/bound-version-constraints/#watch-for-warnings
 # https://github.com/DiamondLightSource/FastCS/issues/230
-filterwarnings = "error"
+filterwarnings = [
+    "error",
+    # DeviceTestContext (pytango) leaks Unix IPC sockets and its internal asyncio
+    # event loop on some Python 3.11.x versions. These cannot be closed from
+    # Python because they are Tango C-level resources. Suppress rather than fail.
+    "ignore:unclosed <socket\\.socket:ResourceWarning",
+    "ignore:unclosed event loop:ResourceWarning",
+]
 # Doctest python code in docs, python code in src docstrings, test functions in tests
 testpaths = "docs src tests"
 timeout = 5
